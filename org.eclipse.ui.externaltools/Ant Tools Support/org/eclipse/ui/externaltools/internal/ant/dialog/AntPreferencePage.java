@@ -36,9 +36,10 @@ import org.eclipse.ui.help.WorkbenchHelp;
  * Ant preference page to set the classpath, tasks, and types.
  */
 public class AntPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
-	private AntClasspathPage jarsPage;
-	private AntTasksPage tasksPage;
-	private AntTypesPage typesPage;
+	
+	private AntClasspathPage fClasspathPage;
+	private AntTasksPage fTasksPage;
+	private AntTypesPage fTypesPage;
 	
 	/**
 	 * Creates the preference page
@@ -64,17 +65,17 @@ public class AntPreferencePage extends PreferencePage implements IWorkbenchPrefe
 		folder.setLayout(new GridLayout());
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		jarsPage = new AntClasspathPage(this);
-		jarsPage.createTabItem(folder);
-		tasksPage = new AntTasksPage(this);
-		tasksPage.createTabItem(folder);
-		typesPage = new AntTypesPage(this);
-		typesPage.createTabItem(folder);
+		fClasspathPage = new AntClasspathPage(this);
+		fClasspathPage.createTabItem(folder);
+		fTasksPage = new AntTasksPage(this);
+		fTasksPage.createTabItem(folder);
+		fTypesPage = new AntTypesPage(this);
+		fTypesPage.createTabItem(folder);
 
 		AntCorePreferences prefs = AntCorePlugin.getPlugin().getPreferences();
-		jarsPage.setInput(Arrays.asList(prefs.getCustomURLs()));
-		tasksPage.setInput(Arrays.asList(prefs.getCustomTasks()));
-		typesPage.setInput(Arrays.asList(prefs.getCustomTypes()));
+		fClasspathPage.setInput(Arrays.asList(prefs.getCustomURLs()));
+		fTasksPage.setInput(Arrays.asList(prefs.getCustomTasks()));
+		fTypesPage.setInput(Arrays.asList(prefs.getCustomTypes()));
 
 		return folder;
 	}
@@ -86,9 +87,9 @@ public class AntPreferencePage extends PreferencePage implements IWorkbenchPrefe
 		super.performDefaults();
 		
 		AntCorePreferences prefs = AntCorePlugin.getPlugin().getPreferences();
-		jarsPage.setInput(Arrays.asList(prefs.getDefaultCustomURLs()));
-		tasksPage.setInput(Arrays.asList(prefs.getCustomTasks()));
-		typesPage.setInput(Arrays.asList(prefs.getCustomTypes()));
+		fClasspathPage.setInput(Arrays.asList(prefs.getDefaultCustomURLs()));
+		fTasksPage.setInput(Arrays.asList(prefs.getCustomTasks()));
+		fTypesPage.setInput(Arrays.asList(prefs.getCustomTypes()));
 	}
 	
 	/* (non-Javadoc)
@@ -97,24 +98,25 @@ public class AntPreferencePage extends PreferencePage implements IWorkbenchPrefe
 	public boolean performOk() {
 		AntCorePreferences prefs = AntCorePlugin.getPlugin().getPreferences();
 		
-		List contents = jarsPage.getContents();
+		List contents = fClasspathPage.getContents();
 		if (contents != null) {
 			URL[] urls = (URL[]) contents.toArray(new URL[contents.size()]);
 			prefs.setCustomURLs(urls);
 		}
 		
-		contents = tasksPage.getContents();
+		contents = fTasksPage.getContents();
 		if (contents != null) {
 			Task[] tasks = (Task[]) contents.toArray(new Task[contents.size()]);
 			prefs.setCustomTasks(tasks);
 		}
 		
-		contents = typesPage.getContents();
+		contents = fTypesPage.getContents();
 		if (contents != null) {
 			Type[] types = (Type[]) contents.toArray(new Type[contents.size()]);
 			prefs.setCustomTypes(types);
 		}
 		
+		prefs.updatePluginPreferences();
 		return super.performOk();
 	}
 	
