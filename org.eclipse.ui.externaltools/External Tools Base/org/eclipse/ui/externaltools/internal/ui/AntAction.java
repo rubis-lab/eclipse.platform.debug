@@ -9,6 +9,9 @@ http://www.eclipse.org/legal/cpl-v05.html
  
 Contributors:
 **********************************************************************/
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -32,6 +35,8 @@ import org.eclipse.ui.externaltools.model.ExternalTool;
 import org.eclipse.ui.externaltools.model.ExternalToolStorage;
 import org.eclipse.ui.externaltools.model.IExternalToolConstants;
 import org.eclipse.ui.externaltools.model.IStorageListener;
+import org.eclipse.ui.externaltools.model.ToolUtil;
+import org.eclipse.ui.externaltools.variable.ExpandVariableContext;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
@@ -60,10 +65,10 @@ public class AntAction extends Action {
 		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 	}
 	
-	private ExternalTool chooseTool(ExternalTool[] tools) {
+	private ExternalTool chooseTool(List tools) {
 		ILabelProvider labelProvider = new ExternalToolLabelProvider();
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
-		dialog.setElements(tools);
+		dialog.setElements((ExternalTool[]) tools.toArray(new ExternalTool[tools.size()]));
 		dialog.setTitle("Ant Tool Selection");
 		dialog.setMessage("Choose an ant tool to run");
 		dialog.setMultipleSelection(false);
@@ -111,10 +116,17 @@ public class AntAction extends Action {
 		
 		ExternalTool tool= null;
 		ExternalToolRegistry registry= ExternalToolsPlugin.getDefault().getToolRegistry(getShell());
-		ExternalTool[] tools= registry.getToolsOfType(IExternalToolConstants.TOOL_TYPE_ANT_BUILD);
-		if (tools.length == 1) {
-			tool= tools[0];
-		} else if (tools.length > 1) {
+		ExternalTool[] antTools= registry.getToolsOfType(IExternalToolConstants.TOOL_TYPE_ANT_BUILD);
+		MultiStatus status = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "", null);
+		List tools= new ArrayList();
+		for (int i= 0, numTools= antTools.length; i < numTools; i++) {
+			if (ToolUtil.expandFileLocation(antTools[i].getLocation(), ExpandVariableContext.EMPTY_CONTEXT, status).equals(file.getLocation().toString())) {
+				tools.add(antTools[i]);
+			}
+		}
+		if (tools.size() == 1) {
+			tool= (ExternalTool)tools.get(0);
+		} else if (tools.size() > 1) {
 			tool= chooseTool(tools);
 			if (tool == null) {
 				// User cancelled.
