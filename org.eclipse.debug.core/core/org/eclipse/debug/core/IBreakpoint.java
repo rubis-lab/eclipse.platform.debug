@@ -37,53 +37,6 @@ public interface IBreakpoint {
 	 */
 	public static final String LINE_NUMBER = "lineNumber";
 
-	/*====================================================================
-	 * Marker attributes values:
-	 *====================================================================*/
-	
-	/** 
-	 * High priority constant (value 2).
-	 *
-	 * @see #getAttribute
-	 */
-	public static final int PRIORITY_HIGH = 2;
-	
-	/** 
-	 * Normal priority constant (value 1).
-	 *
-	 * @see #getAttribute
-	 */
-	public static final int PRIORITY_NORMAL = 1;
-	
-	/** 
-	 * Low priority constant (value 0).
-	 *
-	 * @see #getAttribute
-	 */
-	public static final int PRIORITY_LOW = 0;
-
-	/** 
-	 * Error severity constant (value 2) indicating an error state.
-	 *
-	 * @see #getAttribute
-	 */
-	public static final int SEVERITY_ERROR= 2;
-	
-	/** 
-	 * Warning severity constant (value 1) indicating a warning.
-	 *
-	 * @see #getAttribute
-	 */
-	public static final int SEVERITY_WARNING = 1;
-	
-	/** 
-	 * Info severity constant (value 0) indicating information only.
-	 *
-	 * @see #getAttribute
-	 */
-	public static final int SEVERITY_INFO = 0;
-	
-
 /**
  * Deletes this marker from its associated resource.  This method has no
  * effect if this marker does not exist.
