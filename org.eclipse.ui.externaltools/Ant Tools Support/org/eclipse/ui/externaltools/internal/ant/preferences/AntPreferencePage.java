@@ -127,6 +127,9 @@ public class AntPreferencePage extends PreferencePage implements IWorkbenchPrefe
 			prefs.setCustomProperties(properties);
 		}
 		
+		String[] files = propertiesPage.getPropertyFiles();
+		prefs.setCustomPropertyFiles(files);
+		
 		prefs.updatePluginPreferences();
 		return super.performOk();
 	}

@@ -1,12 +1,15 @@
 package org.eclipse.ui.externaltools.internal.ant.preferences;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import org.eclipse.ant.core.AntCorePlugin;
 import org.eclipse.ant.core.Property;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -22,6 +25,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -29,6 +33,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
+import org.eclipse.ui.externaltools.internal.ui.IExternalToolsUIConstants;
 
 /**
  * Preference page for setting global Ant user properties.
@@ -47,7 +52,6 @@ public class AntPropertiesPage extends AntPage {
 	
 	private Button addButton;
 	private Button addFileButton;
-	private Button editFileButton;
 	private Button removeFileButton;
 	
 	private TableViewer fileTableViewer;
@@ -55,11 +59,14 @@ public class AntPropertiesPage extends AntPage {
 	
 	private final AntPropertiesLabelProvider labelProvider = new AntPropertiesLabelProvider();
 	
+	private IDialogSettings fDialogSettings;
+	
 	/**
 	 * Creates an instance.
 	 */
 	public AntPropertiesPage(AntPreferencePage preferencePage) {
 		super(preferencePage);
+		fDialogSettings= ExternalToolsPlugin.getDefault().getDialogSettings();
 	}
 	
 	/* (non-Javadoc)
@@ -79,7 +86,6 @@ public class AntPropertiesPage extends AntPage {
 			removeButton= createButton(parent, "AntPropertiesPage.removeButton", REMOVE_BUTTON); //$NON-NLS-1$;
 		} else {
 			addFileButton= createButton(parent, "AntPropertiesPage.addFileButton", ADD_PROPERTY_FILE_BUTTON); //$NON-NLS-1$;
-			editFileButton= createButton(parent, "AntPropertiesPage.editFileButton", EDIT_PROPERTY_FILE_BUTTON); //$NON-NLS-1$;
 			removeFileButton= createButton(parent, "AntPropertiesPage.removeButton", REMOVE_PROPERTY_FILE_BUTTON); //$NON-NLS-1$;
 		}
 	}
@@ -157,14 +163,19 @@ public class AntPropertiesPage extends AntPage {
 				removeButtonPressed();
 				break;
 			case ADD_PROPERTY_FILE_BUTTON :
-				//addFile();
-				break;
-			case EDIT_PROPERTY_FILE_BUTTON :
-				//editFile(getSelection());
+				addPropertyFile();
 				break;
 			case REMOVE_PROPERTY_FILE_BUTTON :
-				//removeFile();
+				removePropertyFile();
 				break;
+		}
+	}
+	
+	private void removePropertyFile() {
+		IStructuredSelection selection= ((IStructuredSelection)fileTableViewer.getSelection());
+		Iterator itr = selection.iterator();
+		while (itr.hasNext()) {
+			fileContentProvider.remove(itr.next());
 		}
 	}
 	
@@ -284,9 +295,7 @@ public class AntPropertiesPage extends AntPage {
 	 */
 	protected void fileTableSelectionChanged(IStructuredSelection newSelection) {
 		int size = newSelection.size();
-		editFileButton.setEnabled(size == 1);
 		removeFileButton.setEnabled(size > 0);
-		addFileButton.setEnabled(false);
 	}
 	
 	/**
@@ -295,8 +304,60 @@ public class AntPropertiesPage extends AntPage {
 	 */
 	public void initialize() {
 		getTableViewer().setInput(Arrays.asList(AntCorePlugin.getPlugin().getPreferences().getCustomProperties()));
-		fileTableViewer.setInput(new ArrayList());
+		fileTableViewer.setInput(Arrays.asList(AntCorePlugin.getPlugin().getPreferences().getCustomPropertyFiles()));
 		tableSelectionChanged((IStructuredSelection) getTableViewer().getSelection());
 		fileTableSelectionChanged((IStructuredSelection)fileTableViewer.getSelection());
+	}
+	
+	/**
+	 * Allows the user to enter JARs to the classpath.
+	 */
+	private void addPropertyFile() {
+		String lastUsedPath;
+		lastUsedPath= fDialogSettings.get(IExternalToolsUIConstants.DIALOGSTORE_LASTEXTFILE);
+		if (lastUsedPath == null) {
+			lastUsedPath= ""; //$NON-NLS-1$
+		}
+		FileDialog dialog = new FileDialog(getShell(), SWT.MULTI);
+		dialog.setFilterExtensions(new String[] { "*.properties" }); //$NON-NLS-1$;
+		dialog.setFilterPath(lastUsedPath);
+
+		String result = dialog.open();
+		if (result == null) {
+			return;
+		}
+		IPath filterPath= new Path(dialog.getFilterPath());
+		String[] results= dialog.getFileNames();
+		for (int i = 0; i < results.length; i++) {
+			String fileName = results[i];	
+			IPath path= filterPath.append(fileName).makeAbsolute();	
+			addContent(path.toOSString());
+		}
+		
+		fDialogSettings.put(IExternalToolsUIConstants.DIALOGSTORE_LASTEXTFILE, filterPath.toOSString());
+	}
+	/**
+	 * @see org.eclipse.ui.externaltools.internal.ant.preferences.AntPage#addContent(java.lang.Object)
+	 */
+	protected void addContent(Object o) {
+		if (o instanceof String) {
+			fileContentProvider.add(o);
+		} else {
+			super.addContent(o);
+		}
+	}
+	
+	/**
+	 * Returns the specified property files
+	 * 
+	 * @return String[]
+	 */
+	public String[] getPropertyFiles() {
+		Object[] elements = fileContentProvider.getElements(null);
+		String[] files= new String[elements.length];
+		for (int i = 0; i < elements.length; i++) {
+			files[i] = (String)elements[i];
+		}
+		return files;
 	}
 }
