@@ -17,9 +17,6 @@ import org.eclipse.ui.externaltools.model.IExternalToolConstants;
 /**
  * Represents the context the external tool is running in
  * that a variable uses to expand itself.
- * <p>
- * This interface is not intended to be extended by clients.
- * </p>
  */
 public final class ExpandVariableContext {
 	public static final ExpandVariableContext EMPTY_CONTEXT = new ExpandVariableContext(null);
