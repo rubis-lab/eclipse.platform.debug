@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -153,7 +154,9 @@ public class RunExternalToolAction extends Action {
 			openLogConsole();
 			
 		try {
-			IRunnableWithProgress runnable = new ToolRunnable(tool, sel, activePart);
+			ToolRunnable runnable = new ToolRunnable(tool, window);
+			runnable.selection = sel;
+			runnable.activePart = activePart;
 			ProgressMonitorDialog dialog = new ProgressMonitorDialog(window.getShell());
 			dialog.run(true, true, runnable);
 		} catch (InterruptedException e) {
@@ -205,17 +208,18 @@ public class RunExternalToolAction extends Action {
 	 * and will run the external tool.
 	 */
 	private static final class ToolRunnable implements IRunnableWithProgress {
+		private IWorkbenchWindow window;
 		private ExternalTool tool;
-		private ISelection selection;
-		private IWorkbenchPart activePart;
 		private IResource selectedResource = null;
+		private DefaultRunnerContext context;
 		private MultiStatus status;
+		protected ISelection selection;
+		protected IWorkbenchPart activePart;
 		
-		public ToolRunnable(ExternalTool tool, ISelection selection, IWorkbenchPart activePart) {
+		public ToolRunnable(ExternalTool tool, IWorkbenchWindow window) {
 			super();
 			this.tool = tool;
-			this.selection = selection;
-			this.activePart = activePart;
+			this.window = window;
 		}
 
 		private void determineSelectedResource() {
@@ -238,11 +242,40 @@ public class RunExternalToolAction extends Action {
 			}
 		}
 		
+		private void displayErrorStatus() {
+			ErrorDialog.openError(
+				window.getShell(), 
+				ToolMessages.getString("RunExternalToolAction.runErrorTitle"), //$NON-NLS-1$;
+				ToolMessages.getString("RunExternalToolAction.runProblem"), //$NON-NLS-1$;
+				status);
+		}
+		
 		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 			determineSelectedResource();
+			context = new DefaultRunnerContext(tool, selectedResource);
 			status = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "", null); //$NON-NLS-1$
-			DefaultRunnerContext context = new DefaultRunnerContext(tool, selectedResource);
-			context.run(monitor, status);
+			
+			if (tool.getRunInBackground()) {
+				Thread thread = new Thread(new Runnable() {
+					public void run() {
+						context.run(new NullProgressMonitor(), status);
+						if (!status.isOK()) {
+							if (window.getShell() != null && !window.getShell().isDisposed()) {
+								window.getShell().getDisplay().syncExec(new Runnable() { 
+									public void run() {
+										displayErrorStatus();
+									}
+								});
+							}
+						}
+					}
+				});
+				thread.start();
+			} else {
+				context.run(monitor, status);
+				if (!status.isOK())
+					displayErrorStatus();
+			}
 		};
 	}
 }
