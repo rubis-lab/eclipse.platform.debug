@@ -117,7 +117,9 @@ public class AntExternalToolNewWizard extends ExternalToolNewWizard {
 	public void createPageControls(Composite pageContainer) {
 		String fileLocation= null;
 		if (xmlFile != null) {
-			fileLocation= xmlFile.getLocation().toFile().getAbsolutePath();
+			StringBuffer buffer = new StringBuffer();
+			ToolUtil.buildVariableTag(IExternalToolConstants.VAR_WORKSPACE_LOC, xmlFile.getFullPath().toString(), buffer);
+			fileLocation= buffer.toString();
 			String baseName= xmlFile.getName() + " [" + xmlFile.getProject().getName() + "]" ;
 			String name= baseName;
 			int index= 0;
@@ -125,7 +127,6 @@ public class AntExternalToolNewWizard extends ExternalToolNewWizard {
 				name= baseName +  "_" + index;
 			}
 			mainGroup.setInitialName(name);
-			mainGroup.setInitialLocation(ToolUtil.buildVariableTag(IExternalToolConstants.VAR_WORKSPACE_LOC, xmlFile.getFullPath().toString()));
 			mainGroup.setInitialLocation(fileLocation);
 		}
 		super.createPageControls(pageContainer);
