@@ -9,6 +9,7 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IResource;
@@ -335,11 +336,17 @@ public final class ExternalTool implements IAdaptable {
 	/**
 	 * Sets the name of the external tool.
 	 */
-	/*package*/ void setName(String name) {
-		if (name == null)
+	public void rename(String name) throws CoreException {
+		IStatus status= ExternalToolsPlugin.getDefault().getToolRegistry(null).renameTool(this, name);
+		if (!status.isOK()) {
+			// Throw an exception
+			ExternalToolsPlugin.newError(MessageFormat.format("An exception occurred attempting to rename the tool: ", new Object[] {this.getName()}), null);
+		}
+		if (name == null) {
 			this.name = EMPTY_STRING;
-		else
+		} else {
 			this.name = name;
+		}
 	}
 	
 	/**
