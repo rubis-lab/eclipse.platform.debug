@@ -18,6 +18,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolType;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolTypeRegistry;
@@ -43,9 +44,9 @@ public class ExternalToolLabelProvider extends LabelProvider {
 	/**
 	 * Create a new external tools label provider
 	 */
-	public ExternalToolLabelProvider(IWorkbench workbench) {
+	public ExternalToolLabelProvider() {
 		super();
-		folderImage = workbench.getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
+		folderImage = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
 	}
 
 	/* (non-Javadoc)

@@ -243,8 +243,7 @@ public class ExternalToolView extends ViewPart {
 	 * @param treeViewer the tree viewer
 	 */
 	protected void initLabelProvider(TreeViewer treeViewer) {
-		IWorkbench workbench = getSite().getWorkbenchWindow().getWorkbench();
-		treeViewer.setLabelProvider(new ExternalToolLabelProvider(workbench));
+		treeViewer.setLabelProvider(new ExternalToolLabelProvider());
 	}
 
 	/**
