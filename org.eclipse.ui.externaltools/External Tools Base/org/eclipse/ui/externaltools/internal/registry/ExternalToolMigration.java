@@ -155,6 +155,7 @@ public final class ExternalToolMigration {
 		
 		// Update the name...
 		String name = (String)args.get(TAG_TOOL_NAME);
+		name.replace('/', '.');
 		if (ExternalTool.validateToolName(name) != null)
 			name = newName;
 		if (reg != null && reg.hasToolNamed(name))
