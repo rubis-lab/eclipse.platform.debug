@@ -49,11 +49,4 @@ public class ProgramExternalToolNewWizard extends ExternalToolNewWizard {
 	protected ImageDescriptor getDefaultImageDescriptor() {
 		return ExternalToolsPlugin.getDefault().getImageDescriptor("icons/full/wizban/program_wiz.gif"); //$NON-NLS-1$
 	}
-
-	/* (non-Javadoc)
-	 * Method declared on IWizard.
-	 */
-	public boolean performFinish() {
-		return false;
-	}
 }

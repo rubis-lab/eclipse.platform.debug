@@ -119,4 +119,35 @@ public final class ExternalToolStorage {
 	public static void removeStorageListener(IStorageListener listener) {
 		listeners.remove(listener);
 	}
+
+	/**
+	 * Saves the external tool to storage and to
+	 * the tools registry.
+	 * 
+	 * @param tool the external tool to be saved
+	 * @param shell the shell to parent any error dialogs,
+	 * 		of <code>null</code> to operate quietly.
+	 * @return <code>true</code> if save successful, <code>false</code> otherwise.
+	 */
+	public static boolean saveTool(ExternalTool tool, Shell shell) {
+		if (tool == null)
+			return false;
+		
+		ExternalToolRegistry registry = ExternalToolsPlugin.getDefault().getToolRegistry(shell);
+		boolean exists = registry.hasToolNamed(tool.getName());
+		
+		IStatus results = registry.saveTool(tool);
+		if (handleResults(results, shell, "ExternalToolStorage.saveErrorTitle", "ExternalToolStorage.saveErrorMessage")) //$NON-NLS-2$//$NON-NLS-1$
+			return false;
+
+		Object list[] = listeners.getListeners();
+		for (int i = 0; i < list.length; i++) {
+			if (exists)
+				((IStorageListener)list[i]).toolModified(tool);
+			else
+				((IStorageListener)list[i]).toolCreated(tool);
+		}
+		
+		return true;
+	}
 }

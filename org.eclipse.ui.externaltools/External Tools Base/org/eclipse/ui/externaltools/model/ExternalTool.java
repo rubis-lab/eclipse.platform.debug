@@ -11,7 +11,9 @@ Contributors:
 
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.externaltools.internal.core.ExternalToolsPlugin;
+import org.eclipse.ui.externaltools.internal.core.ToolMessages;
 
 /**
  * This class represents an external tool that can be run. The tool
@@ -52,16 +54,48 @@ public final class ExternalTool {
 	 * @param name the name given to the external tool. Must only
 	 * 		contain letters, numbers, and spaces.
 	 */
-	public ExternalTool(String type, String name) {
+	public ExternalTool(String type, String name) throws CoreException {
 		super();
 
 		if (type != null)
 			this.type = type;
 
-		if (name != null)
-			this.name = name;
+		String errorText = validateToolName(name);
+		if (errorText == null)
+			this.name = name.trim();
+		else
+			throw ExternalToolsPlugin.newError(errorText, null);
 	}
 
+	/**
+	 * Validates the specified tool name only includes letters,
+	 * numbers, and spaces. Must contain at least one letter
+	 * or number.
+	 * 
+	 * @param name the proposed name for the external tool
+	 * @return a string indicating the invalid format or <code>null</code> if valid.
+	 */
+	public static String validateToolName(String name) {
+		boolean leastOneChar = false;
+		
+		if (name != null) {
+			for (int i = 0; i < name.length(); i++) {
+				char ch = name.charAt(i);
+				if (!Character.isLetterOrDigit(ch)) {
+					if (!Character.isSpaceChar(ch))
+						return ToolMessages.getString("ExternalTool.nameContainsInvalidChar"); //$NON-NLS-1$
+				} else {
+					leastOneChar = true;
+				}
+			}
+		}
+		
+		if (leastOneChar)
+			return null;
+		else
+			return ToolMessages.getString("ExternalTool.nameMustContainOneChar"); //$NON-NLS-1$
+	}
+	
 	/**
 	 * Returns the extra attribute value
 	 * 

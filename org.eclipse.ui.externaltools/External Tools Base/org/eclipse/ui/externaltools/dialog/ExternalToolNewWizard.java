@@ -10,6 +10,7 @@ Contributors:
 **********************************************************************/
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -19,10 +20,13 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.externaltools.group.ExternalToolMainGroup;
 import org.eclipse.ui.externaltools.group.ExternalToolOptionGroup;
 import org.eclipse.ui.externaltools.group.ExternalToolRefreshGroup;
+import org.eclipse.ui.externaltools.group.IExternalToolGroup;
 import org.eclipse.ui.externaltools.internal.core.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.core.ToolMessages;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolType;
 import org.eclipse.ui.externaltools.internal.ui.IHelpContextIds;
+import org.eclipse.ui.externaltools.model.ExternalTool;
+import org.eclipse.ui.externaltools.model.ExternalToolStorage;
 import org.eclipse.ui.externaltools.model.IExternalToolConstants;
 import org.eclipse.ui.externaltools.model.ToolUtil;
 
@@ -183,5 +187,84 @@ public abstract class ExternalToolNewWizard extends Wizard implements INewWizard
 			else if (sel instanceof IAdaptable)
 				selectedResource = (IResource)((IAdaptable)sel).getAdapter(IResource.class);
 		}
+	}
+
+	/**
+	 * Returns a new external tool object that is not yet
+	 * initialized with the information collected by the
+	 * wizard.
+	 * <p>
+	 * By default, return a new external tool using the name
+	 * specified in the main page and the tool type of the wizard.
+	 * </p>
+	 * 
+	 * @return a new external tool or <code>null</code> if not possible
+	 */
+	protected ExternalTool newTool() {
+		if (mainGroup == null)
+			return null;
+		String name = mainGroup.getNameFieldValue();
+		if (name == null || name.length() == 0)
+			return null;
+		if (toolType == null)
+			return null;
+		try {
+			return new ExternalTool(toolType.getId(), name);
+		} catch (CoreException e) {
+			return null;
+		}
+	}
+		
+	/* (non-Javadoc)
+	 * Method declared on IWizard.
+	 */
+	public final boolean performFinish() {
+		ExternalTool tool = newTool();
+		if (tool == null)
+			return false;
+		if (!updateTool(tool))
+			return false;
+		return ExternalToolStorage.saveTool(tool, getShell());
+	}
+	
+	/**
+	 * Update the new external tool with the information
+	 * collected from the user.
+	 * <p>
+	 * By default, ask each group to update the tool.
+	 * </p>
+	 * 
+	 * @param tool the new external tool to update
+	 * @return <code>true</code> if the tool was updated properly,
+	 * 		or <code>false</code> if the tool could not be updated
+	 * 		and the wiard should remain open.
+	 */
+	protected boolean updateTool(ExternalTool tool) {
+		if (!updateToolFromGroup(tool, mainGroup))
+			return false;
+		if (!updateToolFromGroup(tool, optionGroup))
+			return false;
+		if (!updateToolFromGroup(tool, refreshGroup))
+			return false;
+		return true;
+	}
+
+	/**
+	 * Update the new external tool with the information
+	 * collected from the user via an external tool group.
+	 * 
+	 * @param tool the new external tool to update
+	 * @param group the external tool group of visual component (<code>null</code> is ignored)
+	 * @return <code>true</code> if the tool was updated properly,
+	 * 		or <code>false</code> if the tool could not be updated
+	 * 		because the group was in an invalid state.
+	 */
+	protected final boolean updateToolFromGroup(ExternalTool tool, IExternalToolGroup group) {
+		if (group == null)
+			return true;
+		if (!group.isValid())
+			return false;
+		group.updateTool(tool);
+		return true;
 	}
 }

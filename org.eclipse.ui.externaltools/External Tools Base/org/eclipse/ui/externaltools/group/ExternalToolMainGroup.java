@@ -408,8 +408,14 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 			return false;
 		}
 		
-		ExternalTool tool = ExternalToolsPlugin.getDefault().getToolRegistry(nameField.getShell()).getToolNamed(value);
-		if (tool != null) {
+		String errorText = ExternalTool.validateToolName(value);
+		if (errorText != null) {
+			getPage().setMessage(errorText, getPage().WARNING); //$NON-NLS-1$
+			return false;
+		}
+		
+		boolean exists = ExternalToolsPlugin.getDefault().getToolRegistry(nameField.getShell()).hasToolNamed(value);
+		if (exists) {
 			getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.nameAlreadyExist"), getPage().WARNING); //$NON-NLS-1$
 			return false;
 		}
