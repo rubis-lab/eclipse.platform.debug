@@ -362,12 +362,12 @@ public class ExternalToolRegistry {
 		IPath filename = (IPath) filenames.get(tool.getName().toLowerCase());
 		if (filename == null) {
 			String msg = ToolMessages.getString("ExternalToolRegistry.noToolFilename"); //$NON-NLS-1$
-			return ExternalToolsPlugin.getDefault().newErrorStatus(msg, null);
+			return ExternalToolsPlugin.newErrorStatus(msg, null);
 		}
 		
 		if (!filename.toFile().delete()) {
 			String msg = ToolMessages.format("ExternalToolRegistry.deleteToolFileFailed", new Object[] {filename.toOSString()}); //$NON-NLS-1$
-			return ExternalToolsPlugin.getDefault().newErrorStatus(msg, null);
+			return ExternalToolsPlugin.newErrorStatus(msg, null);
 		}
 		
 		filenames.remove(tool.getName().toLowerCase());

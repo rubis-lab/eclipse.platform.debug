@@ -17,6 +17,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
@@ -527,7 +528,7 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 		String value = locationField.getText().trim();
 		if (value.length() < 1) {
 			status.message = ToolMessages.getString("ExternalToolMainGroup.locationRequired"); //$NON-NLS-1$
-			status.messageType = getPage().NONE;
+			status.messageType = IMessageProvider.NONE;
 			status.isValid = false;
 			return;
 		}
@@ -540,7 +541,7 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 			IStatus[] children = multiStatus.getChildren();
 			if (children.length > 0) {
 				status.message = children[0].getMessage();
-				status.messageType = getPage().WARNING;
+				status.messageType = IMessageProvider.WARNING;
 			}
 			status.isValid = false;
 			return;
@@ -548,7 +549,7 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 		
 		if (value == null) { // The resource could not be found.
 			status.message = ToolMessages.getString("ExternalToolMainGroup.invalidLocation"); //$NON-NLS-1$
-			status.messageType = getPage().INFORMATION;
+			status.messageType = IMessageProvider.INFORMATION;
 			status.isValid = true;
 			return;
 		}
@@ -556,7 +557,7 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 		File file = new File(value);
 		if (!file.exists()) { // The file does not exist.
 			status.message = ToolMessages.getString("ExternalToolMainGroup.invalidLocation"); //$NON-NLS-1$
-			status.messageType = getPage().INFORMATION;
+			status.messageType = IMessageProvider.INFORMATION;
 			status.isValid = true;
 			return;
 		}
@@ -574,7 +575,7 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 		String value = nameField.getText().trim();
 		if (value.length() < 1) {
 			status.message = ToolMessages.getString("ExternalToolMainGroup.nameRequired"); //$NON-NLS-1$
-			status.messageType = getPage().WARNING;
+			status.messageType = IMessageProvider.WARNING;
 			status.isValid = false;
 			return;
 		}
@@ -582,7 +583,7 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 		String errorText = ExternalTool.validateToolName(value);
 		if (errorText != null) {
 			status.message = errorText;
-			status.messageType = getPage().WARNING;
+			status.messageType = IMessageProvider.WARNING;
 			status.isValid = false;
 			return;
 		}
@@ -590,7 +591,7 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 		boolean exists = ExternalToolsPlugin.getDefault().getToolRegistry(nameField.getShell()).hasToolNamed(value);
 		if (exists) {
 			status.message = ToolMessages.getString("ExternalToolMainGroup.nameAlreadyExist"); //$NON-NLS-1$
-			status.messageType = getPage().WARNING;
+			status.messageType = IMessageProvider.WARNING;
 			status.isValid = false;
 			return;
 		}
@@ -615,7 +616,7 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 				IStatus[] children = multiStatus.getChildren();
 				if (children.length > 0) {
 					status.message = children[0].getMessage();
-					status.messageType = getPage().WARNING;
+					status.messageType = IMessageProvider.WARNING;
 				}
 				status.isValid = false;
 				return;
@@ -623,14 +624,14 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 			
 			if (value == null) { // The resource could not be found.
 				status.message = ToolMessages.getString("ExternalToolMainGroup.invalidWorkDir"); //$NON-NLS-1$
-				status.messageType = getPage().INFORMATION;
+				status.messageType = IMessageProvider.INFORMATION;
 				status.isValid = true;
 				return;
 			}			
 			File file = new File(value);
 			if (!file.exists()) { // The directory does not exist.
 				status.message = ToolMessages.getString("ExternalToolMainGroup.invalidWorkDir"); //$NON-NLS-1$
-				status.messageType = getPage().INFORMATION;
+				status.messageType = IMessageProvider.INFORMATION;
 				status.isValid = true;
 				return;
 			}

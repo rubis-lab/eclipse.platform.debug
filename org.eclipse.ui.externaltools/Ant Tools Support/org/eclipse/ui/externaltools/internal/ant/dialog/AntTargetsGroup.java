@@ -9,23 +9,34 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.eclipse.ant.core.TargetInfo;
-import org.eclipse.core.runtime.*;
-import org.eclipse.jface.dialogs.*;
-import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.*;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
-import org.eclipse.ui.externaltools.group.*;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.externaltools.group.ExternalToolGroup;
 import org.eclipse.ui.externaltools.internal.ant.model.AntUtil;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
-import org.eclipse.ui.externaltools.model.*;
+import org.eclipse.ui.externaltools.model.ExternalTool;
+import org.eclipse.ui.externaltools.model.IExternalToolConstants;
+import org.eclipse.ui.externaltools.model.ToolUtil;
 import org.eclipse.ui.externaltools.variable.ExpandVariableContext;
-
-import org.eclipse.swt.widgets.List;
 
 /**
  * Group for selecting the targets of an Ant build tool.
@@ -113,10 +124,6 @@ public class AntTargetsGroup extends ExternalToolGroup {
 		allowSelectTargets(!runDefaultTargetButton.getSelection());
 		
 		return mainComposite;
-	}
-	
-	private void createSpacer(Composite parent) {
-		Label spacer = new Label(parent, SWT.NONE);	
 	}
 	
 	/*
@@ -233,7 +240,7 @@ public class AntTargetsGroup extends ExternalToolGroup {
 		layout.marginHeight = 0;
 		addRemoveComposite.setLayout(layout);
 
-		createSpacer(addRemoveComposite);
+		new Label(addRemoveComposite, SWT.NONE);
 		
 		addButton = createButton(
 			addRemoveComposite, 
@@ -255,7 +262,7 @@ public class AntTargetsGroup extends ExternalToolGroup {
 			},
 			false);
 		
-		createSpacer(addRemoveComposite);
+		new Label(addRemoveComposite, SWT.NONE);
 		
 		addAll = createButton(
 			addRemoveComposite, 
@@ -293,7 +300,7 @@ public class AntTargetsGroup extends ExternalToolGroup {
 		layout.marginHeight = 0;
 		upDownComposite.setLayout(layout);
 
-		Label spacer = new Label(upDownComposite, SWT.NONE);
+		new Label(upDownComposite, SWT.NONE);
 				
 		upButton = createButton(
 			upDownComposite, 

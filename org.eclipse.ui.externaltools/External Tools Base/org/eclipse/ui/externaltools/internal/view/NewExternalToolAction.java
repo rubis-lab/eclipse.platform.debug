@@ -10,7 +10,6 @@ Contributors:
 **********************************************************************/
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.NewWizardAction;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.IHelpContextIds;

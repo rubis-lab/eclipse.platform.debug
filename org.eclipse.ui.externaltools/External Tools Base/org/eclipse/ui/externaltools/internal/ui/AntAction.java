@@ -122,7 +122,6 @@ public class AntAction extends Action {
 		
 		ExternalTool tool= findTool();
 		
-		AntExternalToolNewWizard wizard;
 		if (tool != null) {
 			runTool(tool);
 			return;

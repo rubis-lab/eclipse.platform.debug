@@ -10,7 +10,6 @@ Contributors:
 **********************************************************************/
 
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.model.IExternalToolConstants;
 
 /**

@@ -9,12 +9,16 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.TreeSet;
 
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
-import org.eclipse.ui.externaltools.internal.registry.*;
-import org.eclipse.ui.externaltools.model.*;
+import org.eclipse.ui.externaltools.internal.registry.ExternalToolRegistry;
+import org.eclipse.ui.externaltools.internal.registry.ExternalToolType;
+import org.eclipse.ui.externaltools.model.ExternalTool;
+import org.eclipse.ui.externaltools.model.ExternalToolStorage;
+import org.eclipse.ui.externaltools.model.IStorageListener;
 
 /**
  * This class manages the list of favorite external tools. These

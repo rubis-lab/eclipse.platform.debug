@@ -11,6 +11,7 @@ Contributors:
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -71,8 +72,8 @@ public class SpecificFolderResourceComponent extends ResourceComponent {
 			
 		IStructuredSelection sel = (IStructuredSelection) resourceList.getSelection();
 		IResource resource = (IResource) sel.getFirstElement();
-		if (resource == null || resource.getType() == resource.FILE) {
-			getPage().setMessage(ToolMessages.getString("ResourceComponent.selectionRequired"), getPage().WARNING); //$NON-NLS-1$
+		if (resource == null || resource.getType() == IResource.FILE) {
+			getPage().setMessage(ToolMessages.getString("ResourceComponent.selectionRequired"), IMessageProvider.WARNING); //$NON-NLS-1$
 			setIsValid(false);
 			return false;
 		}
@@ -100,7 +101,7 @@ public class SpecificFolderResourceComponent extends ResourceComponent {
 			}
 			
 			if (resource != null)
-				return resource.getType() != resource.FILE;
+				return resource.getType() != IResource.FILE;
 			else
 				return false;
 		}

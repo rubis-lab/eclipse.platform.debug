@@ -10,19 +10,15 @@ Contributors:
 **********************************************************************/
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.externaltools.dialog.ExternalToolGroupWizardPage;
 import org.eclipse.ui.externaltools.dialog.ExternalToolNewWizard;
-import org.eclipse.ui.externaltools.internal.ant.model.AntUtil;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.IHelpContextIds;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
-import org.eclipse.ui.externaltools.internal.registry.ExternalToolRegistry;
 import org.eclipse.ui.externaltools.model.ExternalTool;
-import org.eclipse.ui.externaltools.model.ExternalToolStorage;
 import org.eclipse.ui.externaltools.model.IExternalToolConstants;
 import org.eclipse.ui.externaltools.model.ToolUtil;
 

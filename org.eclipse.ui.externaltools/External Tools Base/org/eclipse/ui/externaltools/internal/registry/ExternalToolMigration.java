@@ -17,9 +17,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
 
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.ui.IMemento;
@@ -74,7 +72,6 @@ public final class ExternalToolMigration {
 	 * adds them to the registry.
 	 */
 	/*package*/ static ExternalTool[] readInOldTools(ExternalToolRegistry reg) {
-		int counter = 1;
 		boolean migrationSuccessful = true;
 		ArrayList externalTools = null;
 		IPath path = ExternalToolsPlugin.getDefault().getStateLocation();

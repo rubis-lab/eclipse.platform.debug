@@ -11,7 +11,6 @@ Contributors:
 
 import org.eclipse.ui.externaltools.dialog.ExternalToolGroupWizardPage;
 import org.eclipse.ui.externaltools.group.ExternalToolMainGroup;
-import org.eclipse.ui.externaltools.group.IExternalToolGroup;
 
 /**
  * Wizard page that will display an <code>AntTargetsGroup</code>

@@ -40,7 +40,7 @@ public final class ProgramRunner implements IExternalToolRunner {
 		String msg = e.getMessage();
 		if (msg == null)
 			msg = ToolMessages.getString("ProgramRunner.internalErrorMessage"); //$NON-NLS-1$;
-		status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, e));
+		status.merge(ExternalToolsPlugin.newErrorStatus(msg, e));
 	}
 
 	/* (non-Javadoc)
@@ -62,7 +62,7 @@ public final class ProgramRunner implements IExternalToolRunner {
 			if (runnerContext.getExpandedWorkingDirectory().length() > 0)
 				workingDirectory = new File(runnerContext.getExpandedWorkingDirectory());
 
-			startMonitor(monitor, runnerContext, monitor.UNKNOWN);
+			startMonitor(monitor, runnerContext, IProgressMonitor.UNKNOWN);
 			if (monitor.isCanceled())
 				return;
 
@@ -119,7 +119,7 @@ public final class ProgramRunner implements IExternalToolRunner {
 				// necessary with short programs that execute quickly. If
 				// finished[0] is set to true before the threads run,
 				// nothing will be read from the input and error streams.
-				Thread.currentThread().sleep(300);
+				Thread.sleep(300);
 			}
 				
 			finished[0] = true;
@@ -150,7 +150,7 @@ public final class ProgramRunner implements IExternalToolRunner {
 						}
 						log.append(sb.toString(), level);
 						try {
-							Thread.currentThread().sleep(100);
+							Thread.sleep(100);
 						} catch (InterruptedException e) {
 						}
 					}

@@ -10,6 +10,7 @@ Contributors:
 **********************************************************************/
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -59,8 +60,8 @@ public class SpecificFileResourceComponent extends ResourceComponent {
 			
 		IStructuredSelection sel = (IStructuredSelection) resourceList.getSelection();
 		IResource resource = (IResource) sel.getFirstElement();
-		if (resource == null || resource.getType() != resource.FILE) {
-			getPage().setMessage(ToolMessages.getString("ResourceComponent.selectionRequired"), getPage().WARNING); //$NON-NLS-1$
+		if (resource == null || resource.getType() != IResource.FILE) {
+			getPage().setMessage(ToolMessages.getString("ResourceComponent.selectionRequired"), IMessageProvider.WARNING); //$NON-NLS-1$
 			setIsValid(false);
 			return false;
 		}

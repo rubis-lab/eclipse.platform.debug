@@ -11,6 +11,7 @@ Contributors:
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -233,7 +234,7 @@ public class ResourceComponent implements IVariableComponent {
 			validateResourceListSelection();
 		}
 
-		getPage().setMessage(null, getPage().NONE);
+		getPage().setMessage(null, IMessageProvider.NONE);
 		setIsValid(true);
 	}
 
@@ -249,7 +250,7 @@ public class ResourceComponent implements IVariableComponent {
 			return true;
 			
 		if (resourceList.getSelection().isEmpty()) {
-			getPage().setMessage(ToolMessages.getString("ResourceComponent.selectionRequired"), getPage().WARNING); //$NON-NLS-1$
+			getPage().setMessage(ToolMessages.getString("ResourceComponent.selectionRequired"), IMessageProvider.WARNING); //$NON-NLS-1$
 			setIsValid(false);
 			return false;
 		}

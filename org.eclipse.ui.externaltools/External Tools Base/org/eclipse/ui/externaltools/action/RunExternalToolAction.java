@@ -174,7 +174,7 @@ public class RunExternalToolAction extends Action {
 				status = ((CoreException)e.getTargetException()).getStatus();
 			} else {
 				String msg = ToolMessages.getString("RunExternalToolAction.internalError"); //$NON-NLS-1$;
-				status = ExternalToolsPlugin.getDefault().newErrorStatus(msg, e.getTargetException());
+				status = ExternalToolsPlugin.newErrorStatus(msg, e.getTargetException());
 			}
 			ErrorDialog.openError(
 				window.getShell(), 

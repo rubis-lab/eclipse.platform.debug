@@ -10,7 +10,6 @@ Contributors:
 **********************************************************************/
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 /**
  * Expands a workspace variable into the desired

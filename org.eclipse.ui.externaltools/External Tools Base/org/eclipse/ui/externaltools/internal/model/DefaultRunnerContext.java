@@ -16,10 +16,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolType;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolTypeRegistry;
 import org.eclipse.ui.externaltools.internal.registry.RefreshScopeVariable;
@@ -87,7 +84,7 @@ public final class DefaultRunnerContext implements IRunnerContext {
 				runner = toolType.getRunner();
 			if (runner == null) {
 				String msg = ToolMessages.format("DefaultRunnerContext.noToolRunner", new Object[] {tool.getName()}); //$NON-NLS-1$
-				status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+				status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 				return;
 			}
 			
@@ -185,7 +182,7 @@ public final class DefaultRunnerContext implements IRunnerContext {
 		ToolUtil.VariableDefinition varDef = ToolUtil.extractVariableTag(tool.getRefreshScope(), 0);
 		if (varDef.start == -1 || varDef.end == -1 || varDef.name == null) {
 			String msg = ToolMessages.format("DefaultRunnerContext.invalidRefreshVarFormat", new Object[] {tool.getName()}); //$NON-NLS-1$
-			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 			return;
 		}
 		
@@ -193,7 +190,7 @@ public final class DefaultRunnerContext implements IRunnerContext {
 		RefreshScopeVariable variable = registry.getRefreshVariable(varDef.name);
 		if (variable == null) {
 			String msg = ToolMessages.format("DefaultRunnerContext.noRefreshVarNamed", new Object[] {tool.getName(), varDef.name}); //$NON-NLS-1$
-			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 			return;
 		}
 
@@ -240,12 +237,12 @@ public final class DefaultRunnerContext implements IRunnerContext {
 		if (status.isOK()) {
 			if (expandedLocation == null || expandedLocation.length() == 0) {
 				String msg = ToolMessages.format("DefaultRunnerContext.invalidLocation", new Object[] {tool.getName()}); //$NON-NLS-1$
-				status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+				status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 			} else {
 				File file = new File(expandedLocation);
 				if (!file.isFile()) {
 					String msg = ToolMessages.format("DefaultRunnerContext.invalidLocation", new Object[] {tool.getName()}); //$NON-NLS-1$
-					status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+					status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 				}
 			}
 		}
@@ -256,7 +253,7 @@ public final class DefaultRunnerContext implements IRunnerContext {
 				File path = new File(expandedDirectory);
 				if (!path.isDirectory()) {
 					String msg = ToolMessages.format("DefaultRunnerContext.invalidDirectory", new Object[] {tool.getName()}); //$NON-NLS-1$
-					status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+					status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 				}
 			}
 		}

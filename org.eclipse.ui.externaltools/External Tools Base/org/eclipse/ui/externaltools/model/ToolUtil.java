@@ -10,16 +10,10 @@ Contributors:
 **********************************************************************/
 
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
-import org.eclipse.ui.externaltools.internal.model.IPreferenceConstants;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 import org.eclipse.ui.externaltools.internal.registry.ArgumentVariable;
 import org.eclipse.ui.externaltools.internal.registry.ArgumentVariableRegistry;
@@ -113,7 +107,7 @@ public final class ToolUtil {
 			// Invalid variable format
 			if (varDef.end == -1 || varDef.name == null || varDef.name.length() == 0) {
 				String msg = ToolMessages.getString("ToolUtil.argumentVarFormatWrong"); //$NON-NLS-1$
-				status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+				status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 				return null;
 			}
 
@@ -128,7 +122,7 @@ public final class ToolUtil {
 			ArgumentVariable variable = registry.getArgumentVariable(varDef.name);
 			if (variable == null) {
 				String msg = ToolMessages.format("ToolUtil.argumentVarMissing", new Object[] {varDef.name}); //$NON-NLS-1$
-				status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+				status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 				return null;
 			}
 			
@@ -136,7 +130,7 @@ public final class ToolUtil {
 			String text = variable.getExpander().getText(varDef.name, varDef.argument, context);
 			if (text == null) {
 				String msg = ToolMessages.format("ToolUtil.argumentVarExpandFailed", new Object[] {varDef.name}); //$NON-NLS-1$
-				status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+				status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 				return null;
 			}
 			buffer.append(text);
@@ -190,14 +184,14 @@ public final class ToolUtil {
 		// Disallow text before/after variable
 		if (varDef.start != 0 || (varDef.end < dirLocation.length() && varDef.end != -1)) {
 			String msg = ToolMessages.getString("ToolUtil.dirLocVarBetweenText"); //$NON-NLS-1$
-			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 			return null;
 		}
 		
 		// Invalid variable format
 		if (varDef.name == null || varDef.name.length() == 0 || varDef.end == -1) {
 			String msg = ToolMessages.getString("ToolUtil.dirLocVarFormatWrong"); //$NON-NLS-1$
-			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 			return null;
 		}
 		
@@ -207,7 +201,7 @@ public final class ToolUtil {
 		PathLocationVariable variable = registry.getPathLocationVariable(varDef.name);
 		if (variable == null) {
 			String msg = ToolMessages.format("ToolUtil.dirLocVarMissing", new Object[] {varDef.name}); //$NON-NLS-1$
-			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 			return null;
 		}
 		
@@ -215,7 +209,7 @@ public final class ToolUtil {
 		IPath path = variable.getExpander().getPath(varDef.name, varDef.argument, context);
 		if (path == null) {
 			String msg = ToolMessages.format("ToolUtil.dirLocVarExpandFailed", new Object[] {varDef.name}); //$NON-NLS-1$
-			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 			return null;
 		}
 		
@@ -245,14 +239,14 @@ public final class ToolUtil {
 		// Disallow text before/after variable
 		if (varDef.start != 0 || (varDef.end < fileLocation.length() && varDef.end != -1)) {
 			String msg = ToolMessages.getString("ToolUtil.fileLocVarBetweenText"); //$NON-NLS-1$
-			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 			return null;
 		}
 		
 		// Invalid variable format
 		if (varDef.name == null || varDef.name.length() == 0 || varDef.end == -1) {
 			String msg = ToolMessages.getString("ToolUtil.fileLocVarFormatWrong"); //$NON-NLS-1$
-			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 			return null;
 		}
 		
@@ -262,7 +256,7 @@ public final class ToolUtil {
 		PathLocationVariable variable = registry.getPathLocationVariable(varDef.name);
 		if (variable == null) {
 			String msg = ToolMessages.format("ToolUtil.fileLocVarMissing", new Object[] {varDef.name}); //$NON-NLS-1$
-			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 			return null;
 		}
 		
@@ -270,7 +264,7 @@ public final class ToolUtil {
 		IPath path = variable.getExpander().getPath(varDef.name, varDef.argument, context);
 		if (path == null) {
 			String msg = ToolMessages.format("ToolUtil.fileLocVarExpandFailed", new Object[] {varDef.name}); //$NON-NLS-1$
-			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 			return null;
 		}
 		

@@ -9,6 +9,7 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -261,8 +262,9 @@ public class ExternalToolRefreshGroup extends ExternalToolGroup {
 			tool.setRefreshRecursive(recursiveField.getSelection());
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on IExternalToolGroup.
+
+	/**
+	 * @see org.eclipse.ui.externaltools.group.IExternalToolGroup#validate()
 	 */
 	public void validate() {
 		if (variableForm != null) {
@@ -271,7 +273,7 @@ public class ExternalToolRefreshGroup extends ExternalToolGroup {
 				return;
 		}
 		
-		getPage().setMessage(null, getPage().NONE);
+		getPage().setMessage(null, IMessageProvider.NONE);
 		setIsValid(true);
 	}
 }

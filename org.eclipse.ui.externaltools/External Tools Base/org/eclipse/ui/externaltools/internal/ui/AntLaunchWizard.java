@@ -9,20 +9,28 @@ http://www.eclipse.org/legal/cpl-v05.html
  
 Contributors:
 **********************************************************************/
+
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 
 import org.eclipse.ant.core.TargetInfo;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.externaltools.internal.ant.model.AntUtil;
-import org.eclipse.ui.externaltools.internal.model.*;
-import org.eclipse.ui.externaltools.model.*;
+import org.eclipse.ui.externaltools.internal.model.DefaultRunnerContext;
+import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
+import org.eclipse.ui.externaltools.internal.model.ToolMessages;
+import org.eclipse.ui.externaltools.model.ExternalTool;
+import org.eclipse.ui.externaltools.model.IExternalToolConstants;
+import org.eclipse.ui.externaltools.model.ToolUtil;
 
 /**
  * The wizard to run an Ant file when the Run Ant...
@@ -97,7 +105,6 @@ public class AntLaunchWizard extends Wizard {
 		page1 = new AntLaunchWizardPage(targetList);
 		addPage(page1);
 		
-		String args = antTool.getArguments();
 		StringBuffer buf = new StringBuffer();
 		String[] targets = AntUtil.parseRunTargets(antTool.getExtraAttribute(AntUtil.RUN_TARGETS_ATTRIBUTE));
 		

@@ -9,7 +9,6 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.IConfigurationElement;
