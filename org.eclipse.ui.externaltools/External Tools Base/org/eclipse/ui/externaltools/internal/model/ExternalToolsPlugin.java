@@ -16,7 +16,6 @@ import org.eclipse.jface.preference.*;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.externaltools.internal.core.IPreferenceConstants;
 import org.eclipse.ui.externaltools.internal.registry.ArgumentVariableRegistry;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolRegistry;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolTypeRegistry;

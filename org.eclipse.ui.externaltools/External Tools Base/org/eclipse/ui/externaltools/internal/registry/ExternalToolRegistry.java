@@ -20,7 +20,9 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.StringTokenizer;
 
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -77,6 +79,7 @@ public class ExternalToolRegistry {
 	private static final String TAG_ARGS = "arguments"; //$NON-NLS-1$
 	private static final String TAG_REFRESH_SCOPE = "refreshScope"; //$NON-NLS-1$
 	private static final String TAG_REFRESH_RECURSIVE = "refreshRecursive"; //$NON-NLS-1$
+	private static final String TAG_RUN_BUILD_KINDS = "runForBuildKinds"; //$NON-NLS-1$
 	private static final String TAG_EXTRA_ATTR = "extraAttribute"; //$NON-NLS-1$
 	private static final String TAG_KEY = "key"; //$NON-NLS-1$
 
@@ -84,6 +87,8 @@ public class ExternalToolRegistry {
 	private static final String TRUE = "true"; //$NON-NLS-1$
 	private static final String FALSE = "false"; //$NON-NLS-1$
 
+	private static final String BUILD_TYPE_SEPARATOR = ","; //$NON-NLS-1$
+	
 	private static final ExternalTool[] EMPTY_TOOLS = new ExternalTool[0];
 	
 	/**
@@ -132,6 +137,12 @@ public class ExternalToolRegistry {
 					ErrorDialog.openError(shell, title, msg, results);
 				}
 			});
+		}
+		ExternalTool[] oldTools = ExternalToolMigration.readInOldTools(this);
+		if (oldTools != null) {
+			for (int i = 0; i < oldTools.length; i++) {
+				saveTool(oldTools[i]);
+			}
 		}
 	}
 
@@ -304,6 +315,26 @@ public class ExternalToolRegistry {
 			tool.setRefreshRecursive(TRUE.equals(memento.getString(TAG_REFRESH_RECURSIVE)));
 			tool.setSaveDirtyEditors(TRUE.equals(memento.getString(TAG_SAVE_DIRTY)));
 			
+			String types = memento.getString(TAG_RUN_BUILD_KINDS);
+			if (types != null && types.length() > 0) {
+				ArrayList kinds = new ArrayList();
+				StringTokenizer tokenizer = new StringTokenizer(types, BUILD_TYPE_SEPARATOR);
+				while (tokenizer.hasMoreTokens()) {
+					String token = tokenizer.nextToken();
+					if (IExternalToolConstants.BUILD_TYPE_INCREMENTAL.equals(token))
+						kinds.add(new Integer(IncrementalProjectBuilder.INCREMENTAL_BUILD));
+					else if (IExternalToolConstants.BUILD_TYPE_FULL.equals(token))
+						kinds.add(new Integer(IncrementalProjectBuilder.FULL_BUILD));
+					else if (IExternalToolConstants.BUILD_TYPE_AUTO.equals(token))
+						kinds.add(new Integer(IncrementalProjectBuilder.AUTO_BUILD));
+				}
+				int[] results = new int[kinds.size()];
+				for (int i = 0; i < results.length; i++) {
+					results[i] = ((Integer)kinds.get(i)).intValue();
+				}
+				tool.setRunForBuildKinds(results);
+			}
+			
 			IMemento child = memento.getChild(TAG_DESC);
 			if (child != null)
 				tool.setDescription(child.getTextData());
@@ -402,6 +433,30 @@ public class ExternalToolRegistry {
 		memento.putString(TAG_REFRESH_RECURSIVE, tool.getRefreshRecursive() ? TRUE : FALSE);
 		memento.putString(TAG_SAVE_DIRTY, tool.getSaveDirtyEditors() ? TRUE : FALSE);
 
+		int[] kinds = tool.getRunForBuildKinds();
+		if (kinds.length == 0) {
+			memento.putString(TAG_RUN_BUILD_KINDS, IExternalToolConstants.BUILD_TYPE_NONE);
+		} else {
+			StringBuffer buffer = new StringBuffer();
+			for (int i = 0; i < kinds.length; i++) {
+				switch (kinds[i]) {
+					case IncrementalProjectBuilder.INCREMENTAL_BUILD :
+						buffer.append(IExternalToolConstants.BUILD_TYPE_INCREMENTAL);
+						break;
+					case IncrementalProjectBuilder.FULL_BUILD :
+						buffer.append(IExternalToolConstants.BUILD_TYPE_FULL);
+						break;
+					case IncrementalProjectBuilder.AUTO_BUILD :
+						buffer.append(IExternalToolConstants.BUILD_TYPE_AUTO);
+						break;
+					default :
+						break;
+				}
+				buffer.append(BUILD_TYPE_SEPARATOR);
+			}
+			memento.putString(TAG_RUN_BUILD_KINDS, buffer.toString());
+		}
+		
 		IMemento child = memento.createChild(TAG_DESC);
 		if (child != null)
 			child.putTextData(tool.getDescription());

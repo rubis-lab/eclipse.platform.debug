@@ -11,6 +11,7 @@ Contributors:
 
 import java.util.ArrayList;
 
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -36,6 +37,10 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
  */
 public final class ExternalTool implements IAdaptable {
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
+	private static final int[] DEFAULT_BUILD_KINDS = 
+		{IncrementalProjectBuilder.INCREMENTAL_BUILD,
+		IncrementalProjectBuilder.FULL_BUILD,
+		IncrementalProjectBuilder.AUTO_BUILD};
 	
 	private static final ToolWorkbenchAdapter workbenchAdapter = new ToolWorkbenchAdapter();
 	private static final ToolFilterAdapter filterAdapter = new ToolFilterAdapter();
@@ -45,15 +50,16 @@ public final class ExternalTool implements IAdaptable {
 	private String location = EMPTY_STRING;
 	private String arguments = EMPTY_STRING;
 	private String workDirectory = EMPTY_STRING;
+	private String description = EMPTY_STRING;
+	private String openPerspective = null;
+	private String refreshScope = null;
+	private boolean refreshRecursive = true;
 	private boolean logMessages = true;
 	private boolean runInBackground = true;
 	private boolean promptForArguments = false;
 	private boolean showInMenu = false;
 	private boolean saveDirtyEditors = false;
-	private String openPerspective = null;
-	private String description = EMPTY_STRING;
-	private String refreshScope = null;
-	private boolean refreshRecursive = true;
+	private int[] runForBuildKinds = DEFAULT_BUILD_KINDS;
 	private ArrayList extraAttributes = null;
 	
 	/**
@@ -321,6 +327,16 @@ public final class ExternalTool implements IAdaptable {
 	}
 	
 	/**
+	 * Returns the list of build kinds that this
+	 * tool wants to run when used as a builder.
+	 * The list of valid build kinds is defined
+	 * on <code>IncrementalProjectBuilder</code>.
+	 */
+	public int[] getRunForBuildKinds() {
+		return runForBuildKinds;
+	}
+	
+	/**
 	 * Sets the name of the external tool.
 	 */
 	/*package*/ void setName(String name) {
@@ -446,6 +462,18 @@ public final class ExternalTool implements IAdaptable {
 			this.description = description.trim();
 	}
 	
+	/**
+	 * Sets the list of build kinds that this
+	 * tool wants to run when used as a builder.
+	 * The list of valid build kinds is defined
+	 * on <code>IncrementalProjectBuilder</code>.
+	 */
+	public void setRunForBuildKinds(int[] kinds) {
+		if (kinds == null)
+			this.runForBuildKinds = DEFAULT_BUILD_KINDS;
+		else
+			this.runForBuildKinds = kinds;
+	}
 
 	/**
 	 * Internal representation of extra attributes.
