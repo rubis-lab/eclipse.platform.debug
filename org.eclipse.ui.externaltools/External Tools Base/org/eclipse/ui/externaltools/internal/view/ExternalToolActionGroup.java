@@ -21,6 +21,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.RefreshAction;
 import org.eclipse.ui.actions.TextActionHandler;
+import org.eclipse.ui.externaltools.action.*;
 import org.eclipse.ui.externaltools.model.ExternalTool;
 
 /**

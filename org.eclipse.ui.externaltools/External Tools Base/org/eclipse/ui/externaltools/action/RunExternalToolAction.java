@@ -1,4 +1,4 @@
-package org.eclipse.ui.externaltools.internal.view;
+package org.eclipse.ui.externaltools.action;
 
 /**********************************************************************
 Copyright (c) 2002 IBM Corp. and others. All rights reserved.
@@ -19,16 +19,14 @@ import org.eclipse.ui.externaltools.internal.ui.IHelpContextIds;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
- * Action to run the currently selected external tool
- * in the view.
+ * Action to run an external tool.
  */
 public class RunExternalToolAction extends Action {
 	private IWorkbenchPage page;
-	private ExternalTool selectedTool;
+	private ExternalTool tool;
 	
 	/**
-	 * Create an action to run the selected external
-	 * tool in the view.
+	 * Create an action to run an external tool
 	 */
 	public RunExternalToolAction(IWorkbenchPage page) {
 		super();
@@ -42,10 +40,18 @@ public class RunExternalToolAction extends Action {
 	}
 
 	/**
-	 * Returns the selected external tool.
+	 * Returns the workbench page this action
+	 * in to be run in.
 	 */
-	public ExternalTool getSelectedTool() {
-		return selectedTool;
+	protected final IWorkbenchPage getPage() {
+		return page;
+	}
+	
+	/**
+	 * Returns the external tool.
+	 */
+	public final ExternalTool getTool() {
+		return tool;
 	}
 	
 	/* (non-Javadoc)
@@ -58,8 +64,8 @@ public class RunExternalToolAction extends Action {
 	/**
 	 * Sets the selected external tool.
 	 */
-	public void setSelectedTool(ExternalTool tool) {
-		selectedTool = tool;
+	public final void setTool(ExternalTool tool) {
+		this.tool = tool;
 		setEnabled(tool != null);
 	}
 }

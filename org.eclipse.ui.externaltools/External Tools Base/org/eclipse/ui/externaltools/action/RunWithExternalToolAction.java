@@ -1,4 +1,4 @@
-package org.eclipse.ui.externaltools.internal.view;
+package org.eclipse.ui.externaltools.action;
 
 /**********************************************************************
 Copyright (c) 2002 IBM Corp. and others. All rights reserved.
@@ -19,20 +19,16 @@ import org.eclipse.ui.externaltools.internal.ui.IHelpContextIds;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
- * Action to run the currently selected external tool
- * in the view by prompting for arguments beforehand.
+ * Action to run an external tool by prompting
+ * for arguments beforehand.
  */
-public class RunWithExternalToolAction extends Action {
-	private IWorkbenchPage page;
-	private ExternalTool selectedTool;
+public class RunWithExternalToolAction extends RunExternalToolAction {
 	
 	/**
-	 * Create an action to run the selected external
-	 * tool in the view.
+	 * Create an action to run an external tool.
 	 */
 	public RunWithExternalToolAction(IWorkbenchPage page) {
-		super();
-		this.page = page;
+		super(page);
 		setText(ToolMessages.getString("RunWithExternalToolAction.text")); //$NON-NLS-1$
 		setToolTipText(ToolMessages.getString("RunWithExternalToolAction.toolTip")); //$NON-NLS-1$
 		setHoverImageDescriptor(ExternalToolsPlugin.getDefault().getImageDescriptor("icons/full/clcl16/runwith_tool.gif")); //$NON-NLS-1$
@@ -41,25 +37,10 @@ public class RunWithExternalToolAction extends Action {
 		WorkbenchHelp.setHelp(this, IHelpContextIds.RUN_WITH_TOOL_ACTION);
 	}
 
-	/**
-	 * Returns the selected external tool.
-	 */
-	public ExternalTool getSelectedTool() {
-		return selectedTool;
-	}
-	
 	/* (non-Javadoc)
 	 * Method declared on Action.
 	 */
 	public void run() {
-		org.eclipse.jface.dialogs.MessageDialog.openInformation(page.getWorkbenchWindow().getShell(), "Action", "This action is not yet implemented");
-	}
-
-	/**
-	 * Sets the selected external tool.
-	 */
-	public void setSelectedTool(ExternalTool tool) {
-		selectedTool = tool;
-		setEnabled(tool != null);
+		org.eclipse.jface.dialogs.MessageDialog.openInformation(getPage().getWorkbenchWindow().getShell(), "Action", "This action is not yet implemented");
 	}
 }
