@@ -84,31 +84,31 @@
 		<variable
 			tag="workspace"
 			description="Expands to the workspace root resource."
-			refreshClass="someclassnamehere">
+			expanderClass="someclassnamehere">
 		</variable>
 		<variable
 			tag="project"
 			description="Expands to a project resource."
 			componentClass="someclassnamehere"
-			refreshClass="someclassnamehere">
+			expanderClass="someclassnamehere">
 		</variable>
 		<variable
 			tag="container"
 			description="Expands to a folder or project resource."
 			componentClass="someclassnamehere"
-			refreshClass="someclassnamehere">
+			expanderClass="someclassnamehere">
 		</variable>
 		<variable
 			tag="resource"
 			description="Expands to a resource."
 			componentClass="org.eclipse.ui.externaltools.variable.SpecificFileLocVariableComponent"
-			refreshClass="someclassnamehere">
+			expanderClass="someclassnamehere">
 		</variable>
 		<variable
 			tag="working_set"
 			description="Expands to a group of resources."
 			componentClass="someclassnamehere"
-			refreshClass="someclassnamehere">
+			expanderClass="someclassnamehere">
 		</variable>
 	</extension>
 
@@ -135,6 +135,66 @@
 				class="org.eclipse.ui.externaltools.internal.menu.ExternalToolMenuDelegate">
 			</action>
 		</actionSet>
+	</extension>
+
+	<extension point="org.eclipse.ui.propertyPages">
+		<page
+			id="org.eclipse.ui.externaltools.propertypages.ProgramMainPropertyPage"
+			objectClass="org.eclipse.ui.externaltools.model.ExternalTool"
+			adaptable="false"
+			name="%PropertyPage.main"
+			class="org.eclipse.ui.externaltools.dialog.ExternalToolMainGroupPropertyPage">
+			<filter name="type" value="programType"/> 
+		</page>
+		<page
+			id="org.eclipse.ui.externaltools.propertypages.ProgramOptionPropertyPage"
+			objectClass="org.eclipse.ui.externaltools.model.ExternalTool"
+			adaptable="false"
+			name="%PropertyPage.option"
+			class="org.eclipse.ui.externaltools.dialog.ExternalToolOptionGroupPropertyPage">
+			<filter name="type" value="programType"/> 
+		</page>
+		<page
+			id="org.eclipse.ui.externaltools.propertypages.ProgramRefreshPropertyPage"
+			objectClass="org.eclipse.ui.externaltools.model.ExternalTool"
+			adaptable="false"
+			name="%PropertyPage.refresh"
+			class="org.eclipse.ui.externaltools.dialog.ExternalToolRefreshGroupPropertyPage">
+			<filter name="type" value="programType"/> 
+		</page>
+
+		<page
+			id="org.eclipse.ui.externaltools.propertypages.AntMainPropertyPage"
+			objectClass="org.eclipse.ui.externaltools.model.ExternalTool"
+			adaptable="false"
+			name="%PropertyPage.main"
+			class="org.eclipse.ui.externaltools.dialog.ExternalToolMainGroupPropertyPage">
+			<filter name="type" value="antBuildType"/> 
+		</page>
+		<page
+			id="org.eclipse.ui.externaltools.propertypages.AntTargetsPropertyPage"
+			objectClass="org.eclipse.ui.externaltools.model.ExternalTool"
+			adaptable="false"
+			name="%PropertyPage.antTargets"
+			class="org.eclipse.ui.externaltools.internal.ant.dialog.AntTargetsGroupPropertyPage">
+			<filter name="type" value="antBuildType"/> 
+		</page>
+		<page
+			id="org.eclipse.ui.externaltools.propertypages.AntOptionPropertyPage"
+			objectClass="org.eclipse.ui.externaltools.model.ExternalTool"
+			adaptable="false"
+			name="%PropertyPage.option"
+			class="org.eclipse.ui.externaltools.dialog.ExternalToolOptionGroupPropertyPage">
+			<filter name="type" value="antBuildType"/> 
+		</page>
+		<page
+			id="org.eclipse.ui.externaltools.propertypages.AntRefreshPropertyPage"
+			objectClass="org.eclipse.ui.externaltools.model.ExternalTool"
+			adaptable="false"
+			name="%PropertyPage.refresh"
+			class="org.eclipse.ui.externaltools.dialog.ExternalToolRefreshGroupPropertyPage">
+			<filter name="type" value="antBuildType"/> 
+		</page>
 	</extension>
 
 <!-- Old Stuff -->

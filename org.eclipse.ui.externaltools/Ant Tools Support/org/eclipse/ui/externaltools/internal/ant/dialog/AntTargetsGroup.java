@@ -33,9 +33,7 @@ import org.eclipse.swt.widgets.List;
 public class AntTargetsGroup extends ExternalToolGroup {
 	private static final int DESCRIPTION_FIELD_HEIGHT = 3;
 
-	private ExternalToolMainGroup mainGroup;
-	private String oldLocation;
-	
+	private String fileLocation = null;
 	private Map mapTargetNamesToTargetInfos = new HashMap();
 
 	private List availableTargets;
@@ -48,10 +46,8 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	private Button down;
 	private Text description;
 
-	public AntTargetsGroup(ExternalToolMainGroup mainGroup) {
-		this.mainGroup = mainGroup;
-		if (mainGroup != null)
-			oldLocation = mainGroup.getLocationFieldValue();
+	public AntTargetsGroup() {
+		super();
 	}
 
 	/**
@@ -277,14 +273,16 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	 * @see org.eclipse.ui.externaltools.group.IExternalToolGroup#restoreValues(ExternalTool)
 	 */
 	public void restoreValues(ExternalTool tool) {
-		activeTargets.setItems(toArray(tool.getExtraAttribute(AntUtil.RUN_TARGETS_ATTRIBUTE)));
+		if (activeTargets != null)
+			activeTargets.setItems(toArray(tool.getExtraAttribute(AntUtil.RUN_TARGETS_ATTRIBUTE)));
 	}
 
 	/**
 	 * @see org.eclipse.ui.externaltools.group.IExternalToolGroup#updateTool(ExternalTool)
 	 */
 	public void updateTool(ExternalTool tool) {
-		tool.setExtraAttribute(AntUtil.RUN_TARGETS_ATTRIBUTE, toString(activeTargets.getItems()));
+		if (activeTargets != null)
+			tool.setExtraAttribute(AntUtil.RUN_TARGETS_ATTRIBUTE, toString(activeTargets.getItems()));
 	}
 
 	/**
@@ -294,10 +292,17 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	}
 	
 	/**
-	 * @see org.eclipse.jface.dialogs.DialogPage#setVisible(boolean)
+	 * Informs the group of the current external tool
+	 * file location.
 	 */
-	public void setVisible(boolean visible) {
-		if (visible) {
+	public void setFileLocation(String newLocation) {
+		if (newLocation == null) {
+			if (fileLocation != null) {
+				fileLocation = newLocation;
+				updateAvailableTargets();
+			}
+		} else if (!newLocation.equals(fileLocation)) {
+			fileLocation = newLocation;
 			updateAvailableTargets();
 		}
 	}
@@ -398,35 +403,32 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	 * provided in the mainGroup for this tool.
 	 */
 	private void updateAvailableTargets() {
-		if (mainGroup == null)
+		// Clear the map of target names to target infos.
+		mapTargetNamesToTargetInfos.clear();
+		availableTargets.removeAll();
+		activeTargets.removeAll();
+		
+		if (fileLocation == null)
 			return;
-		String location = mainGroup.getLocationFieldValue();
-		if (location != null && !location.equals(oldLocation)) {
-			try {
-				// Clear the map of target names to target infos.
-				mapTargetNamesToTargetInfos.clear();
-				availableTargets.removeAll();
-				activeTargets.removeAll();
-				
-				MultiStatus status = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "", null); //$NON-NLS-1$
-				String expandedLocation = ToolUtil.expandFileLocation(location, ExpandVariableContext.EMPTY_CONTEXT, status);
-				if (expandedLocation != null && status.isOK()) {
-					TargetInfo[] targets = AntUtil.getTargets(expandedLocation);
-					String[] targetNames = new String[targets.length];
-					for (int i=0; i < targetNames.length; i++) {
-						// Add the target to the map of target names to target infos.
-						mapTargetNamesToTargetInfos.put(targets[i].getName(), targets[i]);
-						targetNames[i] = targets[i].getName();
-					}
-					availableTargets.setItems(targetNames);
-				} else {
-					displayErrorStatus(status);
+			
+		try {
+			MultiStatus status = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "", null); //$NON-NLS-1$
+			String expandedLocation = ToolUtil.expandFileLocation(fileLocation, ExpandVariableContext.EMPTY_CONTEXT, status);
+			if (expandedLocation != null && status.isOK()) {
+				TargetInfo[] targets = AntUtil.getTargets(expandedLocation);
+				String[] targetNames = new String[targets.length];
+				for (int i=0; i < targetNames.length; i++) {
+					// Add the target to the map of target names to target infos.
+					mapTargetNamesToTargetInfos.put(targets[i].getName(), targets[i]);
+					targetNames[i] = targets[i].getName();
 				}
-			} catch (CoreException e) {
-				displayErrorStatus(e.getStatus());
+				availableTargets.setItems(targetNames);
+			} else {
+				displayErrorStatus(status);
 			}
+		} catch (CoreException e) {
+			displayErrorStatus(e.getStatus());
 		}
-		oldLocation = location;			
 	}
 	
 	/*

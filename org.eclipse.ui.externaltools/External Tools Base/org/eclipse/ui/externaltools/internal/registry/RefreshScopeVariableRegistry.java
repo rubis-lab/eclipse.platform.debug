@@ -17,7 +17,6 @@ import org.eclipse.ui.externaltools.model.IExternalToolConstants;
  * Registry of all available refresh scope variables.
  */
 public class RefreshScopeVariableRegistry extends ExternalToolVariableRegistry {
-	/*package*/ static final String TAG_REFRESH_CLASS = "refreshClass"; //$NON-NLS-1$
 
 	/**
 	 * Creates the registry and loads the variables.
@@ -48,17 +47,5 @@ public class RefreshScopeVariableRegistry extends ExternalToolVariableRegistry {
 	 */
 	protected ExternalToolVariable newVariable(String tag, String description, IConfigurationElement element) {
 		return new RefreshScopeVariable(tag, description, element);
-	}
-	
-	/* (non-Javadoc)
-	 * Method declared on ExternalToolVariableRegistry.
-	 */
-	protected boolean validateElement(IConfigurationElement element) {
-		String className = element.getAttribute(TAG_REFRESH_CLASS);
-		if (className == null || className.length() == 0) {
-			ExternalToolsPlugin.getDefault().log("Missing refresh class attribute value for variable element.", null); //$NON-NLS-1$
-			return false;
-		}
-		return true;
 	}
 }

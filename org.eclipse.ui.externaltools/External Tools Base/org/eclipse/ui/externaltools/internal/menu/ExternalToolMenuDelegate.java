@@ -165,7 +165,7 @@ public class ExternalToolMenuDelegate extends ActionDelegate implements IWorkben
 	 */
 	private void runTool(final ExternalTool tool) {
 		RunExternalToolAction runToolAction;
-	 	runToolAction = new RunExternalToolAction(window, false);
+	 	runToolAction = new RunExternalToolAction(window);
 		runToolAction.setTool(tool);
 		runToolAction.run();
 	}

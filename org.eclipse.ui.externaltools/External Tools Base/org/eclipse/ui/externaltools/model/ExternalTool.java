@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.IActionFilter;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 import org.eclipse.ui.model.IWorkbenchAdapter;
@@ -36,7 +37,8 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
 public final class ExternalTool implements IAdaptable {
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 	
-	private ToolWorkbenchAdapter workbenchAdapter;
+	private static final ToolWorkbenchAdapter workbenchAdapter = new ToolWorkbenchAdapter();
+	private static final ToolFilterAdapter filterAdapter = new ToolFilterAdapter();
 	
 	private String type = EMPTY_STRING;
 	private String name = EMPTY_STRING;
@@ -109,11 +111,12 @@ public final class ExternalTool implements IAdaptable {
 	 * Method declared on IAdaptable.
 	 */
 	public Object getAdapter(Class adapter) {
-		if (adapter == IWorkbenchAdapter.class) {
-			if (workbenchAdapter == null)
-				workbenchAdapter = new ToolWorkbenchAdapter();
+		if (adapter == IWorkbenchAdapter.class)
 			return workbenchAdapter;
-		}
+		
+		if (adapter == IActionFilter.class)
+			return filterAdapter;
+		
 		return null;
 	}
 
@@ -445,7 +448,7 @@ public final class ExternalTool implements IAdaptable {
 	
 
 	/**
-	 * Internal representation of extra attributes
+	 * Internal representation of extra attributes.
 	 */
 	private static class Attribute {
 		public String key;
@@ -459,7 +462,7 @@ public final class ExternalTool implements IAdaptable {
 	}
 	
 	/**
-	 * Internal workbench adapter implementation
+	 * Internal workbench adapter implementation.
 	 */
 	private static class ToolWorkbenchAdapter implements IWorkbenchAdapter {
 		public Object[] getChildren(Object o) {
@@ -478,6 +481,24 @@ public final class ExternalTool implements IAdaptable {
 		public Object getParent(Object o) {
 			String type = ((ExternalTool)o).getType();
 			return ExternalToolsPlugin.getDefault().getTypeRegistry().getToolType(type);
+		}
+	}
+	
+	/**
+	 * Internal action filter adapter implementation.
+	 */
+	private static class ToolFilterAdapter implements IExternalToolFilter {
+		public boolean testAttribute(Object target, String name, String value) {
+			ExternalTool tool = (ExternalTool) target;
+
+			if (IExternalToolFilter.TYPE.equals(name))
+				return tool.getType().equals(value);
+
+			String attrValue = tool.getExtraAttribute(name);
+			if (attrValue != null)
+				return attrValue.equals(value);
+
+			return false;
 		}
 	}
 }

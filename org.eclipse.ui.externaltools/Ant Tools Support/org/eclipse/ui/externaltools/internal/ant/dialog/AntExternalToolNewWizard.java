@@ -53,15 +53,9 @@ public class AntExternalToolNewWizard extends ExternalToolNewWizard {
 	 * Method declared on ExternalToolNewWizard.
 	 */
 	protected boolean updateTool(ExternalTool tool) {
-		if (!updateToolFromGroup(tool, mainGroup))
-			return false;
-		if (!updateToolFromGroup(tool, antTargetsGroup))
-			return false;
-		if (!updateToolFromGroup(tool, optionGroup))
-			return false;
-		if (!updateToolFromGroup(tool, refreshGroup))
-			return false;
-		return true;
+		if (super.updateTool(tool))
+			return updateToolFromGroup(tool, antTargetsGroup);
+		return false;
 	}
 
 	/**
@@ -74,7 +68,7 @@ public class AntExternalToolNewWizard extends ExternalToolNewWizard {
 		if (antTargetsGroup == null)
 			return;
 		ExternalToolGroupWizardPage page;
-		page = new ExternalToolGroupWizardPage("antGroupPage", antTargetsGroup, IHelpContextIds.ANT_TARGETS_WIZARD_PAGE); //$NON-NLS-1$
+		page = new AntTargetsGroupWizardPage("antGroupPage", antTargetsGroup, mainGroup, IHelpContextIds.ANT_TARGETS_WIZARD_PAGE); //$NON-NLS-1$
 		page.setTitle(ToolMessages.getString("AntExternalToolNewWizard.antTargetsPageTitle")); //$NON-NLS-1$
 		page.setDescription(ToolMessages.getString("AntExternalToolNewWizard.antTargetsPageDescription")); //$NON-NLS-1$
 		addPage(page);
@@ -83,7 +77,7 @@ public class AntExternalToolNewWizard extends ExternalToolNewWizard {
 	private void createAntTargetsGroup() {
 		if (antTargetsGroup != null)
 			return;
-		antTargetsGroup = new AntTargetsGroup(mainGroup);
+		antTargetsGroup = new AntTargetsGroup();
 	}
 
 }

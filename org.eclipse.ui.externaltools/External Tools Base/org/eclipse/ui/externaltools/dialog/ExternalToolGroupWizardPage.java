@@ -25,8 +25,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
  * as its content. Client is responsible to set the page's title, 
  * description, and image descriptor.
  * <p>
- * This class can be used as is by clients. This class is not intended
- * to be extended.
+ * This class can be used as is by clients.
  * </p>
  */
 public class ExternalToolGroupWizardPage extends WizardPage implements IGroupDialogPage {
@@ -92,23 +91,13 @@ public class ExternalToolGroupWizardPage extends WizardPage implements IGroupDia
 		return setButtonLayoutData(button);
 	}
 
-	 /*
-	  * (non-Javadoc)
-	  * Method declared on DialogPage.
-	  */
-	 public void setVisible(boolean visible) {
-	 	super.setVisible(visible);
-	 	if (group != null)
-	 		group.setVisible(visible);
-	 }
-	 
 	/* (non-Javadoc)
 	 * Method declared on IGroupDialogPage.
 	 */
-	 public void updateValidState() {
-	 	if (group != null)
-	 		setPageComplete(group.isValid());
-	 	else
-	 		setPageComplete(true);
-	 }
+	public void updateValidState() {
+		if (group != null)
+			setPageComplete(group.isValid());
+		else
+			setPageComplete(true);
+	}
 }

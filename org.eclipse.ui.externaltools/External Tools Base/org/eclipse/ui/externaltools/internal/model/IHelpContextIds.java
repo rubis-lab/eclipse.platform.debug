@@ -46,6 +46,12 @@ public interface IHelpContextIds {
 	public static final String ANT_PREFERENCE_PAGE = PREFIX + "ant_preference_page_context"; //$NON-NLS-1$
 	public static final String LOG_CONSOLE_PREFERENCE_PAGE = PREFIX + "log_console_preference_page_context"; //$NON-NLS-1$
 	
+	// Property Pages
+	public static final String TOOL_MAIN_PROPERTY_PAGE = PREFIX + "tool_main_property_page_context"; //$NON-NLS-1$
+	public static final String TOOL_OPTION_PROPERTY_PAGE = PREFIX + "tool_option_property_page_context"; //$NON-NLS-1$
+	public static final String TOOL_REFRESH_PROPERTY_PAGE = PREFIX + "tool_refresh_property_page_context"; //$NON-NLS-1$
+	public static final String ANT_TARGETS_PROPERTY_PAGE = PREFIX + "ant_targets_property_page_context"; //$NON-NLS-1$
+	
 	// Views
 	public static final String LOG_CONSOLE_VIEW = PREFIX + "log_console_view_context"; //$NON-NLS-1$
 	
@@ -60,6 +66,5 @@ public interface IHelpContextIds {
 	public static final String TOOL_MAIN_WIZARD_PAGE = PREFIX + "tool_main_wizard_page_context"; //$NON-NLS-1$
 	public static final String TOOL_OPTION_WIZARD_PAGE = PREFIX + "tool_option_wizard_page_context"; //$NON-NLS-1$
 	public static final String TOOL_REFRESH_WIZARD_PAGE = PREFIX + "tool_refresh_wizard_page_context"; //$NON-NLS-1$
-
 	public static final String ANT_TARGETS_WIZARD_PAGE = PREFIX + "ant_targets_wizard_page_context"; //$NON-NLS-1$
 }
