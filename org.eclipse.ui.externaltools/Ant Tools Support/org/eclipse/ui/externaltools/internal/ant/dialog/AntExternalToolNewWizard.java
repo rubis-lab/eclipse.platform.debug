@@ -9,33 +9,81 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.ui.INewWizard;
-import org.eclipse.ui.IWorkbench;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.externaltools.dialog.ExternalToolGroupWizardPage;
+import org.eclipse.ui.externaltools.dialog.ExternalToolNewWizard;
+import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
+import org.eclipse.ui.externaltools.internal.model.IHelpContextIds;
+import org.eclipse.ui.externaltools.internal.model.ToolMessages;
+import org.eclipse.ui.externaltools.model.ExternalTool;
+import org.eclipse.ui.externaltools.model.IExternalToolConstants;
 
 /**
  * Wizard that will create a new external tool of type Ant build.
  */
-public class AntExternalToolNewWizard extends Wizard implements INewWizard {
+public class AntExternalToolNewWizard extends ExternalToolNewWizard {
+	private AntTargetsGroup antTargetsGroup;
 
 	/**
 	 * Creates the wizard for a new external tool
 	 */
 	public AntExternalToolNewWizard() {
-		super();
-	}
-
-	/* (non-Javadoc)
-	 * Method declared on IWorkbenchWizard.
-	 */
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
+		super(IExternalToolConstants.TOOL_TYPE_ANT_BUILD);
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on IWizard.
 	 */
-	public boolean performFinish() {
-		return false;
+	public void addPages() {
+		addMainPage();
+		addAntTargetsPage();
+		addOptionPage();
+		addRefreshPage();
 	}
+
+	/* (non-Javadoc)
+	 * Method declared on ExternalToolNewWizard.
+	 */
+	protected ImageDescriptor getDefaultImageDescriptor() {
+		return ExternalToolsPlugin.getDefault().getImageDescriptor("icons/full/wizban/ant_wiz.gif"); //$NON-NLS-1$
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * Method declared on ExternalToolNewWizard.
+	 */
+	protected boolean updateTool(ExternalTool tool) {
+		if (!updateToolFromGroup(tool, mainGroup))
+			return false;
+		if (!updateToolFromGroup(tool, antTargetsGroup))
+			return false;
+		if (!updateToolFromGroup(tool, optionGroup))
+			return false;
+		if (!updateToolFromGroup(tool, refreshGroup))
+			return false;
+		return true;
+	}
+
+	/**
+	 * Creates a wizard page to contain the ant build tool
+	 * targets component and adds it to the wizard page
+	 * list.
+	 */
+	private void addAntTargetsPage() {
+		createAntTargetsGroup();
+		if (antTargetsGroup == null)
+			return;
+		ExternalToolGroupWizardPage page;
+		page = new ExternalToolGroupWizardPage("antGroupPage", antTargetsGroup, IHelpContextIds.ANT_TARGETS_WIZARD_PAGE); //$NON-NLS-1$
+		page.setTitle(ToolMessages.getString("AntExternalToolNewWizard.antTargetsPageTitle")); //$NON-NLS-1$
+		page.setDescription(ToolMessages.getString("AntExternalToolNewWizard.antTargetsPageDescription")); //$NON-NLS-1$
+		addPage(page);
+	}
+
+	private void createAntTargetsGroup() {
+		if (antTargetsGroup != null)
+			return;
+		antTargetsGroup = new AntTargetsGroup(mainGroup);
+	}
+
 }
