@@ -129,7 +129,6 @@
 		<variable
 			tag="working_set"
 			description="Expands to the group of resources in a working set."
-			componentClass="someclassnamehere"
 			expanderClass="org.eclipse.ui.externaltools.variable.WorkingSetExpander">
 		</variable>
 	</extension>
