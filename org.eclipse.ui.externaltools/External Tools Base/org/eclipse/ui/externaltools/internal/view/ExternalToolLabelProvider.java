@@ -18,7 +18,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.externaltools.internal.core.ExternalToolsPlugin;
+import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolType;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolTypeRegistry;
 import org.eclipse.ui.externaltools.model.ExternalTool;

@@ -15,7 +15,7 @@ import org.eclipse.ant.internal.core.*;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.*;
-import org.eclipse.ui.externaltools.internal.core.ExternalToolsPlugin;
+import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 
 /**
  * Label provider for the items in the custmomize ant preference page: 

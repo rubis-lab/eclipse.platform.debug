@@ -1,14 +1,14 @@
-package org.eclipse.ui.externaltools.internal.core;
+package org.eclipse.ui.externaltools.internal.model;
 
 /**********************************************************************
-Copyright (c) 2002 IBM Corp. and others.
-All rights reserved.   This program and the accompanying materials
-are made available under the terms of the Common Public License v0.5
+Copyright (c) 2002 IBM Corp. and others. All rights reserved.
+This file is made available under the terms of the Common Public License v1.0
 which accompanies this distribution, and is available at
-http://www.eclipse.org/legal/cpl-v05.html
+http://www.eclipse.org/legal/cpl-v10.html
  
 Contributors:
 **********************************************************************/
+
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -16,8 +16,8 @@ import java.util.ResourceBundle;
 /**
  * Utility class which helps managing messages
  */
-public class ToolMessages {
-	private static final String RESOURCE_BUNDLE= "org.eclipse.ui.externaltools.internal.core.messages"; //$NON-NLS-1$
+public final class ToolMessages {
+	private static final String RESOURCE_BUNDLE= "org.eclipse.ui.externaltools.internal.model.messages"; //$NON-NLS-1$
 	private static ResourceBundle bundle = ResourceBundle.getBundle(RESOURCE_BUNDLE);
 	
 	private ToolMessages(){

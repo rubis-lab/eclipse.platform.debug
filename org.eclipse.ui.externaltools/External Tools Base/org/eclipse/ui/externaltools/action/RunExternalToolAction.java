@@ -20,7 +20,7 @@ import org.eclipse.jface.viewers.*;
 import org.eclipse.ui.*;
 import org.eclipse.ui.externaltools.internal.core.*;
 import org.eclipse.ui.externaltools.internal.menu.FavoritesManager;
-import org.eclipse.ui.externaltools.internal.ui.IHelpContextIds;
+import org.eclipse.ui.externaltools.internal.model.*;
 import org.eclipse.ui.externaltools.model.*;
 import org.eclipse.ui.help.WorkbenchHelp;
 

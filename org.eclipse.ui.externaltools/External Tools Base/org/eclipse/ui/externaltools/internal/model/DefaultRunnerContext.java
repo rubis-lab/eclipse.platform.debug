@@ -1,4 +1,4 @@
-package org.eclipse.ui.externaltools.internal.core;
+package org.eclipse.ui.externaltools.internal.model;
 
 /**********************************************************************
 Copyright (c) 2002 IBM Corp. and others.
@@ -17,6 +17,8 @@ import org.eclipse.core.runtime.*;
 import org.eclipse.jface.dialogs.*;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.*;
+import org.eclipse.ui.externaltools.internal.core.ExternalToolsRunner;
+import org.eclipse.ui.externaltools.internal.model.*;
 import org.eclipse.ui.externaltools.model.*;
 
 /**

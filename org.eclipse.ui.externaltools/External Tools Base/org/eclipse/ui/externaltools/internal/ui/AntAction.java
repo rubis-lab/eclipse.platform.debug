@@ -18,6 +18,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.externaltools.internal.core.*;
+import org.eclipse.ui.externaltools.internal.model.*;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 /**

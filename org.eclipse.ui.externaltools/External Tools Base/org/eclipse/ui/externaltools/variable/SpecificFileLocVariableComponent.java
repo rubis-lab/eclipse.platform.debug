@@ -14,7 +14,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.externaltools.internal.core.ToolMessages;
+import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 
 /**
  * Visual component to edit the <code>resource_loc</code> variable

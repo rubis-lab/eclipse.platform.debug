@@ -15,7 +15,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.*;
-import org.eclipse.ui.externaltools.internal.core.ToolMessages;
+import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 
 import org.eclipse.jface.dialogs.Dialog;
 

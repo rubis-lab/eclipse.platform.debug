@@ -15,6 +15,7 @@ import org.apache.tools.ant.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.externaltools.internal.core.*;
+import org.eclipse.ui.externaltools.internal.model.*;
 import org.eclipse.ui.externaltools.internal.ui.*;
 
 public class AntBuildLogger implements BuildLogger {

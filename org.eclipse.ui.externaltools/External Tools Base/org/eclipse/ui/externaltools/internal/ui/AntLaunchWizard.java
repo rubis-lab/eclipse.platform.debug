@@ -19,6 +19,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.externaltools.internal.core.*;
+import org.eclipse.ui.externaltools.internal.model.*;
 import org.eclipse.ui.externaltools.model.*;
 
 /**

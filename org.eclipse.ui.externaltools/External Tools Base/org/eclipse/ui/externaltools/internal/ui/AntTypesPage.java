@@ -17,6 +17,7 @@ import org.eclipse.swt.events.*;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.externaltools.internal.core.*;
+import org.eclipse.ui.externaltools.internal.model.*;
 
 import org.eclipse.jface.dialogs.Dialog;
 

@@ -15,7 +15,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.externaltools.internal.core.ExternalToolsPlugin;
+import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolRegistry;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolType;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolTypeRegistry;

@@ -12,7 +12,7 @@ Contributors:
 import java.util.*;
 
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.externaltools.internal.core.ExternalToolsPlugin;
+import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.registry.*;
 import org.eclipse.ui.externaltools.model.*;
 

@@ -1,14 +1,14 @@
-package org.eclipse.ui.externaltools.internal.core;
+package org.eclipse.ui.externaltools.internal.model;
 
 /**********************************************************************
-Copyright (c) 2002 IBM Corp. and others.
-All rights reserved.   This program and the accompanying materials
-are made available under the terms of the Common Public License v0.5
+Copyright (c) 2002 IBM Corp. and others. All rights reserved.
+This file is made available under the terms of the Common Public License v1.0
 which accompanies this distribution, and is available at
-http://www.eclipse.org/legal/cpl-v05.html
+http://www.eclipse.org/legal/cpl-v10.html
  
 Contributors:
 **********************************************************************/
+
 import java.net.*;
 
 import org.eclipse.core.runtime.*;
@@ -16,6 +16,7 @@ import org.eclipse.jface.preference.*;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.externaltools.internal.core.IPreferenceConstants;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolRegistry;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolTypeRegistry;
 import org.eclipse.ui.externaltools.internal.registry.PathLocationVariableRegistry;
@@ -27,23 +28,13 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
  * External tools plug-in class
  */
 public final class ExternalToolsPlugin extends AbstractUIPlugin {
-	/*package*/ static final String LOG_CONSOLE_ID = IExternalToolConstants.PLUGIN_ID + ".LogConsoleView"; //$NON-NLS-1$;
-	
-	public static final String IMG_ANT_TOOL= "icons/full/obj16/ant_file.gif"; //$NON-NLS-1$;
-	public static final String IMG_BUILDER= "icons/full/obj16/builder.gif"; //$NON-NLS-1$;
-	public static final String IMG_JAR_FILE = "icons/full/obj16/jar_l_obj.gif"; //$NON-NLS-1$;
-	public static final String IMG_CLASSPATH = "icons/full/obj16/classpath.gif"; //$NON-NLS-1$;
-	public static final String IMG_TYPE = "icons/full/obj16/type.gif"; //$NON-NLS-1$;
-	public static final String IMG_EXTERNAL_TOOL = "icons/full/obj16/external_tools.gif"; //$NON-NLS-1$
-	public static final String IMG_INVALID_BUILD_TOOL = "icons/full/obj16/invalid_build_tool.gif"; //$NON-NLS-1$
-	public static final String IMG_WIZBAN_EXTERNAL_TOOLS = "icons/full/wizban/ext_tools_wiz.gif"; //$NON-NLS-1$
-	
 	/**
 	 * Status representing no problems encountered during operation.
 	 */
 	public static final IStatus OK_STATUS = new Status(IStatus.OK, IExternalToolConstants.PLUGIN_ID, 0, "", null); //$NON-NLS-1$
 
 	private static ExternalToolsPlugin plugin;
+	
 	private ExternalToolRegistry toolRegistry;
 	private ExternalToolTypeRegistry typeRegistry;
 	private RefreshScopeVariableRegistry refreshVarRegistry;
@@ -158,7 +149,6 @@ public final class ExternalToolsPlugin extends AbstractUIPlugin {
 	 * Method declared in AbstractUIPlugin.
 	 */
 	protected void initializeDefaultPreferences(IPreferenceStore prefs) {
-		prefs.setDefault(IPreferenceConstants.AUTO_SAVE, false);
 		prefs.setDefault(IPreferenceConstants.INFO_LEVEL, true);
 		prefs.setDefault(IPreferenceConstants.VERBOSE_LEVEL, false);
 		prefs.setDefault(IPreferenceConstants.DEBUG_LEVEL, false);

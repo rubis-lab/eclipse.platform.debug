@@ -16,6 +16,7 @@ import javax.xml.parsers.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.XMLMemento;
+import org.eclipse.ui.externaltools.internal.model.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 

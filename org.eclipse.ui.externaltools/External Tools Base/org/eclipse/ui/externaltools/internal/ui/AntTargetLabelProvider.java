@@ -12,7 +12,7 @@ Contributors:
 import java.util.ArrayList;
 
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.ui.externaltools.internal.core.ToolMessages;
+import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 
 /**
  * Ant target label provider

@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.externaltools.internal.model.*;
 
 /**
  * The external tool builder can be added to the build spec of a project to run 

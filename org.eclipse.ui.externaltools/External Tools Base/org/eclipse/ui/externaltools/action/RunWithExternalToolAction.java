@@ -12,7 +12,7 @@ Contributors:
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.externaltools.internal.core.*;
-import org.eclipse.ui.externaltools.internal.ui.IHelpContextIds;
+import org.eclipse.ui.externaltools.internal.model.*;
 import org.eclipse.ui.externaltools.model.ExternalTool;
 import org.eclipse.ui.help.WorkbenchHelp;
 
