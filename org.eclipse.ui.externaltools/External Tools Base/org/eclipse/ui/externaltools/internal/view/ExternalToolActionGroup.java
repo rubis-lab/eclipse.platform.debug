@@ -37,7 +37,7 @@ public class ExternalToolActionGroup extends ActionGroup {
 	private RenameExternalToolAction renameAction;
 	private RefreshViewAction refreshAction;
 	private RunExternalToolAction runAction;
-	private RunWithExternalToolAction runWithAction;
+	private RunExternalToolAction runWithAction;
 	private EditExternalToolPropertiesAction editAction;
 	
 	public ExternalToolActionGroup(ExternalToolView view) {
@@ -139,13 +139,7 @@ public class ExternalToolActionGroup extends ActionGroup {
 	public void runDefaultAction(IStructuredSelection selection) {
 		ExternalTool tool = getSelectedTool(selection);
 		runAction.setTool(tool);
-		runWithAction.setTool(tool);
-		if (tool != null) {
-			if (tool.getPromptForArguments())
-				runWithAction.run();
-			else
-				runAction.run();
-		}
+		runAction.run();
 	}
 
 	/**
@@ -159,8 +153,8 @@ public class ExternalToolActionGroup extends ActionGroup {
 		delAction = new DeleteExternalToolAction(page);
 		renameAction = new RenameExternalToolAction(view);
 		refreshAction = new RefreshViewAction(page);
-		runAction = new RunExternalToolAction(page.getWorkbenchWindow());
-		runWithAction = new RunWithExternalToolAction(page.getWorkbenchWindow());
+		runAction = new RunExternalToolAction(page.getWorkbenchWindow(), false);
+		runWithAction = new RunExternalToolAction(page.getWorkbenchWindow(), true);
 		editAction = new EditExternalToolPropertiesAction(page);
 	}
 	
