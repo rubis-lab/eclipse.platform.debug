@@ -60,4 +60,6 @@ public interface IHelpContextIds {
 	public static final String TOOL_MAIN_WIZARD_PAGE = PREFIX + "tool_main_wizard_page_context"; //$NON-NLS-1$
 	public static final String TOOL_OPTION_WIZARD_PAGE = PREFIX + "tool_option_wizard_page_context"; //$NON-NLS-1$
 	public static final String TOOL_REFRESH_WIZARD_PAGE = PREFIX + "tool_refresh_wizard_page_context"; //$NON-NLS-1$
+
+	public static final String ANT_TARGETS_WIZARD_PAGE = PREFIX + "ant_targets_wizard_page_context"; //$NON-NLS-1$
 }
