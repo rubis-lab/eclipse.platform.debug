@@ -60,7 +60,7 @@ public interface IExternalToolConstants {
 	public static final String VIEW_ID = PLUGIN_ID + ".ExternalToolView"; //$NON-NLS-1$
 	
 	/**
-	 * External tool view identifier (value <code>org.eclipse.ui.externaltools.LogConsoleView</code>).
+	 * Log Console view identifier (value <code>org.eclipse.ui.externaltools.LogConsoleView</code>).
 	 */
 	public static final String LOG_CONSOLE_VIEW_ID = PLUGIN_ID + ".LogConsoleView"; //$NON-NLS-1$
 
