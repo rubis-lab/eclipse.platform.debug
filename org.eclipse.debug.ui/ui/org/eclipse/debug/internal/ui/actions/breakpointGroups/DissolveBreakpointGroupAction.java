@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial implementation
  *******************************************************************************/
-package org.eclipse.debug.internal.ui.actions;
+package org.eclipse.debug.internal.ui.actions.breakpointGroups;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.model.IBreakpoint;
