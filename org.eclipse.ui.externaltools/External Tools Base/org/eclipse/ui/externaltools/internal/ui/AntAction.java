@@ -56,17 +56,6 @@ public class AntAction extends Action {
 		WorkbenchHelp.setHelp(this, IHelpContextIds.ANT_ACTION);
 	}
 	
-	private ExternalTool findTool() {
-		ExternalToolRegistry registry= ExternalToolsPlugin.getDefault().getToolRegistry(getShell());
-		ExternalTool[] tools= registry.getToolsOfType(IExternalToolConstants.TOOL_TYPE_ANT_BUILD);
-		if (tools.length == 1) {
-			return tools[0];
-		} else if (tools.length > 1) {
-			return chooseTool(tools);
-		}
-		return null;
-	}
-	
 	private Shell getShell() {
 		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 	}
@@ -120,7 +109,18 @@ public class AntAction extends Action {
 			return;
 		}
 		
-		ExternalTool tool= findTool();
+		ExternalTool tool= null;
+		ExternalToolRegistry registry= ExternalToolsPlugin.getDefault().getToolRegistry(getShell());
+		ExternalTool[] tools= registry.getToolsOfType(IExternalToolConstants.TOOL_TYPE_ANT_BUILD);
+		if (tools.length == 1) {
+			tool= tools[0];
+		} else if (tools.length > 1) {
+			tool= chooseTool(tools);
+			if (tool == null) {
+				// User cancelled.
+				return;
+			}
+		}
 		
 		if (tool != null) {
 			runTool(tool);
