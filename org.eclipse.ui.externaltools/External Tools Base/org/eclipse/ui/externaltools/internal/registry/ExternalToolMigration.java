@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -147,7 +148,7 @@ public final class ExternalToolMigration {
 	/**
 	 * Creates an external tool from the map.
 	 */
-	private static ExternalTool toolFromArgumentMap(HashMap args, ExternalToolRegistry reg, String newName) {
+	public static ExternalTool toolFromArgumentMap(Map args, ExternalToolRegistry reg, String newName) {
 		// Update the type...
 		String type = (String)args.get(TAG_TOOL_TYPE);
 		if (TOOL_TYPE_ANT.equals(type))
@@ -159,7 +160,7 @@ public final class ExternalToolMigration {
 		String name = (String)args.get(TAG_TOOL_NAME);
 		if (ExternalTool.validateToolName(name) != null)
 			name = newName;
-		if (reg.hasToolNamed(name))
+		if (reg != null && reg.hasToolNamed(name))
 			name = newName;
 
 		// Update the location...
@@ -244,20 +245,6 @@ public final class ExternalToolMigration {
 	private static int[] toBuildTypesArray(String string) {
 		if (string == null)
 			return null;
-		StringTokenizer tokenizer =	new StringTokenizer(string, SEPERATOR);
-		int tokenCount = tokenizer.countTokens();
-		int[] elements = new int[tokenCount];
-
-		for (int i = 0; i < tokenCount; i++) {
-			String type = tokenizer.nextToken();
-			if (type.equals(IExternalToolConstants.BUILD_TYPE_AUTO))
-				elements[i] = IncrementalProjectBuilder.AUTO_BUILD;
-			else if (type.equals(IExternalToolConstants.BUILD_TYPE_INCREMENTAL))
-				elements[i] = IncrementalProjectBuilder.INCREMENTAL_BUILD;
-			else
-				elements[i] = IncrementalProjectBuilder.FULL_BUILD;
-		}
-
-		return elements;
+		return ExternalToolRegistry.buildTypesToArray(string);
 	}
 }

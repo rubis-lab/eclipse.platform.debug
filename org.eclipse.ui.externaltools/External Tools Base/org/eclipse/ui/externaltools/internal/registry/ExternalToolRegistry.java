@@ -147,6 +147,91 @@ public class ExternalToolRegistry {
 	}
 
 	/**
+	 * Converts the build kinds into a built types
+	 * string representation.
+	 * 
+	 * @param buildKinds the array of build kinds to convert
+	 * @return the build types string representation
+	 */
+	protected static String buildKindsToString(int[] buildKinds) {
+		if (buildKinds.length == 0)
+			return IExternalToolConstants.BUILD_TYPE_NONE;
+			
+		StringBuffer buffer = new StringBuffer();
+		for (int i = 0; i < buildKinds.length; i++) {
+			switch (buildKinds[i]) {
+				case IncrementalProjectBuilder.INCREMENTAL_BUILD :
+					buffer.append(IExternalToolConstants.BUILD_TYPE_INCREMENTAL);
+					break;
+				case IncrementalProjectBuilder.FULL_BUILD :
+					buffer.append(IExternalToolConstants.BUILD_TYPE_FULL);
+					break;
+				case IncrementalProjectBuilder.AUTO_BUILD :
+					buffer.append(IExternalToolConstants.BUILD_TYPE_AUTO);
+					break;
+				default :
+					break;
+			}
+			buffer.append(BUILD_TYPE_SEPARATOR);
+		}
+		return buffer.toString();
+	}
+	
+	/**
+	 * Converts the build types string into an array of
+	 * build kinds.
+	 * 
+	 * @param buildTypes the string of built types to convert
+	 * @return the array of build kinds.
+	 */
+	protected static int[] buildTypesToArray(String buildTypes) {
+		int count = 0;
+		boolean incremental = false;
+		boolean full = false;
+		boolean auto = false;
+		
+		StringTokenizer tokenizer = new StringTokenizer(buildTypes, BUILD_TYPE_SEPARATOR);
+		while (tokenizer.hasMoreTokens()) {
+			String token = tokenizer.nextToken();
+			if (IExternalToolConstants.BUILD_TYPE_INCREMENTAL.equals(token)) {
+				if (!incremental) {
+					incremental = true;
+					count++;
+				}
+			}
+			else if (IExternalToolConstants.BUILD_TYPE_FULL.equals(token)) {
+				if (!full) {
+					full = true;
+					count++;
+				}
+			}
+			else if (IExternalToolConstants.BUILD_TYPE_AUTO.equals(token)) {
+				if (!auto) {
+					auto = true;
+					count++;
+				}
+			}
+		}
+		
+		int[] results = new int[count];
+		count = 0;
+		if (incremental) {
+			results[count] = IncrementalProjectBuilder.INCREMENTAL_BUILD;
+			count++;
+		}
+		if (full) {
+			results[count] = IncrementalProjectBuilder.FULL_BUILD;
+			count++;
+		}
+		if (auto) {
+			results[count] = IncrementalProjectBuilder.AUTO_BUILD;
+			count++;
+		}
+		
+		return results;
+	}
+	
+	/**
 	 * Adds an external tool to the in-memory registry.
 	 * Note that no check for an existing tool with the
 	 * same name is done.
@@ -316,24 +401,8 @@ public class ExternalToolRegistry {
 			tool.setSaveDirtyEditors(TRUE.equals(memento.getString(TAG_SAVE_DIRTY)));
 			
 			String types = memento.getString(TAG_RUN_BUILD_KINDS);
-			if (types != null && types.length() > 0) {
-				ArrayList kinds = new ArrayList();
-				StringTokenizer tokenizer = new StringTokenizer(types, BUILD_TYPE_SEPARATOR);
-				while (tokenizer.hasMoreTokens()) {
-					String token = tokenizer.nextToken();
-					if (IExternalToolConstants.BUILD_TYPE_INCREMENTAL.equals(token))
-						kinds.add(new Integer(IncrementalProjectBuilder.INCREMENTAL_BUILD));
-					else if (IExternalToolConstants.BUILD_TYPE_FULL.equals(token))
-						kinds.add(new Integer(IncrementalProjectBuilder.FULL_BUILD));
-					else if (IExternalToolConstants.BUILD_TYPE_AUTO.equals(token))
-						kinds.add(new Integer(IncrementalProjectBuilder.AUTO_BUILD));
-				}
-				int[] results = new int[kinds.size()];
-				for (int i = 0; i < results.length; i++) {
-					results[i] = ((Integer)kinds.get(i)).intValue();
-				}
-				tool.setRunForBuildKinds(results);
-			}
+			if (types != null && types.length() > 0)
+				tool.setRunForBuildKinds(buildTypesToArray(types));
 			
 			IMemento child = memento.getChild(TAG_DESC);
 			if (child != null)
@@ -432,30 +501,7 @@ public class ExternalToolRegistry {
 		memento.putString(TAG_REFRESH_SCOPE, tool.getRefreshScope());
 		memento.putString(TAG_REFRESH_RECURSIVE, tool.getRefreshRecursive() ? TRUE : FALSE);
 		memento.putString(TAG_SAVE_DIRTY, tool.getSaveDirtyEditors() ? TRUE : FALSE);
-
-		int[] kinds = tool.getRunForBuildKinds();
-		if (kinds.length == 0) {
-			memento.putString(TAG_RUN_BUILD_KINDS, IExternalToolConstants.BUILD_TYPE_NONE);
-		} else {
-			StringBuffer buffer = new StringBuffer();
-			for (int i = 0; i < kinds.length; i++) {
-				switch (kinds[i]) {
-					case IncrementalProjectBuilder.INCREMENTAL_BUILD :
-						buffer.append(IExternalToolConstants.BUILD_TYPE_INCREMENTAL);
-						break;
-					case IncrementalProjectBuilder.FULL_BUILD :
-						buffer.append(IExternalToolConstants.BUILD_TYPE_FULL);
-						break;
-					case IncrementalProjectBuilder.AUTO_BUILD :
-						buffer.append(IExternalToolConstants.BUILD_TYPE_AUTO);
-						break;
-					default :
-						break;
-				}
-				buffer.append(BUILD_TYPE_SEPARATOR);
-			}
-			memento.putString(TAG_RUN_BUILD_KINDS, buffer.toString());
-		}
+		memento.putString(TAG_RUN_BUILD_KINDS, buildKindsToString(tool.getRunForBuildKinds()));
 		
 		IMemento child = memento.createChild(TAG_DESC);
 		if (child != null)

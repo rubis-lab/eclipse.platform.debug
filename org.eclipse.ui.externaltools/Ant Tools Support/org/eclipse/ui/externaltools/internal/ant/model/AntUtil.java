@@ -33,6 +33,29 @@ public final class AntUtil {
 	}
 	
 	/**
+	 * Returns a single-string of target names for storage.
+	 * 
+	 * @param targets the array of target names
+	 * @return a single-string representation of the target names,
+	 *  or <code>null</code> if the target array is empty.
+	 */
+	public static String combineRunTargets(String[] targets) {
+		if (targets.length == 0)
+			return null;
+
+		if (targets.length == 1)
+			return targets[0];
+
+		StringBuffer buf = new StringBuffer();
+		for (int i = 0; i < targets.length - 1; i++) {
+			buf.append(targets[i]);
+			buf.append(TARGET_SEPARATOR);
+		}
+		buf.append(targets[targets.length - 1]);
+		return buf.toString();
+	}
+	
+	/**
 	 * Returns the list of all targets for the Ant build file specified by
 	 * the provided IPath, or <code>null</code> if no targets found.
 	 * 
@@ -46,7 +69,31 @@ public final class AntUtil {
 		runner.setBuildFileLocation(path);
 	 	return runner.getAvailableTargets();
 	}
+	
+	/**
+	 * Returns whether the target described by the given
+	 * <code>TargetInfo</code> is an internal target.
+	 * 
+	 * @param info the info of the target in question
+	 * @return <code>true</code> if the target is an internal
+	 * 		target, <code>false</code> otherwise
+	 */
+	public static boolean isInternalTarget(TargetInfo info) {
+		return info.getName().charAt(0) == '-';	
+	}
 
+	/**
+	 * Returns whether the target described by the given
+	 * <code>TargetInfo</code> is a sub-target.
+	 * 
+	 * @param info the info of the target in question
+	 * @return <code>true</code> if the target is a sub-target,
+	 * 		<code>false</code> otherwise
+	 */
+	public static boolean isSubTarget(TargetInfo info) {
+		return info.getDescription() == null;
+	}
+	
 	/**
 	 * Returns the list of target names to run
 	 * 
@@ -67,52 +114,5 @@ public final class AntUtil {
 		}
 		
 		return results;
-	}
-	
-	/**
-	 * Returns a single-string of target names for storage.
-	 * 
-	 * @param targets the array of target names
-	 * @return a single-string representation of the target names,
-	 *  or <code>null</code> if the target array is empty.
-	 */
-	public static String combineRunTargets(String[] targets) {
-		if (targets.length == 0) {
-			return null;
-		} else if (targets.length == 1) {
-			return targets[0];
-		} else {
-			StringBuffer buf = new StringBuffer();
-			for (int i = 0; i < targets.length - 1; i++) {
-				buf.append(targets[i]);
-				buf.append(TARGET_SEPARATOR);
-			}
-			buf.append(targets[targets.length - 1]);
-			return buf.toString();
-		}		
-	}
-	
-	/**
-	 * Returns whether the target described by the given
-	 * <code>TargetInfo</code> is a sub-target.
-	 * 
-	 * @param info the info of the target in question
-	 * @return <code>true</code> if the target is a sub-target,
-	 * <code>false</code> otherwise
-	 */
-	public static boolean isSubTarget(TargetInfo info) {
-		return info.getDescription() == null;
-	}
-	
-	/**
-	 * Returns whether the target described by the given
-	 * <code>TargetInfo</code> is an internal target.
-	 * 
-	 * @param info the info of the target in question
-	 * @return <code>true</code> if the target is an internal
-	 * target, <code>false</code> otherwise
-	 */
-	public static boolean isInternalTarget(TargetInfo info) {
-		return info.getName().charAt(0) == '-';	
 	}
 }

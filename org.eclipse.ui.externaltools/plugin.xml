@@ -197,19 +197,48 @@
 		</page>
 	</extension>
 
-<!-- Old Stuff -->
-<!-- Old Stuff -->
-<!-- Old Stuff -->
-<!-- Old Stuff -->
-<!-- Old Stuff -->
+	<extension point="org.eclipse.ui.views">
+		<category 
+			id="org.eclipse.ui.externaltools.views"
+			name="%CategoryView.externalTools">
+		</category>
+		<view
+			id="org.eclipse.ui.externaltools.ExternalToolView"
+	  		name="%View.externalToolView"
+			icon="icons/full/cview16/external_tools.gif"
+			fastViewWidthRatio="0.30"
+			category="org.eclipse.ui.externaltools.views"
+			class="org.eclipse.ui.externaltools.internal.view.ExternalToolView">
+		</view>
+	</extension>
+
+	<extension point="org.eclipse.core.resources.builders"
+		id="ExternalToolBuilderProxy"
+		name="%Builder.externalTools">
+		<builder> 
+			<run class="org.eclipse.ui.externaltools.internal.model.ExternalToolBuilderProxy"/> 
+		</builder> 
+	</extension>
 
 	<extension point="org.eclipse.core.resources.builders"
 		id="ExternalToolBuilder"
 		name="%Builder.externalTools">
 		<builder> 
-			<run class="org.eclipse.ui.externaltools.internal.core.ExternalToolsBuilder"/> 
+			<run class="org.eclipse.ui.externaltools.internal.model.ExternalToolOldBuilder"/> 
 		</builder> 
 	</extension>
+
+    <extension point="org.eclipse.ant.core.extraClasspathEntries">
+     	<extraClasspathEntry
+         	library="lib/antrunner.jar">
+      	</extraClasspathEntry>
+    </extension>
+
+<!-- Old Stuff -->
+<!-- Old Stuff -->
+<!-- Old Stuff -->
+<!-- Old Stuff -->
+<!-- Old Stuff -->
 
 	<extension point="org.eclipse.ui.popupMenus">
 		<objectContribution
@@ -266,20 +295,6 @@
 			category="org.eclipse.ui.externaltools.views"
 			class="org.eclipse.ui.externaltools.internal.ui.LogConsoleView">
 		</view>
-		<view
-			id="org.eclipse.ui.externaltools.ExternalToolView"
-	  		name="%View.externalToolView"
-			icon="icons/full/cview16/external_tools.gif"
-			fastViewWidthRatio="0.30"
-			category="org.eclipse.ui.externaltools.views"
-			class="org.eclipse.ui.externaltools.internal.view.ExternalToolView">
-		</view>
 	</extension>
-
-    <extension point="org.eclipse.ant.core.extraClasspathEntries">
-     	<extraClasspathEntry
-         	library="lib/antrunner.jar">
-      	</extraClasspathEntry>
-    </extension>
 
 </plugin>
