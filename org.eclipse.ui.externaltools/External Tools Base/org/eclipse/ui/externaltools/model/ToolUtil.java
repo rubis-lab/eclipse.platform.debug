@@ -268,7 +268,7 @@ public final class ToolUtil {
 			return null;
 		}
 		
-		return path.toOSString();
+		return path.toString();
 	}
 	
 	/**
