@@ -13,6 +13,7 @@ package org.eclipse.debug.ui.variables;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.internal.ui.launchConfigurations.LaunchConfigurationsMessages;
 
 /**
  * Extracts the resource name from a variable context
@@ -27,7 +28,7 @@ public class ResourceNameExpander extends DefaultVariableExpander {
 		if (resource != null) {
 			return resource.getName();
 		}
-		throwExpansionException(varTag, ExternalToolsVariableMessages.getString("ResourceNameExpander.No_resource")); //$NON-NLS-1$
+		throwExpansionException(varTag, LaunchConfigurationsMessages.getString("ResourceNameExpander.No_resource_selected._1")); //$NON-NLS-1$
 		return null;
 	}
 }
