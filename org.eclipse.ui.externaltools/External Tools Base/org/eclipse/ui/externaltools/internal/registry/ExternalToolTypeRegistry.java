@@ -31,7 +31,7 @@ public class ExternalToolTypeRegistry {
 	//			name={string}
 	//			description={string}
 	//			icon={string:path}
-	//			class={string:IRunTool}>
+	//			runnerClass={string:IExternalToolRunner}>
 	//		</toolType>
 	// </extension>
 	//
@@ -42,7 +42,7 @@ public class ExternalToolTypeRegistry {
 	/*package*/ static final String TAG_ID = "id"; //$NON-NLS-1$
 	/*package*/ static final String TAG_NAME = "name"; //$NON-NLS-1$
 	/*package*/ static final String TAG_ICON = "icon"; //$NON-NLS-1$
-	/*package*/ static final String TAG_CLASS = "class"; //$NON-NLS-1$
+	/*package*/ static final String TAG_RUN_CLASS = "runnerClass"; //$NON-NLS-1$
 	/*package*/ static final String TAG_DESCRIPTION = "description"; //$NON-NLS-1$
 	
 	private ArrayList types;
@@ -115,7 +115,7 @@ public class ExternalToolTypeRegistry {
 						String id = element.getAttribute(TAG_ID);
 						String name = element.getAttribute(TAG_NAME);
 						String iconPath = element.getAttribute(TAG_ICON);
-						String className = element.getAttribute(TAG_CLASS);
+						String runClassName = element.getAttribute(TAG_RUN_CLASS);
 						
 						boolean valid = true;
 						if (id == null || id.length() == 0) {
@@ -130,7 +130,7 @@ public class ExternalToolTypeRegistry {
 							valid = false;
 							ExternalToolsPlugin.getDefault().log("Missing icon attribute value for toolType element.", null); //$NON-NLS-1$
 						}
-						if (className == null || className.length() == 0) {
+						if (runClassName == null || runClassName.length() == 0) {
 							valid = false;
 							ExternalToolsPlugin.getDefault().log("Missing class attribute value for toolType element.", null); //$NON-NLS-1$
 						}

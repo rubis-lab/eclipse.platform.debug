@@ -13,6 +13,7 @@ import java.io.*;
 
 import org.eclipse.core.runtime.*;
 import org.eclipse.ui.externaltools.internal.ui.LogConsoleDocument;
+import org.eclipse.ui.externaltools.model.*;
 
 /**
  * Execute external tools that represent programs in the file
