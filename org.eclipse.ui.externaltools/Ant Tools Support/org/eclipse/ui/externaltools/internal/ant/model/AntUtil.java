@@ -91,4 +91,28 @@ public final class AntUtil {
 			return buf.toString();
 		}		
 	}
+	
+	/**
+	 * Returns whether the target described by the given
+	 * <code>TargetInfo</code> is a sub-target.
+	 * 
+	 * @param info the info of the target in question
+	 * @return <code>true</code> if the target is a sub-target,
+	 * <code>false</code> otherwise
+	 */
+	public static boolean isSubTarget(TargetInfo info) {
+		return info.getDescription() == null;
+	}
+	
+	/**
+	 * Returns whether the target described by the given
+	 * <code>TargetInfo</code> is an internal target.
+	 * 
+	 * @param info the info of the target in question
+	 * @return <code>true</code> if the target is an internal
+	 * target, <code>false</code> otherwise
+	 */
+	public static boolean isInternalTarget(TargetInfo info) {
+		return info.getName().charAt(0) == '-';	
+	}
 }
