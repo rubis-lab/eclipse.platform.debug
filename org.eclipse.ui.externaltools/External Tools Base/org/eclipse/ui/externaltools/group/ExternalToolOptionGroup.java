@@ -9,19 +9,31 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
-import java.io.File;
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.SelectionDialog;
+import org.eclipse.ui.externaltools.internal.dialog.ExternalToolVariableForm;
+import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
+import org.eclipse.ui.externaltools.internal.registry.ExternalToolVariable;
 import org.eclipse.ui.externaltools.model.ExternalTool;
 
 /**
@@ -59,6 +71,7 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 	protected Button promptArgButton;
 	protected Button showInMenuButton;
 	protected Button saveDirtyEditorsButton;
+	private Button variableButton;
 	
 	private IPerspectiveDescriptor[] perspectives;
 	
@@ -169,15 +182,74 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 		data.widthHint = SIZING_TEXT_FIELD_WIDTH;
 		argumentField.setLayoutData(data);
 
-		Button button = new Button(comp, SWT.PUSH);
-		button.setText(ToolMessages.getString("ExternalToolOptionGroup.argumentVariableLabel")); //$NON-NLS-1$
-		getPage().setButtonGridData(button);
+		variableButton= new Button(comp, SWT.PUSH);
+		variableButton.setText(ToolMessages.getString("ExternalToolOptionGroup.argumentVariableLabel")); //$NON-NLS-1$
+		variableButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleButtonPressed((Button)e.getSource());
+			}
+		});
+		getPage().setButtonGridData(variableButton);
 
 		Label instruction = new Label(comp, SWT.NONE);
 		instruction.setText(ToolMessages.getString("ExternalToolOptionGroup.argumentInstruction")); //$NON-NLS-1$
 		data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		data.horizontalSpan = 2;
 		instruction.setLayoutData(data);
+	}
+	
+	private void handleButtonPressed(Button button) {
+		if (button == variableButton) {
+			VariableSelectionDialog dialog= new VariableSelectionDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+			if (dialog.open() == SelectionDialog.OK) {
+				Object[] objects= dialog.getResult();
+				argumentField.append(((ExternalToolVariable)objects[0]).getTag());
+			}
+		}
+	}
+	
+	private class VariableSelectionDialog extends SelectionDialog {
+		private VariableSelectionDialog(Shell parent) {
+			super(parent);
+			setTitle("Select variable");
+		}
+		protected Control createDialogArea(Composite parent) {
+			// Create the dialog area
+			Composite composite= (Composite)super.createDialogArea(parent);
+			ExternalToolVariable[] variables= ExternalToolsPlugin.getDefault().getArgumentVariableRegistry().getArgumentVariables();
+			ExternalToolVariableForm form= new ExternalToolVariableForm("Choose a variable", variables);
+			form.createContents(composite, new IGroupDialogPage() {
+				public GridData setButtonGridData(Button button) {
+					GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+					data.heightHint = convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT);
+					int widthHint = convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
+					data.widthHint = Math.max(widthHint, button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).x);
+					button.setLayoutData(data);
+					return data;
+				}
+
+				public void setMessage(String newMessage, int newType) {
+					VariableSelectionDialog.this.setMessage(newMessage);
+				}
+
+				public void updateValidState() {
+				}
+
+				public int convertHeightHint(int chars) {
+					return convertHeightInCharsToPixels(chars);
+				}
+
+				public String getMessage() {
+					return VariableSelectionDialog.this.getMessage();
+				}
+
+				public int getMessageType() {
+					return 0;
+				}
+			});
+			return composite;
+		}
+
 	}
 	
 	/**

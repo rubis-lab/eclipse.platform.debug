@@ -11,9 +11,14 @@ Contributors:
 
 import java.io.File;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -24,17 +29,26 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ContainerSelectionDialog;
+import org.eclipse.ui.dialogs.SelectionDialog;
+import org.eclipse.ui.externaltools.internal.dialog.ExternalToolVariableForm;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
+import org.eclipse.ui.externaltools.internal.model.IHelpContextIds;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 import org.eclipse.ui.externaltools.model.ExternalTool;
 import org.eclipse.ui.externaltools.model.IExternalToolConstants;
 import org.eclipse.ui.externaltools.model.ToolUtil;
 import org.eclipse.ui.externaltools.variable.ExpandVariableContext;
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.model.WorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 /**
  * Group of components applicable to most external tools. This group
@@ -52,7 +66,10 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 	protected Text workDirectoryField;
 	protected Text nameField;
 	protected Text descriptionField;
-	private Button locationButton;
+	private Button fileLocationButton;
+	private Button workspaceLocationButton;
+	private Button fileWorkingDirectoryButton;
+	private Button workspaceWorkingDirectoryButton;
 	
 	private ModifyListener modifyListener = new ModifyListener() {
 		public void modifyText(ModifyEvent e) {
@@ -146,29 +163,170 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 		locationField = new Text(parent, SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = SIZING_TEXT_FIELD_WIDTH;
+		data.verticalSpan= 2;
 		locationField.setLayoutData(data);
 		
-		locationButton= new Button(parent, SWT.PUSH );
-		locationButton.setText(ToolMessages.getString("ExternalToolMainGroup.locationBrowseLabel")); //$NON-NLS-1$
-		locationButton.addSelectionListener(new SelectionAdapter() {
+		workspaceLocationButton= createPushButton(parent, "Browse Workspace...");
+		fileLocationButton= createPushButton(parent, "Browse File System...");
+		
+		createSpacer(parent);
+	}
+	
+	private Button createPushButton(Composite parent, String label) {
+		Button button= new Button(parent, SWT.PUSH );
+		button.setText(ToolMessages.getString(label));
+		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				handleButtonPressed((Button)e.widget);
 			}
 		});
-		getPage().setButtonGridData(locationButton);
-
-		createSpacer(parent);
+		getPage().setButtonGridData(button);
+		return button;
 	}
 	
 	private void handleButtonPressed(Button button) {
-		if (button == locationButton) {
-			FileDialog dialog = new FileDialog(getShell(), SWT.NONE);
-			dialog.setFileName(locationField.getText());
-			String filename = dialog.open();
-			if (filename != null) {
-				locationField.setText(filename);
+		String text= null;
+		Text field= null;
+		if (button == fileLocationButton) {
+			text= getFileLocation();
+			field= locationField;
+		} else if (button == workspaceLocationButton) {
+			text= getWorkspaceLocation();
+			field= locationField;
+		} else if (button == fileWorkingDirectoryButton) {
+			DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.SAVE);
+			dialog.setMessage("Select a directory");
+			dialog.setFilterPath(workDirectoryField.getText());
+			text= dialog.open();
+			field= workDirectoryField;
+		} else if (button == workspaceWorkingDirectoryButton) {
+			ContainerSelectionDialog containerDialog;
+			containerDialog = new ContainerSelectionDialog(
+				getShell(), 
+				ResourcesPlugin.getWorkspace().getRoot(),
+				false,
+				"Select a directory");
+			containerDialog.open();
+			Object[] resource = containerDialog.getResult();
+			if (resource != null && resource.length > 0) {
+				text= ToolUtil.buildVariableTag(IExternalToolConstants.VAR_WORKSPACE_LOC, ((IPath)resource[0]).toString());
 			}
+			field= workDirectoryField;
 		}
+		if (text != null && field != null) {
+			field.setText(text);
+		}
+	}
+	
+	private String getFileLocation() {
+		FileDialog fileDialog = new FileDialog(getShell(), SWT.NONE);
+		fileDialog.setFileName(locationField.getText());
+		return fileDialog.open();
+	}
+	
+	/**
+	 * Prompts the user for a workspace location and returns the location
+	 * as a String containing the workspace_loc variable or <code>null</code>
+	 * if no location was obtained from the user.	 */
+	private String getWorkspaceLocation() {
+		ResourceSelectionDialog dialog;
+		dialog = new ResourceSelectionDialog(getShell(), ResourcesPlugin.getWorkspace().getRoot(), "Select a resource");
+		dialog.open();
+		Object[] results = dialog.getResult();
+		if (results == null || results.length < 1) {
+			return null;
+		}
+		IResource resource = (IResource)results[0];
+		StringBuffer buf = new StringBuffer();
+		ToolUtil.buildVariableTag(IExternalToolConstants.VAR_WORKSPACE_LOC, resource.getFullPath().toString(), buf);
+		return buf.toString();
+	}
+	
+	/**
+	 * Internal dialog to show available resources from which
+	 * the user can select one
+	 */
+	private class ResourceSelectionDialog extends SelectionDialog {
+		String labelText;
+		IContainer root;
+		TreeViewer wsTree;
+		
+		public ResourceSelectionDialog(Shell parent, IContainer root, String labelText) {
+			super(parent);
+			this.root = root;
+			this.labelText = labelText;
+			setShellStyle(getShellStyle() | SWT.RESIZE);
+			setTitle(ToolMessages.getString("EditDialog.browseWorkspaceTitle")); //$NON-NLS-1$
+			WorkbenchHelp.setHelp(parent, IHelpContextIds.RESOURCE_SELECTION_DIALOG);
+		}
+
+		/* (non-Javadoc)
+		 * Method declared on Dialog.
+		 */
+		protected Control createDialogArea(Composite parent) {
+			// create composite 
+			Composite dialogArea = (Composite)super.createDialogArea(parent);
+			
+			Label label = new Label(dialogArea, SWT.LEFT);
+			label.setText(labelText);
+			
+			Tree tree = new Tree(dialogArea, SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.BORDER);
+			GridData data = new GridData(GridData.FILL_BOTH);
+			data.heightHint = 300;
+			data.widthHint = 300;
+			tree.setLayoutData(data);
+			wsTree = new TreeViewer(tree);
+			wsTree.setContentProvider(new WorkbenchContentProvider());
+			wsTree.setLabelProvider(new WorkbenchLabelProvider());
+			wsTree.setInput(root);
+			
+			return dialogArea;
+		}
+		
+		/* (non-Javadoc)
+		 * Method declared on Dialog.
+		 */
+		protected void okPressed() {
+			IStructuredSelection sel = (IStructuredSelection)wsTree.getSelection();
+			if (sel != null)
+				setSelectionResult(sel.toArray());
+			super.okPressed();
+		}
+	}
+	
+	private class WorkspaceSelectionDialog extends SelectionDialog {
+		public WorkspaceSelectionDialog() {
+			super(ExternalToolMainGroup.this.getShell());
+		}
+		protected Control createDialogArea(Composite parent) {
+			Composite composite= (Composite)super.createDialogArea(parent);
+			ExternalToolVariableForm form= new ExternalToolVariableForm("Select from workspace", ExternalToolsPlugin.getDefault().getDirectoryLocationVariableRegistry().getPathLocationVariables());
+			form.createContents(composite, new IGroupDialogPage() {
+				public GridData setButtonGridData(Button button) {
+					return null;
+				}
+
+				public void setMessage(String newMessage, int newType) {
+				}
+
+				public void updateValidState() {
+				}
+
+				public int convertHeightHint(int chars) {
+					return 0;
+				}
+
+				public String getMessage() {
+					return null;
+				}
+
+				public int getMessageType() {
+					return 0;
+				}
+			});
+			return composite;
+		}
+
 	}
 	
 	private Shell getShell() {
@@ -222,11 +380,11 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 		workDirectoryField = new Text(parent, SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = SIZING_TEXT_FIELD_WIDTH;
+		data.verticalSpan= 2;
 		workDirectoryField.setLayoutData(data);
 		
-		Button button = new Button(parent, SWT.PUSH );
-		button.setText(ToolMessages.getString("ExternalToolMainGroup.workDirBrowseLabel")); //$NON-NLS-1$
-		getPage().setButtonGridData(button);
+		workspaceWorkingDirectoryButton= createPushButton(parent, "Browse Workspace...");
+		fileWorkingDirectoryButton= createPushButton(parent, "Browse File System...");
 
 		createSpacer(parent);
 	}

@@ -32,6 +32,7 @@ public interface IHelpContextIds {
 	public static final String ANT_ACTION = PREFIX + "ant_action_context"; //$NON-NLS-1$
 	
 	// Dialogs
+	public static final String RESOURCE_SELECTION_DIALOG = PREFIX + "resource_selection_dialog_context"; //$NON-NLS-1$
 
 	// Preference Pages
 	public static final String ANT_PREFERENCE_PAGE = PREFIX + "ant_preference_page_context"; //$NON-NLS-1$
