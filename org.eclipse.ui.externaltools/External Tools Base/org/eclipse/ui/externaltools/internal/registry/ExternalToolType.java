@@ -12,12 +12,14 @@ Contributors:
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
+import org.eclipse.ui.externaltools.model.IExternalToolRunner;
 
 /**
  * This class represents the definition of an external
@@ -28,6 +30,7 @@ public final class ExternalToolType {
 	private String name;
 	private IConfigurationElement element;
 	private ImageDescriptor imageDescriptor;
+	private IExternalToolRunner runner;
 	
 	/**
 	 * Create a new external tool type.
@@ -92,5 +95,20 @@ public final class ExternalToolType {
 				imageDescriptor = ImageDescriptor.getMissingImageDescriptor();
 		}
 		return imageDescriptor;
+	}
+	
+	/**
+	 * Returns the runner to run external tools of this type
+	 * or <code>null</code> if none provided by client.
+	 */
+	public IExternalToolRunner getRunner() {
+		if (runner == null) {
+			try {
+				runner = (IExternalToolRunner) element.createExecutableExtension(ExternalToolTypeRegistry.TAG_RUN_CLASS);
+			} catch (CoreException e) {
+				ExternalToolsPlugin.getDefault().getLog().log(e.getStatus());
+			}
+		}
+		return runner;
 	}
 }

@@ -238,7 +238,8 @@ public final class ExternalTool {
 	/**
 	 * Returns the scope of resources to refresh after
 	 * the external tool is run, or <code>null</code> if
-	 * not specified.
+	 * not specified. The value is in an variable
+	 * format.
 	 */
 	public String getRefreshScope() {
 		return refreshScope;
@@ -349,7 +350,7 @@ public final class ExternalTool {
 	/**
 	 * Sets the scope of resources to refresh after
 	 * the external tool is run, or <code>null</code>
-	 * if none.
+	 * if none. The value is in a variable format.
 	 */
 	public void setRefreshScope(String refreshScope) {
 		if (refreshScope == null)

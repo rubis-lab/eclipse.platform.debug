@@ -19,8 +19,8 @@ import org.eclipse.ui.externaltools.model.*;
  * Responsible for running ant files.
  */
 public class AntFileRunner extends ExternalToolsRunner {
-	private static final String ANT_LOGGER_CLASS = "org.eclipse.ui.externaltools.internal.ui.ant.AntBuildLogger"; //$NON-NLS-1$
-	private static final String NULL_LOGGER_CLASS = "org.eclipse.ui.externaltools.internal.ui.ant.NullBuildLogger"; //$NON-NLS-1$
+	private static final String ANT_LOGGER_CLASS = "org.eclipse.ui.externaltools.internal.ant.logger.AntBuildLogger"; //$NON-NLS-1$
+	private static final String NULL_LOGGER_CLASS = "org.eclipse.ui.externaltools.internal.ant.logger.NullBuildLogger"; //$NON-NLS-1$
 	private static final String BASE_DIR_PREFIX = "-Dbasedir="; //$NON-NLS-1$
 
 	/**

@@ -1,4 +1,4 @@
-package org.eclipse.ui.externaltools.internal.ui.ant;
+package org.eclipse.ui.externaltools.internal.ant.logger;
 
 /**********************************************************************
 Copyright (c) 2002 IBM Corp. and others.

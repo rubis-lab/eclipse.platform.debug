@@ -9,12 +9,18 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.ui.externaltools.variable.ExpandVariableContext;
+import org.eclipse.ui.externaltools.variable.IVariableResourceExpander;
 
 /**
  * Represents the variable for a refresh scope.
  */
 public final class RefreshScopeVariable extends ExternalToolVariable {
+	private static final DefaultResourceExpander defaultExpander = new DefaultResourceExpander();
+	
+	private IVariableResourceExpander expander = null;
 
 	/**
 	 * Creates a refresh scope variable
@@ -25,5 +31,32 @@ public final class RefreshScopeVariable extends ExternalToolVariable {
 	 */
 	/*package*/ RefreshScopeVariable(String tag, String description, IConfigurationElement element) {
 		super(tag, description, element);
+	}
+
+	/**
+	 * Returns the object that can expand the variable
+	 * as resources.
+	 */
+	public IVariableResourceExpander getExpander() {
+		if (expander == null) {
+			expander = (IVariableResourceExpander) createObject(ExternalToolVariableRegistry.TAG_EXPANDER_CLASS);
+			if (expander == null)
+				expander = defaultExpander;
+		}
+		return expander;
+	}
+
+
+	/**
+	 * Default variable resource expander implementation which does
+	 * not expand variables, but just returns <code>null</code>.
+	 */	
+	private static final class DefaultResourceExpander implements IVariableResourceExpander {
+		/* (non-Javadoc)
+		 * Method declared on IVariableResourceExpander.
+		 */
+		public IResource[] getResources(String varTag, String varValue, ExpandVariableContext context) {
+			return null;
+		}
 	}
 }

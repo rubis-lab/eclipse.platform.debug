@@ -9,6 +9,9 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -17,6 +20,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.externaltools.internal.core.IPreferenceConstants;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
+import org.eclipse.ui.externaltools.internal.registry.ArgumentVariable;
+import org.eclipse.ui.externaltools.internal.registry.ArgumentVariableRegistry;
 import org.eclipse.ui.externaltools.internal.registry.PathLocationVariable;
 import org.eclipse.ui.externaltools.internal.registry.PathLocationVariableRegistry;
 import org.eclipse.ui.externaltools.variable.ExpandVariableContext;
@@ -71,6 +76,58 @@ public final class ToolUtil {
 	}
 	
 	/**
+	 * Expands all the variables found in an individual
+	 * argument text.
+	 */
+	public static String expandArgument(String argument, ExpandVariableContext context) throws CoreException {
+		StringBuffer buffer = new StringBuffer();
+		
+		int start = 0;
+		while (true) {
+			VariableDefinition varDef = extractVariableTag(argument, start);
+			
+			// No more variables found...
+			if (varDef.start == -1) {
+				if (start == 0)
+					buffer.append(argument);
+				else
+					buffer.append(argument.substring(start));
+				break;
+			}
+
+			// Invalid variable format
+			if (varDef.end == -1 || varDef.name == null || varDef.name.length() == 0) {
+				String msg = ToolMessages.getString("ToolUtil.argumentVarFormatWrong"); //$NON-NLS-1$
+				throw ExternalToolsPlugin.getDefault().newError(msg, null);
+			}
+
+			// Copy text between start and variable.			
+			if (varDef.start > start)
+				buffer.append(argument.substring(start, varDef.start));
+			start = varDef.end;
+			
+			// Lookup the variable if it exist
+			ArgumentVariableRegistry registry;
+			registry = ExternalToolsPlugin.getDefault().getArgumentVariableRegistry();
+			ArgumentVariable variable = registry.getArgumentVariable(varDef.name);
+			if (variable == null) {
+				String msg = ToolMessages.format("ToolUtil.argumentVarMissing", new Object[] {varDef.name}); //$NON-NLS-1$
+				throw ExternalToolsPlugin.getDefault().newError(msg, null);
+			}
+			
+			// Expand the variable as text if possible
+			String text = variable.getExpander().getText(varDef.name, varDef.argument, context);
+			if (text == null) {
+				String msg = ToolMessages.format("ToolUtil.argumentVarExpandFailed", new Object[] {varDef.name}); //$NON-NLS-1$
+				throw ExternalToolsPlugin.getDefault().newError(msg, null);
+			}
+			buffer.append(text);
+		}
+		
+		return buffer.toString();
+	}
+	
+	/**
 	 * Returns a list of individual arguments where all
 	 * variables have been expanded.
 	 * 
@@ -83,7 +140,12 @@ public final class ToolUtil {
 		if (arguments == null || arguments.length() == 0)
 			return new String[0];
 
-		return new String[0];
+		String[] argList = parseArgumentsIntoList(arguments);
+		for (int i = 0; i < argList.length; i++) {
+			argList[i] = expandArgument(argList[i], context);
+		}
+		
+		return argList;
 	}
 	
 	/**
@@ -222,6 +284,85 @@ public final class ToolUtil {
 		
 		return varDef;
 	}
+	
+	/**
+	 * Parses the argument text into an array of individual
+	 * arguments using the space character as the delimiter.
+	 * An individual argument containing spaces must have a
+	 * double quote (") at the start and end. Two double 
+	 * quotes together is taken to mean an embedded double
+	 * quote in the argument text.
+	 * 
+	 * @return the ArrayList of arguments
+	 */
+	public static String[] parseArgumentsIntoList(String arguments) {
+		final String QUOTE = "\"";  //$NON-NLS-1$
+		final String SPACE = " ";  //$NON-NLS-1$
+		final String SPACE_AND_QUOTE = " \""; //$NON-NLS-1$
+
+		if (arguments == null || arguments.length() == 0)
+			return new String[0];
+		
+		// The list of arguments.
+		ArrayList list = new ArrayList();
+		boolean inQuotes = false;
+		String currentToken = null;
+		String nextToken = null;
+		StringBuffer buffer = new StringBuffer();
+
+		// Tokenized on both space and double quotes.		
+		StringTokenizer tokenizer = new StringTokenizer(arguments, SPACE_AND_QUOTE, true);
+		while (tokenizer.hasMoreTokens() || nextToken != null) {
+			// Determine the current token to work with.
+			if (nextToken != null) {
+				currentToken = nextToken;
+				nextToken = null;
+			} else {
+				currentToken = tokenizer.nextToken();
+			}
+			
+			// If we reach a quote...
+			if (currentToken.equals(QUOTE)) {
+				// If last token...
+				if (!tokenizer.hasMoreTokens()) {
+					if (inQuotes)
+						inQuotes = false;	
+					else
+						buffer.append(QUOTE);
+				} else {
+					nextToken = tokenizer.nextToken();
+					if (nextToken.equals(QUOTE)) {
+						// Add a single quote to the argument.
+						buffer.append(QUOTE);
+						nextToken = null;
+					} else {
+						inQuotes = !inQuotes;
+					}
+				}
+			}
+			// If we reach a space outside a quoted argument...
+			else if (currentToken.equals(SPACE) && !inQuotes) {
+				// Add the complete argument to the list.
+				list.add(buffer.toString());
+				buffer.setLength(0);
+			} 
+			// We have reached a normal token.
+			else {
+				// Append it to the argument buffer.
+				buffer.append(currentToken);
+			}
+		}
+		
+		// If there is an argument that hasn't been added 
+		// to the list, add it.
+		if (buffer.length() > 0)
+			list.add(buffer.toString());
+		
+		String[] results = new String[list.size()];
+		list.toArray(results);
+		return results;
+	}
+	
 	
 	/**
 	 * Structure to represent a variable definition within a

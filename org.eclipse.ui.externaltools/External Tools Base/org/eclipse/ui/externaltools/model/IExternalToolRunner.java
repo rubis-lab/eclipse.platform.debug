@@ -19,8 +19,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * Clients using the extension point to define a new external
  * tool type must provide an implementation of this interface.
  * </p><p>
+ * Implementation of this interface will be treated like
+ * a singleton. That is, only one instance will be created
+ * per tool type.
+ * </p><p>
  * This interface is not intended to be extended by clients.
- * Clients must only implement this interface.
  * </p>
  */
 public interface IExternalToolRunner {

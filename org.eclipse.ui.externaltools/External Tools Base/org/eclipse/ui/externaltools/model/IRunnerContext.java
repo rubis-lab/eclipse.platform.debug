@@ -48,19 +48,7 @@ public interface IRunnerContext {
 	public String getExtraAttribute(String key);
 
 	/**
-	 * Returns whether to log messages from the running
-	 * tool to the console.
-	 */
-	public boolean getLogMessages();
-
-	/**
 	 * Returns the name of the external tool.
 	 */
 	public String getName();
-	
-	/**
-	 * Returns whether to run the external tool in the
-	 * background so as not to block the UI.
-	 */
-	public boolean getRunInBackground();
 }
