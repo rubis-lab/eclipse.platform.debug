@@ -10,7 +10,10 @@ Contributors:
 **********************************************************************/
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.actions.NewWizardTypeAction;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.IHelpContextIds;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
@@ -21,15 +24,18 @@ import org.eclipse.ui.help.WorkbenchHelp;
  * external tool.
  */
 public class NewExternalToolAction extends Action {
-	private ExternalToolView view;
+	private static final String CATEGORY_ID = "org.eclipse.ui.externaltools.newWizards"; //$NON-NLS-1$
+	private static final String DLG_SETTING_SECTION = "NewWizardTypeAction"; //$NON-NLS-1$
+	
+	private IWorkbenchPage page;
 
 	/**
 	 * Create an action to launch a new
 	 * external tool wizard.
 	 */
-	public NewExternalToolAction(ExternalToolView view) {
+	public NewExternalToolAction(IWorkbenchPage page) {
 		super();
-		this.view = view;
+		this.page = page;
 		setText(ToolMessages.getString("NewExternalToolAction.text")); //$NON-NLS-1$
 		setToolTipText(ToolMessages.getString("NewExternalToolAction.toolTip")); //$NON-NLS-1$
 		setHoverImageDescriptor(ExternalToolsPlugin.getDefault().getImageDescriptor("icons/full/clcl16/new_tool.gif")); //$NON-NLS-1$
@@ -42,6 +48,11 @@ public class NewExternalToolAction extends Action {
 	 * Method declared on Action.
 	 */
 	public void run() {
-		org.eclipse.jface.dialogs.MessageDialog.openInformation(view.getSite().getShell(), "Action", "This action is not yet implemented");
+		IDialogSettings pluginSettings = ExternalToolsPlugin.getDefault().getDialogSettings();
+		IDialogSettings wizardSettings = pluginSettings.getSection(DLG_SETTING_SECTION);
+		if (wizardSettings == null)
+			wizardSettings = pluginSettings.addNewSection(DLG_SETTING_SECTION);
+		NewWizardTypeAction action = new NewWizardTypeAction(page.getWorkbenchWindow(), CATEGORY_ID, wizardSettings);
+		action.run();
 	}
 }

@@ -147,7 +147,7 @@ public class ExternalToolActionGroup extends ActionGroup {
 	 */
 	protected void makeActions() {
 		IWorkbenchPage page = view.getSite().getPage();
-		newAction = new NewExternalToolAction(view);
+		newAction = new NewExternalToolAction(page);
 		copyAction = new CopyExternalToolAction(page);
 		pasteAction = new PasteExternalToolAction(view);
 		delAction = new DeleteExternalToolAction(page);
