@@ -38,8 +38,6 @@ public class AntFileRunner implements IExternalToolRunner {
 			// Determine the targets to run.
 			String value = runnerContext.getExtraAttribute(AntUtil.RUN_TARGETS_ATTRIBUTE);
 			String[] targets = AntUtil.parseRunTargets(value);
-			if (targets.length == 0)
-				return;
 
 			AntRunner runner = new AntRunner();
 			
