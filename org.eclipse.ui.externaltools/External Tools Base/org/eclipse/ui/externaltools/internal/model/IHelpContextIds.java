@@ -29,6 +29,7 @@ public interface IHelpContextIds {
 	public static final String RUN_TOOL_ACTION = PREFIX + "run_tool_action_context"; //$NON-NLS-1$
 	public static final String RUN_WITH_TOOL_ACTION = PREFIX + "run_with_tool_action_context"; //$NON-NLS-1$
 	public static final String EDIT_TOOL_PROPERTIES_ACTION = PREFIX + "edit_tool_properties_action_context"; //$NON-NLS-1$
+	public static final String ANT_ACTION = PREFIX + "ant_action_context"; //$NON-NLS-1$
 	
 	// Dialogs
 

@@ -97,8 +97,16 @@ public final class BuilderPropertyPage extends PropertyPage {
 		//add build spec entries to the table
 		try {
 			ICommand[] commands = project.getDescription().getBuildSpec();
+			ExternalToolRegistry registry= ExternalToolsPlugin.getDefault().getToolRegistry(getShell());
 			for (int i = 0; i < commands.length; i++) {
-				addCommand(commands[i], -1, false);
+				ExternalTool tool = ExternalToolRegistry.toolFromBuildCommandArgs(commands[i].getArguments(), NEW_NAME);
+				if (registry.hasToolNamed(tool.getName())) {
+					addTool(tool, -1, false);
+				} else {
+					// If the tool generated from the command is not in the registry, it's
+					// just a command, not a tool.
+					addCommand(commands[i], -1, false);
+				}
 			}
 		} catch (CoreException e) {
 			handleException(e);
@@ -122,6 +130,25 @@ public final class BuilderPropertyPage extends PropertyPage {
 		newItem.setData(command);
 		updateCommandItem(newItem, command);
 		if (select) builderTable.setSelection(position);
+	}
+	
+	private void addTool(ExternalTool tool, int position, boolean select) {
+		TableItem newItem;
+		if (position < 0) {
+			newItem = new TableItem(builderTable, SWT.NONE);
+		} else {
+			newItem = new TableItem(builderTable, SWT.NONE, position);
+		}
+		newItem.setData(tool);
+		updateToolItem(newItem, tool);
+		if (select) builderTable.setSelection(position);
+	}
+	
+	private void updateToolItem(TableItem item, ExternalTool tool) {
+		item.setText(tool.getName());
+		Image toolImage= ExternalToolsPlugin.getDefault().getTypeRegistry().getToolType(tool.getType()).getImageDescriptor().createImage();
+		imagesToDispose.add(toolImage);
+		item.setImage(toolImage);
 	}
 	
 	/**
@@ -312,9 +339,12 @@ public final class BuilderPropertyPage extends PropertyPage {
 					public void setSelection(ISelection selection) {
 					}					
 				}).run();
-//				MessageDialog.openInformation(getShell(), "Edit tool", "Edit not currently implemented");
-//				editTool((ICommand)selection[0].getData());
-				updateCommandItem(selection[0],(ICommand)selection[0].getData());
+				Object data= selection[0].getData();
+				if (data instanceof ExternalTool) {
+					// The table contains ExternalTools and ICommands,
+					// but we only edit ExternalTools
+					updateToolItem(selection[0], (ExternalTool) data);
+				}
 			}
 		} else if (button == removeButton) {
 			TableItem[] selection = builderTable.getSelection();
@@ -358,8 +388,8 @@ public final class BuilderPropertyPage extends PropertyPage {
 		TableItem[] items = builderTable.getSelection();
 		if (items != null && items.length == 1) {
 			TableItem item = items[0];
-			ICommand buildCommand = (ICommand)item.getData();
-			if (buildCommand.getBuilderName().equals(ExternalToolBuilder.ID)) {
+			Object data= item.getData();
+			if (data instanceof ExternalTool) {
 				editButton.setEnabled(true);
 				removeButton.setEnabled(true);
 				int selection = builderTable.getSelectionIndex();
@@ -420,14 +450,27 @@ public final class BuilderPropertyPage extends PropertyPage {
 	 * Method declared on IPreferencePage.
 	 */
 	public boolean performOk() {
+		IProject project = getInputProject();
 		//get all the build commands
 		int numCommands = builderTable.getItemCount();
 		ICommand[] commands = new ICommand[numCommands];
 		for (int i = 0; i < numCommands; i++) {
-			commands[i] = (ICommand)builderTable.getItem(i).getData();
+			Object data= builderTable.getItem(i).getData();
+			if (data instanceof ICommand) {
+			} else if (data instanceof ExternalTool) {
+				// Translate ExternalTools to ICommands for storage
+				ICommand newCommand= null;
+				try {
+					newCommand= project.getDescription().newCommand();
+				} catch (CoreException exception) {
+					MessageDialog.openError(getShell(), "Command error", "An error occurred while saving the project's build commands");
+					return true;
+				}
+				data= toBuildCommand(((ExternalTool)data), newCommand);
+			}
+			commands[i] = (ICommand)data;
 		}
 		//set the build spec
-		IProject project = getInputProject();
 		try {
 			IProjectDescription desc = project.getDescription();
 			desc.setBuildSpec(commands);
