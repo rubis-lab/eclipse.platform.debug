@@ -45,6 +45,14 @@ public class ExternalToolGroupWizardPage extends WizardPage implements IGroupDia
 		this.helpContextId = helpContextId;
 	}
 	
+	 /*
+	  * (non-Javadoc)
+	  * Method declared on IGroupDialogPage.
+	  */
+	 public int convertHeightHint(int chars) {
+	 	return convertHeightInCharsToPixels(chars);	
+	 }
+
 	/* (non-Javadoc)
 	 * Method declared on IDialogPage.
 	 */
@@ -84,6 +92,16 @@ public class ExternalToolGroupWizardPage extends WizardPage implements IGroupDia
 		return setButtonLayoutData(button);
 	}
 
+	 /*
+	  * (non-Javadoc)
+	  * Method declared on DialogPage.
+	  */
+	 public void setVisible(boolean visible) {
+	 	super.setVisible(visible);
+	 	if (group != null)
+	 		group.setVisible(visible);
+	 }
+	 
 	/* (non-Javadoc)
 	 * Method declared on IGroupDialogPage.
 	 */

@@ -57,8 +57,17 @@ public interface IExternalToolGroup {
 	public void restoreValues(ExternalTool tool);
 	
 	/**
+	 * Allows an external tool group to react when its page is shown.
+	 * 
+	 * @param visible whether the group's page is visible
+	 */
+	public void setVisible(boolean visible);
+	
+	/**
 	 * Updates the external tool with the information
 	 * collected by the group's visual components.
+	 * 
+	 * @param tool the external tool to update
 	 */
 	public void updateTool(ExternalTool tool);
 	

@@ -51,4 +51,12 @@ public interface IGroupDialogPage extends IMessageProvider {
 	 * update to reflect the new state.
 	 */
 	public void updateValidState();
+	
+	/**
+	 * Converts a height in characters to a height in pixels.
+	 * 
+	 * @param chars the height in characters to be converted
+	 * @return the corresponding height in pixels
+	 */
+	public int convertHeightHint(int chars);
 }

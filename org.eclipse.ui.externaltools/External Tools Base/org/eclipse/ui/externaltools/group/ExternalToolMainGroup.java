@@ -242,6 +242,18 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 			return null;
 	}
 	
+	/**
+	 * Returns the location of the external tool as 
+	 * found in the text field, or <code>null</code> if
+	 * field does not exist.
+	 */
+	public String getLocationFieldValue() {
+		if (locationField != null)
+			return locationField.getText().trim();
+		else
+			return null;	
+	}
+	
 	/* (non-Javadoc)
 	 * Method declared on IExternalToolGroup.
 	 */

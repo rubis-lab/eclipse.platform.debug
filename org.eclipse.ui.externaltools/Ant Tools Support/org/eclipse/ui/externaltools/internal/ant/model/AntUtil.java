@@ -41,7 +41,7 @@ public final class AntUtil {
 	 * 
 	 * @throws CoreException if file does not exist, IO problems, or invalid format.
 	 */
-	public static TargetInfo[] getTargetList(String path) throws CoreException {
+	public static TargetInfo[] getTargets(String path) throws CoreException {
 		AntRunner runner = new AntRunner();
 		runner.setBuildFileLocation(path);
 	 	return runner.getAvailableTargets();
@@ -67,5 +67,28 @@ public final class AntUtil {
 		}
 		
 		return results;
+	}
+	
+	/**
+	 * Returns a single-string of target names for storage.
+	 * 
+	 * @param targets the array of target names
+	 * @return a single-string representation of the target names,
+	 *  or <code>null</code> if the target array is empty.
+	 */
+	public static String combineRunTargets(String[] targets) {
+		if (targets.length == 0) {
+			return null;
+		} else if (targets.length == 1) {
+			return targets[0];
+		} else {
+			StringBuffer buf = new StringBuffer();
+			for (int i = 0; i < targets.length - 1; i++) {
+				buf.append(targets[i]);
+				buf.append(TARGET_SEPARATOR);
+			}
+			buf.append(targets[targets.length - 1]);
+			return buf.toString();
+		}		
 	}
 }

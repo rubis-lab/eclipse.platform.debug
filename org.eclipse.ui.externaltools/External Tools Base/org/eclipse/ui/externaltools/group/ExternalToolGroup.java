@@ -117,6 +117,12 @@ public abstract class ExternalToolGroup implements IExternalToolGroup {
 	 * Method declared on IExternalToolGroup.
 	 */
 	public abstract void restoreValues(ExternalTool tool);
+	
+	/* (non-Javadoc)
+	 * Method declared on IExternalToolGroup.
+	 */
+	public void setVisible(boolean visible) {
+	}
 
 	/* (non-Javadoc)
 	 * Method declared on IExternalToolGroup.
