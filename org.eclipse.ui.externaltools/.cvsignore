@@ -1,4 +1,5 @@
 bin
+lib
 externaltools.jar
 build.xml
 temp.folder
