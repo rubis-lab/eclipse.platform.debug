@@ -12,7 +12,9 @@ Contributors:
 import org.eclipse.ant.core.TargetInfo;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -70,10 +72,24 @@ public class AntAction extends Action {
 			public void toolCreated(ExternalTool tool) {
 				if (tool.getLocation().equals(file.getLocation().toString())) {
 					MultiStatus status = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "", null);
-					new DefaultRunnerContext(tool, file).run(null, status);
+					new DefaultRunnerContext(tool, file).run(new NullProgressMonitor(), status);
 					Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 					if (!status.isOK()) {
-						MessageDialog.openError(shell, "Ant Error", "An exception occurred while running ant");
+						StringBuffer message= new StringBuffer("An exception occurred while running ant: ");
+						IStatus[] errors= status.getChildren();
+						IStatus error;
+						for (int i= 0, numErrors= errors.length; i < numErrors; i++) {
+							error= errors[i];
+							if (error.getSeverity() == IStatus.ERROR) {
+								Throwable exception= error.getException();
+								message.append('\n');
+								if (exception != null) {
+									message.append(exception.getClass().getName()).append(' ');
+								}
+								message.append(error.getMessage());
+							}
+						}
+						MessageDialog.openError(shell, "Ant Error", message.toString());
 					}
 					ExternalToolStorage.deleteTool(tool, shell);
 				}
