@@ -13,7 +13,7 @@ Contributors:
  * Represents the context of the external tool to run. An implementation
  * of this interface is provided to the <code>IExternalToolRunner</code>.
  * <p>
- * This interface is not be extended or implemented by clients.
+ * This interface is not be extended nor implemented by clients.
  * </p>
  */
 public interface IRunnerContext {
@@ -47,6 +47,12 @@ public interface IRunnerContext {
 	 */
 	public String getExtraAttribute(String key);
 
+	/**
+	 * Returns the log the runner can used to log
+	 * messages captured from the running tool's output.
+	 */
+	public IRunnerLog getLog();
+	
 	/**
 	 * Returns the name of the external tool.
 	 */

@@ -22,9 +22,11 @@ import org.eclipse.ui.externaltools.internal.registry.ExternalToolType;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolTypeRegistry;
 import org.eclipse.ui.externaltools.internal.registry.RefreshScopeVariable;
 import org.eclipse.ui.externaltools.internal.registry.RefreshScopeVariableRegistry;
+import org.eclipse.ui.externaltools.internal.ui.LogConsoleDocument;
 import org.eclipse.ui.externaltools.model.ExternalTool;
 import org.eclipse.ui.externaltools.model.IExternalToolRunner;
 import org.eclipse.ui.externaltools.model.IRunnerContext;
+import org.eclipse.ui.externaltools.model.IRunnerLog;
 import org.eclipse.ui.externaltools.model.ToolUtil;
 import org.eclipse.ui.externaltools.variable.ExpandVariableContext;
 
@@ -127,6 +129,13 @@ public final class DefaultRunnerContext implements IRunnerContext {
 	 */
 	public String getExtraAttribute(String key) {
 		return tool.getExtraAttribute(key);
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on IRunnerContext.
+	 */
+	public IRunnerLog getLog() {
+		return LogConsoleDocument.getInstance();
 	}
 
 	/* (non-Javadoc)

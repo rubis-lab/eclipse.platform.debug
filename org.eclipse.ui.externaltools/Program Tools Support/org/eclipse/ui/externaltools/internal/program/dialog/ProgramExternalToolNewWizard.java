@@ -1,4 +1,4 @@
-package org.eclipse.ui.externaltools.internal.dialog;
+package org.eclipse.ui.externaltools.internal.program.dialog;
 
 /**********************************************************************
 Copyright (c) 2002 IBM Corp. and others. All rights reserved.

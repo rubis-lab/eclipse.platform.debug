@@ -33,14 +33,14 @@
 			name="%ToolType.programName"
 			description="%ToolType.programDescription"
 			icon="icons/full/obj16/ttype_program.gif"
-			class="someclassnamehere">
+			runnerClass="org.eclipse.ui.externaltools.internal.program.model.ProgramRunner">
 		</toolType>
 		<toolType
 			id="antBuildType"
 			name="%ToolType.antBuildName"
 			description="%ToolType.antBuildDescription"
 			icon="icons/full/obj16/ttype_ant.gif"
-			class="someclassnamehere">
+			runnerClass="org.eclipse.ui.externaltools.internal.ant.model.AntFileRunner">
 		</toolType>
 	</extension>
 
@@ -54,7 +54,7 @@
 			name="%NewWizard.programName" 
 			category="org.eclipse.ui.externaltools.newWizards" 
 			icon="icons/full/obj16/ttype_program.gif" 
-			class="org.eclipse.ui.externaltools.internal.dialog.ProgramExternalToolNewWizard"> 
+			class="org.eclipse.ui.externaltools.internal.program.dialog.ProgramExternalToolNewWizard"> 
 			<description> 
 				%NewWizard.programDescription 
 			</description> 
@@ -64,7 +64,7 @@
 			name="%NewWizard.antBuildName" 
 			category="org.eclipse.ui.externaltools.newWizards" 
 			icon="icons/full/obj16/ttype_ant.gif" 
-			class="org.eclipse.ui.externaltools.internal.dialog.AntExternalToolNewWizard"> 
+			class="org.eclipse.ui.externaltools.internal.ant.dialog.AntExternalToolNewWizard"> 
 			<description> 
 				%NewWizard.antBuildDescription 
 			</description> 
@@ -221,6 +221,5 @@
          	library="lib/antrunner.jar">
       	</extraClasspathEntry>
     </extension>
-
 
 </plugin>
