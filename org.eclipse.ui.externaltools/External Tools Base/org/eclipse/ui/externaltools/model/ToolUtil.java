@@ -32,8 +32,17 @@ import org.eclipse.ui.externaltools.variable.ExpandVariableContext;
  */
 public final class ToolUtil {
 	/**
+	 * Argument parsing constants
+	 */
+	private static final char ARG_DELIMITER = ' '; //$NON-NLS-1$
+	private static final char ARG_DBL_QUOTE = '"'; //$NON-NLS-1$
+	
+	/**
 	 * Variable tag indentifiers
 	 */
+	private static final char VAR_TAG_START_CHAR1 = '$'; //$NON-NLS-1$
+	private static final char VAR_TAG_START_CHAR2 = '{'; //$NON-NLS-1$
+	private static final char VAR_TAG_END_CHAR1 = '}'; //$NON-NLS-1$
 	private static final String VAR_TAG_START = "${"; //$NON-NLS-1$
 	private static final String VAR_TAG_END = "}"; //$NON-NLS-1$
 	private static final String VAR_TAG_SEP = ":"; //$NON-NLS-1$
@@ -311,79 +320,91 @@ public final class ToolUtil {
 	 * An individual argument containing spaces must have a
 	 * double quote (") at the start and end. Two double 
 	 * quotes together is taken to mean an embedded double
-	 * quote in the argument text.
+	 * quote in the argument text. Variables are treated as
+	 * a single unit and therefore spaces and double quotes
+	 * inside a variable are copied as is and not parsed.
 	 * 
-	 * @return the ArrayList of arguments
+	 * @param arguments the arguments as one string
+	 * @return the array of arguments
 	 */
 	public static String[] parseArgumentsIntoList(String arguments) {
-		final String QUOTE = "\"";  //$NON-NLS-1$
-		final String SPACE = " ";  //$NON-NLS-1$
-		final String SPACE_AND_QUOTE = " \""; //$NON-NLS-1$
-
 		if (arguments == null || arguments.length() == 0)
 			return new String[0];
 		
-		// The list of arguments.
-		ArrayList list = new ArrayList();
+		ArrayList list = new ArrayList(10);
 		boolean inQuotes = false;
-		String currentToken = null;
-		String nextToken = null;
-		StringBuffer buffer = new StringBuffer();
+		boolean inVar = false;
+		int start = 0;
+		int end = arguments.length();
+		StringBuffer buffer = new StringBuffer(end);
+		
+		while (start < end) {
+			char ch = arguments.charAt(start);
+			start++;
+			
+			switch (ch) {
+				case ARG_DELIMITER :
+					if (inQuotes || inVar) {
+						buffer.append(ch);
+					} else {
+						if (buffer.length() > 0) {
+							list.add(buffer.toString());
+							buffer.setLength(0);
+						}
+					}
+					break;
 
-		// Tokenized on both space and double quotes.		
-		StringTokenizer tokenizer = new StringTokenizer(arguments, SPACE_AND_QUOTE, true);
-		while (tokenizer.hasMoreTokens() || nextToken != null) {
-			// Determine the current token to work with.
-			if (nextToken != null) {
-				currentToken = nextToken;
-				nextToken = null;
-			} else {
-				currentToken = tokenizer.nextToken();
+				case ARG_DBL_QUOTE :
+					if (inVar) {
+						buffer.append(ch);
+					} else {
+						if (start < end) {
+							if (arguments.charAt(start) == ARG_DBL_QUOTE) {
+								// Two quotes together represents one quote
+								buffer.append(ch);
+								start++;
+							} else {
+								inQuotes = !inQuotes;
+							}
+						} else {
+							// A lone quote at the end, just drop it.
+							inQuotes = false;
+						}
+					}
+					break;
+					
+				case VAR_TAG_START_CHAR1 :
+					buffer.append(ch);
+					if (!inVar && start < end) {
+						if (arguments.charAt(start) == VAR_TAG_START_CHAR2) {
+							buffer.append(VAR_TAG_START_CHAR2);
+							inVar = true;
+							start++;
+						}
+					}
+					break;
+
+				case VAR_TAG_END_CHAR1 :
+					buffer.append(ch);
+					inVar = false;
+					break;
+
+				default :
+					buffer.append(ch);
+					break;
 			}
 			
-			// If we reach a quote...
-			if (currentToken.equals(QUOTE)) {
-				// If last token...
-				if (!tokenizer.hasMoreTokens()) {
-					if (inQuotes)
-						inQuotes = false;	
-					else
-						buffer.append(QUOTE);
-				} else {
-					nextToken = tokenizer.nextToken();
-					if (nextToken.equals(QUOTE)) {
-						// Add a single quote to the argument.
-						buffer.append(QUOTE);
-						nextToken = null;
-					} else {
-						inQuotes = !inQuotes;
-					}
-				}
-			}
-			// If we reach a space outside a quoted argument...
-			else if (currentToken.equals(SPACE) && !inQuotes) {
-				// Add the complete argument to the list.
-				list.add(buffer.toString());
-				buffer.setLength(0);
-			} 
-			// We have reached a normal token.
-			else {
-				// Append it to the argument buffer.
-				buffer.append(currentToken);
-			}
 		}
 		
-		// If there is an argument that hasn't been added 
-		// to the list, add it.
 		if (buffer.length() > 0)
 			list.add(buffer.toString());
-		
+			
 		String[] results = new String[list.size()];
 		list.toArray(results);
 		return results;
 	}
-	
-	
+
+
 	/**
 	 * Structure to represent a variable definition within a
 	 * source string.
