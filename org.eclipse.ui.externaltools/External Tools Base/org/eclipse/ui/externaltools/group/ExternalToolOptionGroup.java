@@ -45,6 +45,9 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 	private String initialArgument = ""; //$NON-NLS-1$
 	private boolean initialPromptArg = false;
 	private boolean initialShowInMenu = false;
+	private boolean initialSaveDirtyEditors = false;
+	
+	private String promptForArgsLabel = null;
 	
 	protected Button showMessageField;
 	protected Button runBackgroundField;
@@ -52,7 +55,8 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 	protected Combo openPerspNameField;
 	protected Text argumentField;
 	protected Button promptArgField;
-	protected Button showInMenu;
+	protected Button showInMenuField;
+	protected Button saveDirtyEditorsField;
 	
 	private IPerspectiveDescriptor[] perspectives;
 	
@@ -79,9 +83,13 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 		createShowMessageComponent(mainComposite);
 		createRunBackgroundComponent(mainComposite);
 		createShowInMenuComponent(mainComposite);
+		createSaveDirtyEditorsComponent(mainComposite);
 		createOpenPerspComponent(mainComposite);
+		createSpacer(parent);
 		createArgumentComponent(mainComposite);
-		
+		createPromptForArgumentsComponent(mainComposite);
+		createSpacer(parent);
+
 		if (showMessageField != null) {
 			showMessageField.setSelection(isEditMode() ? tool.getLogMessages() : initialShowMessage);
 		}
@@ -90,6 +98,14 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 			runBackgroundField.setSelection(isEditMode() ? tool.getRunInBackground() : initialRunBackground);
 		}
 		
+		if (showInMenuField != null) {
+			showInMenuField.setSelection(isEditMode() ? tool.getShowInMenu() : initialShowInMenu);	
+		}
+		
+		if (saveDirtyEditorsField != null) {
+			saveDirtyEditorsField.setSelection(isEditMode() ? tool.getSaveDirtyEditors() : initialSaveDirtyEditors);	
+		}
+
 		if (openPerspField != null) {
 			String perspId = isEditMode() ? tool.getOpenPerspective() : initialOpenPersp;
 			openPerspField.setSelection(perspId != null);
@@ -114,10 +130,6 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 			promptArgField.setSelection(isEditMode() ? tool.getPromptForArguments() : initialPromptArg);
 		}
 		
-		if (showInMenu != null) {
-			showInMenu.setSelection(isEditMode() ? tool.getShowInMenu() : initialShowInMenu);	
-		}
-
 		validate();
 
 		return mainComposite;
@@ -153,13 +165,16 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 		Button button = new Button(comp, SWT.PUSH);
 		button.setText(ToolMessages.getString("ExternalToolOptionGroup.argumentVariableLabel")); //$NON-NLS-1$
 		getPage().setButtonGridData(button);
-
+	}
+	
+	protected void createPromptForArgumentsComponent(Composite parent) {
 		promptArgField = new Button(parent, SWT.CHECK);
-		promptArgField.setText(ToolMessages.getString("ExternalToolOptionGroup.promptArgLabel")); //$NON-NLS-1$
-		data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		promptArgField.setLayoutData(data);
-		
-		createSpacer(parent);
+		if (promptForArgsLabel != null)
+			promptArgField.setText(promptForArgsLabel);
+		else
+			promptArgField.setText(ToolMessages.getString("ExternalToolOptionGroup.promptArgLabel")); //$NON-NLS-1$
+		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		promptArgField.setLayoutData(data);		
 	}
 
 	/**
@@ -194,8 +209,6 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 		openPerspNameField.setItems(getOpenPerspectiveNames());
 		data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		openPerspNameField.setLayoutData(data);
-		
-		createSpacer(parent);
 	}
 	
 	/**
@@ -212,6 +225,32 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 	}
 
 	/**
+	 * Creates the controls needed to edit the save dirty editors
+	 * attribute of an external tool.
+	 * 
+	 * @param parent the composite to create the controls in
+	 */
+	protected void createSaveDirtyEditorsComponent(Composite parent) {
+		saveDirtyEditorsField = new Button(parent, SWT.CHECK);
+		saveDirtyEditorsField.setText(ToolMessages.getString("ExternalToolOptionGroup.saveDirtyEditorsLabel")); //$NON-NLS-1$
+		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		saveDirtyEditorsField.setLayoutData(data);		
+	}
+
+	/**
+	 * Creates the controls needed to edit the show in menu
+	 * attribute of an external tool.
+	 * 
+	 * @param parent the composite to create the controls in
+	 */
+	protected void createShowInMenuComponent(Composite parent) {
+		showInMenuField = new Button(parent, SWT.CHECK);
+		showInMenuField.setText(ToolMessages.getString("ExternalToolOptionGroup.showInMenuLabel")); //$NON-NLS-1$
+		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		showInMenuField.setLayoutData(data);
+	}
+	
+	/**
 	 * Creates the controls needed to edit the log messages
 	 * attribute of an external tool
 	 * 
@@ -224,19 +263,6 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 		showMessageField.setLayoutData(data);
 	}
 	
-	/**
-	 * Creates the controls needed to edit the show in menu
-	 * attribute of an external tool.
-	 * 
-	 * @param parent the compostie to create the controls in
-	 */
-	protected void createShowInMenuComponent(Composite parent) {
-		showInMenu = new Button(parent, SWT.CHECK);
-		showInMenu.setText(ToolMessages.getString("ExternalToolOptionGroup.showInMenuLabel")); //$NON-NLS-1$
-		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		showInMenu.setLayoutData(data);
-	}
-
 	/**
 	 * Creates a vertical space between controls.
 	 */
@@ -288,15 +314,15 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 	}
 
 	/**
-	 * Returns the proposed initial log message for the external
+	 * Returns the proposed initial save dirty editors for the external
 	 * tool if no tool provided in the createContents.
 	 * 
-	 * @return the proposed initial log message when editing new tool.
-	 */
-	public final boolean getInitialShowMessage() {
-		return initialShowMessage;
+	 * @return the proposed initial save dirty editors when editing new tool.
+	 */	
+	public final boolean getInitialSaveDirtyEditors() {
+		return initialSaveDirtyEditors;
 	}
-	
+
 	/**
 	 * Returns the proposed initial show in menu for the external
 	 * tool if no tool provided in the createContents.
@@ -307,6 +333,16 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 		return initialShowInMenu;
 	}
 
+	/**
+	 * Returns the proposed initial log message for the external
+	 * tool if no tool provided in the createContents.
+	 * 
+	 * @return the proposed initial log message when editing new tool.
+	 */
+	public final boolean getInitialShowMessage() {
+		return initialShowMessage;
+	}
+	
 	/**
 	 * Returns the list of perspective names to place in
 	 * the open perspective combo box. This list contains
@@ -378,6 +414,10 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 			showMessageField.setSelection(tool.getLogMessages());
 		if (runBackgroundField != null)
 			runBackgroundField.setSelection(tool.getRunInBackground());
+		if (showInMenuField != null)
+			showInMenuField.setSelection(tool.getShowInMenu());
+		if (saveDirtyEditorsField != null)
+			saveDirtyEditorsField.setSelection(tool.getSaveDirtyEditors());
 		if (openPerspField != null)
 			openPerspField.setSelection(tool.getOpenPerspective() != null);
 		if (openPerspNameField != null) {
@@ -424,16 +464,6 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 	}
 	
 	/**
-	 * Sets the proposed initial show in menu for the external
-	 * tool if no tool provided in the createContents.
-	 * 
-	 * @param initialShowInMenu the proposed show in menu when editing new tool.
-	 */
-	public final void setInitialShowInMenu(boolean initialShowInMenu) {
-		this.initialShowInMenu = initialShowInMenu;
-	}
-
-	/**
 	 * Sets the proposed initial run in background for the external
 	 * tool if no tool provided in the createContents.
 	 * 
@@ -444,6 +474,26 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 	}
 
 	/**
+	 * Sets the proposed initial save dirty editors for the external
+	 * tool if no tool provided in the createContents.
+	 * 
+	 * @param initialSaveDirtyEditors the proposed save dirty editors when editing new tool.
+	 */
+	public final void setInitialSaveDirtyEditors(boolean initialSaveDirtyEditors) {
+		this.initialSaveDirtyEditors = initialSaveDirtyEditors;
+	}
+
+	/**
+	 * Sets the proposed initial show in menu for the external
+	 * tool if no tool provided in the createContents.
+	 * 
+	 * @param initialShowInMenu the proposed show in menu when editing new tool.
+	 */
+	public final void setInitialShowInMenu(boolean initialShowInMenu) {
+		this.initialShowInMenu = initialShowInMenu;
+	}
+
+	/**
 	 * Sets the proposed initial log message for the external
 	 * tool if no tool provided in the createContents.
 	 * 
@@ -451,6 +501,20 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 	 */
 	public final void setInitialShowMessage(boolean initialShowMessage) {
 		this.initialShowMessage = initialShowMessage;
+	}
+	
+	/**
+	 * Sets the label for the prompt for arguments option
+	 * of the tool. Does nothing if passed null.
+	 */
+	public final void setPromptForArgumentsLabel(String label) {
+		if (label == null)
+			promptForArgsLabel = null;
+		else {
+			promptForArgsLabel = label.trim();
+			if (promptForArgsLabel.length() == 0)
+				promptForArgsLabel = null;
+		}
 	}
 
 	/**
@@ -470,6 +534,10 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 			tool.setLogMessages(showMessageField.getSelection());
 		if (runBackgroundField != null)
 			tool.setRunInBackground(runBackgroundField.getSelection());
+		if (showInMenuField != null)
+			tool.setShowInMenu(showInMenuField.getSelection());
+		if (saveDirtyEditorsField != null)
+			tool.setSaveDirtyEditors(saveDirtyEditorsField.getSelection());
 		if (openPerspField != null && openPerspNameField != null) {
 			if (openPerspField.getSelection())
 				tool.setOpenPerspective(getPerspectiveId(openPerspNameField.getSelectionIndex()));
@@ -480,8 +548,6 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 			tool.setArguments(argumentField.getText().trim());
 		if (promptArgField != null)
 			tool.setPromptForArguments(promptArgField.getSelection());
-		if (showInMenu != null)
-			tool.setShowInMenu(showInMenu.getSelection());
 	}
 
 	/* (non-Javadoc)

@@ -42,6 +42,7 @@ public final class ExternalTool {
 	private boolean runInBackground = true;
 	private boolean promptForArguments = false;
 	private boolean showInMenu = false;
+	private boolean saveDirtyEditors = false;
 	private String openPerspective = null;
 	private String description = EMPTY_STRING;
 	private String refreshScope = null;
@@ -276,6 +277,14 @@ public final class ExternalTool {
 	}
 	
 	/**
+	 * Returns whether to save all dirty editors before
+	 * running this tool.
+	 */
+	public boolean getSaveDirtyEditors() {
+		return saveDirtyEditors;	
+	}
+	
+	/**
 	 * Returns the perspective ID to open when this
 	 * tool is run, or <code>null</code> if not specified.
 	 */
@@ -382,6 +391,14 @@ public final class ExternalTool {
 	 */
 	public void setShowInMenu(boolean showInMenu) {
 		this.showInMenu = showInMenu;
+	}
+	
+	/**
+	 * Sets whether all dirty editors will be saved
+	 * before running this tool.
+	 */
+	public void setSaveDirtyEditors(boolean saveDirtyEditors) {
+		this.saveDirtyEditors = saveDirtyEditors;	
 	}
 	
 	/**

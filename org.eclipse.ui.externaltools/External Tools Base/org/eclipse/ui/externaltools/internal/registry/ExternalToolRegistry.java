@@ -72,6 +72,7 @@ public class ExternalToolRegistry {
 	private static final String TAG_OPEN_PERSP = "openPerspective"; //$NON-NLS-1$
 	private static final String TAG_PROMPT_ARGS = "promptForArguments"; //$NON-NLS-1$
 	private static final String TAG_SHOW_MENU = "showInMenu"; //$NON-NLS-1$
+	private static final String TAG_SAVE_DIRTY = "saveDirtyEditors"; //$NON-NLS-1$
 	private static final String TAG_DESC = "description"; //$NON-NLS-1$
 	private static final String TAG_ARGS = "arguments"; //$NON-NLS-1$
 	private static final String TAG_REFRESH_SCOPE = "refreshScope"; //$NON-NLS-1$
@@ -301,6 +302,7 @@ public class ExternalToolRegistry {
 			tool.setOpenPerspective(memento.getString(TAG_OPEN_PERSP));
 			tool.setRefreshScope(memento.getString(TAG_REFRESH_SCOPE));
 			tool.setRefreshRecursive(TRUE.equals(memento.getString(TAG_REFRESH_RECURSIVE)));
+			tool.setSaveDirtyEditors(TRUE.equals(memento.getString(TAG_SAVE_DIRTY)));
 			
 			IMemento child = memento.getChild(TAG_DESC);
 			if (child != null)
@@ -398,6 +400,7 @@ public class ExternalToolRegistry {
 		memento.putString(TAG_OPEN_PERSP, tool.getOpenPerspective());
 		memento.putString(TAG_REFRESH_SCOPE, tool.getRefreshScope());
 		memento.putString(TAG_REFRESH_RECURSIVE, tool.getRefreshRecursive() ? TRUE : FALSE);
+		memento.putString(TAG_SAVE_DIRTY, tool.getSaveDirtyEditors() ? TRUE : FALSE);
 
 		IMemento child = memento.createChild(TAG_DESC);
 		if (child != null)
