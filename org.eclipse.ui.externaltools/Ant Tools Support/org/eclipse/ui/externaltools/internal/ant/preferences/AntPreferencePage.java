@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.ant.core.AntCorePlugin;
 import org.eclipse.ant.core.AntCorePreferences;
+import org.eclipse.ant.core.Property;
 import org.eclipse.ant.core.Task;
 import org.eclipse.ant.core.Type;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -39,7 +40,7 @@ public class AntPreferencePage extends PreferencePage implements IWorkbenchPrefe
 	private AntClasspathPage classpathPage;
 	private AntTasksPage tasksPage;
 	private AntTypesPage typesPage;
-	private AntGlobalPage globalPage;
+	private AntPropertiesPage globalPage;
 	
 	/**
 	 * Creates the preference page
@@ -71,7 +72,7 @@ public class AntPreferencePage extends PreferencePage implements IWorkbenchPrefe
 		typesPage = new AntTypesPage(this);
 		typesPage.createTabItem(folder);
 
-		globalPage= new AntGlobalPage(this);
+		globalPage= new AntPropertiesPage(this);
 		globalPage.createTabItem(folder);
 	
 		AntCorePreferences prefs = AntCorePlugin.getPlugin().getPreferences();
@@ -118,6 +119,12 @@ public class AntPreferencePage extends PreferencePage implements IWorkbenchPrefe
 		if (contents != null) {
 			Type[] types = (Type[]) contents.toArray(new Type[contents.size()]);
 			prefs.setCustomTypes(types);
+		}
+		
+		contents = globalPage.getContents();
+		if (contents != null) {
+			Property[] properties = (Property[]) contents.toArray(new Property[contents.size()]);
+			prefs.setCustomProperties(properties);
 		}
 		
 		prefs.updatePluginPreferences();
