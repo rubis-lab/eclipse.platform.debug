@@ -24,15 +24,12 @@ import org.eclipse.ui.help.WorkbenchHelp;
 public class NewExternalToolAction extends Action {
 	private static final String CATEGORY_ID = "org.eclipse.ui.externaltools.newWizards"; //$NON-NLS-1$
 	
-	private IWorkbenchPage page;
-
 	/**
 	 * Create an action to launch a new
 	 * external tool wizard.
 	 */
-	public NewExternalToolAction(IWorkbenchPage page) {
+	public NewExternalToolAction() {
 		super();
-		this.page = page;
 		setText(ToolMessages.getString("NewExternalToolAction.text")); //$NON-NLS-1$
 		setToolTipText(ToolMessages.getString("NewExternalToolAction.toolTip")); //$NON-NLS-1$
 		setHoverImageDescriptor(ExternalToolsPlugin.getDefault().getImageDescriptor("icons/full/clcl16/new_tool.gif")); //$NON-NLS-1$
