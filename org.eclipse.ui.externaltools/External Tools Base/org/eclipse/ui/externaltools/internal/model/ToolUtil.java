@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.ui.variables.ExpandVariableContext;
 import org.eclipse.debug.ui.variables.ExternalToolVariable;
 import org.eclipse.debug.ui.variables.ExternalToolVariableRegistry;
@@ -111,7 +112,7 @@ public final class ToolUtil {
 			start = varDef.end;
 			
 			// Lookup the variable if it exist
-			ExternalToolVariableRegistry registry = ExternalToolsPlugin.getDefault().getToolVariableRegistry();
+			ExternalToolVariableRegistry registry = DebugUIPlugin.getDefault().getToolVariableRegistry();
 			ExternalToolVariable variable = registry.getVariable(varDef.name);
 			if (variable == null) {
 				String msg = MessageFormat.format(ExternalToolsModelMessages.getString("ToolUtil.argumentVarMissing"), new Object[] {varDef.name}); //$NON-NLS-1$
@@ -194,7 +195,7 @@ public final class ToolUtil {
 			
 			// Lookup the variable if it exist
 			ExternalToolVariableRegistry registry;
-			registry = ExternalToolsPlugin.getDefault().getToolVariableRegistry();
+			registry = DebugUIPlugin.getDefault().getToolVariableRegistry();
 			ExternalToolVariable variable = registry.getVariable(varDef.name);
 			if (variable == null) {
 				String msg = MessageFormat.format(ExternalToolsModelMessages.getString("ToolUtil.dirLocVarMissing"), new Object[] {varDef.name}); //$NON-NLS-1$
@@ -256,7 +257,7 @@ public final class ToolUtil {
 		
 			// Lookup the variable if it exist
 			ExternalToolVariableRegistry registry;
-			registry = ExternalToolsPlugin.getDefault().getToolVariableRegistry();
+			registry = DebugUIPlugin.getDefault().getToolVariableRegistry();
 			ExternalToolVariable variable = registry.getVariable(varDef.name);
 			if (variable == null) {
 				String msg = MessageFormat.format(ExternalToolsModelMessages.getString("ToolUtil.fileLocVarMissing"), new Object[] {varDef.name}); //$NON-NLS-1$

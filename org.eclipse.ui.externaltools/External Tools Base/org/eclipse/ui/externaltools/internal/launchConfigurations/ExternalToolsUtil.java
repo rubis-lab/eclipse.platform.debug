@@ -31,9 +31,9 @@ import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.eclipse.ui.externaltools.internal.model.ToolUtil;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolMigration;
+import org.eclipse.ui.externaltools.internal.variables.RefreshScopeVariableRegistry;
 import org.eclipse.debug.ui.variables.ExpandVariableContext;
 import org.eclipse.debug.ui.variables.ExternalToolVariable;
-import org.eclipse.debug.ui.variables.RefreshScopeVariableRegistry;
 import org.eclipse.debug.ui.variables.VariableContextManager;
 import org.eclipse.debug.ui.variables.VariableUtil;
 

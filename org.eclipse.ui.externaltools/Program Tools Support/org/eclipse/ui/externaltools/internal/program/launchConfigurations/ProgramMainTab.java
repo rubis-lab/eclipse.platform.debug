@@ -17,7 +17,6 @@ import org.eclipse.debug.ui.variables.IVariableConstants;
 import org.eclipse.debug.ui.variables.VariableUtil;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.externaltools.internal.launchConfigurations.ExternalToolsMainTab;
-import org.eclipse.ui.externaltools.internal.model.IExternalToolConstants;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolsHelpContextIds;
 import org.eclipse.ui.externaltools.internal.ui.FileSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;

@@ -16,6 +16,7 @@ import java.text.MessageFormat;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.debug.internal.ui.launchConfigurations.LaunchConfigurationsMessages;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
@@ -40,13 +41,13 @@ public class WorkingSetExpander extends DefaultVariableExpander {
 	 */
 	public IResource[] getResources(String varTag, String varValue, ExpandVariableContext context) throws CoreException {
 		if (varValue == null || varValue.length() == 0) {
-			throwExpansionException(varTag, ExternalToolsVariableMessages.getString("WorkingSetExpander.No_working_set")); //$NON-NLS-1$
+			throwExpansionException(varTag, LaunchConfigurationsMessages.getString("WorkingSetExpander.No_working_set_specified._1")); //$NON-NLS-1$
 			return null;
 		}
 
 		IWorkingSet set = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(varValue);
 		if (set == null) {
-			throwExpansionException(varTag, MessageFormat.format(ExternalToolsVariableMessages.getString("WorkingSetExpander.No_working_set_found"), new String[] {varValue})); //$NON-NLS-1$
+			throwExpansionException(varTag, MessageFormat.format(LaunchConfigurationsMessages.getString("WorkingSetExpander.No_working_set_found_with_the_name_{0}._2"), new String[] {varValue})); //$NON-NLS-1$
 			return null;
 		}
 			

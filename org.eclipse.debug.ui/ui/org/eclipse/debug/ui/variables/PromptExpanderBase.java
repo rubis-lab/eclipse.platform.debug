@@ -15,7 +15,7 @@ import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.debug.internal.ui.launchConfigurations.LaunchConfigurationsMessages;
 
 /**
  * Base implementation for variable expanders that prompt the user
@@ -95,9 +95,9 @@ abstract class PromptExpanderBase extends DefaultVariableExpander {
 		}
 
 		if (promptHint != null) {
-			dialogMessage = MessageFormat.format(ExternalToolsVariableMessages.getString("PromptExpanderBase.Please_input_a_value_for_{0}_1"), new String[] {promptHint}); //$NON-NLS-1$
+			dialogMessage = MessageFormat.format(LaunchConfigurationsMessages.getString("PromptExpanderBase.Please_input_a_value_for_{0}_1"), new String[] {promptHint}); //$NON-NLS-1$
 		} else {
-			dialogMessage = ExternalToolsVariableMessages.getString("PromptExpanderBase.Please_input_a_value_2"); //$NON-NLS-1$
+			dialogMessage = LaunchConfigurationsMessages.getString("PromptExpanderBase.Please_input_a_value_2"); //$NON-NLS-1$
 		}
 	}
 }

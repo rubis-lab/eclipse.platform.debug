@@ -13,6 +13,7 @@ package org.eclipse.debug.ui.variables;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.debug.internal.ui.launchConfigurations.LaunchConfigurationsMessages;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -92,7 +93,7 @@ public class ResourceComponent extends AbstractVariableComponent {
 	 */
 	private void createSelectedResourceOption() {
 		selectedResourceButton = new Button(mainGroup, SWT.RADIO);
-		selectedResourceButton.setText(ExternalToolsVariableMessages.getString("ResourceComponent.selectedResLabel")); //$NON-NLS-1$
+		selectedResourceButton.setText(LaunchConfigurationsMessages.getString("ResourceComponent.Use_&selected_resource_1")); //$NON-NLS-1$
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		selectedResourceButton.setLayoutData(data);
 		selectedResourceButton.setFont(mainGroup.getFont());
@@ -105,7 +106,7 @@ public class ResourceComponent extends AbstractVariableComponent {
 	 */
 	private void createSpecificResourceOption() {
 		specificResourceButton = new Button(mainGroup, SWT.RADIO);
-		specificResourceButton.setText(ExternalToolsVariableMessages.getString("ResourceComponent.specificResLabel")); //$NON-NLS-1$
+		specificResourceButton.setText(LaunchConfigurationsMessages.getString("ResourceComponent.Us&e_specific_resource__2")); //$NON-NLS-1$
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		specificResourceButton.setLayoutData(data);
 		specificResourceButton.setFont(mainGroup.getFont());
@@ -215,7 +216,7 @@ public class ResourceComponent extends AbstractVariableComponent {
 			return;
 		}
 		if (resourceList.getSelection().isEmpty()) {
-			getPage().setErrorMessage(ExternalToolsVariableMessages.getString("ResourceComponent.selectionRequired")); //$NON-NLS-1$
+			getPage().setErrorMessage(LaunchConfigurationsMessages.getString("ResourceComponent.A_specific_resource_must_be_selected_from_the_list._3")); //$NON-NLS-1$
 			setIsValid(false);
 		}
 	}

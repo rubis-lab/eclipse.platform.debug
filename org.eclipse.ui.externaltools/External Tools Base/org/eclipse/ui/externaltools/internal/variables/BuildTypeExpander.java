@@ -8,20 +8,16 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.ui.variables;
+package org.eclipse.ui.externaltools.internal.variables;
+
+import org.eclipse.debug.ui.variables.DefaultVariableExpander;
+import org.eclipse.debug.ui.variables.ExpandVariableContext;
+import org.eclipse.ui.externaltools.internal.model.ExternalToolBuilder;
 
 
+public class BuildTypeExpander extends DefaultVariableExpander {
 
-/**
- * Registry of all available refresh scope variables.
- */
-public class RefreshScopeVariableRegistry extends ExternalToolVariableRegistry {
-
-	/**
-	 * Creates the registry and loads the variables.
-	 */
-	public RefreshScopeVariableRegistry() {
-		super(IExternalToolConstants.EXTENSION_POINT_REFRESH_VARIABLES);
+	public String getText(String varTag, String varValue, ExpandVariableContext context) {
+		return ExternalToolBuilder.getBuildType();
 	}
-	
 }

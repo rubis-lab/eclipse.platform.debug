@@ -13,7 +13,6 @@ package org.eclipse.debug.ui.variables;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 
 /**
  * Represents the context the external tool is running in
@@ -24,7 +23,6 @@ public final class ExpandVariableContext {
 	
 	private IProject project = null;
 	private IResource selectedResource = null;
-	private String buildType = IExternalToolConstants.BUILD_TYPE_NONE;
 	
 	/**
 	 * Create a context for an external tool running
@@ -37,20 +35,7 @@ public final class ExpandVariableContext {
 	public ExpandVariableContext(IProject project, int buildKind) {
 		super();
 		this.project = project;
-		switch (buildKind) {
-			case IncrementalProjectBuilder.INCREMENTAL_BUILD :
-				this.buildType = IExternalToolConstants.BUILD_TYPE_INCREMENTAL;
-				break;
-			case IncrementalProjectBuilder.FULL_BUILD :
-				this.buildType = IExternalToolConstants.BUILD_TYPE_FULL;
-				break;
-			case IncrementalProjectBuilder.AUTO_BUILD :
-				this.buildType = IExternalToolConstants.BUILD_TYPE_AUTO;
-				break;
-			default :
-				this.buildType = IExternalToolConstants.BUILD_TYPE_NONE;
-				break;
-		}
+
 	}
 	
 	/**
@@ -66,16 +51,6 @@ public final class ExpandVariableContext {
 			this.selectedResource = selectedResource;
 			this.project = selectedResource.getProject();
 		}
-	}
-	
-	/**
-	 * Returns the build type being performed if the
-	 * external tool is being run as a project builder.
-	 * 
-	 * @return one of the <code>IExternalToolConstants.BUILD_TYPE_*</code> constants.
-	 */
-	public String getBuildType() {
-		return buildType;
 	}
 	
 	/**

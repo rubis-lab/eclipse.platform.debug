@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.debug.ui.variables;
 
-
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.ISelection;
@@ -38,10 +36,6 @@ public class VariableContextManager implements IWindowListener, ISelectionListen
 	private static VariableContextManager fgDefault;
 	
 	private IResource fSelectedResource = null;
-	
-	private boolean fBuilding = false;
-	private IProject fProject = null;
-	private int fKind;
 	
 	private VariableContextManager() {
 		IWorkbench workbench = PlatformUI.getWorkbench();
@@ -140,32 +134,6 @@ public class VariableContextManager implements IWindowListener, ISelectionListen
 	 * @return variable context
 	 */
 	public ExpandVariableContext getVariableContext() {
-		if (fBuilding) {
-			return new ExpandVariableContext(fProject, fKind);
-		} else {
-			return new ExpandVariableContext(fSelectedResource);
-		}
-	}
-	
-	/**
-	 * Notification that the given project is being built.
-	 * 
-	 * @param project
-	 * @param kind
-	 * @see ExternalToolBuilder#build(int, Map, IProgressMonitor)
-	 */
-	public void buildStarted(IProject project, int kind) {
-		fBuilding = true;
-		fProject = project;
-		fKind = kind;
-	}
-	
-	/**
-	 * Notification the building the current project has completed.
-	 * @see ExternalToolBuilder#build(int, Map, IProgressMonitor)
-	 */
-	public void buildEnded() {
-		fBuilding = false;
-		fProject= null;
+		return new ExpandVariableContext(fSelectedResource);
 	}
 }

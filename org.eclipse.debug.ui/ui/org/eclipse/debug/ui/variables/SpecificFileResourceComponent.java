@@ -12,6 +12,7 @@ package org.eclipse.debug.ui.variables;
 
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.debug.internal.ui.launchConfigurations.LaunchConfigurationsMessages;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -49,7 +50,7 @@ public class SpecificFileResourceComponent extends ResourceComponent {
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		label.setLayoutData(data);
 		label.setFont(mainGroup.getFont());
-		label.setText(ExternalToolsVariableMessages.getString("ResourceComponent.specificResLabel")); //$NON-NLS-1$
+		label.setText(LaunchConfigurationsMessages.getString("SpecificFileResourceComponent.Us&e_specific_resource__1")); //$NON-NLS-1$
 	}
 
 	/* (non-Javadoc)
@@ -62,7 +63,7 @@ public class SpecificFileResourceComponent extends ResourceComponent {
 		IStructuredSelection sel = (IStructuredSelection) resourceList.getSelection();
 		IResource resource = (IResource) sel.getFirstElement();
 		if (resource == null || resource.getType() != IResource.FILE) {
-			getPage().setErrorMessage(ExternalToolsVariableMessages.getString("ResourceComponent.selectionRequired")); //$NON-NLS-1$
+			getPage().setErrorMessage(LaunchConfigurationsMessages.getString("SpecificFileResourceComponent.Use_&selected_resource_2")); //$NON-NLS-1$
 			setIsValid(false);
 		}
 	}
