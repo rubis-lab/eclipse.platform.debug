@@ -26,8 +26,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.*;
 import org.eclipse.ui.dialogs.*;
 import org.eclipse.ui.externaltools.internal.ant.model.*;
-import org.eclipse.ui.externaltools.internal.core.*;
-import org.eclipse.ui.externaltools.internal.core.ToolUtil.VariableDefinition;
 import org.eclipse.ui.externaltools.internal.model.*;
 import org.eclipse.ui.externaltools.model.*;
 import org.eclipse.ui.externaltools.model.ToolUtil;

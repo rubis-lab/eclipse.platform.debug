@@ -17,7 +17,6 @@ import org.eclipse.jface.util.*;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.externaltools.internal.core.*;
 import org.eclipse.ui.externaltools.internal.model.*;
 import org.eclipse.ui.externaltools.model.IRunnerLog;
 

@@ -19,7 +19,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.*;
-import org.eclipse.ui.externaltools.internal.core.*;
 import org.eclipse.ui.externaltools.internal.model.*;
 import org.eclipse.ui.help.WorkbenchHelp;
 

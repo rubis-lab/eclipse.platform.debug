@@ -10,7 +10,6 @@ http://www.eclipse.org/legal/cpl-v05.html
 Contributors:
 **********************************************************************/
 import org.eclipse.jface.viewers.*;
-import org.eclipse.ui.externaltools.internal.core.AntTargetList;
 
 /**
  * Content provider for targets within an Ant file
