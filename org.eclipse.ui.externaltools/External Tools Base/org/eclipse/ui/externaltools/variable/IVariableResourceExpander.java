@@ -31,8 +31,8 @@ public interface IVariableResourceExpander {
 	 * @param varTag the variable tag name
 	 * @param varValue the value for the variable
 	 * @param context the context the variable should use to expand itself
-	 * @return the list of <code>IResource</code>
-	 * 		or <code>null</code> if not possible
+	 * @return the list of <code>IResource</code> or <code>null</code> if not
+	 * 		possible (note, elements of the list can be <code>null</code>)
 	 */
 	public IResource[] getResources(String varTag, String varValue, ExpandVariableContext context);
 }

@@ -19,6 +19,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
+import org.eclipse.ui.externaltools.group.ExternalToolGroup.ValidationStatus;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 import org.eclipse.ui.externaltools.model.ExternalTool;
@@ -317,131 +318,134 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 	 * Method declared on IExternalToolGroup.
 	 */
 	public void validate() {
-		if (!validateLocation())
-			return;
-		if (!validateWorkDirectory())
-			return;
-		if (!validateName())
-			return;
-		getPage().setMessage(null, getPage().NONE);
-		setIsValid(true);
+		ValidationStatus status = new ValidationStatus();
+		validateLocation(status);
+		validateWorkDirectory(status);
+		validateName(status);
+		
+		getPage().setMessage(status.message, status.messageType);
+		setIsValid(status.isValid);
 	}
 
 	/**
 	 * Validates the content of the location field, and
-	 * sends any message to the reporter.
-	 * 
-	 * @return <code>true</code> to continue validating other
-	 * 	fields, <code>false</code> to stop.
+	 * updates the validation status. Does nothing if the
+	 * validation status is already invalid.
 	 */
-	protected boolean validateLocation() {
-		if (locationField == null)
-			return true;
+	protected void validateLocation(ValidationStatus status) {
+		if (locationField == null || !status.isValid)
+			return;
 
 		String value = locationField.getText().trim();
 		if (value.length() < 1) {
-			getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.locationRequired"), getPage().NONE); //$NON-NLS-1$
-			setIsValid(false);
-			return false;
+			status.message = ToolMessages.getString("ExternalToolMainGroup.locationRequired"); //$NON-NLS-1$
+			status.messageType = getPage().NONE;
+			status.isValid = false;
+			return;
 		}
 
 		// Translate field contents to the actual file location so we
 		// can check to ensure the file actually exists.
-		MultiStatus status = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "", null); //$NON-NLS-1$
-		value = ToolUtil.expandFileLocation(value, ExpandVariableContext.EMPTY_CONTEXT, status);
-		if (!status.isOK()) {
-			IStatus[] children = status.getChildren();
-			if (children.length > 0)
-				getPage().setMessage(children[0].getMessage(), getPage().WARNING);
-			setIsValid(false);
-			return false;			
+		MultiStatus multiStatus = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "", null); //$NON-NLS-1$
+		value = ToolUtil.expandFileLocation(value, ExpandVariableContext.EMPTY_CONTEXT, multiStatus);
+		if (!multiStatus.isOK()) {
+			IStatus[] children = multiStatus.getChildren();
+			if (children.length > 0) {
+				status.message = children[0].getMessage();
+				status.messageType = getPage().WARNING;
+			}
+			status.isValid = false;
+			return;
 		}
 		
 		if (value == null) { // The resource could not be found.
-			getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.invalidLocation"), getPage().INFORMATION); //$NON-NLS-1$
-			return true;			
+			status.message = ToolMessages.getString("ExternalToolMainGroup.invalidLocation"); //$NON-NLS-1$
+			status.messageType = getPage().INFORMATION;
+			status.isValid = true;
+			return;
 		}
 		
 		File file = new File(value);
 		if (!file.exists()) { // The file does not exist.
-			getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.invalidLocation"), getPage().INFORMATION); //$NON-NLS-1$
-			return true;
+			status.message = ToolMessages.getString("ExternalToolMainGroup.invalidLocation"); //$NON-NLS-1$
+			status.messageType = getPage().INFORMATION;
+			status.isValid = true;
+			return;
 		}
-		
-		return true;
 	}
 	
 	/**
-	 * Validates the content of the name field and
-	 * sends any message to the reporter.
-	 * 
-	 * @return <code>true</code> to continue validating other
-	 * 	fields, <code>false</code> to stop.
+	 * Validates the content of the name field, and
+	 * updates the validation status. Does nothing if the
+	 * validation status is already invalid.
 	 */
-	protected boolean validateName() {
-		if (isEditMode() || nameField == null)
-			return true;
+	protected void validateName(ValidationStatus status) {
+		if (isEditMode() || nameField == null || !status.isValid)
+			return;
 			
 		String value = nameField.getText().trim();
 		if (value.length() < 1) {
-			getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.nameRequired"), getPage().WARNING); //$NON-NLS-1$
-			setIsValid(false);
-			return false;
+			status.message = ToolMessages.getString("ExternalToolMainGroup.nameRequired"); //$NON-NLS-1$
+			status.messageType = getPage().WARNING;
+			status.isValid = false;
+			return;
 		}
 		
 		String errorText = ExternalTool.validateToolName(value);
 		if (errorText != null) {
-			getPage().setMessage(errorText, getPage().WARNING); //$NON-NLS-1$
-			setIsValid(false);
-			return false;
+			status.message = errorText;
+			status.messageType = getPage().WARNING;
+			status.isValid = false;
+			return;
 		}
 		
 		boolean exists = ExternalToolsPlugin.getDefault().getToolRegistry(nameField.getShell()).hasToolNamed(value);
 		if (exists) {
-			getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.nameAlreadyExist"), getPage().WARNING); //$NON-NLS-1$
-			setIsValid(false);
-			return false;
+			status.message = ToolMessages.getString("ExternalToolMainGroup.nameAlreadyExist"); //$NON-NLS-1$
+			status.messageType = getPage().WARNING;
+			status.isValid = false;
+			return;
 		}
-
-		return true;
 	}
 	
 	/**
-	 * Validates the content of the working directory field and
-	 * sends any message to the reporter.
-	 * 
-	 * @return <code>true</code> to continue validating other
-	 * 	fields, <code>false</code> to stop.
+	 * Validates the content of the working directory field, and
+	 * updates the validation status. Does nothing if the
+	 * validation status is already invalid.
 	 */
-	protected boolean validateWorkDirectory() {
-		if (workDirectoryField == null)
-			return true;
+	protected void validateWorkDirectory(ValidationStatus status) {
+		if (workDirectoryField == null || !status.isValid)
+			return;
 			
 		String value = workDirectoryField.getText().trim();
 		if (value.length() > 0) {
 			// Translate field contents to the actual directory location so we
 			// can check to ensure the directory actually exists.
-			MultiStatus status = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "", null); //$NON-NLS-1$
-			value = ToolUtil.expandDirectoryLocation(value, ExpandVariableContext.EMPTY_CONTEXT, status);
-			if (!status.isOK()) {
-				IStatus[] children = status.getChildren();
-				if (children.length > 0)
-					getPage().setMessage(children[0].getMessage(), getPage().WARNING);
-				setIsValid(false);
-				return false;			
+			MultiStatus multiStatus = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "", null); //$NON-NLS-1$
+			value = ToolUtil.expandDirectoryLocation(value, ExpandVariableContext.EMPTY_CONTEXT, multiStatus);
+			if (!multiStatus.isOK()) {
+				IStatus[] children = multiStatus.getChildren();
+				if (children.length > 0) {
+					status.message = children[0].getMessage();
+					status.messageType = getPage().WARNING;
+				}
+				status.isValid = false;
+				return;
 			}
 			
 			if (value == null) { // The resource could not be found.
-				getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.invalidWorkDir"), getPage().INFORMATION); //$NON-NLS-1$
-				return true;			
+				status.message = ToolMessages.getString("ExternalToolMainGroup.invalidWorkDir"); //$NON-NLS-1$
+				status.messageType = getPage().INFORMATION;
+				status.isValid = true;
+				return;
 			}			
 			File file = new File(value);
 			if (!file.exists()) { // The directory does not exist.
-				getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.invalidWorkDir"), getPage().INFORMATION); //$NON-NLS-1$
-				return true;
+				status.message = ToolMessages.getString("ExternalToolMainGroup.invalidWorkDir"); //$NON-NLS-1$
+				status.messageType = getPage().INFORMATION;
+				status.isValid = true;
+				return;
 			}
 		}
-		
-		return true;
 	}
 }

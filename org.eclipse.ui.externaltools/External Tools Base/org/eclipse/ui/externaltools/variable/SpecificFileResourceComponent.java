@@ -17,41 +17,41 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 
 /**
- * Visual component to edit the <code>resource_loc</code> variable
+ * Visual component to edit the resource type variable
  * value for the file location. Variable is limited to a specific
  * <code>IFile</code> resource.
  * <p>
  * This class is not intended to be extended by clients.
  * </p>
  */
-public class SpecificFileResourceLocComponent extends ResourceLocComponent {
+public class SpecificFileResourceComponent extends ResourceComponent {
 
 	/**
 	 * Creates an instance
 	 */
-	public SpecificFileResourceLocComponent() {
+	public SpecificFileResourceComponent() {
 		super();
 	}
 
 	/* (non-Javadoc)
-	 * Method declared on ResourceLocComponent.
+	 * Method declared on ResourceComponent.
 	 */
 	protected void createSelectedResourceOption() {
 		// Do not present this option...
 	}
 	
 	/* (non-Javadoc)
-	 * Method declared on ResourceLocComponent.
+	 * Method declared on ResourceComponent.
 	 */
 	protected void createSpecificResourceOption() {
 		Label label = new Label(mainGroup, SWT.NONE);
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		label.setLayoutData(data);
-		label.setText(ToolMessages.getString("ResourceLocComponent.specificResLabel")); //$NON-NLS-1$
+		label.setText(ToolMessages.getString("ResourceComponent.specificResLabel")); //$NON-NLS-1$
 	}
 
 	/* (non-Javadoc)
-	 * Method declared on ResourceLocComponent.
+	 * Method declared on ResourceComponent.
 	 */
 	protected boolean validateResourceListSelection() {
 		if (resourceList == null)
@@ -60,7 +60,7 @@ public class SpecificFileResourceLocComponent extends ResourceLocComponent {
 		IStructuredSelection sel = (IStructuredSelection) resourceList.getSelection();
 		IResource resource = (IResource) sel.getFirstElement();
 		if (resource == null || resource.getType() != resource.FILE) {
-			getPage().setMessage(ToolMessages.getString("ResourceLocComponent.selectionRequired"), getPage().WARNING); //$NON-NLS-1$
+			getPage().setMessage(ToolMessages.getString("ResourceComponent.selectionRequired"), getPage().WARNING); //$NON-NLS-1$
 			setIsValid(false);
 			return false;
 		}

@@ -74,41 +74,63 @@
 	<extension point="org.eclipse.ui.externaltools.fileVariables">
 		<variable
 			tag="resource_loc"
-			description="Expands to the resource's absolute path on the system's hard drive."
-			componentClass="org.eclipse.ui.externaltools.variable.SpecificFileResourceLocComponent"
-			expanderClass="org.eclipse.ui.externaltools.variable.ResourceLocExpander">
+			description="Expands to the resource's absolute file system path."
+			componentClass="org.eclipse.ui.externaltools.variable.SpecificFileResourceComponent"
+			expanderClass="org.eclipse.ui.externaltools.variable.ResourceExpander">
+		</variable>
+	</extension>
+
+	<extension point="org.eclipse.ui.externaltools.directoryVariables">
+		<variable
+			tag="workspace_loc"
+			description="Expands to the workspace root's absolute file system path."
+			expanderClass="org.eclipse.ui.externaltools.variable.WorkspaceExpander">
+		</variable>
+		<variable
+			tag="project_loc"
+			description="Expands to the selected resource's project absolute file system path."
+			expanderClass="org.eclipse.ui.externaltools.variable.ResourceProjectExpander">
+		</variable>
+		<variable
+			tag="container_loc"
+			description="Expands to the selected resource's containing folder absolute file system path."
+			expanderClass="org.eclipse.ui.externaltools.variable.ResourceContainerExpander">
+		</variable>
+		<variable
+			tag="resource_loc"
+			description="Expands to a resource's absolute file system path."
+			componentClass="org.eclipse.ui.externaltools.variable.SpecificFolderResourceComponent"
+			expanderClass="org.eclipse.ui.externaltools.variable.ResourceExpander">
 		</variable>
 	</extension>
 
 	<extension point="org.eclipse.ui.externaltools.refreshVariables">
 		<variable
 			tag="workspace"
-			description="Expands to the workspace root resource."
-			expanderClass="someclassnamehere">
+			description="Expands to the workspace root."
+			expanderClass="org.eclipse.ui.externaltools.variable.WorkspaceExpander">
 		</variable>
 		<variable
 			tag="project"
-			description="Expands to a project resource."
-			componentClass="someclassnamehere"
-			expanderClass="someclassnamehere">
+			description="Expands to the project of the selected resource."
+			expanderClass="org.eclipse.ui.externaltools.variable.ResourceProjectExpander">
 		</variable>
 		<variable
 			tag="container"
-			description="Expands to a folder or project resource."
-			componentClass="someclassnamehere"
-			expanderClass="org.eclipse.ui.externaltools.variable.ResourceLocExpander">
+			description="Expands to the folder containing the selected resource."
+			expanderClass="org.eclipse.ui.externaltools.variable.ResourceContainerExpander">
 		</variable>
 		<variable
 			tag="resource"
 			description="Expands to a resource."
-			componentClass="org.eclipse.ui.externaltools.variable.ResourceLocComponent"
-			expanderClass="org.eclipse.ui.externaltools.variable.ResourceLocExpander">
+			componentClass="org.eclipse.ui.externaltools.variable.ResourceComponent"
+			expanderClass="org.eclipse.ui.externaltools.variable.ResourceExpander">
 		</variable>
 		<variable
 			tag="working_set"
-			description="Expands to a group of resources."
+			description="Expands to the group of resources in a working set."
 			componentClass="someclassnamehere"
-			expanderClass="someclassnamehere">
+			expanderClass="org.eclipse.ui.externaltools.variable.WorkingSetExpander">
 		</variable>
 	</extension>
 

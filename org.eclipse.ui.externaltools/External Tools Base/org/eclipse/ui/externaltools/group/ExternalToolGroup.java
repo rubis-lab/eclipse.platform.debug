@@ -133,4 +133,14 @@ public abstract class ExternalToolGroup implements IExternalToolGroup {
 	 * Method declared on IExternalToolGroup.
 	 */
 	public abstract void validate();
+	
+	
+	/**
+	 * Helper class to report group validation information.
+	 */
+	protected static final class ValidationStatus {
+		public boolean isValid = true;
+		public String message = null;
+		public int messageType = IGroupDialogPage.NONE;
+	}
 }

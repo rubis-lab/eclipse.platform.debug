@@ -14,22 +14,25 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 
 /**
- * Expands the <code>resource_loc</code> variable into the desired
+ * Expands a resource type variable into the desired
  * result format.
+ * <p>
+ * This class is not intended to be extended by clients.
+ * </p>
  */
-public class ResourceLocExpander implements IVariableLocationExpander, IVariableResourceExpander {
+public class ResourceExpander implements IVariableLocationExpander, IVariableResourceExpander {
 
 	/**
 	 * Create an instance
 	 */
-	public ResourceLocExpander() {
+	public ResourceExpander() {
 		super();
 	}
 
 	/**
 	 * Expands the variable to a resource.
 	 */
-	private IResource expand(String varValue, ExpandVariableContext context) {
+	/*package*/ IResource expand(String varValue, ExpandVariableContext context) {
 		if (varValue != null && varValue.length() > 0)
 			return ResourcesPlugin.getWorkspace().getRoot().findMember(varValue);
 		else

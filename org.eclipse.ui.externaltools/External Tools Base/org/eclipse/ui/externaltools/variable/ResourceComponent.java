@@ -33,13 +33,13 @@ import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 /**
- * Visual component to edit the <code>resource_loc</code> variable
+ * Visual component to edit the resource type variable
  * value.
  * <p>
  * This class is not intended to be extended by clients.
  * </p>
  */
-public class ResourceLocComponent implements IVariableComponent {
+public class ResourceComponent implements IVariableComponent {
 	private IGroupDialogPage page;
 	private boolean isValid = true;
 	
@@ -51,7 +51,7 @@ public class ResourceLocComponent implements IVariableComponent {
 	/**
 	 * Creates the component
 	 */
-	public ResourceLocComponent() {
+	public ResourceComponent() {
 		super();
 	}
 
@@ -105,7 +105,7 @@ public class ResourceLocComponent implements IVariableComponent {
 	 */
 	protected void createSelectedResourceOption() {
 		selectedResourceButton = new Button(mainGroup, SWT.RADIO);
-		selectedResourceButton.setText(ToolMessages.getString("ResourceLocComponent.selectedResLabel")); //$NON-NLS-1$
+		selectedResourceButton.setText(ToolMessages.getString("ResourceComponent.selectedResLabel")); //$NON-NLS-1$
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		selectedResourceButton.setLayoutData(data);
 		selectedResourceButton.setSelection(true);
@@ -117,7 +117,7 @@ public class ResourceLocComponent implements IVariableComponent {
 	 */
 	protected void createSpecificResourceOption() {
 		specificResourceButton = new Button(mainGroup, SWT.RADIO);
-		specificResourceButton.setText(ToolMessages.getString("ResourceLocComponent.specificResLabel")); //$NON-NLS-1$
+		specificResourceButton.setText(ToolMessages.getString("ResourceComponent.specificResLabel")); //$NON-NLS-1$
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		specificResourceButton.setLayoutData(data);
 		specificResourceButton.setSelection(false);
@@ -249,7 +249,7 @@ public class ResourceLocComponent implements IVariableComponent {
 			return true;
 			
 		if (resourceList.getSelection().isEmpty()) {
-			getPage().setMessage(ToolMessages.getString("ResourceLocComponent.selectionRequired"), getPage().WARNING); //$NON-NLS-1$
+			getPage().setMessage(ToolMessages.getString("ResourceComponent.selectionRequired"), getPage().WARNING); //$NON-NLS-1$
 			setIsValid(false);
 			return false;
 		}
