@@ -21,9 +21,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -32,7 +30,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.dialogs.ListSelectionDialog;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 /**
  * 
@@ -55,48 +53,55 @@ public class SetDefaultBreakpointGroupAction extends AbstractBreakpointsViewActi
 			GridData data= (GridData) button.getLayoutData();
 			data.horizontalAlignment= GridData.BEGINNING;
 			data.verticalAlignment= GridData.BEGINNING;
-			button.addSelectionListener(new SelectionAdapter() {
-                public void widgetSelected(SelectionEvent e) {
-                    ListSelectionDialog dialog= new ListSelectionDialog(
-                        getShell(),
-                        new Object(),
-                        new IStructuredContentProvider() {
-	                        public Object[] getElements(Object inputElement) {
-	                            Object[] children = fView.getTreeContentProvider().getElements(fView.getViewer().getInput());
-	                            List groups= new ArrayList();
-	                            for (int i = 0; i < children.length; i++) {
-                                    Object child= children[i];
-                                    if (child instanceof String) {
-                                        groups.add(child);
-                                    }
-                                }
-	                            return groups.toArray();
-	                        }
-	                        public void dispose() {
-	                        }
-	                        public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-	                        }
-                        },
-                        new LabelProvider() {
-	                        public Image getImage(Object element) {
-	                            return DebugPluginImages.getImage(IDebugUIConstants.IMG_OBJS_BREAKPOINT_GROUP);
-	                        }
-	
-	                        public String getText(Object element) {
-	                            return (String) element;
-	                        }
-                        },
-                    	"Select a group");
-                    if (dialog.open() != Dialog.OK) {
-                        return;
-                    }
-                    Object[] result = dialog.getResult();
-                    getText().setText((String) result[0]);
+			
+
+            Object[] children = fView.getTreeContentProvider().getElements(fView.getViewer().getInput());
+            final List groups= new ArrayList();
+            for (int i = 0; i < children.length; i++) {
+                Object child= children[i];
+                if (child instanceof String) {
+                    groups.add(child);
                 }
-            });
+            }
+            
+            if (groups.size() > 0) {
+				button.addSelectionListener(new SelectionAdapter() {
+		            public void widgetSelected(SelectionEvent e) {
+		                handleBrowsePressed(groups.toArray());
+		            }
+		        });
+            } else {
+                button.setEnabled(false);
+            }
 			
 			return area;
 		}
+
+        /**
+         * The browse button has been pressed. Prompt the user to choose a group.
+         */
+        private void handleBrowsePressed(final Object[] groups) {
+            ElementListSelectionDialog dialog= new ElementListSelectionDialog(
+                    getShell(),
+                    new LabelProvider() {
+                        public Image getImage(Object element) {
+                            return DebugPluginImages.getImage(IDebugUIConstants.IMG_OBJS_BREAKPOINT_GROUP);
+                        }
+
+                        public String getText(Object element) {
+                            return (String) element;
+                        }
+                    });
+            dialog.setElements(groups);
+            dialog.setMultipleSelection(false);
+            dialog.setMessage("Choose a group");
+            dialog.setTitle("Choose Default Group");
+            if (dialog.open() != Dialog.OK) {
+                return;
+            }
+            Object[] result = dialog.getResult();
+            getText().setText((String) result[0]);
+        }
     }
 
     /* (non-Javadoc)
