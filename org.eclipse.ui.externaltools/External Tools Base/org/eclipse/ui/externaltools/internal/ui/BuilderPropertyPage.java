@@ -477,15 +477,19 @@ public final class BuilderPropertyPage extends PropertyPage {
 		 * @see IStorageListener#toolCreated(ExternalTool)
 		 */
 		public void toolCreated(ExternalTool tool) {
-			ICommand newCommand= null;
 			try {
+				final ICommand newCommand;
 				newCommand= getInputProject().getDescription().newCommand();
 				toBuildCommand(tool, newCommand);
+				if (newCommand != null) {
+					getShell().getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							int insertPosition = builderTable.getSelectionIndex() + 1;
+							addCommand(newCommand, insertPosition, true);
+						}
+					});
+				}
 			} catch (CoreException e) {
-			}
-			if (newCommand != null) {
-				int insertPosition = builderTable.getSelectionIndex() + 1;
-				addCommand(newCommand, insertPosition, true);
 			}
 		}
 		/**
