@@ -29,12 +29,15 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.externaltools.internal.menu.FavoritesManager;
 import org.eclipse.ui.externaltools.internal.model.DefaultRunnerContext;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.IHelpContextIds;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
+import org.eclipse.ui.externaltools.internal.ui.LogConsoleDocument;
+import org.eclipse.ui.externaltools.internal.ui.LogConsoleView;
 import org.eclipse.ui.externaltools.model.ExternalTool;
 import org.eclipse.ui.externaltools.model.IExternalToolConstants;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -98,12 +101,19 @@ public class RunExternalToolAction extends Action {
 	
 	/**
 	 * Opens the console to which messages captured
-	 * from the running tool's output will be log
+	 * from the running tool's output will be logged
 	 * to.
 	 */
 	protected final void openLogConsole() {
-//		ToolUtil.showLogConsole(window);
-//		ToolUtil.clearLogDocument();
+		IWorkbenchPage page = window.getActivePage();
+		try {
+			if (page != null) {
+				page.showView(IExternalToolConstants.LOG_CONSOLE_VIEW_ID);
+			}
+		} catch (PartInitException e) {
+			ExternalToolsPlugin.getDefault().getLog().log(e.getStatus());
+		}
+		LogConsoleDocument.getInstance().clearOutput();
 	}
 
 
