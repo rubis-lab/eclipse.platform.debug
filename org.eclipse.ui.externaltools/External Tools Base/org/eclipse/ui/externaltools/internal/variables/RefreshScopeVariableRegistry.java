@@ -22,7 +22,7 @@ public class RefreshScopeVariableRegistry extends ExternalToolVariableRegistry {
 	 * Creates the registry and loads the variables.
 	 */
 	public RefreshScopeVariableRegistry() {
-		super(IExternalToolConstants.EXTENSION_POINT_REFRESH_VARIABLES);
+		super(IExternalToolConstants.PLUGIN_ID, IExternalToolConstants.EXTENSION_POINT_REFRESH_VARIABLES);
 	}
 	
 }

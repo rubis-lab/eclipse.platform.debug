@@ -100,6 +100,6 @@ public interface IVariableConstants {
 	 * Extension point to declare external tool variables. 
 	 * (value<code>toolVariables</code>).
 	 */
-	public static final String EXTENSION_POINT_TOOL_VARIABLES = "toolVariables"; //$NON-NLS-1$
+	public static final String EXTENSION_POINT_TOOL_VARIABLES = "launchConfigurationVariables"; //$NON-NLS-1$
 	
 }

@@ -58,15 +58,20 @@ public class ExternalToolVariableRegistry {
 	 * The extension point id to read the variables from
 	 */
 	protected String extensionPointId;
+	/**
+	 * The plugin id to read the extension point from
+	 */
+	protected String pluginId;
 	
 	public ExternalToolVariableRegistry() {
-		this(IVariableConstants.EXTENSION_POINT_TOOL_VARIABLES);
+		this(DebugUIPlugin.getUniqueIdentifier(), IVariableConstants.EXTENSION_POINT_TOOL_VARIABLES);
 	}
 	
 	/**
 	 * Creates a new registry and loads the variables.
 	 */
-	protected ExternalToolVariableRegistry(String extensionPointId) {
+	protected ExternalToolVariableRegistry(String pluginId, String extensionPointId) {
+		this.pluginId= pluginId;
 		this.extensionPointId = extensionPointId;
 		loadVariables();
 	}
@@ -109,7 +114,7 @@ public class ExternalToolVariableRegistry {
 	private void loadVariables() {
 		variables = new TreeMap();
 		IPluginRegistry registry = Platform.getPluginRegistry();
-		IExtensionPoint point = registry.getExtensionPoint(DebugUIPlugin.getUniqueIdentifier(), extensionPointId);
+		IExtensionPoint point = registry.getExtensionPoint(pluginId, extensionPointId);
 		if (point != null) {
 			IExtension[] extensions = point.getExtensions();
 			for (int i = 0; i < extensions.length; i++) {
