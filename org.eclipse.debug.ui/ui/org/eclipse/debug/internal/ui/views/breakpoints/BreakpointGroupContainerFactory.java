@@ -19,6 +19,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
+import org.eclipse.debug.internal.ui.views.DebugUIViewsMessages;
 
 /**
  * 
@@ -71,7 +72,7 @@ public class BreakpointGroupContainerFactory extends AbstractBreakpointContainer
 			BreakpointGroupContainer container= new BreakpointGroupContainer(
 					(IBreakpoint[]) other.toArray(new IBreakpoint[0]),
 					this,
-					"(no group)",
+					DebugUIViewsMessages.getString("BreakpointGroupContainerFactory.0"), //$NON-NLS-1$
 					parentId);
 			containers.add(container);
 		}

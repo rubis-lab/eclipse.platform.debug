@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.debug.internal.ui.views.DebugUIViewsMessages;
 
 /**
  * 
@@ -37,7 +38,7 @@ public class BreakpointTypeContainerFactory extends AbstractBreakpointContainerF
 			IBreakpoint breakpoint = breakpoints[i];
 			String typeName= DebugPlugin.getDefault().getBreakpointManager().getTypeName(breakpoint);
 			if (typeName == null) {
-				typeName= "(other)";
+				typeName= DebugUIViewsMessages.getString("BreakpointTypeContainerFactory.0"); //$NON-NLS-1$
 			}
 			List list = (List) map.get(typeName);
 			if (list == null) {

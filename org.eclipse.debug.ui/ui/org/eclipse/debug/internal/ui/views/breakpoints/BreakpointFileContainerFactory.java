@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.debug.internal.ui.views.DebugUIViewsMessages;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
@@ -99,7 +100,7 @@ public class BreakpointFileContainerFactory extends AbstractBreakpointContainerF
 			BreakpointContainer container= new BreakpointContainer(
 					(IBreakpoint[]) other.toArray(new IBreakpoint[0]),
 					this,
-					"(no file)",
+					DebugUIViewsMessages.getString("BreakpointFileContainerFactory.0"), //$NON-NLS-1$
 					parentId);
 			fOtherImage= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FILE);
 			container.setImage(fOtherImage);

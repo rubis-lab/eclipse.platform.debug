@@ -19,6 +19,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.debug.internal.ui.views.DebugUIViewsMessages;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
@@ -79,7 +80,7 @@ public class BreakpointProjectContainerFactory extends AbstractBreakpointContain
 			BreakpointContainer container= new BreakpointContainer(
 					(IBreakpoint[]) other.toArray(new IBreakpoint[0]),
 					this,
-					"(no project)",
+					DebugUIViewsMessages.getString("BreakpointProjectContainerFactory.0"), //$NON-NLS-1$
 					parentId);
 			fOtherImage= PlatformUI.getWorkbench().getSharedImages().getImage(SharedImages.IMG_OBJ_PROJECT);
 			container.setImage(fOtherImage);
