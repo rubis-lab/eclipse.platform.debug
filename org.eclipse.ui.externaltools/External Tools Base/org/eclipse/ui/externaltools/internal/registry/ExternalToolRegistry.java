@@ -12,9 +12,11 @@ Contributors:
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -102,8 +104,8 @@ public class ExternalToolRegistry {
 	
 	/**
 	 * Lookup table of file names where the key is the external
-	 * tool name, and the value if the full path to the file
-	 * for that tool
+	 * tool name as <b>lowercase</b>, and the value if the full path
+	 * to the file for that tool
 	 */
 	private HashMap filenames = new HashMap();
 	
@@ -142,7 +144,7 @@ public class ExternalToolRegistry {
 		}
 		list.add(tool);
 		
-		filenames.put(tool.getName(), filePath);
+		filenames.put(tool.getName().toLowerCase(), filePath);
 	}
 
 	/**
@@ -150,7 +152,7 @@ public class ExternalToolRegistry {
 	 * registry.
 	 */
 	public IStatus deleteTool(ExternalTool tool) {
-		IPath filename = (IPath) filenames.get(tool.getName());
+		IPath filename = (IPath) filenames.get(tool.getName().toLowerCase());
 		if (filename == null) {
 			String msg = ToolMessages.getString("ExternalToolRegistry.noToolFilename"); //$NON-NLS-1$
 			return ExternalToolsPlugin.getDefault().newErrorStatus(msg, null);
@@ -161,7 +163,7 @@ public class ExternalToolRegistry {
 			return ExternalToolsPlugin.getDefault().newErrorStatus(msg, null);
 		}
 		
-		filenames.remove(tool.getName());
+		filenames.remove(tool.getName().toLowerCase());
 		
 		ArrayList list = (ArrayList) tools.get(tool.getType());
 		if (list != null)
@@ -179,7 +181,8 @@ public class ExternalToolRegistry {
 	 * @return the <code>IPath</code> for the filename
 	 */
 	private IPath generateToolFilename(String toolName) {
-		return null;
+		String filename = toolName.replace(' ', '_');
+		return TOOLS_PATH.append(filename);
 	}
 
 	/**
@@ -237,7 +240,7 @@ public class ExternalToolRegistry {
 	 * @return <code>true</code> if found, <code>false</code> otherwise
 	 */
 	public boolean hasToolNamed(String name) {
-		return filenames.get(name) != null;
+		return filenames.get(name.toLowerCase()) != null;
 	}
 	
 	/**
@@ -353,14 +356,14 @@ public class ExternalToolRegistry {
 	public IStatus saveTool(ExternalTool tool) {
 		boolean isNew = false;
 		
-		IPath filename = (IPath) filenames.get(tool.getName());
+		IPath filename = (IPath) filenames.get(tool.getName().toLowerCase());
 		if (filename == null) {
 			filename = generateToolFilename(tool.getName());
 			isNew = true;
 		}
 		
 		IStatus results = storeTool(tool, filename);
-		if (!results.isOK())
+		if (results != null)
 			return results;
 
 		if (isNew)
@@ -374,65 +377,65 @@ public class ExternalToolRegistry {
 	 */
 	private IStatus storeTool(ExternalTool tool, IPath filePath) {
 		IStatus result = null;
-/*		InputStreamReader reader = null;
-		
-		try {
-			FileInputStream input = new FileInputStream(filePath.toFile());
-			reader = new InputStreamReader(input, "utf-8"); //$NON-NLS-1$
-			IPath basePath = filePath.removeLastSegments(1).addTrailingSeparator();
-			XMLMemento memento = XMLMemento.createReadRoot(reader, basePath.toOSString());
 
-			String type = memento.getString(TAG_TYPE);
-			String name = memento.getString(TAG_NAME);
-			ExternalTool tool = new ExternalTool(type, name);
-			
-			tool.setLocation(memento.getString(TAG_LOCATION));
-			tool.setWorkingDirectory(memento.getString(TAG_WORK_DIR));
-			tool.setLogMessages(TRUE.equals(memento.getString(TAG_LOG_MSG)));
-			tool.setRunInBackground(TRUE.equals(memento.getString(TAG_RUN_BKGRND)));
-			tool.setPromptForArguments(TRUE.equals(memento.getString(TAG_PROMPT_ARGS)));
-			tool.setOpenPerspective(memento.getString(TAG_OPEN_PERSP));
-			tool.setRefreshScope(memento.getString(TAG_REFRESH_SCOPE));
-			tool.setRefreshRecursive(TRUE.equals(memento.getString(TAG_REFRESH_RECURSIVE)));
-			
-			IMemento child = memento.getChild(TAG_DESC);
-			if (child != null)
-				tool.setDescription(child.getTextData());
+		// Populate the memento
+		XMLMemento memento = XMLMemento.createWriteRoot(TAG_EXTERNAL_TOOL);
+		memento.putString(TAG_TYPE, tool.getType());
+		memento.putString(TAG_NAME, tool.getName());
+		memento.putString(TAG_LOCATION, tool.getLocation());
+		memento.putString(TAG_WORK_DIR, tool.getWorkingDirectory());
+		memento.putString(TAG_LOG_MSG, tool.getLogMessages() ? TRUE : FALSE);
+		memento.putString(TAG_RUN_BKGRND, tool.getRunInBackground() ? TRUE : FALSE);
+		memento.putString(TAG_PROMPT_ARGS, tool.getPromptForArguments() ? TRUE : FALSE);
+		memento.putString(TAG_OPEN_PERSP, tool.getOpenPerspective());
+		memento.putString(TAG_REFRESH_SCOPE, tool.getRefreshScope());
+		memento.putString(TAG_REFRESH_RECURSIVE, tool.getRefreshRecursive() ? TRUE : FALSE);
 
-			child = memento.getChild(TAG_ARGS);
-			if (child != null)
-				tool.setArguments(child.getTextData());
-			
-			IMemento[] attributes = memento.getChildren(TAG_EXTRA_ATTR);
-			for (int i = 0; i < attributes.length; i++) {
-				String key = attributes[i].getString(TAG_KEY);
-				String value = attributes[i].getTextData();
-				tool.setExtraAttribute(key, value);
-			}
-			
-			addTool(tool, filePath);
-		} catch (FileNotFoundException e) {
-			String msg = e.getMessage();
-			if (msg == null)
-				msg = ToolMessages.getString("ExternalToolRegistry.fileNotFoundError"); //$NON-NLS-1$
-			result = ExternalToolsPlugin.newErrorStatus(msg, e);
-		} catch (IOException e) {
-			String msg = e.getMessage();
-			if (msg == null)
-				msg = ToolMessages.getString("ExternalToolRegistry.ioLoadError"); //$NON-NLS-1$
-			result = ExternalToolsPlugin.newErrorStatus(msg, e);
-		} catch (CoreException e) {
-			result = e.getStatus();
-		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch(IOException e) {
-					ExternalToolsPlugin.getDefault().log("Unable to close external tool storage reader.", e); //$NON-NLS-1$
+		IMemento child = memento.createChild(TAG_DESC);
+		if (child != null)
+			child.putTextData(tool.getDescription());
+
+		child = memento.createChild(TAG_ARGS);
+		if (child != null)
+			child.putTextData(tool.getArguments());
+
+		String[] keys = tool.getExtraAttributeKeys();
+		if (keys.length > 0) {
+			String[] values = tool.getExtraAttributeValues();
+			for (int i = 0; i < keys.length; i++) {
+				child = memento.createChild(TAG_EXTRA_ATTR);
+				if (child != null) {
+					child.putString(TAG_KEY, keys[i]);
+					child.putTextData(values[i]);
 				}
 			}
 		}
-*/		
+
+		// Write the memento to the file	
+		File toolFile = filePath.toFile();
+		OutputStreamWriter writer = null;
+		try {
+			FileOutputStream stream = new FileOutputStream(toolFile);
+			writer = new OutputStreamWriter(stream, "utf-8"); //$NON-NLS-1$
+			memento.save(writer);
+		} catch (IOException e) {
+			toolFile.delete();
+			String msg = e.getMessage();
+			if (msg == null)
+				msg = ToolMessages.getString("ExternalToolRegistry.ioSaveError"); //$NON-NLS-1$
+			result = ExternalToolsPlugin.newErrorStatus(msg, e);
+		} finally {
+			if (writer != null) {
+				try {
+					writer.close();
+				} catch(IOException e) {
+					ExternalToolsPlugin.getDefault().log("Unable to close external tool storage writer.", e); //$NON-NLS-1$
+				}
+			}
+			if (result != null)
+				toolFile.delete();
+		}
+
 		return result;
 	}
 }

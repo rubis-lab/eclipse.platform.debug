@@ -119,6 +119,38 @@ public final class ExternalTool {
 	}
 	
 	/**
+	 * Returns all the extra attribute keys
+	 */
+	public String[] getExtraAttributeKeys() {
+		if (extraAttributes == null)
+			return new String[0];
+
+		String[] results = new String[extraAttributes.size()];
+		for (int i = 0; i < extraAttributes.size(); i++) {
+			Attribute attr = (Attribute)extraAttributes.get(i);
+			results[i] = attr.key;
+		}
+
+		return results;
+	}
+	
+	/**
+	 * Returns all the extra attribute values
+	 */
+	public String[] getExtraAttributeValues() {
+		if (extraAttributes == null)
+			return new String[0];
+
+		String[] results = new String[extraAttributes.size()];
+		for (int i = 0; i < extraAttributes.size(); i++) {
+			Attribute attr = (Attribute)extraAttributes.get(i);
+			results[i] = attr.value;
+		}
+
+		return results;
+	}
+	
+	/**
 	 * Sets an extra attribute to the tool.
 	 * 
 	 * @param key the unique attribute name
