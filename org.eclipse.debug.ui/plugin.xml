@@ -41,6 +41,7 @@
    <extension-point id="debugModelContextBindings" name="%DebugModelContextBindingsName" schema="schema/debugModelContextBindings.exsd"/>
    <extension-point id="contextViewBindings" name="%ContextViewBindingsName" schema="schema/contextViewBindings.exsd"/>
    <extension-point id="debugViewContentProviders" name="%DebugViewContentProvidersName" schema="schema/debugViewContentProviders.exsd"/>
+   <extension-point id="breakpointContainerFactories" name="Breakpoint Container Factories" schema="schema/breakpointContainerFactories.exsd"/>
 
 <!-- Extensions -->
    <extension
@@ -2190,4 +2191,16 @@ M4 = Platform-specific fourth key
     <extension point="org.eclipse.core.runtime.preferences">
 		<initializer class="org.eclipse.debug.internal.ui.DebugUIPreferenceInitializer"/>
 	</extension>
+    <extension
+          point="org.eclipse.debug.ui.breakpointContainerFactories">
+          <breakpointContainerFactory
+          	class="org.eclipse.debug.internal.ui.views.breakpoints.BreakpointProjectContainerFactory"
+          	id="org.eclipse.debug.ui.breakpointProjectContainerFactory"/>
+          <breakpointContainerFactory
+          	class="org.eclipse.debug.internal.ui.views.breakpoints.BreakpointFileContainerFactory"
+          	id="org.eclipse.debug.ui.breakpointFileContainerFactory"/>
+          <breakpointContainerFactory
+          	class="org.eclipse.debug.internal.ui.views.breakpoints.BreakpointTypeContainerFactory"
+          	id="org.eclipse.debug.ui.breakpointTypeContainerFactory"/>
+    </extension>
 </plugin>
