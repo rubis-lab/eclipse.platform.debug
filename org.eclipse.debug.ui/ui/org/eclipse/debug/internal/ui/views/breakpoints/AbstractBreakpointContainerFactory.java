@@ -39,8 +39,8 @@ public abstract class AbstractBreakpointContainerFactory implements IBreakpointC
 		return fLabel= label;
 	}
 	
-	public void setIdentifier(String id) {
-		fIdentifier= id;
+	public void setIdentifier(String identifier) {
+		fIdentifier= identifier;
 	}
 	
 	public String getIdentifier() {

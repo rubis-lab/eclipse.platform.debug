@@ -32,6 +32,8 @@ public interface IBreakpointContainerFactory {
 	
 	public String getIdentifier();
 	
+	public void setIdentifier(String identifier);
+	
 	/**
 	 * Disposes this container factory. Allows the factory to clean up any
 	 * resources related to images that it may have used for containers 

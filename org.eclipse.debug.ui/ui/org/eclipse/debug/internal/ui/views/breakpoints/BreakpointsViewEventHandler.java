@@ -126,7 +126,6 @@ public class BreakpointsViewEventHandler implements IBreakpointsListener, IActiv
 					if (fView.isAvailable()) {
 						CheckboxTreeViewer viewer= (CheckboxTreeViewer)fView.getViewer();
 						viewer.refresh();
-						fView.initializeCheckedState();
 						fView.updateObjects();
 					}
 				}
@@ -158,7 +157,6 @@ public class BreakpointsViewEventHandler implements IBreakpointsListener, IActiv
 							while (iter.hasNext()) {
 								viewer.expandToLevel(iter.next(), AbstractTreeViewer.ALL_LEVELS);
 							}
-							fView.initializeCheckedState();
 							return;
 						}
 						List groupsToUpdate= new ArrayList();
@@ -237,7 +235,6 @@ public class BreakpointsViewEventHandler implements IBreakpointsListener, IActiv
 			fView.asyncExec(new Runnable() {
 				public void run() {
 					fView.getViewer().refresh();
-					fView.initializeCheckedState();
 				}
 			});
 		}

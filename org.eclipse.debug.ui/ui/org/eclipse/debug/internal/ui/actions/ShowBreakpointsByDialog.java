@@ -147,6 +147,11 @@ public class ShowBreakpointsByDialog extends Dialog {
 		fSelectedViewer.setLabelProvider(labelProvider);
 		fSelectedViewer.setInput(new Object());
 		fSelectedViewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
+		fSelectedViewer.addDoubleClickListener(new IDoubleClickListener() {
+            public void doubleClick(DoubleClickEvent event) {
+                handleRemovePressed();
+            }
+        });
 		fSelectedViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				updateSelectedButtons();

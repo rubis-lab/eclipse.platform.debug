@@ -26,6 +26,7 @@ import org.eclipse.debug.internal.ui.IDebugHelpContextIds;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsView;
 import org.eclipse.debug.internal.ui.views.breakpoints.IBreakpointContainer;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -172,7 +173,6 @@ public class ShowSupportedBreakpointsAction extends ToggleFilterAction implement
 	protected void reapplyFilters(List debugTargets) {
 		fDebugTargets= debugTargets;		
 		getViewer().refresh();
-		((BreakpointsView)getView()).initializeCheckedState();
 	}
 	
 	protected IViewPart getView() {
@@ -221,9 +221,9 @@ public class ShowSupportedBreakpointsAction extends ToggleFilterAction implement
 			getView().getSite().getPage().removeSelectionListener(IDebugUIConstants.ID_DEBUG_VIEW, this);
 		}
 		super.valueChanged(on);
-		if (!on) {
-			((BreakpointsView)getView()).initializeCheckedState();
-		}
+//		if (!on) {
+//			((BreakpointsView)getView()).initializeCheckedState((CheckboxTreeViewer) getViewer());
+//		}
 	}
 	
 }

@@ -27,12 +27,6 @@ public class BreakpointsViewContentProvider implements ITreeContentProvider {
 	private List fBreakpointContainerFactories= new ArrayList();
 	
 	private Map fParentMap= new HashMap();
-	
-	public BreakpointsViewContentProvider() {
-		fBreakpointContainerFactories.add(BreakpointContainerFactoryManager.getDefault().getFactory("org.eclipse.debug.ui.breakpointTypeContainerFactory"));
-		fBreakpointContainerFactories.add(BreakpointContainerFactoryManager.getDefault().getFactory("org.eclipse.debug.ui.breakpointProjectContainerFactory"));
-		fBreakpointContainerFactories.add(BreakpointContainerFactoryManager.getDefault().getFactory("org.eclipse.debug.ui.breakpointFileContainerFactory"));
-	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)

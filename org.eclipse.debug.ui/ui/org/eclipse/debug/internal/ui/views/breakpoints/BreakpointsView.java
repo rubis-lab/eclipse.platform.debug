@@ -86,7 +86,6 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		if (getViewer() != null) {
-			initializeCheckedState();
 			updateViewerBackground();
 			DebugPlugin.getDefault().getBreakpointManager().addBreakpointManagerListener(this);
 		}
@@ -96,10 +95,25 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 	 * @see AbstractDebugView#createViewer(Composite)
 	 */
 	protected Viewer createViewer(Composite parent) {
-		final CheckboxTreeViewer viewer = new CheckboxTreeViewer(new Tree(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CHECK));
 		fContentProvider= new BreakpointsViewContentProvider();
+		final CheckboxTreeViewer viewer = new CheckboxTreeViewer(new Tree(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CHECK)) {
+		    public void refresh() {
+                super.refresh();
+                initializeCheckedState(this, fContentProvider);
+            }
+		};
 		viewer.setContentProvider(fContentProvider);
-		viewer.setLabelProvider(new DelegatingModelPresentation() {
+		viewer.setSorter(new BreakpointsSorter());
+		viewer.setInput(DebugPlugin.getDefault().getBreakpointManager());
+		viewer.addCheckStateListener(fCheckListener);
+		viewer.addTreeListener(new ITreeViewerListener() {
+			public void treeExpanded(TreeExpansionEvent event) {
+				initializeCheckedState(viewer, fContentProvider);
+			}
+			public void treeCollapsed(TreeExpansionEvent event) {
+			}
+		});
+	    viewer.setLabelProvider(new DelegatingModelPresentation() {
 			public Image getImage(Object item) {
 				if (item instanceof IBreakpointContainer) {
 					IBreakpointContainer container= (IBreakpointContainer) item;
@@ -118,16 +132,6 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 					return container.getName();
 				}
 				return super.getText(item);
-			}
-		});
-		viewer.setSorter(new BreakpointsSorter());
-		viewer.setInput(DebugPlugin.getDefault().getBreakpointManager());
-		viewer.addCheckStateListener(fCheckListener);
-		viewer.addTreeListener(new ITreeViewerListener() {
-			public void treeExpanded(TreeExpansionEvent event) {
-				initializeCheckedState();
-			}
-			public void treeCollapsed(TreeExpansionEvent event) {
 			}
 		});
 		
@@ -184,10 +188,8 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 	/**
 	 * Sets the initial checked state of the items in the viewer.
 	 */
-	public void initializeCheckedState() {
+	public void initializeCheckedState(CheckboxTreeViewer viewer, ITreeContentProvider provider) {
 		IBreakpointManager manager= DebugPlugin.getDefault().getBreakpointManager();
-		CheckboxTreeViewer viewer= getCheckboxViewer();
-		ITreeContentProvider provider= getTreeContentProvider();
 		Object[] elements= provider.getElements(manager);
 		ArrayList elementsToCheck= new ArrayList(elements.length);
 		for (int i = 0; i < elements.length; i++) {
@@ -502,7 +504,6 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 	protected void becomesVisible() {
 		super.becomesVisible();
 		getViewer().refresh();
-		initializeCheckedState();
 		updateViewerBackground();
 	}
 

@@ -54,6 +54,7 @@ public class BreakpointContainerFactoryManager {
 				try {
 					IBreakpointContainerFactory factory = (IBreakpointContainerFactory) element.createExecutableExtension("class"); //$NON-NLS-1$
 					factory.setLabel(label);
+					factory.setIdentifier(id);
 					if (factory != null) {
 						fFactories.put(id, factory);
 					}
