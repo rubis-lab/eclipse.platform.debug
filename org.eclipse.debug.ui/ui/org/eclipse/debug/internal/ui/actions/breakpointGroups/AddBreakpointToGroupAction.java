@@ -42,6 +42,8 @@ public class AddBreakpointToGroupAction implements IViewActionDelegate {
 	private Object[] fBreakpoints= null;
 	private BreakpointsView fView= null;
 	
+	private static String fgLastValue= null;
+	
 	/**
 	 * A dialog that sets the focus to the text area.
 	 */
@@ -75,7 +77,11 @@ public class AddBreakpointToGroupAction implements IViewActionDelegate {
 			return area;
 		}
 		protected void okPressed() {
-		    fView.setAutoGroup(getValue());
+		    String value= getValue();
+		    if (fAutoAddToGroup.getSelection()) {
+		        fView.setAutoGroup(value);
+		    }
+		    fgLastValue= value;
 			super.okPressed();
 		}
 	}
@@ -85,6 +91,9 @@ public class AddBreakpointToGroupAction implements IViewActionDelegate {
 	 */
 	public void run(IAction action) {
 		String initialValue= fView.getAutoGroup();
+		if (initialValue == null) {
+		    initialValue= fgLastValue;
+		}
 		BreakpointGroupDialog dialog = new BreakpointGroupDialog(null, "Add To Group", "Specify the name of the group", initialValue, null);
 		int dialogResult = dialog.open();
 		if (dialogResult == Window.OK) {

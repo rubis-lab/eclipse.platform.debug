@@ -74,7 +74,7 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 	// Persistance constants
 	private static String KEY_IS_TRACKING_SELECTION= "isTrackingSelection"; //$NON-NLS-1$
 	private static String KEY_VALUE="value"; //$NON-NLS-1$
-	private String fAutoGroup;
+	private String fAutoGroup= null;
 	
 	/**
 	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
@@ -193,9 +193,9 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 	
 	/**
 	 * Returns the group that new breakpoints will be automatically
-	 * added to.
+	 * added to or <code>null</code> if none.
 	 * @return the group that new breakpoints will be automatically
-	 *  added to
+	 *  added to or <code>null</code> if none
 	 */
 	public String getAutoGroup() {
 		return fAutoGroup;
