@@ -127,9 +127,6 @@ public class AntAction extends Action {
 				tools.add(antTools[i]);
 			}
 		}
-		if (!status.isOK()) {
-			new ErrorDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Ant Error", null, status, IStatus.ERROR).open();
-		}
 		if (tools.size() == 1) {
 			tool= (ExternalTool)tools.get(0);
 		} else if (tools.size() > 1) {
