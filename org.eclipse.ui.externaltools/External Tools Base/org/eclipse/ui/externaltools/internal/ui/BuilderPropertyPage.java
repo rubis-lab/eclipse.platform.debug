@@ -10,7 +10,11 @@ http://www.eclipse.org/legal/cpl-v05.html
 Contributors:
 **********************************************************************/
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
@@ -25,8 +29,15 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -38,14 +49,19 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolBuilder;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolRegistry;
+import org.eclipse.ui.externaltools.internal.view.EditExternalToolPropertiesAction;
 import org.eclipse.ui.externaltools.internal.view.NewExternalToolAction;
 import org.eclipse.ui.externaltools.model.ExternalTool;
+import org.eclipse.ui.externaltools.model.ExternalToolStorage;
 import org.eclipse.ui.externaltools.model.IExternalToolConstants;
+import org.eclipse.ui.externaltools.model.IStorageListener;
 
 /**
  * Property page to add external tools in between builders.
@@ -60,6 +76,7 @@ public final class BuilderPropertyPage extends PropertyPage {
 	private Button upButton, downButton, newButton, editButton, removeButton;
 	private ArrayList imagesToDispose = new ArrayList();
 	private Image builderImage, invalidBuildToolImage;
+	private IStorageListener storageListener= new StorageListener();
 
 	/**
 	 * Creates an initialized property page
@@ -112,37 +129,45 @@ public final class BuilderPropertyPage extends PropertyPage {
 	 * that invokes an external tool.  Returns the new command,
 	 * or <code>null</code> if no command was created.
 	 */
-	private ICommand createTool() {
-		try {
-			EditDialog dialog;
-			dialog = new EditDialog(getShell(), null);
-			if (dialog.open() == Window.OK) {
-				ExternalTool tool = dialog.getExternalTool();
-				ICommand command = getInputProject().getDescription().newCommand();
-				return tool.toBuildCommand(command);
-			} else {
-				return null;	
-			}
-		} catch(CoreException e) {
-			handleException(e);
-			return null;
-		}		
+//	private ICommand createTool() {
+//		try {
+//			EditDialog dialog;
+//			dialog = new EditDialog(getShell(), null);
+//			if (dialog.open() == Window.OK) {
+//				ExternalTool tool = dialog.getExternalTool();
+//				ICommand command = getInputProject().getDescription().newCommand();
+//				return tool.toBuildCommand(command);
+//			} else {
+//				return null;	
+//			}
+//		} catch(CoreException e) {
+//			handleException(e);
+//			return null;
+//		}		
+//	}
+	
+	public ICommand toBuildCommand(ExternalTool tool, ICommand command) {
+		Map args= ExternalToolRegistry.toolToBuildCommandArgs(tool);
+		command.setBuilderName(ExternalToolBuilder.ID);
+		command.setArguments(args);
+		
+		return command;
 	}
 	
 	/**
 	 * Edits an exisiting build command that invokes an external tool.
 	 */
-	private void editTool(ICommand command) {
-		ExternalTool tool = ExternalToolRegistry.toolFromBuildCommandArgs(command.getArguments(), NEW_NAME);
-		if (tool == null)
-			return;
-		EditDialog dialog;
-		dialog = new EditDialog(getShell(), tool);
-		if (dialog.open() == Window.OK) {
-			tool = dialog.getExternalTool();
-			tool.toBuildCommand(command);
-		}
-	}
+//	private void editTool(ICommand command) {
+//		ExternalTool tool = ExternalToolRegistry.toolFromBuildCommandArgs(command.getArguments(), NEW_NAME);
+//		if (tool == null)
+//			return;
+//		EditDialog dialog;
+//		dialog = new EditDialog(getShell(), tool);
+//		if (dialog.open() == Window.OK) {
+//			tool = dialog.getExternalTool();
+//			tool.toBuildCommand(command);
+//		}
+//	}
 	
 	/**
 	 * Creates and returns a button with the given label, id, and enablement.
@@ -221,8 +246,13 @@ public final class BuilderPropertyPage extends PropertyPage {
 		
 		//populate widget contents	
 		addBuildersToTable();
+		initializeStorageListener();
 		
 		return topLevel;
+	}
+	
+	private void initializeStorageListener() {
+		ExternalToolStorage.addStorageListener(storageListener);
 	}
 	
 	/* (non-Javadoc)
@@ -235,6 +265,7 @@ public final class BuilderPropertyPage extends PropertyPage {
 			image.dispose();
 		}
 		imagesToDispose.clear();
+		ExternalToolStorage.removeStorageListener(storageListener);
 	}
 	
 	/**
@@ -258,15 +289,31 @@ public final class BuilderPropertyPage extends PropertyPage {
 	 */
 	private void handleButtonPressed(Button button) {
 		if (button == newButton) {
-			ICommand newCommand = createTool();
-			if (newCommand != null) {
-				int insertPosition = builderTable.getSelectionIndex() + 1;
-				addCommand(newCommand, insertPosition, true);
-			}
+			new NewExternalToolAction().run();
 		} else if (button == editButton) {
 			TableItem[] selection = builderTable.getSelection();
 			if (selection != null) {
-				editTool((ICommand)selection[0].getData());
+				new PropertyDialogAction(getShell(), new ISelectionProvider() {
+					public void addSelectionChangedListener(ISelectionChangedListener listener) {
+					}
+
+					public ISelection getSelection() {
+						TableItem[] items= builderTable.getSelection();
+						List list= new ArrayList(items.length);
+						for (int i= 0, numItems= items.length; i < numItems; i++) {
+							list.add(items[i].getData());
+						}
+						return new StructuredSelection(list);
+					}
+
+					public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+					}
+
+					public void setSelection(ISelection selection) {
+					}					
+				}).run();
+//				MessageDialog.openInformation(getShell(), "Edit tool", "Edit not currently implemented");
+//				editTool((ICommand)selection[0].getData());
 				updateCommandItem(selection[0],(ICommand)selection[0].getData());
 			}
 		} else if (button == removeButton) {
@@ -417,6 +464,39 @@ public final class BuilderPropertyPage extends PropertyPage {
 				builderName = ToolMessages.format("BuilderPropertyPage.missingBuilder", new Object[] {builderID}); //$NON-NLS-1$
 			item.setText(builderName);
 			item.setImage(builderImage);
+		}
+	}
+	
+	private class StorageListener implements IStorageListener {
+		/**
+		 * @see IStorageListener#toolDeleted(ExternalTool)
+		 */
+		public void toolDeleted(ExternalTool tool) {
+		}
+		/**
+		 * @see IStorageListener#toolCreated(ExternalTool)
+		 */
+		public void toolCreated(ExternalTool tool) {
+			ICommand newCommand= null;
+			try {
+				newCommand= getInputProject().getDescription().newCommand();
+				toBuildCommand(tool, newCommand);
+			} catch (CoreException e) {
+			}
+			if (newCommand != null) {
+				int insertPosition = builderTable.getSelectionIndex() + 1;
+				addCommand(newCommand, insertPosition, true);
+			}
+		}
+		/**
+		 * @see IStorageListener#toolModified(ExternalTool)
+		 */
+		public void toolModified(ExternalTool tool) {
+		}
+		/**
+		 * @see IStorageListener#toolsRefreshed()
+		 */
+		public void toolsRefreshed() {
 		}
 	}
 }
