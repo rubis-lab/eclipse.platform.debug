@@ -9,11 +9,10 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.externaltools.internal.core.*;
-import org.eclipse.ui.externaltools.internal.model.*;
-import org.eclipse.ui.externaltools.model.ExternalTool;
+import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
+import org.eclipse.ui.externaltools.internal.model.IHelpContextIds;
+import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
