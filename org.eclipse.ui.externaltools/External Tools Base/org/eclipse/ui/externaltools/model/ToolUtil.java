@@ -263,7 +263,7 @@ public final class ToolUtil {
 		// Expand the variable into a IPath if possible
 		IPath path = variable.getExpander().getPath(varDef.name, varDef.argument, context);
 		if (path == null) {
-			String msg = ToolMessages.format("ToolUtil.fileLocVarExpandFailed", new Object[] {varDef.name}); //$NON-NLS-1$
+			String msg = ToolMessages.format("The variable {0} with argument {1} could not be expanded to a valid path.", new Object[] {varDef.name, varDef.argument});
 			status.merge(ExternalToolsPlugin.newErrorStatus(msg, null));
 			return null;
 		}

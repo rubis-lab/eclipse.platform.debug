@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -117,7 +118,7 @@ public class AntAction extends Action {
 		ExternalTool tool= null;
 		ExternalToolRegistry registry= ExternalToolsPlugin.getDefault().getToolRegistry(getShell());
 		ExternalTool[] antTools= registry.getToolsOfType(IExternalToolConstants.TOOL_TYPE_ANT_BUILD);
-		MultiStatus status = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "", null);
+		MultiStatus status = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "An error occurred while expanding the location of one or more ant tools: ", null);
 		List tools= new ArrayList();
 		String toolLocation;
 		for (int i= 0, numTools= antTools.length; i < numTools; i++) {
@@ -127,7 +128,7 @@ public class AntAction extends Action {
 			}
 		}
 		if (!status.isOK()) {
-			MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Ant Error", "An error occurred while expanding the location of one or more ant tools: " + status.getMessage());
+			new ErrorDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Ant Error", null, status, IStatus.ERROR).open();
 		}
 		if (tools.size() == 1) {
 			tool= (ExternalTool)tools.get(0);
