@@ -58,10 +58,12 @@ public class AntFileRunner implements IExternalToolRunner {
 			runner.setArguments(runnerArgs);
 			
 			runner.setBuildFileLocation(runnerContext.getExpandedLocation());
-			if (targets.length > 0)
+			if (targets.length > 0) {
 				runner.setExecutionTargets(targets);
-			if (runnerContext.getCaptureOutput())
+			}
+			if (runnerContext.getCaptureOutput()) {
 				runner.addBuildLogger(ANT_LOGGER_CLASS);
+			}
 			
 			// Print out the command used to run the ant build file.
 			if (IRunnerLog.LEVEL_VERBOSE <= runnerContext.getLog().getFilterLevel()) {
