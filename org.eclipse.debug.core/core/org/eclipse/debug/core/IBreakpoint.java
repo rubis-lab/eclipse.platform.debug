@@ -7,97 +7,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.model.IDebugTarget;
 
 public interface IBreakpoint {
-	/*====================================================================
-	 * Marker types:
-	 *====================================================================*/
+
 	
-	/** 
-	 * Base marker type 
-	 *
-	 * @see #getType
-	 */
-	public static final String MARKER = ResourcesPlugin.PI_RESOURCES + ".marker";
-
-	/** 
-	 * Task marker type 
-	 *
-	 * @see #getType
-	 */
-	public static final String TASK = ResourcesPlugin.PI_RESOURCES + ".taskmarker";
-
-	/** 
-	 * Problem marker type 
-	 *
-	 * @see #getType
-	 */
-	public static final String PROBLEM = ResourcesPlugin.PI_RESOURCES + ".problemmarker";
-
-	/** 
-	 * Text marker type 
-	 *
-	 * @see #getType
-	 */
-	public static final String TEXT = ResourcesPlugin.PI_RESOURCES + ".textmarker";
-
-	/** 
-	 * Bookmark marker type 
-	 *
-	 * @see #getType
-	 */
-	public static final String BOOKMARK = ResourcesPlugin.PI_RESOURCES + ".bookmark";
-
 	/*====================================================================
 	 * Marker attributes:
 	 *====================================================================*/
-	
-	/** 
-	 * Severity marker attribute.  A number from the set of error, warning and info
-	 * severities defined by the plaform.
-	 *
-	 * @see #SEVERITY_ERROR
-	 * @see #SEVERITY_WARNING
-	 * @see #SEVERITY_INFO
-	 * @see #getAttribute
-	 */
-	public static final String SEVERITY = "severity";
-	
-	/** 
-	 * Message marker attribute.  A localized string describing the nature
-	 * of the marker (e.g., a name for a bookmark or task).  The content
-	 * and form of this attribute is not specified or interpreted by the platform.
-	 *
-	 * @see #getAttribute
-	 */
-	public static final String MESSAGE = "message";
-	
-	/** 
-	 * Location marker attribute.  The location is a human-readable (localized) string which
-	 * can be used to distinguish between markers on a resource.  As such it 
-	 * should be concise and aimed at users.  The content and 
-	 * form of this attribute is not specified or interpreted by the platform.
-	 *
-	 * @see #getAttribute
-	 */
-	public static final String LOCATION = "location";
-	
-	/** 
-	 * Priority marker attribute.  A number from the set of high, normal and low 
-	 * priorities defined by the plaform.
-	 * 
-	 * @see #PRIORITY_HIGH
-	 * @see #PRIORITY_NORMAL
-	 * @see #PRIORITY_LOW
-	 * @see #getAttribute
-	 */
-	public static final String PRIORITY = "priority";
-	
-	/** 
-	 * Done marker attribute.  A boolean value indicating whether 
-	 * the marker (e.g., a task) is considered done.  
-	 *
-	 * @see #getAttribute
-	 */
-	public static final String DONE = "done";
 
 	/** 
 	 * Character start marker attribute.  An integer value indicating where a text
@@ -181,8 +95,8 @@ public interface IBreakpoint {
  */
 public void delete() throws CoreException;
 /**
- * Tests this marker for equality with the given object.
- * Two markers are equal iff they have the same id.
+ * Tests this breakpoint for equality with the given object.
+ * Two breakpoints are equal if their markers have the same id.
  * Markers are assigned an id when created on a resource.
  *
  * @param object the other object
