@@ -20,6 +20,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -81,13 +82,17 @@ public class ExternalToolRegistry {
 	private static final String TAG_RUN_BUILD_KINDS = "runForBuildKinds"; //$NON-NLS-1$
 	private static final String TAG_EXTRA_ATTR = "extraAttribute"; //$NON-NLS-1$
 	private static final String TAG_KEY = "key"; //$NON-NLS-1$
+	private static final String TAG_VERSION = "version"; //$NON-NLS-1$
 
 	// Possible values for boolean type of attributes	
 	private static final String TRUE = "true"; //$NON-NLS-1$
 	private static final String FALSE = "false"; //$NON-NLS-1$
 
 	private static final String BUILD_TYPE_SEPARATOR = ","; //$NON-NLS-1$
+	private static final String EXTRA_ATTR_SEPARATOR = "="; //$NON-NLS-1$
 	
+	private static final String VERSION_21 = "2.1"; //$NON-NLS-1$;
+
 	private static final ExternalTool[] EMPTY_TOOLS = new ExternalTool[0];
 	
 	/**
@@ -228,6 +233,109 @@ public class ExternalToolRegistry {
 		}
 		
 		return results;
+	}
+
+	/**
+	 * Creates an external tool from the map.
+	 * 
+	 * @param commandArgs the builder ICommand arguments
+	 * @param newName a new name for the tool if the one in the command is invalid
+	 * @return the new external tool or <code>null</code> if not possible.
+	 */
+	public static ExternalTool toolFromBuildCommandArgs(Map commandArgs, String newName) {
+		String version = (String) commandArgs.get(TAG_VERSION);
+		if (VERSION_21.equals(version)) {
+			String name = (String)commandArgs.get(TAG_NAME);
+			if (ExternalTool.validateToolName(name) != null)
+				name = newName;
+			String type = (String)commandArgs.get(TAG_TYPE);
+	
+			try {
+				ExternalTool tool = new ExternalTool(type, name);
+				tool.setLocation((String)commandArgs.get(TAG_LOCATION));
+				tool.setWorkingDirectory((String)commandArgs.get(TAG_WORK_DIR));
+				tool.setCaptureOutput(TRUE.equals((String)commandArgs.get(TAG_CAPTURE_OUTPUT)));
+				tool.setShowConsole(TRUE.equals((String)commandArgs.get(TAG_SHOW_CONSOLE)));
+				tool.setRunInBackground(TRUE.equals((String)commandArgs.get(TAG_RUN_BKGRND)));
+				tool.setPromptForArguments(TRUE.equals((String)commandArgs.get(TAG_PROMPT_ARGS)));
+				tool.setShowInMenu(TRUE.equals((String)commandArgs.get(TAG_SHOW_MENU)));
+				tool.setOpenPerspective((String)commandArgs.get(TAG_OPEN_PERSP));
+				tool.setRefreshScope((String)commandArgs.get(TAG_REFRESH_SCOPE));
+				tool.setRefreshRecursive(TRUE.equals((String)commandArgs.get(TAG_REFRESH_RECURSIVE)));
+				tool.setSaveDirtyEditors(TRUE.equals((String)commandArgs.get(TAG_SAVE_DIRTY)));
+				
+				String types = (String)commandArgs.get(TAG_RUN_BUILD_KINDS);
+				if (types != null && types.length() > 0)
+					tool.setRunForBuildKinds(buildTypesToArray(types));
+				
+				String desc = (String)commandArgs.get(TAG_DESC);
+				if (desc != null)
+					tool.setDescription(desc);
+	
+				String args = (String)commandArgs.get(TAG_ARGS);
+				if (args != null)
+					tool.setArguments(args);
+				
+				String extraAttributes = (String)commandArgs.get(TAG_EXTRA_ATTR);
+				if (extraAttributes != null) {
+					StringTokenizer tokenizer = new StringTokenizer(extraAttributes, EXTRA_ATTR_SEPARATOR);
+					while (tokenizer.hasMoreTokens()) {
+						String key = tokenizer.nextToken();
+						if (!tokenizer.hasMoreTokens())
+							break;
+						String value = tokenizer.nextToken();
+						tool.setExtraAttribute(key, value);
+					}
+				}
+				
+				return tool;
+			} catch (CoreException e) {
+				return null;
+			}
+		} else {
+			return ExternalToolMigration.toolFromArgumentMap(commandArgs, null, newName);
+		}
+	}
+	
+	/**
+	 * Creates an builder ICommand argument map for the external tool.
+	 * 
+	 * @param tool the external tool to use
+	 * @return the map of arguments representing the external tool.
+	 */
+	public static Map toolToBuildCommandArgs(ExternalTool tool) {
+		Map commandArgs = new HashMap();
+		commandArgs.put(TAG_VERSION, VERSION_21);
+		commandArgs.put(TAG_TYPE, tool.getType());
+		commandArgs.put(TAG_NAME, tool.getName());
+		commandArgs.put(TAG_LOCATION, tool.getLocation());
+		commandArgs.put(TAG_WORK_DIR, tool.getWorkingDirectory());
+		commandArgs.put(TAG_CAPTURE_OUTPUT, tool.getCaptureOutput() ? TRUE : FALSE);
+		commandArgs.put(TAG_SHOW_CONSOLE, tool.getShowConsole() ? TRUE : FALSE);
+		commandArgs.put(TAG_RUN_BKGRND, tool.getRunInBackground() ? TRUE : FALSE);
+		commandArgs.put(TAG_PROMPT_ARGS, tool.getPromptForArguments() ? TRUE : FALSE);
+		commandArgs.put(TAG_SHOW_MENU, tool.getShowInMenu() ? TRUE : FALSE);
+		commandArgs.put(TAG_OPEN_PERSP, tool.getOpenPerspective());
+		commandArgs.put(TAG_REFRESH_SCOPE, tool.getRefreshScope());
+		commandArgs.put(TAG_REFRESH_RECURSIVE, tool.getRefreshRecursive() ? TRUE : FALSE);
+		commandArgs.put(TAG_SAVE_DIRTY, tool.getSaveDirtyEditors() ? TRUE : FALSE);
+		commandArgs.put(TAG_RUN_BUILD_KINDS, buildKindsToString(tool.getRunForBuildKinds()));
+		commandArgs.put(TAG_DESC, tool.getDescription());
+		commandArgs.put(TAG_ARGS, tool.getArguments());
+
+		String[] keys = tool.getExtraAttributeKeys();
+		if (keys.length > 0) {
+			StringBuffer buffer = new StringBuffer();
+			String[] values = tool.getExtraAttributeValues();
+			for (int i = 0; i < keys.length; i++) {
+				buffer.append(keys[i]);
+				buffer.append(EXTRA_ATTR_SEPARATOR);
+				buffer.append(values[i]);
+			}
+			commandArgs.put(TAG_EXTRA_ATTR, buffer.toString());
+		}
+
+		return commandArgs;
 	}
 	
 	/**
@@ -489,6 +597,7 @@ public class ExternalToolRegistry {
 
 		// Populate the memento
 		XMLMemento memento = XMLMemento.createWriteRoot(TAG_EXTERNAL_TOOL);
+		memento.putString(TAG_VERSION, VERSION_21);
 		memento.putString(TAG_TYPE, tool.getType());
 		memento.putString(TAG_NAME, tool.getName());
 		memento.putString(TAG_LOCATION, tool.getLocation());
