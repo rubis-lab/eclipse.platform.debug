@@ -44,6 +44,7 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 	private String initialOpenPersp = null;
 	private String initialArgument = ""; //$NON-NLS-1$
 	private boolean initialPromptArg = false;
+	private boolean initialShowInMenu = false;
 	
 	protected Button showMessageField;
 	protected Button runBackgroundField;
@@ -51,6 +52,7 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 	protected Combo openPerspNameField;
 	protected Text argumentField;
 	protected Button promptArgField;
+	protected Button showInMenu;
 	
 	private IPerspectiveDescriptor[] perspectives;
 	
@@ -76,6 +78,7 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 		
 		createShowMessageComponent(mainComposite);
 		createRunBackgroundComponent(mainComposite);
+		createShowInMenuComponent(mainComposite);
 		createOpenPerspComponent(mainComposite);
 		createArgumentComponent(mainComposite);
 		
@@ -109,6 +112,10 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 		
 		if (promptArgField != null) {
 			promptArgField.setSelection(isEditMode() ? tool.getPromptForArguments() : initialPromptArg);
+		}
+		
+		if (showInMenu != null) {
+			showInMenu.setSelection(isEditMode() ? tool.getShowInMenu() : initialShowInMenu);	
 		}
 
 		validate();
@@ -216,6 +223,19 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		showMessageField.setLayoutData(data);
 	}
+	
+	/**
+	 * Creates the controls needed to edit the show in menu
+	 * attribute of an external tool.
+	 * 
+	 * @param parent the compostie to create the controls in
+	 */
+	protected void createShowInMenuComponent(Composite parent) {
+		showInMenu = new Button(parent, SWT.CHECK);
+		showInMenu.setText(ToolMessages.getString("ExternalToolOptionGroup.showInMenuLabel")); //$NON-NLS-1$
+		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		showInMenu.setLayoutData(data);
+	}
 
 	/**
 	 * Creates a vertical space between controls.
@@ -275,6 +295,16 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 	 */
 	public final boolean getInitialShowMessage() {
 		return initialShowMessage;
+	}
+	
+	/**
+	 * Returns the proposed initial show in menu for the external
+	 * tool if no tool provided in the createContents.
+	 * 
+	 * @return the proposed initial show in menu when editing new tool.
+	 */	
+	public final boolean getInitialShowInMenu() {
+		return initialShowInMenu;
 	}
 
 	/**
@@ -390,7 +420,17 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 	 * @param initialPromptArg the proposed initial prompt for argument when editing new tool.
 	 */
 	public final void setInitialPromptForArgument(boolean initialPromptArg) {
-		initialPromptArg = initialPromptArg;
+		this.initialPromptArg = initialPromptArg;
+	}
+	
+	/**
+	 * Sets the proposed initial show in menu for the external
+	 * tool if no tool provided in the createContents.
+	 * 
+	 * @param initialShowInMenu the proposed show in menu when editing new tool.
+	 */
+	public final void setInitialShowInMenu(boolean initialShowInMenu) {
+		this.initialShowInMenu = initialShowInMenu;
 	}
 
 	/**
@@ -440,6 +480,8 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 			tool.setArguments(argumentField.getText().trim());
 		if (promptArgField != null)
 			tool.setPromptForArguments(promptArgField.getSelection());
+		if (showInMenu != null)
+			tool.setShowInMenu(showInMenu.getSelection());
 	}
 
 	/* (non-Javadoc)

@@ -1,4 +1,4 @@
-package org.eclipse.ui.externaltools.internal.ui;
+package org.eclipse.ui.externaltools.internal.menu;
 
 /**********************************************************************
 Copyright (c) 2002 IBM Corp. and others.
@@ -9,39 +9,40 @@ http://www.eclipse.org/legal/cpl-v05.html
  
 Contributors:
 **********************************************************************/
+
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.*;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuCreator;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.action.*;
+import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.*;
 import org.eclipse.ui.actions.ActionDelegate;
 import org.eclipse.ui.externaltools.internal.core.*;
+import org.eclipse.ui.externaltools.internal.view.ExternalToolView;
 import org.eclipse.ui.externaltools.model.*;
 
 /**
- * This action will display the external tool configuration dialog.
- * In addition, as a tool bar item, it's drop down list will include
- * tools to run directly.
+ * This action delegate is responsible for producing the
+ * Run > External Tools sub menu contents, which includes
+ * an items to run last tool, favorite tools, and show the
+ * external tools view. Default action is to run the last tool
+ * if one exist.
  */
-public class ExternalToolsAction extends ActionDelegate implements IWorkbenchWindowPulldownDelegate2, IMenuCreator {
+public class ExternalToolMenuDelegate extends ActionDelegate implements IWorkbenchWindowPulldownDelegate2, IMenuCreator {
 	private IWorkbenchWindow window;
 	private IAction realAction;
+	private ExternalTool lastTool;
 	
 	/**
-	 * Creates the external tool configure action
+	 * Creates the action delegate
 	 */
-	public ExternalToolsAction() {
+	public ExternalToolMenuDelegate() {
 		super();
 	}
 	
@@ -50,7 +51,7 @@ public class ExternalToolsAction extends ActionDelegate implements IWorkbenchWin
 	 */
 	public void run(IAction action) {
 		if (action.isEnabled())
-			showConfigurationDialog();
+			runLastTool();
 	}
 
 	/* (non-Javadoc)
@@ -115,11 +116,25 @@ public class ExternalToolsAction extends ActionDelegate implements IWorkbenchWin
 	 * Populates the menu with its items
 	 */
 	private void populateMenu(Menu menu, boolean wantFastAccess) {
-		// Add a menu item for each tool in the history
-		ArrayList tools = ExternalToolsPlugin.getDefault().getRegistry().getExternalTools();
-		if (tools.size() > 0) {
-			for (int i = 0; i < tools.size(); i++) {
-				ExternalTool tool = (ExternalTool)tools.get(i);
+		// Add a menu item to run the most recent tool.
+		MenuItem runRecent = new MenuItem(menu, SWT.NONE);
+		runRecent.setText(ToolMessages.getString("ExternalToolMenuDelegate.runRecent")); //$NON-NLS-1$
+		runRecent.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				runLastTool();
+			}
+		});
+		// Disable option if no tool has been run yet.
+		runRecent.setEnabled(lastTool != null);
+		
+		// Add a separator.
+		new MenuItem(menu, SWT.SEPARATOR);
+				
+		// Add a menu item for each tool in the favorites list.
+		ExternalTool[] tools = FavoritesManager.getInstance().getFavorites();
+		if (tools.length > 0) {
+			for (int i = 0; i < tools.length; i++) {
+				ExternalTool tool = tools[i];
 				StringBuffer label = new StringBuffer();
 				if (i < 9 && wantFastAccess) {
 					//add the numerical accelerator
@@ -138,16 +153,16 @@ public class ExternalToolsAction extends ActionDelegate implements IWorkbenchWin
 				});
 			}
 			
-			// Add a separator
+			// Add a separator.
 			new MenuItem(menu, SWT.SEPARATOR);
 		}
 
-		// Add a menu to edit the configurations
-		MenuItem item = new MenuItem(menu, SWT.NONE);
-		item.setText(ToolMessages.getString("ExternalToolsAction.configure")); //$NON-NLS-1$
-		item.addSelectionListener(new SelectionAdapter() {
+		// Add a menu item to show the external tools view.
+		MenuItem showView = new MenuItem(menu, SWT.NONE);
+		showView.setText(ToolMessages.getString("ExternalToolMenuDelegate.showView")); //$NON-NLS-1$
+		showView.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				showConfigurationDialog();
+				showView();
 			}
 		});
 	}
@@ -167,9 +182,9 @@ public class ExternalToolsAction extends ActionDelegate implements IWorkbenchWin
 		final ISelection sel = window.getSelectionService().getSelection();
 		final IWorkbenchPart activePart = window.getPartService().getActivePart();
 									
-		if (tool.getShowLog()) {
-			ToolUtil.showLogConsole(window);
-			ToolUtil.clearLogDocument();
+		if (tool.getLogMessages()) {
+//			ToolUtil.showLogConsole(window);
+//			ToolUtil.clearLogDocument();
 		}
 		
 		IRunnableWithProgress runnable = new IRunnableWithProgress() {
@@ -204,6 +219,9 @@ public class ExternalToolsAction extends ActionDelegate implements IWorkbenchWin
 			};
 		};
 		
+		// Keep track of the most recently run tool.
+		lastTool = tool;
+		
 		try {
 			new ProgressMonitorDialog(window.getShell()).run(true, true, runnable);		
 		} catch (InterruptedException e) {
@@ -213,22 +231,37 @@ public class ExternalToolsAction extends ActionDelegate implements IWorkbenchWin
 			if (e.getTargetException() instanceof CoreException)
 				status = ((CoreException)e.getTargetException()).getStatus();
 			else
-				status = new Status(IStatus.ERROR, ExternalToolsPlugin.PLUGIN_ID, 0, ToolMessages.getString("ExternalToolsAction.internalError"), e.getTargetException()); //$NON-NLS-1$;
+				status = new Status(IStatus.ERROR, IExternalToolConstants.PLUGIN_ID, 0, ToolMessages.getString("ExternalToolsAction.internalError"), e.getTargetException()); //$NON-NLS-1$;
 			ErrorDialog.openError(
 				window.getShell(), 
-				ToolMessages.getString("ExternalToolsAction.runErrorTitle"), //$NON-NLS-1$;
-				ToolMessages.getString("ExternalToolsAction.runProblem"), //$NON-NLS-1$;
+				ToolMessages.getString("ExternalToolMenuDelegate.runErrorTitle"), //$NON-NLS-1$;
+				ToolMessages.getString("ExternalToolMenuDelegate.runProblem"), //$NON-NLS-1$;
 				status);
 			return;
 		}
 	}
 	
 	/**
-	 * Shows the tool configuration dialog
+	 * Shows the external tool view.
 	 */
-	private void showConfigurationDialog() {
-		ConfigurationDialog dialog;
-		dialog = new ConfigurationDialog(window.getShell());
-		dialog.open();
+	private void showView() {
+		try {
+			IWorkbenchPage page = window.getActivePage();
+			if (page != null)
+				page.showView(IExternalToolConstants.VIEW_ID);
+		} catch (PartInitException e) {
+			ExternalToolsPlugin.getDefault().log("Unable to display the External Tools view.", e); //$NON-NLS-1$
+		}
 	}
+	
+	/**
+	 * Run the most recently run external tool.
+	 */
+	private void runLastTool() {
+		if (lastTool == null)
+			return;
+		runTool(lastTool);	
+	}
+	
+	
 }

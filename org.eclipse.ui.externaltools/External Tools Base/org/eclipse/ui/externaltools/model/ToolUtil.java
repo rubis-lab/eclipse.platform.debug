@@ -211,7 +211,7 @@ public final class ToolUtil {
 	/**
 	 * Saves any dirty editors if user preference
 	 */
-	/*package*/ static void saveDirtyEditors(IWorkbenchWindow window) {
+	public static void saveDirtyEditors(IWorkbenchWindow window) {
 		IPreferenceStore store = ExternalToolsPlugin.getDefault().getPreferenceStore();
 		boolean autoSave = store.getBoolean(IPreferenceConstants.AUTO_SAVE);
 		if (autoSave) {

@@ -41,6 +41,7 @@ public final class ExternalTool {
 	private boolean logMessages = true;
 	private boolean runInBackground = true;
 	private boolean promptForArguments = false;
+	private boolean showInMenu = false;
 	private String openPerspective = null;
 	private String description = EMPTY_STRING;
 	private String refreshScope = null;
@@ -267,6 +268,14 @@ public final class ExternalTool {
 	}
 	
 	/**
+	 * Returns whether to show this tool in the 
+	 * Run > External Tools menu.
+	 */
+	public boolean getShowInMenu() {
+		return showInMenu;	
+	}
+	
+	/**
 	 * Returns the perspective ID to open when this
 	 * tool is run, or <code>null</code> if not specified.
 	 */
@@ -365,6 +374,14 @@ public final class ExternalTool {
 	 */
 	public void setPromptForArguments(boolean promptForArguments) {
 		this.promptForArguments = promptForArguments;
+	}
+	
+	/**
+	 * Sets whether to show this tool in the 
+	 * Run > External Tools menu.
+	 */
+	public void setShowInMenu(boolean showInMenu) {
+		this.showInMenu = showInMenu;
 	}
 	
 	/**

@@ -112,6 +112,30 @@
 		</variable>
 	</extension>
 
+	<extension point="org.eclipse.ui.actionSets">
+		<actionSet
+			id="org.eclipse.ui.externaltools.ExternalToolsSet"
+			label="%ActionSet.externalTools"
+			visible="true">
+			<menu id="org.eclipse.ui.run" 
+				label="%Menu.run" 
+				path="additions"> 
+				<separator name="ExternalToolsGroup"/> 
+			</menu> 
+			<action
+				id="org.eclipse.ui.externaltools.ExternalToolMenuDelegate"
+				label="%Action.externalTools"
+				menubarPath="org.eclipse.ui.run/ExternalToolsGroup"
+				toolbarPath="Normal/additions"
+				disabledIcon="icons/full/dtool16/external_tools.gif"
+				icon="icons/full/etool16/external_tools.gif"
+				hoverIcon="icons/full/ctool16/external_tools.gif"
+				tooltip="%Action.externalToolsTip"
+				pulldown="true"
+				class="org.eclipse.ui.externaltools.internal.menu.ExternalToolMenuDelegate">
+			</action>
+		</actionSet>
+	</extension>
 
 <!-- Old Stuff -->
 <!-- Old Stuff -->
@@ -142,31 +166,6 @@
 				class="org.eclipse.ui.externaltools.internal.ui.AntRunActionDelegate">
 			</action>
 		</objectContribution>			
-	</extension>
-
-	<extension point="org.eclipse.ui.actionSets">
-		<actionSet
-			id="org.eclipse.ui.externaltools.ExternalToolsSet"
-			label="%ActionSet.externalTools"
-			visible="true">
-			<menu id="org.eclipse.ui.run" 
-				label="%Menu.run" 
-				path="additions"> 
-				<separator name="ExternalToolsGroup"/> 
-			</menu> 
-			<action
-				id="org.eclipse.ui.externaltools.ExternalToolAction"
-				label="%Action.externalTools"
-				menubarPath="org.eclipse.ui.run/ExternalToolsGroup"
-				toolbarPath="Normal/additions"
-				disabledIcon="icons/full/dtool16/external_tools.gif"
-				icon="icons/full/etool16/external_tools.gif"
-				hoverIcon="icons/full/ctool16/external_tools.gif"
-				tooltip="%Action.externalToolsTip"
-				pulldown="true"
-				class="org.eclipse.ui.externaltools.internal.ui.ExternalToolsAction">
-			</action>
-		</actionSet>
 	</extension>
 
 	<extension point="org.eclipse.ui.propertyPages">

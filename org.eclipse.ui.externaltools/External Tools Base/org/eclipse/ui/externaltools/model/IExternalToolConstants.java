@@ -53,6 +53,13 @@ public interface IExternalToolConstants {
 	public static final String PL_REFRESH_VARIABLES = "refreshVariables"; //$NON-NLS-1$
 	
 
+	// ------- Views -------
+	/**
+	 * External tool view identifier (value <code>org.eclipse.ui.externaltools.ExternalToolView</code>).
+	 */
+	public static final String VIEW_ID = PLUGIN_ID + ".ExternalToolView"; //$NON-NLS-1$
+
+
 	// ------- Tool Types -------
 	/**
 	 * External tool type for programs such as executables, batch files, 

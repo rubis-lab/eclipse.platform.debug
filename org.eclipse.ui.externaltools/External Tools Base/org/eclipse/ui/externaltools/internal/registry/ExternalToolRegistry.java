@@ -47,7 +47,8 @@ public class ExternalToolRegistry {
 	//		workDirectory={string:path}
 	//		logMessages={string:true/false}
 	//		runInBackground={string:true/false}
-	//		promptForArguments={string: true/false}
+	//		promptForArguments={string:true/false}
+	//		showInMenu={string:true/false}
 	//		openPerspective={string:id}
 	//		refreshScope={string}
 	//		refreshRecursive={string: true/false}>
@@ -69,6 +70,7 @@ public class ExternalToolRegistry {
 	private static final String TAG_RUN_BKGRND = "runInBackground"; //$NON-NLS-1$
 	private static final String TAG_OPEN_PERSP = "openPerspective"; //$NON-NLS-1$
 	private static final String TAG_PROMPT_ARGS = "promptForArguments"; //$NON-NLS-1$
+	private static final String TAG_SHOW_MENU = "showInMenu"; //$NON-NLS-1$
 	private static final String TAG_DESC = "description"; //$NON-NLS-1$
 	private static final String TAG_ARGS = "arguments"; //$NON-NLS-1$
 	private static final String TAG_REFRESH_SCOPE = "refreshScope"; //$NON-NLS-1$
@@ -294,6 +296,7 @@ public class ExternalToolRegistry {
 			tool.setLogMessages(TRUE.equals(memento.getString(TAG_LOG_MSG)));
 			tool.setRunInBackground(TRUE.equals(memento.getString(TAG_RUN_BKGRND)));
 			tool.setPromptForArguments(TRUE.equals(memento.getString(TAG_PROMPT_ARGS)));
+			tool.setShowInMenu(TRUE.equals(memento.getString(TAG_SHOW_MENU)));
 			tool.setOpenPerspective(memento.getString(TAG_OPEN_PERSP));
 			tool.setRefreshScope(memento.getString(TAG_REFRESH_SCOPE));
 			tool.setRefreshRecursive(TRUE.equals(memento.getString(TAG_REFRESH_RECURSIVE)));
@@ -387,6 +390,7 @@ public class ExternalToolRegistry {
 		memento.putString(TAG_LOG_MSG, tool.getLogMessages() ? TRUE : FALSE);
 		memento.putString(TAG_RUN_BKGRND, tool.getRunInBackground() ? TRUE : FALSE);
 		memento.putString(TAG_PROMPT_ARGS, tool.getPromptForArguments() ? TRUE : FALSE);
+		memento.putString(TAG_SHOW_MENU, tool.getShowInMenu() ? TRUE : FALSE);
 		memento.putString(TAG_OPEN_PERSP, tool.getOpenPerspective());
 		memento.putString(TAG_REFRESH_SCOPE, tool.getRefreshScope());
 		memento.putString(TAG_REFRESH_RECURSIVE, tool.getRefreshRecursive() ? TRUE : FALSE);
