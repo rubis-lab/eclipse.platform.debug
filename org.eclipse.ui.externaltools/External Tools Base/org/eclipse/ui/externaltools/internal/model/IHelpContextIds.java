@@ -20,8 +20,6 @@ public interface IHelpContextIds {
 	public static final String PREFIX = "org.eclipse.ui.externaltools."; //$NON-NLS-1$
 
 	// Actions
-	public static final String ANT_ACTION = PREFIX + "ant_action_context"; //$NON-NLS-1$
-	
 	public static final String NEW_TOOL_ACTION = PREFIX + "new_tool_action_context"; //$NON-NLS-1$
 	public static final String COPY_TOOL_ACTION = PREFIX + "copy_tool_action_context"; //$NON-NLS-1$
 	public static final String PASTE_TOOL_ACTION = PREFIX + "paste_tool_action_context"; //$NON-NLS-1$
@@ -33,19 +31,11 @@ public interface IHelpContextIds {
 	public static final String EDIT_TOOL_PROPERTIES_ACTION = PREFIX + "edit_tool_properties_action_context"; //$NON-NLS-1$
 	
 	// Dialogs
-	public static final String CONFIGURE_DIALOG = PREFIX + "configure_dialog_context"; //$NON-NLS-1$
-	public static final String EDIT_DIALOG = PREFIX + "edit_dialog_context"; //$NON-NLS-1$
-	public static final String ADD_TASK_DIALOG = PREFIX + "add_task_dialog_context"; //$NON-NLS-1$
-	public static final String PROJECT_SELECTION_DIALOG = PREFIX + "project_selection_dialog_context"; //$NON-NLS-1$
-	public static final String REFRESH_SELECTION_DIALOG = PREFIX + "refresh_selection_dialog_context"; //$NON-NLS-1$
-	public static final String TARGET_SELECTION_DIALOG = PREFIX + "target_selection_dialog_context"; //$NON-NLS-1$
-	public static final String VARIABLE_SELECTION_DIALOG = PREFIX + "variable_selection_dialog_context"; //$NON-NLS-1$
-	public static final String RESOURCE_SELECTION_DIALOG = PREFIX + "resource_selection_dialog_context"; //$NON-NLS-1$
 
 	// Preference Pages
 	public static final String ANT_PREFERENCE_PAGE = PREFIX + "ant_preference_page_context"; //$NON-NLS-1$
-	public static final String LOG_CONSOLE_PREFERENCE_PAGE = PREFIX + "log_console_preference_page_context"; //$NON-NLS-1$
-	
+	public static final String ADD_TASK_DIALOG = PREFIX + "add_task_dialog_context"; //$NON-NLS-1$
+
 	// Property Pages
 	public static final String TOOL_MAIN_PROPERTY_PAGE = PREFIX + "tool_main_property_page_context"; //$NON-NLS-1$
 	public static final String TOOL_OPTION_PROPERTY_PAGE = PREFIX + "tool_option_property_page_context"; //$NON-NLS-1$
@@ -53,16 +43,11 @@ public interface IHelpContextIds {
 	public static final String ANT_TARGETS_PROPERTY_PAGE = PREFIX + "ant_targets_property_page_context"; //$NON-NLS-1$
 	
 	// Views
-	public static final String LOG_CONSOLE_VIEW = PREFIX + "log_console_view_context"; //$NON-NLS-1$
-	
 	public static final String EXTERNAL_TOOLS_VIEW = PREFIX + "external_tools_view_context"; //$NON-NLS-1$
 
 	// Wizards
-	public static final String ANT_LAUNCH_WIZARD = PREFIX + "ant_launch_wizard_context"; //$NON-NLS-1$
 	
 	// Wizard Pages
-	public static final String ANT_LAUNCH_WIZARD_PAGE = PREFIX + "ant_launch_wizard_page_context"; //$NON-NLS-1$
-	
 	public static final String TOOL_MAIN_WIZARD_PAGE = PREFIX + "tool_main_wizard_page_context"; //$NON-NLS-1$
 	public static final String TOOL_OPTION_WIZARD_PAGE = PREFIX + "tool_option_wizard_page_context"; //$NON-NLS-1$
 	public static final String TOOL_REFRESH_WIZARD_PAGE = PREFIX + "tool_refresh_wizard_page_context"; //$NON-NLS-1$

@@ -1,30 +1,39 @@
-package org.eclipse.ui.externaltools.internal.ui;
+package org.eclipse.ui.externaltools.internal.ant.dialog;
 
 /**********************************************************************
-Copyright (c) 2002 IBM Corp. and others.
-All rights reserved.   This program and the accompanying materials
-are made available under the terms of the Common Public License v0.5
+Copyright (c) 2002 IBM Corp. and others. All rights reserved.
+This file is made available under the terms of the Common Public License v1.0
 which accompanies this distribution, and is available at
-http://www.eclipse.org/legal/cpl-v05.html
+http://www.eclipse.org/legal/cpl-v10.html
  
 Contributors:
 **********************************************************************/
+
 import java.net.URL;
 
 import org.eclipse.ant.core.AntCorePlugin;
-import org.eclipse.jface.dialogs.*;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.*;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
-import org.eclipse.ui.externaltools.internal.model.*;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.externaltools.internal.model.IHelpContextIds;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jface.dialogs.Dialog;
-
 /**
- * Dialog to prompt the user to add a custom ant task or type.
+ * Dialog to prompt the user to add a custom Ant task or type.
  */
 public class AddTaskDialog extends Dialog {
 	private String title;
@@ -44,34 +53,32 @@ public class AddTaskDialog extends Dialog {
 	private URL[] libraryUrls;
 
 	/**
-	 * Creates a new task dialog with the given shell and title.
+	 * Creates a new dialog with the given shell and title.
 	 */
-	protected AddTaskDialog(
-		Shell parentShell,
-		String title,
-		String description) {
-		super(parentShell);
+	protected AddTaskDialog(Shell parent, String title, String description) {
+		super(parent);
 		this.title = title;
 		this.description = description;
 	}
-	/**
-	 * @see Window#configureShell(Shell)
+	
+	/* (non-Javadoc)
+	 * Method declared on Window.
 	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		newShell.setText(title);
 		WorkbenchHelp.setHelp(newShell, IHelpContextIds.ADD_TASK_DIALOG);
 	}
-	/**
-	 * @see Dialog#createButtonsForButtonBar(Composite)
+	
+	/* (non-Javadoc)
+	 * Method declared on Dialog.
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
-		okButton =
-			createButton(
-				parent,
-				IDialogConstants.OK_ID,
-				IDialogConstants.OK_LABEL,
-				true);
+		okButton = createButton(
+			parent,
+			IDialogConstants.OK_ID,
+			IDialogConstants.OK_LABEL,
+			true);
 		createButton(
 			parent,
 			IDialogConstants.CANCEL_ID,
@@ -79,8 +86,9 @@ public class AddTaskDialog extends Dialog {
 			false);
 		updateEnablement();
 	}
-	/**
-	 * @see Dialog#createDialogArea(Composite)
+
+	/* (non-Javadoc)
+	 * Method declared on Dialog.
 	 */
 	protected Control createDialogArea(Composite parent) {
 		Composite dialogArea = new Composite(parent, SWT.NONE);
@@ -133,8 +141,7 @@ public class AddTaskDialog extends Dialog {
 		});
 
 		//populate library combo and select input library
-		libraryUrls =
-			AntCorePlugin.getPlugin().getPreferences().getCustomURLs();
+		libraryUrls = AntCorePlugin.getPlugin().getPreferences().getCustomURLs();
 		int selection = 0;
 		for (int i = 0; i < libraryUrls.length; i++) {
 			libraryField.add(libraryUrls[i].getFile());
@@ -149,20 +156,24 @@ public class AddTaskDialog extends Dialog {
 			classField.setText(className);
 		if (libraryUrls.length >= 0)
 			libraryField.select(selection);
+
 		return dialogArea;
 	}
 
 	public String getClassName() {
 		return className;
 	}
-	public void setClassName(String className) {
-		this.className = className;
-	}
+	
 	public URL getLibrary() {
 		return library;
 	}
-	/**
-	 * @see Dialog#okPressed()
+	
+	public String getTaskName() {
+		return taskName;
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on Dialog.
 	 */
 	protected void okPressed() {
 		className = classField.getText();
@@ -172,20 +183,25 @@ public class AddTaskDialog extends Dialog {
 			library = libraryUrls[selection];
 		super.okPressed();
 	}
+
+	public void setClassName(String className) {
+		this.className = className;
+	}
+	
 	public void setLibrary(URL library) {
 		this.library = library;
 	}
-	public String getTaskName() {
-		return taskName;
-	}
+
 	public void setTaskName(String taskName) {
 		this.taskName = taskName;
 	}
+
 	private void updateEnablement() {
-		if (okButton != null)
+		if (okButton != null) {
 			okButton.setEnabled(
 				nameField.getText().length() > 0
 					&& classField.getText().length() > 0
 					&& libraryField.getSelectionIndex() >= 0);
+		}
 	}
 }

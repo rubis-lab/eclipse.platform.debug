@@ -234,6 +234,15 @@
 		</view>
 	</extension>
 
+	<extension point="org.eclipse.ui.preferencePages">
+		<page 
+			id="org.eclipse.ui.externaltools.AntPreferencePage" 
+			name="%PreferencePage.antPreferences"
+			class="org.eclipse.ui.externaltools.internal.ant.dialog.AntPreferencePage"
+			category="org.eclipse.ui.externaltools.ToolsPreferencePage">
+		</page>
+	</extension>
+
 	<extension point="org.eclipse.core.resources.builders"
 		id="ExternalToolBuilder"
 		name="%Builder.externalTools">
@@ -287,12 +296,6 @@
 			id="org.eclipse.ui.externaltools.ToolsPreferencePage" 
 			name="%PreferencePage.toolsPreferences"
 			class="org.eclipse.ui.externaltools.internal.ui.ToolsPreferencePage">
-		</page>
-		<page 
-			id="org.eclipse.ui.externaltools.AntPreferencePage" 
-			name="%PreferencePage.antPreferences"
-			class="org.eclipse.ui.externaltools.internal.ui.AntPreferencePage"
-			category="org.eclipse.ui.externaltools.ToolsPreferencePage">
 		</page>
 	</extension>
 
