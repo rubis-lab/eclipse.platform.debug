@@ -17,13 +17,16 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -117,7 +120,7 @@ public class ExternalToolRegistry {
 	
 	/**
 	 * Lookup table of file names where the key is the external
-	 * tool name as <b>lowercase</b>, and the value if the full path
+	 * tool name as <b>lowercase</b>, and the value is the full path
 	 * to the file for that tool
 	 */
 	private HashMap filenames = new HashMap();
@@ -352,6 +355,32 @@ public class ExternalToolRegistry {
 		list.add(tool);
 		
 		filenames.put(tool.getName().toLowerCase(), filePath);
+	}
+	
+	/**
+	 * Performs the necessary work to rename the given external tool
+	 * in this tools registry. The tool's storage location is updated
+	 * to a new location based on the given tool name and the registry's
+	 * cache is updated. Note that this method does NOT update the "name"
+	 * attribute of the given tool.
+	 * 
+	 * This method is intended to be called only by ExternalTool.rename(String)	 */
+	public IStatus renameTool(ExternalTool tool, String newName) {
+		IPath filename= (IPath) filenames.get(tool.getName().toLowerCase());
+		if (filename == null) {
+			String msg = MessageFormat.format("The file for tool {0} could not be found", new Object[] {tool.getName()});
+			return ExternalToolsPlugin.newErrorStatus(msg, null);
+		}
+		IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(filename);
+		IPath newPath= generateToolFilename(newName);
+		try {
+			file.move(newPath, false, true, null);
+		} catch (CoreException exception) {
+			String msg = MessageFormat.format("An exception occurred creating file {0}", new Object[] {newPath.toString()});
+			return ExternalToolsPlugin.newErrorStatus(msg, null);
+		}
+		filenames.put(tool.getName().toLowerCase(), newPath);
+		return ExternalToolsPlugin.OK_STATUS;
 	}
 
 	/**
