@@ -9,19 +9,13 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.*;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.*;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.*;
-import org.eclipse.ui.*;
-import org.eclipse.ui.externaltools.internal.core.*;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.externaltools.internal.menu.FavoritesManager;
-import org.eclipse.ui.externaltools.internal.model.*;
-import org.eclipse.ui.externaltools.model.*;
+import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
+import org.eclipse.ui.externaltools.internal.model.IHelpContextIds;
+import org.eclipse.ui.externaltools.internal.model.ToolMessages;
+import org.eclipse.ui.externaltools.model.ExternalTool;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
@@ -48,7 +42,7 @@ public class RunExternalToolAction extends Action {
 	/**
 	 * Returns the last external tool to be run.
 	 */
-	public final static ExternalTool getLastTool() {
+	public static final ExternalTool getLastTool() {
 		return FavoritesManager.getInstance().getLastTool();	
 	}
 

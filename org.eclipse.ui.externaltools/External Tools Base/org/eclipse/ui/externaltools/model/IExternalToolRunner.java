@@ -9,17 +9,17 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.MultiStatus;
 
 /**
  * The implementation of this interface is responsible for running
- * an external tool within a context.
+ * an external tool within the specified context.
  * <p>
  * Clients using the extension point to define a new external
  * tool type must provide an implementation of this interface.
  * </p><p>
- * Implementation of this interface will be treated like
+ * The implementation of this interface will be treated like
  * a singleton. That is, only one instance will be created
  * per tool type.
  * </p><p>
@@ -30,8 +30,9 @@ public interface IExternalToolRunner {
 	/**
 	 * Runs an external tool using the specified context.
 	 * 
-	 * @param monitor the monitor to show progress of running tool
+	 * @param monitor the monitor to report progress or cancellation to
 	 * @param runnerContext the context representing the tool to run
+	 * @param status a multi status to report any problems while running tool
 	 */
-	public void run(IProgressMonitor monitor, IRunnerContext runnerContext) throws CoreException, InterruptedException;
+	public void run(IProgressMonitor monitor, IRunnerContext runnerContext, MultiStatus status);
 }

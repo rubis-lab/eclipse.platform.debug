@@ -15,7 +15,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolType;
@@ -72,12 +74,10 @@ public final class DefaultRunnerContext implements IRunnerContext {
 	 * Executes the runner to launch the external tool. A resource refresh
 	 * is done if specified.
 	 * 
-	 * @param monitor the monitor to report progress to, or <code>null</code>.
+	 * @param monitor the monitor to report progress or cancellation to
+	 * @param status a multi status to report any problems while running tool
 	 */
-	private void executeRunner(IProgressMonitor monitor) throws CoreException, InterruptedException {
-		if (monitor == null)
-			monitor = new NullProgressMonitor();
-
+	private void executeRunner(IProgressMonitor monitor, MultiStatus status) {
 		try {
 			// Lookup the runner based on the tool's type
 			ExternalToolTypeRegistry registry = ExternalToolsPlugin.getDefault().getTypeRegistry();
@@ -87,16 +87,21 @@ public final class DefaultRunnerContext implements IRunnerContext {
 				runner = toolType.getRunner();
 			if (runner == null) {
 				String msg = ToolMessages.format("DefaultRunnerContext.noToolRunner", new Object[] {tool.getName()}); //$NON-NLS-1$
-				throw ExternalToolsPlugin.getDefault().newError(msg, null);
+				status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+				return;
 			}
 			
+			if (monitor.isCanceled())
+				return;
+				
 			// Run the tool
 			if (tool.getRefreshScope() == null) {
-				runner.run(monitor, this);
+				runner.run(monitor, this, status);
 			} else {
 				monitor.beginTask(ToolMessages.getString("DefaultRunnerContext.runningExternalTool"), 100); //$NON-NLS-1$
-				runner.run(new SubProgressMonitor(monitor, 70), this);
-				refreshResources(new SubProgressMonitor(monitor, 30));
+				runner.run(new SubProgressMonitor(monitor, 70), this, status);
+				if (status.isOK() && !monitor.isCanceled())
+					refreshResources(new SubProgressMonitor(monitor, 30), status);
 			}
 		} finally {
 			monitor.done();
@@ -151,37 +156,47 @@ public final class DefaultRunnerContext implements IRunnerContext {
 	 * while validating or running the tool will cause an exception
 	 * to be thrown.
 	 * 
-	 * @param monitor the monitor to report progress to, or <code>null</code>.
+	 * @param monitor the monitor to report progress or cancellation to
+	 * @param status a multi status to report any problems while running tool
 	 */
-	public void run(IProgressMonitor monitor) throws CoreException, InterruptedException {
-		validateContext();
-		executeRunner(monitor);
+	public void run(IProgressMonitor monitor, MultiStatus status) {
+		validateContext(status);
+		if (status.isOK() && !monitor.isCanceled())
+			executeRunner(monitor, status);
 	}
 
 	/**
 	 * Refreshes the resources specified by the tool.
+	 * 
+	 * @param monitor the monitor to report progress or cancellation to
+	 * @param status a multi status to report any problems while running tool
 	 */
-	private void refreshResources(IProgressMonitor monitor) throws CoreException {
+	private void refreshResources(IProgressMonitor monitor, MultiStatus status) {
 		if (tool.getRefreshScope() == null)
 			return;
 		
 		ToolUtil.VariableDefinition varDef = ToolUtil.extractVariableTag(tool.getRefreshScope(), 0);
 		if (varDef.start == -1 || varDef.end == -1 || varDef.name == null) {
 			String msg = ToolMessages.format("DefaultRunnerContext.invalidRefreshVarFormat", new Object[] {tool.getName()}); //$NON-NLS-1$
-			throw ExternalToolsPlugin.getDefault().newError(msg, null);
+			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			return;
 		}
 		
 		RefreshScopeVariableRegistry registry = ExternalToolsPlugin.getDefault().getRefreshVariableRegistry();
 		RefreshScopeVariable variable = registry.getRefreshVariable(varDef.name);
 		if (variable == null) {
 			String msg = ToolMessages.format("DefaultRunnerContext.noRefreshVarNamed", new Object[] {tool.getName(), varDef.name}); //$NON-NLS-1$
-			throw ExternalToolsPlugin.getDefault().newError(msg, null);
+			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			return;
 		}
 
 		int depth = IResource.DEPTH_ZERO;
 		if (tool.getRefreshRecursive())
 			depth = IResource.DEPTH_INFINITE;
-		
+
+		if (monitor.isCanceled())
+			return;
+					
 		IResource[] resources = variable.getExpander().getResources(varDef.name, varDef.argument, expandVarCtx);
 		if (resources == null || resources.length == 0)
 			return;
@@ -190,43 +205,55 @@ public final class DefaultRunnerContext implements IRunnerContext {
 			ToolMessages.getString("DefaultRunnerContext.refreshResources"), //$NON-NLS-1$
 			resources.length);
 			
-		try {
-			for (int i = 0; i < resources.length; i++) {
-				if (resources[i] != null && resources[i].isAccessible())
+		for (int i = 0; i < resources.length; i++) {
+			if (monitor.isCanceled())
+				break;
+			if (resources[i] != null && resources[i].isAccessible()) {
+				try {
 					resources[i].refreshLocal(depth, null);
-				monitor.worked(1);
+				} catch (CoreException e) {
+					status.merge(e.getStatus());
+				}
 			}
-		} finally {
-			monitor.done();
+			monitor.worked(1);
 		}
+		
+		monitor.done();
 	}
 	
 	/**
 	 * Validates the context in which to run the external tool.
 	 * This will cause the location, arguments, and working
 	 * directory to be expanded and verified.
+	 * 
+	 * @param status a multi status to report any problems while running tool
 	 */
-	private void validateContext() throws CoreException {
-		expandedLocation = ToolUtil.expandFileLocation(tool.getLocation(), expandVarCtx);
-		if (expandedLocation == null || expandedLocation.length() == 0) {
-			String msg = ToolMessages.format("DefaultRunnerContext.invalidLocation", new Object[] {tool.getName()}); //$NON-NLS-1$
-			throw ExternalToolsPlugin.getDefault().newError(msg, null);
-		}
-		File file = new File(expandedLocation);
-		if (!file.isFile()) {
-			String msg = ToolMessages.format("DefaultRunnerContext.invalidLocation", new Object[] {tool.getName()}); //$NON-NLS-1$
-			throw ExternalToolsPlugin.getDefault().newError(msg, null);
-		}
-		
-		expandedDirectory = ToolUtil.expandDirectoryLocation(tool.getWorkingDirectory(), expandVarCtx);
-		if (expandedDirectory != null && expandedDirectory.length() > 0) {
-			File path = new File(expandedDirectory);
-			if (!path.isDirectory()) {
-				String msg = ToolMessages.format("DefaultRunnerContext.invalidDirectory", new Object[] {tool.getName()}); //$NON-NLS-1$
-				throw ExternalToolsPlugin.getDefault().newError(msg, null);
+	private void validateContext(MultiStatus status) {
+		expandedLocation = ToolUtil.expandFileLocation(tool.getLocation(), expandVarCtx, status);
+		if (status.isOK()) {
+			if (expandedLocation == null || expandedLocation.length() == 0) {
+				String msg = ToolMessages.format("DefaultRunnerContext.invalidLocation", new Object[] {tool.getName()}); //$NON-NLS-1$
+				status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			} else {
+				File file = new File(expandedLocation);
+				if (!file.isFile()) {
+					String msg = ToolMessages.format("DefaultRunnerContext.invalidLocation", new Object[] {tool.getName()}); //$NON-NLS-1$
+					status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+				}
 			}
 		}
 		
-		expandedArguments = ToolUtil.expandArguments(tool.getArguments(), expandVarCtx);
+		expandedDirectory = ToolUtil.expandDirectoryLocation(tool.getWorkingDirectory(), expandVarCtx, status);
+		if (status.isOK()) {
+			if (expandedDirectory != null && expandedDirectory.length() > 0) {
+				File path = new File(expandedDirectory);
+				if (!path.isDirectory()) {
+					String msg = ToolMessages.format("DefaultRunnerContext.invalidDirectory", new Object[] {tool.getName()}); //$NON-NLS-1$
+					status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+				}
+			}
+		}
+		
+		expandedArguments = ToolUtil.expandArguments(tool.getArguments(), expandVarCtx, status);
 	}
 }

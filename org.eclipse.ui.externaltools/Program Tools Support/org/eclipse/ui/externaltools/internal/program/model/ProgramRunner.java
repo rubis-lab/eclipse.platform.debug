@@ -13,8 +13,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 import org.eclipse.ui.externaltools.model.IExternalToolRunner;
@@ -36,17 +36,17 @@ public final class ProgramRunner implements IExternalToolRunner {
 	/**
 	 * Handles exceptions that may occur while running.
 	 */
-	private void handleException(Exception e) throws CoreException {
+	private void handleException(Exception e, MultiStatus status) {
 		String msg = e.getMessage();
 		if (msg == null)
 			msg = ToolMessages.getString("ProgramRunner.internalErrorMessage"); //$NON-NLS-1$;
-		throw ExternalToolsPlugin.getDefault().newError(msg, e);
+		status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, e));
 	}
 
 	/* (non-Javadoc)
 	 * Method declared in IExternalToolsRunner.
 	 */
-	public void run(IProgressMonitor monitor, IRunnerContext runnerContext) throws CoreException, InterruptedException {
+	public void run(IProgressMonitor monitor, IRunnerContext runnerContext, MultiStatus status) {
 		// Runtime exec requires an array where the first element is
 		// the file to run, and the remainind elements are the
 		// arguments to past along.
@@ -63,6 +63,8 @@ public final class ProgramRunner implements IExternalToolRunner {
 				workingDirectory = new File(runnerContext.getExpandedWorkingDirectory());
 
 			startMonitor(monitor, runnerContext, monitor.UNKNOWN);
+			if (monitor.isCanceled())
+				return;
 
 			// Run the program
 			boolean[] finished = new boolean[] {false};
@@ -83,22 +85,26 @@ public final class ProgramRunner implements IExternalToolRunner {
 				runnerContext.getLog(), 
 				IRunnerLog.LEVEL_ERROR, 
 				finished);
-	
-			p.waitFor();
-				
-			// Sleep to allow the two new threads to begin reading
-			// the program-running process's input and error streams
-			// before finished[0] is set to true. This is especially
-			// necessary with short programs that execute quickly. If
-			// finished[0] is set to true before the threads run,
-			// nothing will be read from the input and error streams.
-			Thread.currentThread().sleep(300);
+
+			if (monitor.isCanceled()) {
+				p.destroy();
+			} else {
+				p.waitFor();
+					
+				// Sleep to allow the two new threads to begin reading
+				// the program-running process's input and error streams
+				// before finished[0] is set to true. This is especially
+				// necessary with short programs that execute quickly. If
+				// finished[0] is set to true before the threads run,
+				// nothing will be read from the input and error streams.
+				Thread.currentThread().sleep(300);
+			}
 				
 			finished[0] = true;
 		} catch (IOException e) {
-			handleException(e);
+			handleException(e, status);
 		} catch (InterruptedException e) {
-			handleException(e);
+			handleException(e, status);
 		} finally {
 			monitor.done();
 		}

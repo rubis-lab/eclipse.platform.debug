@@ -14,6 +14,7 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -78,8 +79,13 @@ public final class ToolUtil {
 	/**
 	 * Expands all the variables found in an individual
 	 * argument text.
+	 * 
+	 * @param argument one of the argument text in the list of arguments
+	 * @param context the context to use for expanding variables
+	 * @param status multi status to report any problems expanding variables
+	 * @return the argument text with all variables expanded, or <code>null</code> if not possible
 	 */
-	public static String expandArgument(String argument, ExpandVariableContext context) throws CoreException {
+	public static String expandArgument(String argument, ExpandVariableContext context, MultiStatus status) {
 		StringBuffer buffer = new StringBuffer();
 		
 		int start = 0;
@@ -98,7 +104,8 @@ public final class ToolUtil {
 			// Invalid variable format
 			if (varDef.end == -1 || varDef.name == null || varDef.name.length() == 0) {
 				String msg = ToolMessages.getString("ToolUtil.argumentVarFormatWrong"); //$NON-NLS-1$
-				throw ExternalToolsPlugin.getDefault().newError(msg, null);
+				status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+				return null;
 			}
 
 			// Copy text between start and variable.			
@@ -112,14 +119,16 @@ public final class ToolUtil {
 			ArgumentVariable variable = registry.getArgumentVariable(varDef.name);
 			if (variable == null) {
 				String msg = ToolMessages.format("ToolUtil.argumentVarMissing", new Object[] {varDef.name}); //$NON-NLS-1$
-				throw ExternalToolsPlugin.getDefault().newError(msg, null);
+				status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+				return null;
 			}
 			
 			// Expand the variable as text if possible
 			String text = variable.getExpander().getText(varDef.name, varDef.argument, context);
 			if (text == null) {
 				String msg = ToolMessages.format("ToolUtil.argumentVarExpandFailed", new Object[] {varDef.name}); //$NON-NLS-1$
-				throw ExternalToolsPlugin.getDefault().newError(msg, null);
+				status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+				return null;
 			}
 			buffer.append(text);
 		}
@@ -134,16 +143,17 @@ public final class ToolUtil {
 	 * @param arguments the arguments with leading and trailing
 	 * 		spaces already removed.
 	 * @param context the context used to expand the variable(s)
-	 * @return the list of individual arguments
+	 * @param status multi status to report any problems expanding variables
+	 * @return the list of individual arguments where some elements in the
+	 * 		list maybe <code>null</code> if problems expanding variable(s).
 	 */
-	public static String[] expandArguments(String arguments, ExpandVariableContext context) throws CoreException {
+	public static String[] expandArguments(String arguments, ExpandVariableContext context, MultiStatus status) {
 		if (arguments == null || arguments.length() == 0)
 			return new String[0];
 
 		String[] argList = parseArgumentsIntoList(arguments);
-		for (int i = 0; i < argList.length; i++) {
-			argList[i] = expandArgument(argList[i], context);
-		}
+		for (int i = 0; i < argList.length; i++)
+			argList[i] = expandArgument(argList[i], context, status);
 		
 		return argList;
 	}
@@ -156,9 +166,10 @@ public final class ToolUtil {
 	 * @param dirLocation a directory location either as a path or a variable
 	 * 		with leading and trailing spaces already removed.
 	 * @param context the context used to expand the variable
-	 * @return the directory location as a string
+	 * @param status multi status to report any problems expanding variables
+	 * @return the directory location as a string or <code>null</code> if not possible
 	 */
-	public static String expandDirectoryLocation(String dirLocation, ExpandVariableContext context) throws CoreException {
+	public static String expandDirectoryLocation(String dirLocation, ExpandVariableContext context, MultiStatus status) {
 		if (dirLocation == null || dirLocation.length() == 0)
 			return ""; //$NON-NLS-1$
 
@@ -169,14 +180,16 @@ public final class ToolUtil {
 		
 		// Disallow text before/after variable
 		if (varDef.start != 0 || (varDef.end < dirLocation.length() && varDef.end != -1)) {
-			String text = ToolMessages.getString("ToolUtil.dirLocVarBetweenText"); //$NON-NLS-1$
-			throw ExternalToolsPlugin.getDefault().newError(text, null);
+			String msg = ToolMessages.getString("ToolUtil.dirLocVarBetweenText"); //$NON-NLS-1$
+			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			return null;
 		}
 		
 		// Invalid variable format
 		if (varDef.name == null || varDef.name.length() == 0 || varDef.end == -1) {
-			String text = ToolMessages.getString("ToolUtil.dirLocVarFormatWrong"); //$NON-NLS-1$
-			throw ExternalToolsPlugin.getDefault().newError(text, null);
+			String msg = ToolMessages.getString("ToolUtil.dirLocVarFormatWrong"); //$NON-NLS-1$
+			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			return null;
 		}
 		
 		// Lookup the variable if it exist
@@ -184,15 +197,17 @@ public final class ToolUtil {
 		registry = ExternalToolsPlugin.getDefault().getDirectoryLocationVariableRegistry();
 		PathLocationVariable variable = registry.getPathLocationVariable(varDef.name);
 		if (variable == null) {
-			String text = ToolMessages.format("ToolUtil.dirLocVarMissing", new Object[] {varDef.name}); //$NON-NLS-1$
-			throw ExternalToolsPlugin.getDefault().newError(text, null);
+			String msg = ToolMessages.format("ToolUtil.dirLocVarMissing", new Object[] {varDef.name}); //$NON-NLS-1$
+			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			return null;
 		}
 		
 		// Expand the variable into a IPath if possible
 		IPath path = variable.getExpander().getPath(varDef.name, varDef.argument, context);
 		if (path == null) {
-			String text = ToolMessages.format("ToolUtil.dirLocVarExpandFailed", new Object[] {varDef.name}); //$NON-NLS-1$
-			throw ExternalToolsPlugin.getDefault().newError(text, null);
+			String msg = ToolMessages.format("ToolUtil.dirLocVarExpandFailed", new Object[] {varDef.name}); //$NON-NLS-1$
+			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			return null;
 		}
 		
 		return path.toOSString();
@@ -206,9 +221,10 @@ public final class ToolUtil {
 	 * @param fileLocation a file location either as a path or a variable
 	 * 		with leading and trailing spaces already removed.
 	 * @param context the context used to expand the variable
-	 * @return the file location as a string
+	 * @param status multi status to report any problems expanding variables
+	 * @return the file location as a string or <code>null</code> if not possible
 	 */
-	public static String expandFileLocation(String fileLocation, ExpandVariableContext context) throws CoreException {
+	public static String expandFileLocation(String fileLocation, ExpandVariableContext context, MultiStatus status) {
 		if (fileLocation == null || fileLocation.length() == 0)
 			return ""; //$NON-NLS-1$
 
@@ -219,14 +235,16 @@ public final class ToolUtil {
 		
 		// Disallow text before/after variable
 		if (varDef.start != 0 || (varDef.end < fileLocation.length() && varDef.end != -1)) {
-			String text = ToolMessages.getString("ToolUtil.fileLocVarBetweenText"); //$NON-NLS-1$
-			throw ExternalToolsPlugin.getDefault().newError(text, null);
+			String msg = ToolMessages.getString("ToolUtil.fileLocVarBetweenText"); //$NON-NLS-1$
+			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			return null;
 		}
 		
 		// Invalid variable format
 		if (varDef.name == null || varDef.name.length() == 0 || varDef.end == -1) {
-			String text = ToolMessages.getString("ToolUtil.fileLocVarFormatWrong"); //$NON-NLS-1$
-			throw ExternalToolsPlugin.getDefault().newError(text, null);
+			String msg = ToolMessages.getString("ToolUtil.fileLocVarFormatWrong"); //$NON-NLS-1$
+			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			return null;
 		}
 		
 		// Lookup the variable if it exist
@@ -234,15 +252,17 @@ public final class ToolUtil {
 		registry = ExternalToolsPlugin.getDefault().getFileLocationVariableRegistry();
 		PathLocationVariable variable = registry.getPathLocationVariable(varDef.name);
 		if (variable == null) {
-			String text = ToolMessages.format("ToolUtil.fileLocVarMissing", new Object[] {varDef.name}); //$NON-NLS-1$
-			throw ExternalToolsPlugin.getDefault().newError(text, null);
+			String msg = ToolMessages.format("ToolUtil.fileLocVarMissing", new Object[] {varDef.name}); //$NON-NLS-1$
+			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			return null;
 		}
 		
 		// Expand the variable into a IPath if possible
 		IPath path = variable.getExpander().getPath(varDef.name, varDef.argument, context);
 		if (path == null) {
-			String text = ToolMessages.format("ToolUtil.fileLocVarExpandFailed", new Object[] {varDef.name}); //$NON-NLS-1$
-			throw ExternalToolsPlugin.getDefault().newError(text, null);
+			String msg = ToolMessages.format("ToolUtil.fileLocVarExpandFailed", new Object[] {varDef.name}); //$NON-NLS-1$
+			status.merge(ExternalToolsPlugin.getDefault().newErrorStatus(msg, null));
+			return null;
 		}
 		
 		return path.toOSString();

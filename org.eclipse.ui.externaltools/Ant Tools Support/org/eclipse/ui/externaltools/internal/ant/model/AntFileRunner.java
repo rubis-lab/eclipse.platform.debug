@@ -12,6 +12,7 @@ Contributors:
 import org.eclipse.ant.core.AntRunner;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.ui.externaltools.model.IExternalToolRunner;
 import org.eclipse.ui.externaltools.model.IRunnerContext;
@@ -33,7 +34,7 @@ public class AntFileRunner implements IExternalToolRunner {
 	/* (non-Javadoc)
 	 * Method declared in IExternalToolsRunner.
 	 */
-	public void run(IProgressMonitor monitor, IRunnerContext runnerContext) throws CoreException, InterruptedException {
+	public void run(IProgressMonitor monitor, IRunnerContext runnerContext, MultiStatus status) {
 		try {
 			// Determine the targets to run.
 			String value = runnerContext.getExtraAttribute(AntUtil.RUN_TARGETS_ATTRIBUTE);
@@ -59,13 +60,15 @@ public class AntFileRunner implements IExternalToolRunner {
 			if (targets.length > 0)
 				runner.setExecutionTargets(targets);
 			runner.addBuildLogger(ANT_LOGGER_CLASS);
-			runner.run(monitor);
+			
+			if (!monitor.isCanceled())
+				runner.run(monitor);
 		} catch (CoreException e) {
 			Throwable carriedException = e.getStatus().getException();
 			if (carriedException instanceof OperationCanceledException) {
-				throw new InterruptedException(carriedException.getMessage());
+				monitor.setCanceled(true);
 			} else {
-				throw e;
+				status.merge(e.getStatus());
 			}
 		} finally {
 			monitor.done();

@@ -12,6 +12,8 @@ Contributors:
 import java.io.File;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -20,6 +22,7 @@ import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 import org.eclipse.ui.externaltools.model.ExternalTool;
+import org.eclipse.ui.externaltools.model.IExternalToolConstants;
 import org.eclipse.ui.externaltools.model.ToolUtil;
 import org.eclipse.ui.externaltools.variable.ExpandVariableContext;
 
@@ -332,10 +335,12 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 
 		// Translate field contents to the actual file location so we
 		// can check to ensure the file actually exists.
-		try {
-			value = ToolUtil.expandFileLocation(value, ExpandVariableContext.EMPTY_CONTEXT);
-		} catch (CoreException e) {
-			getPage().setMessage(e.getStatus().getMessage(), getPage().WARNING);
+		MultiStatus status = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "", null); //$NON-NLS-1$
+		value = ToolUtil.expandFileLocation(value, ExpandVariableContext.EMPTY_CONTEXT, status);
+		if (!status.isOK()) {
+			IStatus[] children = status.getChildren();
+			if (children.length > 0)
+				getPage().setMessage(children[0].getMessage(), getPage().WARNING);
 			setIsValid(false);
 			return false;			
 		}
@@ -404,10 +409,12 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 		if (value.length() > 0) {
 			// Translate field contents to the actual directory location so we
 			// can check to ensure the directory actually exists.
-			try {
-				value = ToolUtil.expandDirectoryLocation(value, ExpandVariableContext.EMPTY_CONTEXT);
-			} catch (CoreException e) {
-				getPage().setMessage(e.getStatus().getMessage(), getPage().WARNING);
+			MultiStatus status = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "", null); //$NON-NLS-1$
+			value = ToolUtil.expandDirectoryLocation(value, ExpandVariableContext.EMPTY_CONTEXT, status);
+			if (!status.isOK()) {
+				IStatus[] children = status.getChildren();
+				if (children.length > 0)
+					getPage().setMessage(children[0].getMessage(), getPage().WARNING);
 				setIsValid(false);
 				return false;			
 			}
