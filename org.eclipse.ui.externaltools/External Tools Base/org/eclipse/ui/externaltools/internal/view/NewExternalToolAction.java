@@ -10,10 +10,8 @@ Contributors:
 **********************************************************************/
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.actions.NewWizardTypeAction;
+import org.eclipse.ui.actions.NewWizardAction;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.IHelpContextIds;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
@@ -25,7 +23,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
  */
 public class NewExternalToolAction extends Action {
 	private static final String CATEGORY_ID = "org.eclipse.ui.externaltools.newWizards"; //$NON-NLS-1$
-	private static final String DLG_SETTING_SECTION = "NewWizardTypeAction"; //$NON-NLS-1$
 	
 	private IWorkbenchPage page;
 
@@ -48,11 +45,8 @@ public class NewExternalToolAction extends Action {
 	 * Method declared on Action.
 	 */
 	public void run() {
-		IDialogSettings pluginSettings = ExternalToolsPlugin.getDefault().getDialogSettings();
-		IDialogSettings wizardSettings = pluginSettings.getSection(DLG_SETTING_SECTION);
-		if (wizardSettings == null)
-			wizardSettings = pluginSettings.addNewSection(DLG_SETTING_SECTION);
-		NewWizardTypeAction action = new NewWizardTypeAction(page.getWorkbenchWindow(), CATEGORY_ID, wizardSettings);
+		NewWizardAction action = new NewWizardAction();
+		action.setCategoryId(CATEGORY_ID);
 		action.run();
 	}
 }
