@@ -83,8 +83,9 @@ public class AntFileRunner implements IExternalToolRunner {
 				}
 			}
 
-			if (!monitor.isCanceled())
+			if (!monitor.isCanceled()) {
 				runner.run(monitor);
+			}
 		} catch (CoreException e) {
 			Throwable carriedException = e.getStatus().getException();
 			if (carriedException instanceof OperationCanceledException) {
