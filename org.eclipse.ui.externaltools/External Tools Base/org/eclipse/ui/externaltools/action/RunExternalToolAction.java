@@ -24,6 +24,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -121,6 +122,7 @@ public class RunExternalToolAction extends Action {
 				ToolMessages.getString("RunExternalToolAction.openPerspTitle"), //$NON-NLS-1$;
 				ToolMessages.getString("RunExternalToolAction.openPerspProblem"), //$NON-NLS-1$;
 				e.getStatus());
+			ExternalToolsPlugin.getDefault().log(ToolMessages.getString("RunExternalToolAction.openPerspProblem"), e);
 		}
 	}
 
@@ -253,14 +255,14 @@ public class RunExternalToolAction extends Action {
 			ErrorDialog.openError(
 				window.getShell(), 
 				ToolMessages.getString("RunExternalToolAction.runErrorTitle"), //$NON-NLS-1$;
-				ToolMessages.getString("RunExternalToolAction.runProblem"), //$NON-NLS-1$;
+				null,
 				status);
 		}
 		
 		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 			determineSelectedResource();
 			context = new DefaultRunnerContext(tool, selectedResource);
-			status = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "", null); //$NON-NLS-1$
+			status = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, ToolMessages.getString("RunExternalToolAction.runProblem"), null); //$NON-NLS-1$;
 			
 			if (tool.getRunInBackground()) {
 				Thread thread = new Thread(new Runnable() {
@@ -281,7 +283,13 @@ public class RunExternalToolAction extends Action {
 			} else {
 				context.run(monitor, status);
 				if (!status.isOK())
-					displayErrorStatus();
+					if (window.getShell() != null && !window.getShell().isDisposed()) {
+						window.getShell().getDisplay().syncExec(new Runnable() { 
+							public void run() {
+								displayErrorStatus();
+							}
+						});
+					}
 			}
 		};
 	}
