@@ -11,13 +11,15 @@ Contributors:
 
 import java.util.ArrayList;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IActionFilter;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
-import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
 /**
@@ -92,26 +94,11 @@ public final class ExternalTool implements IAdaptable {
 	 * @return a string indicating the invalid format or <code>null</code> if valid.
 	 */
 	public static String validateToolName(String name) {
-		boolean leastOneChar = false;
-		
-		if (name != null) {
-			for (int i = 0; i < name.length(); i++) {
-				char ch = name.charAt(i);
-				if (!Character.isLetterOrDigit(ch)) {
-					if (!Character.isSpaceChar(ch)) {
-						if (ch != '-')
-							return ToolMessages.getString("ExternalTool.nameContainsInvalidChar"); //$NON-NLS-1$
-					}
-				} else {
-					leastOneChar = true;
-				}
-			}
+		IStatus status = ResourcesPlugin.getWorkspace().validateName(name, IResource.FILE);
+		if (status.getCode() != IStatus.OK) {
+			return status.getMessage();								
 		}
-		
-		if (leastOneChar)
-			return null;
-		else
-			return ToolMessages.getString("ExternalTool.nameMustContainOneChar"); //$NON-NLS-1$
+		return null;
 	}
 
 	/* (non-Javadoc)
