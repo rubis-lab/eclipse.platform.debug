@@ -16,8 +16,12 @@ import java.util.Iterator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.model.IDebugElement;
+import org.eclipse.debug.internal.core.IDebugRuleFactory;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.action.IAction;
@@ -65,14 +69,9 @@ public abstract class AbstractDebugActionDelegate implements IWorkbenchWindowAct
 	 */
 	protected IWorkbenchWindow fWindow;
 	
-	/**
-	 * Background job for this action, or <code>null</code> if none.
-	 */
-	private DebugRequestJob fBackgroundJob = null;
-	
 	class DebugRequestJob extends Job {
 	    
-	    private Object[] fElements = null;
+	    private Object fElement;
 
 	    /** 
 	     * Constructs a new job to perform a debug request (for example, step)
@@ -80,35 +79,22 @@ public abstract class AbstractDebugActionDelegate implements IWorkbenchWindowAct
 	     * 
 	     * @param name job name
 	     */
-	    public DebugRequestJob(String name) {
+	    public DebugRequestJob(String name, Object target) {
 	        super(name);
 	        setPriority(Job.INTERACTIVE);
+	        fElement = target;
 	    }
 	    
         /* (non-Javadoc)
          * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
          */
         protected IStatus run(IProgressMonitor monitor) {
-		    MultiStatus status= 
-				new MultiStatus(DebugUIPlugin.getUniqueIdentifier(), DebugException.REQUEST_FAILED, getStatusMessage(), null);
-		    for (int i = 0; i < fElements.length; i++) {
-				Object element= fElements[i];
-				try {
-					doAction(element);
-				} catch (DebugException e) {
-					status.merge(e.getStatus());
-				}
+			try {
+				doAction(fElement);
+			} catch (DebugException e) {
+				return e.getStatus();
 			}
-			return status;
-        }
-        
-        /**
-         * Sets the selection to operate on.
-         * 
-         * @param elements
-         */
-        public void setTargets(Object[] elements) {
-            fElements = elements;
+			return Status.OK_STATUS;
         }
 	    
 	}
@@ -128,7 +114,6 @@ public abstract class AbstractDebugActionDelegate implements IWorkbenchWindowAct
 		if (getWindow() != null) {
 			getWindow().getSelectionService().removeSelectionListener(IDebugUIConstants.ID_DEBUG_VIEW, this);
 		}
-		fBackgroundJob = null;
 	}
 
 	/* (non-Javadoc)
@@ -163,11 +148,21 @@ public abstract class AbstractDebugActionDelegate implements IWorkbenchWindowAct
 	private void runInBackground(IAction action, IStructuredSelection selection) {
 	    // disable the action
 	    action.setEnabled(false);
-	    if (fBackgroundJob == null) {
-			fBackgroundJob = new DebugRequestJob(action.getText());
+	    Iterator iterator = selection.iterator();
+	    while (iterator.hasNext()) {
+	        Object target = iterator.next();
+	        ISchedulingRule rule = null;
+	        if (target instanceof IDebugElement) {
+                IDebugElement element = (IDebugElement) target;
+                IDebugRuleFactory ruleFactory = (IDebugRuleFactory) element.getAdapter(IDebugRuleFactory.class);
+                if (ruleFactory != null) {
+                    rule = ruleFactory.modificationRule(element);
+                }
+            }
+	        DebugRequestJob job = new DebugRequestJob(action.getText(), target);
+	        job.setRule(rule);
+	        job.schedule();
 	    }
-	    fBackgroundJob.setTargets(selection.toArray());
-		fBackgroundJob.schedule();
 	}
 	
 	/**

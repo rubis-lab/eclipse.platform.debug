@@ -18,10 +18,16 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.model.IDebugElement;
+import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IMemoryBlock;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IThread;
 import org.eclipse.debug.core.model.IValue;
+import org.eclipse.debug.internal.core.IDebugRuleFactory;
 import org.eclipse.debug.internal.core.ListenerList;
 import org.eclipse.debug.internal.ui.views.memory.IMemoryBlockModelPresentation;
 import org.eclipse.debug.internal.ui.views.memory.IMemoryRenderingType;
@@ -99,17 +105,58 @@ public class LazyModelPresentation implements IDebugModelPresentation, IDebugEdi
 	 * @see IDebugModelPresentation#getImage(Object)
 	 */
 	public Image getImage(Object element) {
-		return getPresentation().getImage(element);
+	    Image image = null;
+	    // TODO: causes UI job blocking dialog to appear
+//	    ISchedulingRule rule = null;
+//	    try {
+//		    rule = beginRule(element);
+		    image = getPresentation().getImage(element);
+//	    } finally {
+//	        endRule(rule);
+//	    }
+	    return image;
 	}
 
 	/**
 	 * @see IDebugModelPresentation#getText(Object)
 	 */
 	public String getText(Object element) {
-		return getPresentation().getText(element);
+	    String text = null;
+	    ISchedulingRule rule = null;
+	    try {
+		    rule = beginRule(element); 
+			text = getPresentation().getText(element);
+	    } finally {
+	        endRule(rule);
+	    }
+		return text;
 	}
 	
 	/**
+     * @param rule
+     */
+    private void endRule(ISchedulingRule rule) {
+        if (rule != null) {
+            Platform.getJobManager().endRule(rule);
+        }
+    }
+
+    /**
+     * @param element
+     * @return
+     */
+    private ISchedulingRule beginRule(Object object) {
+        ISchedulingRule rule = null;
+        if (object instanceof IDebugElement) {
+            rule = DebugPlugin.accessRule((IDebugElement)object);
+            if (rule != null) {
+                Platform.getJobManager().beginRule(rule, null);
+            }
+        }
+        return rule;
+    }
+
+    /**
 	 * @see IDebugModelPresentation#computeDetail(IValue, IValueDetailListener)
 	 */
 	public void computeDetail(IValue value, IValueDetailListener listener) {
