@@ -365,6 +365,9 @@ public class ExternalToolRegistry {
 			isNew = true;
 		}
 		
+		// Ensure the extenal tool storage directory exist
+		TOOLS_PATH.toFile().mkdirs();
+		
 		IStatus results = storeTool(tool, filename);
 		if (results != null)
 			return results;

@@ -137,7 +137,7 @@ public class ExternalToolActionGroup extends ActionGroup {
 	 * Runs the default action by invoking the appropriate action
 	 */
 	public void runDefaultAction(IStructuredSelection selection) {
-		runAction.setSelectedTool(getSelectedTool(selection));
+		runAction.setTool(getSelectedTool(selection));
 		runAction.run();
 	}
 
@@ -176,8 +176,8 @@ public class ExternalToolActionGroup extends ActionGroup {
 //		pasteAction.setEnabled();
 		delAction.setSelectedTool(selectedTool);
 		renameAction.setSelectedTool(selectedTool);
-		runAction.setSelectedTool(selectedTool);
-		runWithAction.setSelectedTool(selectedTool);
+		runAction.setTool(selectedTool);
+		runWithAction.setTool(selectedTool);
 		editAction.setSelectedTool(selectedTool);
 	}
 }
