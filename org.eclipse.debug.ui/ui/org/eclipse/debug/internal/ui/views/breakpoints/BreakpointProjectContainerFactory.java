@@ -20,6 +20,9 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE.SharedImages;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 /**
@@ -28,6 +31,8 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 public class BreakpointProjectContainerFactory extends AbstractBreakpointContainerFactory {
 	
 	private ILabelProvider fImageProvider= new WorkbenchLabelProvider();
+	// Handle to the image for the "other" container. Maintained so it can be disposed.
+	private Image fOtherImage= null;
 	
 	public BreakpointProjectContainerFactory() {
 	}
@@ -76,6 +81,8 @@ public class BreakpointProjectContainerFactory extends AbstractBreakpointContain
 					this,
 					"(no project)",
 					parentId);
+			fOtherImage= PlatformUI.getWorkbench().getSharedImages().getImage(SharedImages.IMG_OBJ_PROJECT);
+			container.setImage(fOtherImage);
 			containers.add(container);
 		}
 		return (IBreakpointContainer[]) containers.toArray(new IBreakpointContainer[containers.size()]);
@@ -83,6 +90,9 @@ public class BreakpointProjectContainerFactory extends AbstractBreakpointContain
 	
 	public void dispose() {
 		fImageProvider.dispose();
+		if (fOtherImage != null) {
+			fOtherImage.dispose();
+		}
 	}
 
 }

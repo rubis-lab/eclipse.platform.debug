@@ -96,7 +96,7 @@ public class BreakpointsViewEventHandler implements IBreakpointsListener, IActiv
 								if (viewer.getChecked(breakpoint) != enabled) {
 									viewer.setChecked(breakpoint, breakpoint.isEnabled());								
 								}
-								fView.updateParentsCheckedState(breakpoint, enabled);
+								fView.updateParents(breakpoint, enabled);
 
                                 if (!DebugPlugin.getDefault().getBreakpointManager().isEnabled()) {
                                 	fView.updateViewerBackground();
@@ -167,24 +167,15 @@ public class BreakpointsViewEventHandler implements IBreakpointsListener, IActiv
 								try {
 									boolean enabled= breakpoint.isEnabled();
 									if (viewer.getChecked(breakpoint) != enabled) {
-									    String group= breakpoint.getGroup();
-									    if (group != null) {
-											groupsToUpdate.add(group);   
-                                        }
 										viewer.setChecked(breakpoint, breakpoint.isEnabled());
-										viewer.update(breakpoint, null);							
+										viewer.update(breakpoint, null);	
 									}
+									fView.updateParents(breakpoint, enabled);
 								} catch (CoreException e) {
 									DebugUIPlugin.errorDialog(DebugUIPlugin.getShell(), DebugUIViewsMessages.getString("BreakpointsViewEventHandler.1"), DebugUIViewsMessages.getString("BreakpointsViewEventHandler.2"), e); //$NON-NLS-1$ //$NON-NLS-2$
 									DebugUIPlugin.log(e);
 								}
 							}
-						}
-						// Update the checked/grayed state of groups whose children changed
-						Iterator iter= groupsToUpdate.iterator();
-						while (iter.hasNext()) {
-						    String group = (String) iter.next();
-						    fView.updateGroupCheckedState(group);
 						}
 						fView.updateObjects();
 					}

@@ -405,6 +405,9 @@ public interface IDebugUIConstants {
 	
 	/** Breakpoint group image identifier. */
 	public static final String IMG_OBJS_BREAKPOINT_GROUP = "IMG_OBJS_BREAKPOINT_GROUP"; //$NON-NLS-1$
+	
+	/** Disabled breakpoint group image identifier. */
+	public static final String IMG_OBJS_BREAKPOINT_GROUP_DISABLED = "IMG_OBJS_BREAKPOINT_GROUP_DISABLED"; //$NON-NLS-1$
 		
 	/**
 	 * Enabled watchpoint image identifier (access & modification).

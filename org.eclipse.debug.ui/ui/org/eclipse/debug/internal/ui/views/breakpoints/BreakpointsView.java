@@ -42,6 +42,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IBasicPropertyConstants;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -116,10 +117,27 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 	    viewer.setLabelProvider(new DelegatingModelPresentation() {
 			public Image getImage(Object item) {
 				if (item instanceof IBreakpointContainer) {
+					Image image= DebugPluginImages.getImage(IDebugUIConstants.IMG_OBJS_BREAKPOINT_GROUP);
 					IBreakpointContainer container= (IBreakpointContainer) item;
-					Image image = container.getContainerImage();
-					if (image == null) {
-						image= DebugPluginImages.getImage(IDebugUIConstants.IMG_OBJS_BREAKPOINT_GROUP);
+					Image containerImage = container.getContainerImage();
+					if (container instanceof BreakpointGroupContainer) {
+						// First, set to the "disabled group" image
+						containerImage= DebugPluginImages.getImage(IDebugUIConstants.IMG_OBJS_BREAKPOINT_GROUP_DISABLED);
+						IBreakpoint[] breakpoints = container.getBreakpoints();
+						for (int i = 0; i < breakpoints.length; i++) {
+							try {
+								if (breakpoints[i].isEnabled()) {
+									// If any child breakpoints are enabled, reset to the
+									// default (enabled) image.
+									containerImage= image;
+								}
+							} catch (CoreException e) {
+								DebugUIPlugin.log(e);
+							}
+						}
+					}
+					if (containerImage != null) {
+						image= containerImage;
 					}
 					return image;
 				}
@@ -333,8 +351,11 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 		ITreeContentProvider contentProvider= getTreeContentProvider();
 		try {
 			breakpoint.setEnabled(enable);
-			updateParentsCheckedState(breakpoint, enable);
 			viewer.update(breakpoint, null);
+			// updateParents will also be called from the breakpointChanged callback,
+			// but we include it here so that the feedback is immediate when the user
+			// toggles a breakpoint within the view.
+			updateParents(breakpoint, enable);
 		} catch (CoreException e) {
 			String titleState= enable ? DebugUIViewsMessages.getString("BreakpointsView.6") : DebugUIViewsMessages.getString("BreakpointsView.7"); //$NON-NLS-1$ //$NON-NLS-2$
 			String messageState= enable ? DebugUIViewsMessages.getString("BreakpointsView.8") : DebugUIViewsMessages.getString("BreakpointsView.9");  //$NON-NLS-1$ //$NON-NLS-2$
@@ -347,13 +368,13 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 	}
 	
 	/**
-	 * Updates the checked state of the given object's container
+	 * Updates the checked state and icon of the given object's container
 	 * assuming that the child element has changed to the given
 	 * enabled state.
 	 * @param object
 	 * @param enable
 	 */
-	public void updateParentsCheckedState(Object object, boolean enable) {
+	public void updateParents(Object object, boolean enable) {
 		Object parent= getTreeContentProvider().getParent(object);
 		if (!(parent instanceof IBreakpointContainer)) {
 			return;
@@ -378,7 +399,8 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 			} catch (CoreException e) {
 			}
 		}
-		updateParentsCheckedState(parent, enable);
+		viewer.update(container, new String[] { IBasicPropertyConstants.P_IMAGE });
+		updateParents(parent, enable);
 	}
 
 	/**
@@ -402,6 +424,10 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 				DebugUIPlugin.log(e);
 			}
 		}
+		// updateParents will also be called from the breakpointChanged callback,
+		// but we include it here so that the feedback is immediate when the user
+		// toggles a breakpoint within the view.
+		updateParents(container, enable);
 		if (!DebugPlugin.getDefault().getBreakpointManager().isEnabled()) {
 			viewer.setGrayed(container, true);
 		}
