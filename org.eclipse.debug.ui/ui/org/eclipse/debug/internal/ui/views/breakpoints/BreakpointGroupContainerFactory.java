@@ -60,7 +60,7 @@ public class BreakpointGroupContainerFactory extends AbstractBreakpointContainer
 		while (iter.hasNext()) {
 			String group= (String) iter.next();
 			List list= (List) map.get(group);
-			BreakpointContainer container= new BreakpointContainer(
+			BreakpointGroupContainer container= new BreakpointGroupContainer(
 					(IBreakpoint[]) list.toArray(new IBreakpoint[0]),
 					this,
 					group,
@@ -68,7 +68,7 @@ public class BreakpointGroupContainerFactory extends AbstractBreakpointContainer
 			containers.add(container);
 		}
 		if (other.size() > 0) {
-			BreakpointContainer container= new BreakpointContainer(
+			BreakpointGroupContainer container= new BreakpointGroupContainer(
 					(IBreakpoint[]) other.toArray(new IBreakpoint[0]),
 					this,
 					"(no group)",
