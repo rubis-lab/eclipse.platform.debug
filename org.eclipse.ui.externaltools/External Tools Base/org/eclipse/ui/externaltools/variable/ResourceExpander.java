@@ -10,6 +10,7 @@ Contributors:
 **********************************************************************/
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 
@@ -34,9 +35,27 @@ public class ResourceExpander implements IVariableLocationExpander, IVariableRes
 	 */
 	/*package*/ IResource expand(String varValue, ExpandVariableContext context) {
 		if (varValue != null && varValue.length() > 0)
-			return ResourcesPlugin.getWorkspace().getRoot().findMember(varValue);
+			return expandToMember(varValue);
 		else
-			return context.getSelectedResource();
+			return expandUsingContext(context);
+	}
+	
+	/**
+	 * Expands using the current context information.
+	 * By default, return the selected resource of the
+	 * context.
+	 */
+	/*package*/ IResource expandUsingContext(ExpandVariableContext context) {
+		return context.getSelectedResource();
+	}
+	
+	/**
+	 * Expands the variable value to a resource. The value
+	 * will not be <code>null</code> nor empty. By default,
+	 * lookup the member from the workspace root.
+	 */
+	/*package*/ IResource expandToMember(String varValue) {
+		return getWorkspaceRoot().findMember(varValue);
 	}
 	
 	/* (non-Javadoc)
@@ -59,5 +78,12 @@ public class ResourceExpander implements IVariableLocationExpander, IVariableRes
 			return new IResource[] {resource};
 		else
 			return null;
+	}
+	
+	/**
+	 * Returns the workspace root resource.
+	 */
+	protected final IWorkspaceRoot getWorkspaceRoot() {
+		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 }

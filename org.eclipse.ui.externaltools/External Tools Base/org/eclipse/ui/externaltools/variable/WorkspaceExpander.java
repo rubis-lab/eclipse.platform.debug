@@ -31,7 +31,7 @@ public class WorkspaceExpander extends ResourceExpander {
 	/* (non-Javadoc)
 	 * Method declared on ResourceExpander.
 	 */
-	/*package*/ IResource expand(String varValue, ExpandVariableContext context) {
-		return ResourcesPlugin.getWorkspace().getRoot();
+	/*package*/ IResource expandUsingContext(ExpandVariableContext context) {
+		return getWorkspaceRoot();
 	}
 }

@@ -10,7 +10,6 @@ Contributors:
 **********************************************************************/
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 /**
  * Expands a resource's project type variable into the desired
@@ -31,15 +30,18 @@ public class ResourceProjectExpander extends ResourceExpander {
 	/* (non-Javadoc)
 	 * Method declared on ResourceExpander.
 	 */
-	/*package*/ IResource expand(String varValue, ExpandVariableContext context) {
-		if (varValue != null && varValue.length() > 0) {
-			IResource member = ResourcesPlugin.getWorkspace().getRoot().findMember(varValue);
-			if (member != null)
-				return member.getProject();
-			else
-				return null;
-		} else {
-			return context.getProject();
-		}
+	/*package*/ IResource expandUsingContext(ExpandVariableContext context) {
+		return context.getProject();
+	}
+	
+	/* (non-Javadoc)
+	 * Method declared on ResourceExpander.
+	 */
+	/*package*/ IResource expandToMember(String varValue) {
+		IResource member = super.expandToMember(varValue);
+		if (member != null)
+			return member.getProject();
+		else
+			return null;
 	}
 }

@@ -39,6 +39,8 @@ public class AntExternalToolNewWizard extends ExternalToolNewWizard {
 		addAntTargetsPage();
 		addOptionPage();
 		addRefreshPage();
+		
+		optionGroup.setPromptForArgumentLabel(ToolMessages.getString("AntExternalToolNewWizard.promptForArgumentLabel")); //$NON-NLS-1$
 	}
 
 	/* (non-Javadoc)
@@ -74,10 +76,13 @@ public class AntExternalToolNewWizard extends ExternalToolNewWizard {
 		addPage(page);
 	}
 
+	/**
+	 * Creates and initializes the group for selecting
+	 * which Ant targets to run.
+	 */
 	private void createAntTargetsGroup() {
 		if (antTargetsGroup != null)
 			return;
 		antTargetsGroup = new AntTargetsGroup();
 	}
-
 }

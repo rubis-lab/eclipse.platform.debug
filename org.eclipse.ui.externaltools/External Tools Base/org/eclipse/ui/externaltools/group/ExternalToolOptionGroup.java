@@ -172,6 +172,12 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 		Button button = new Button(comp, SWT.PUSH);
 		button.setText(ToolMessages.getString("ExternalToolOptionGroup.argumentVariableLabel")); //$NON-NLS-1$
 		getPage().setButtonGridData(button);
+
+		Label instruction = new Label(comp, SWT.NONE);
+		instruction.setText(ToolMessages.getString("ExternalToolOptionGroup.argumentInstruction")); //$NON-NLS-1$
+		data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		data.horizontalSpan = 2;
+		instruction.setLayoutData(data);
 	}
 	
 	/**

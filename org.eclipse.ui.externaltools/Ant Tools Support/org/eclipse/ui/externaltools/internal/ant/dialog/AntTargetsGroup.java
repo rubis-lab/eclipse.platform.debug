@@ -28,7 +28,7 @@ import org.eclipse.ui.externaltools.variable.ExpandVariableContext;
 import org.eclipse.swt.widgets.List;
 
 /**
- * Group for selecting the targets of an ant build tool.
+ * Group for selecting the targets of an Ant build tool.
  */
 public class AntTargetsGroup extends ExternalToolGroup {
 	private static final int DESCRIPTION_FIELD_HEIGHT = 3;
@@ -38,27 +38,30 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	private Map mapTargetNamesToTargetInfos = new HashMap();
 	private ArrayList subTargets = new ArrayList();
 
-	private Button runDefaultTarget;
-	private Button showSubTargets;
-	private List availableTargets;
-	private List activeTargets;
-	private Button add;
-	private Button remove;
+	private Button runDefaultTargetButton;
+	private Button showSubTargetsButton;
+	private List availableTargetsList;
+	private List activeTargetsList;
+	private Button addButton;
+	private Button removeButton;
 	private Button addAll;
 	private Button removeAll;
-	private Button up;
-	private Button down;
-	private Text description;
+	private Button upButton;
+	private Button downButton;
+	private Text descriptionField;
 	private Label descriptionLabel;
 	private Label availableLabel;
 	private Label activeLabel;
 
+	/**
+	 * Creates the group
+	 */
 	public AntTargetsGroup() {
 		super();
 	}
 
-	/**
-	 * @see org.eclipse.ui.externaltools.group.ExternalToolGroup#createGroupContents(Composite, ExternalTool)
+	/* (non-Javadoc)
+	 * Method declared on ExternalToolGroup.
 	 */
 	protected Control createGroupContents(Composite parent, ExternalTool tool) {
 		// main composite
@@ -107,7 +110,7 @@ public class AntTargetsGroup extends ExternalToolGroup {
 		
 		if (tool != null) 
 			restoreValues(tool);
-		allowSelectTargets(! runDefaultTarget.getSelection());
+		allowSelectTargets(!runDefaultTargetButton.getSelection());
 		
 		return mainComposite;
 	}
@@ -121,15 +124,15 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	 * "Run default target" preference.
 	 */
 	private void createRunDefaultTargetButton(Composite parent) {
-		runDefaultTarget = new Button(parent, SWT.CHECK);
+		runDefaultTargetButton = new Button(parent, SWT.CHECK);
 		// The label that is applied if the default target is unknown
-		runDefaultTarget.setText(ToolMessages.getString("AntTargetsGroup.runDefaultTargetUnknownLabel")); //$NON-NLS-1$
-		runDefaultTarget.addSelectionListener(new SelectionAdapter() {
+		runDefaultTargetButton.setText(ToolMessages.getString("AntTargetsGroup.runDefaultTargetUnknownLabel")); //$NON-NLS-1$
+		runDefaultTargetButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				runDefaultTargetSelected();
 			}			
 		});
-		runDefaultTarget.setSelection(true);
+		runDefaultTargetButton.setSelection(true);
 	}
 	
 	/*
@@ -137,18 +140,18 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	 * "Show sub-targets" preference.
 	 */
 	private void createShowSubTargetsButton(Composite parent) {
-		showSubTargets = new Button(parent, SWT.CHECK);
-		showSubTargets.setText(ToolMessages.getString("AntTargetsGroup.showSubTargetsLabel")); //$NON-NLS-1$
-		showSubTargets.addSelectionListener(new SelectionAdapter() {
+		showSubTargetsButton = new Button(parent, SWT.CHECK);
+		showSubTargetsButton.setText(ToolMessages.getString("AntTargetsGroup.showSubTargetsLabel")); //$NON-NLS-1$
+		showSubTargetsButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				if (showSubTargets.getSelection()) {
+				if (showSubTargetsButton.getSelection()) {
 					showSubTargets();
 				} else {
 					hideSubTargets();
 				}
 			}			
 		});
-		showSubTargets.setSelection(false);			
+		showSubTargetsButton.setSelection(false);			
 	}
 	
 	/*
@@ -166,17 +169,17 @@ public class AntTargetsGroup extends ExternalToolGroup {
 		listComposite.setLayout(layout);
 				
 		availableLabel = new Label(listComposite, SWT.LEFT);
-		availableLabel.setText(ToolMessages.getString("AntTargetsGroup.availableTargetsLabel"));
+		availableLabel.setText(ToolMessages.getString("AntTargetsGroup.availableTargetsLabel")); //$NON-NLS-1$
 		
-		availableTargets = new List(listComposite, SWT.BORDER | SWT.MULTI);	
+		availableTargetsList = new List(listComposite, SWT.BORDER | SWT.MULTI);	
 		gridData = new GridData(GridData.FILL_BOTH);
-		availableTargets.setLayoutData(gridData);
+		availableTargetsList.setLayoutData(gridData);
 		
-		availableTargets.addSelectionListener(new SelectionAdapter() {
+		availableTargetsList.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				int index = availableTargets.getSelectionIndex();
+				int index = availableTargetsList.getSelectionIndex();
 				if (index >= 0)
-					targetsSelected(availableTargets.getItem(index), availableTargets);
+					targetsSelected(availableTargetsList.getItem(index), availableTargetsList);
 				else
 					deselectAll();
 			}
@@ -198,17 +201,17 @@ public class AntTargetsGroup extends ExternalToolGroup {
 		listComposite.setLayout(layout);
 				
 		activeLabel = new Label(listComposite, SWT.LEFT);
-		activeLabel.setText(ToolMessages.getString("AntTargetsGroup.activeTargetsLabel"));
+		activeLabel.setText(ToolMessages.getString("AntTargetsGroup.activeTargetsLabel")); //$NON-NLS-1$
 		
-		activeTargets = new List(listComposite, SWT.BORDER | SWT.MULTI);	
+		activeTargetsList = new List(listComposite, SWT.BORDER | SWT.MULTI);	
 		gridData = new GridData(GridData.FILL_BOTH);
-		activeTargets.setLayoutData(gridData);
+		activeTargetsList.setLayoutData(gridData);
 		
-		activeTargets.addSelectionListener(new SelectionAdapter() {
+		activeTargetsList.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				int index = activeTargets.getSelectionIndex();
+				int index = activeTargetsList.getSelectionIndex();
 				if (index >= 0)
-					targetsSelected(activeTargets.getItem(index), activeTargets);
+					targetsSelected(activeTargetsList.getItem(index), activeTargetsList);
 				else
 					deselectAll();
 			}
@@ -217,7 +220,7 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	
 	/*
 	 * Creates the bank of buttons that allow the user to
-	 * add and remove targets from the active list.
+	 * addButton and removeButton targets from the active list.
 	 */
 	private void createAddRemoveComposite(Composite parent) {
 		Composite addRemoveComposite = new Composite(parent, SWT.NONE);
@@ -232,7 +235,7 @@ public class AntTargetsGroup extends ExternalToolGroup {
 
 		createSpacer(addRemoveComposite);
 		
-		add = createButton(
+		addButton = createButton(
 			addRemoveComposite, 
 			ToolMessages.getString("AntTargetsGroup.addLabel"), //$NON-NLS-1$	
 			new SelectionAdapter() {
@@ -242,7 +245,7 @@ public class AntTargetsGroup extends ExternalToolGroup {
 			},
 			false);
 		
-		remove = createButton(
+		removeButton = createButton(
 			addRemoveComposite, 
 			ToolMessages.getString("AntTargetsGroup.removeLabel"), //$NON-NLS-1$	
 			new SelectionAdapter() {
@@ -277,7 +280,7 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	
 	/*
 	 * Creates a button bank containing the buttons for moving
-	 * targets in the active list up and down.
+	 * targets in the active list upButton and downButton.
 	 */
 	private void createUpDownComposite(Composite parent) {
 		Composite upDownComposite = new Composite(parent, SWT.NONE);
@@ -292,7 +295,7 @@ public class AntTargetsGroup extends ExternalToolGroup {
 
 		Label spacer = new Label(upDownComposite, SWT.NONE);
 				
-		up = createButton(
+		upButton = createButton(
 			upDownComposite, 
 			ToolMessages.getString("AntTargetsGroup.upLabel"), //$NON-NLS-1$	
 			new SelectionAdapter() {
@@ -302,7 +305,7 @@ public class AntTargetsGroup extends ExternalToolGroup {
 			},
 			true);
 				
-		down = createButton(
+		downButton = createButton(
 			upDownComposite, 
 			ToolMessages.getString("AntTargetsGroup.downLabel"), //$NON-NLS-1$	
 			new SelectionAdapter() {
@@ -330,48 +333,48 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	 }
 	
 	/*
-	 * Creates the text field which displays the description of the selected target.
+	 * Creates the text field which displays the descriptionField of the selected target.
 	 */
 	private void createDescriptionField(Composite parent) {
 		descriptionLabel = new Label(parent, SWT.NONE);
 		descriptionLabel.setText(ToolMessages.getString("AntTargetsGroup.descriptionLabel")); //$NON-NLS-1$
 		
-		description = new Text(parent, SWT.READ_ONLY | SWT.BORDER);
+		descriptionField = new Text(parent, SWT.READ_ONLY | SWT.BORDER);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		data.heightHint = getPage().convertHeightHint(DESCRIPTION_FIELD_HEIGHT);
-		description.setLayoutData(data);
+		descriptionField.setLayoutData(data);
 	}
 
-	/**
-	 * @see org.eclipse.ui.externaltools.group.IExternalToolGroup#restoreValues(ExternalTool)
+	/* (non-Javadoc)
+	 * Method declared on IExternalToolGroup.
 	 */
 	public void restoreValues(ExternalTool tool) {
-		if (activeTargets != null) {
-			activeTargets.setItems(toArray(tool.getExtraAttribute(AntUtil.RUN_TARGETS_ATTRIBUTE)));
+		if (activeTargetsList != null) {
+			activeTargetsList.setItems(toArray(tool.getExtraAttribute(AntUtil.RUN_TARGETS_ATTRIBUTE)));
 
-			if (activeTargets.getItemCount() == 0) {
-				runDefaultTarget.setSelection(true);
+			if (activeTargetsList.getItemCount() == 0) {
+				runDefaultTargetButton.setSelection(true);
 				runDefaultTargetSelected();
 			}
 		}
 	}
 
-	/**
-	 * @see org.eclipse.ui.externaltools.group.IExternalToolGroup#updateTool(ExternalTool)
+	/* (non-Javadoc)
+	 * Method declared on IExternalToolGroup.
 	 */
 	public void updateTool(ExternalTool tool) {
-		if (runDefaultTarget == null)
+		if (runDefaultTargetButton == null)
 			return;
-		if (runDefaultTarget.getSelection()) {
+		if (runDefaultTargetButton.getSelection()) {
 			tool.setExtraAttribute(AntUtil.RUN_TARGETS_ATTRIBUTE, null);
 		} else {
-			if (activeTargets != null)
-				tool.setExtraAttribute(AntUtil.RUN_TARGETS_ATTRIBUTE, toString(activeTargets.getItems()));
+			if (activeTargetsList != null)
+				tool.setExtraAttribute(AntUtil.RUN_TARGETS_ATTRIBUTE, toString(activeTargetsList.getItems()));
 		}
 	}
 
-	/**
-	 * @see org.eclipse.ui.externaltools.group.IExternalToolGroup#validate()
+	/* (non-Javadoc)
+	 * Method declared on IExternalToolGroup.
 	 */
 	public void validate() {
 	}
@@ -412,7 +415,7 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	 * The "run default target" preference has been selected.
 	 */
 	private void runDefaultTargetSelected() {
-		allowSelectTargets(! runDefaultTarget.getSelection());
+		allowSelectTargets(! runDefaultTargetButton.getSelection());
 	}
 	
 	/*
@@ -420,9 +423,9 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	 * to the active list.
 	 */
 	private void addTargets() {
-		String[] targets = availableTargets.getSelection();
+		String[] targets = availableTargetsList.getSelection();
 		for (int i=0; i < targets.length; i++) {
-			activeTargets.add(targets[i]);
+			activeTargetsList.add(targets[i]);
 		}
 		updateButtonEnablement();
 	}
@@ -431,9 +434,9 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	 * Removes the current selection in the active list.
 	 */
 	private void removeTargets() {
-		String[] targets = activeTargets.getSelection();
+		String[] targets = activeTargetsList.getSelection();
 		for (int i=0; i < targets.length; i++) {
-			activeTargets.remove(targets[i]);
+			activeTargetsList.remove(targets[i]);
 		}
 		deselectAll();
 	}
@@ -442,9 +445,9 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	 * Adds all the available targets to the active list.
 	 */
 	private void addAllTargets() {
-		String[] targets = availableTargets.getItems();
+		String[] targets = availableTargetsList.getItems();
 		for (int i=0; i < targets.length; i++) {
-			activeTargets.add(targets[i]);	
+			activeTargetsList.add(targets[i]);	
 		}
 		updateButtonEnablement();
 	}
@@ -453,39 +456,39 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	 * Removes all the active targets.
 	 */
 	private void removeAllTargets() {
-		activeTargets.removeAll();
+		activeTargetsList.removeAll();
 		deselectAll();
 	}
 	
 	/*
-	 * Moves the current selection in the active list up.
+	 * Moves the current selection in the active list upButton.
 	 */
 	private void moveTargetUp() {
-		int index = activeTargets.getSelectionIndex();
+		int index = activeTargetsList.getSelectionIndex();
 		// Action only works if selected element is not first element.
 		if (index > 0) {
-			String target = activeTargets.getItem(index);
-			activeTargets.remove(index);
-			activeTargets.add(target, index - 1);
-			activeTargets.setSelection(index - 1);
+			String target = activeTargetsList.getItem(index);
+			activeTargetsList.remove(index);
+			activeTargetsList.add(target, index - 1);
+			activeTargetsList.setSelection(index - 1);
 		}
 		
 		updateUpDownButtonEnablement();
 	}
 	
 	/*
-	 * Moves the current selection in the active list down.
+	 * Moves the current selection in the active list downButton.
 	 */
 	private void moveTargetDown() {
-		int index = activeTargets.getSelectionIndex();
+		int index = activeTargetsList.getSelectionIndex();
 		if (index < 0)
 			return;
 		// Action only works if selected element is not last element.
-		if (index < activeTargets.getItemCount() - 1) {
-			String target = activeTargets.getItem(index);
-			activeTargets.remove(index);
-			activeTargets.add(target, index + 1);
-			activeTargets.setSelection(index + 1);
+		if (index < activeTargetsList.getItemCount() - 1) {
+			String target = activeTargetsList.getItem(index);
+			activeTargetsList.remove(index);
+			activeTargetsList.add(target, index + 1);
+			activeTargetsList.setSelection(index + 1);
 		}
 		
 		updateUpDownButtonEnablement();
@@ -499,8 +502,8 @@ public class AntTargetsGroup extends ExternalToolGroup {
 		// Clear the map of target names to target infos.
 		mapTargetNamesToTargetInfos.clear();
 		subTargets.clear();
-		availableTargets.removeAll();
-		activeTargets.removeAll();
+		availableTargetsList.removeAll();
+		activeTargetsList.removeAll();
 		
 		if (fileLocation == null)
 			return;
@@ -518,7 +521,7 @@ public class AntTargetsGroup extends ExternalToolGroup {
 
 						if (targets[i].isDefault()) {
 							defaultTarget = targets[i];
-							runDefaultTarget.setText(ToolMessages.format("AntTargetsGroup.runDefaultTargetLabel", new Object[] {targets[i].getName()})); //NON-NLS-1$
+							runDefaultTargetButton.setText(ToolMessages.format("AntTargetsGroup.runDefaultTargetLabel", new Object[] {targets[i].getName()})); //NON-NLS-1$
 						}
 						
 						if (AntUtil.isSubTarget(targets[i])) {
@@ -528,11 +531,11 @@ public class AntTargetsGroup extends ExternalToolGroup {
 						}
 					}
 				}
-				if (showSubTargets.getSelection())
+				if (showSubTargetsButton.getSelection())
 					targetNameList.addAll(subTargets);
 					
 				String[] targetNames = (String[]) targetNameList.toArray(new String[targetNameList.size()]);
-				availableTargets.setItems(targetNames);
+				availableTargetsList.setItems(targetNames);
 			} else {
 				displayErrorStatus(status);
 			}
@@ -560,10 +563,10 @@ public class AntTargetsGroup extends ExternalToolGroup {
 
 		if (targetName == null)	
 			return;		
-		if (list == availableTargets) {
-			activeTargets.deselectAll();
+		if (list == availableTargetsList) {
+			activeTargetsList.deselectAll();
 		} else {
-			availableTargets.deselectAll();
+			availableTargetsList.deselectAll();
 		}
 		
 		showDescription(targetName);
@@ -578,56 +581,56 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	}
 	
 	/*
-	 * Updates the enabled state of the up and down buttons based
+	 * Updates the enabled state of the upButton and downButton buttons based
 	 * on the current list selection.
 	 */
 	private void updateUpDownButtonEnablement() {
-		if (activeTargets.getEnabled() == false) {
+		if (activeTargetsList.getEnabled() == false) {
 			disableUpDownButtons();
 			return;
 		}
-		// Disable up and down buttons if there is not one
+		// Disable upButton and downButton buttons if there is not one
 		// target selected in the active list.
-		if (activeTargets.getSelectionCount() != 1) {
+		if (activeTargetsList.getSelectionCount() != 1) {
 			disableUpDownButtons();
 			return;	
 		}
 			
-		int index = activeTargets.getSelectionIndex();
+		int index = activeTargetsList.getSelectionIndex();
 		if (index > 0)
-			up.setEnabled(true);
+			upButton.setEnabled(true);
 		else
-			up.setEnabled(false);
+			upButton.setEnabled(false);
 	
-		if (index >= 0 && index < activeTargets.getItemCount() - 1)
-			down.setEnabled(true);		
+		if (index >= 0 && index < activeTargetsList.getItemCount() - 1)
+			downButton.setEnabled(true);		
 		else
-			down.setEnabled(false);		
+			downButton.setEnabled(false);		
 	}
 	
 	/*
-	 * Updates the enabled state of the add, remove, addAll, and
+	 * Updates the enabled state of the addButton, removeButton, addAll, and
 	 * removeAll buttons based on the current list selection.
 	 */
 	private void updateAddRemoveButtonEnablement() {
-		if (runDefaultTarget.getSelection()) {
+		if (runDefaultTargetButton.getSelection()) {
 			disableAddRemoveButtons();
 			return;
 		}
-		int availableIndex = availableTargets.getSelectionIndex();
-		int activeIndex = activeTargets.getSelectionIndex();
-		add.setEnabled(availableIndex >= 0);
-		remove.setEnabled(activeIndex >= 0);
-		addAll.setEnabled(availableTargets.getItemCount() > 0);
-		removeAll.setEnabled(activeTargets.getItemCount() > 0);
+		int availableIndex = availableTargetsList.getSelectionIndex();
+		int activeIndex = activeTargetsList.getSelectionIndex();
+		addButton.setEnabled(availableIndex >= 0);
+		removeButton.setEnabled(activeIndex >= 0);
+		addAll.setEnabled(availableTargetsList.getItemCount() > 0);
+		removeAll.setEnabled(activeTargetsList.getItemCount() > 0);
 	}
 	
 	/*
 	 * Deselects all targets in both lists.
 	 */
 	private void deselectAll() {
-		availableTargets.deselectAll();
-		activeTargets.deselectAll();
+		availableTargetsList.deselectAll();
+		activeTargetsList.deselectAll();
 		updateButtonEnablement();
 		clearDescriptionField();
 	}
@@ -639,18 +642,18 @@ public class AntTargetsGroup extends ExternalToolGroup {
 		if (! enabled) {
 			deselectAll();
 			if (defaultTarget != null && defaultTarget.getDescription() != null)
-				description.setText(defaultTarget.getDescription());	
+				descriptionField.setText(defaultTarget.getDescription());	
 		} else {
-			description.setText(""); //$NON-NLS-1$
+			descriptionField.setText(""); //$NON-NLS-1$
 		}
 		
 		availableLabel.setEnabled(enabled);
-	 	availableTargets.setEnabled(enabled);
+	 	availableTargetsList.setEnabled(enabled);
 	 	activeLabel.setEnabled(enabled);
-	 	activeTargets.setEnabled(enabled);
+	 	activeTargetsList.setEnabled(enabled);
 	 	descriptionLabel.setEnabled(enabled);
-	 	description.setEnabled(enabled);
-	 	showSubTargets.setEnabled(enabled);
+	 	descriptionField.setEnabled(enabled);
+	 	showSubTargetsButton.setEnabled(enabled);
 	 	updateButtonEnablement();	
 	}
 
@@ -663,27 +666,27 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	}
 	
 	/*
-	 * Disables the add, remove, addAll, and
+	 * Disables the addButton, removeButton, addAll, and
 	 * removeAll buttons.
 	 */
 	private void disableAddRemoveButtons() {
-		add.setEnabled(false);
-		remove.setEnabled(false);
+		addButton.setEnabled(false);
+		removeButton.setEnabled(false);
 		addAll.setEnabled(false);
 		removeAll.setEnabled(false);		
 	}
 	
 	/*
-	 * Disables the up and down buttons.
+	 * Disables the upButton and downButton buttons.
 	 */
 	private void disableUpDownButtons() {
-		up.setEnabled(false);
-		down.setEnabled(false);		
+		upButton.setEnabled(false);
+		downButton.setEnabled(false);		
 	}
 	
 	/*
-	 * Shows the description of the given target in the
-	 * description field.
+	 * Shows the descriptionField of the given target in the
+	 * descriptionField field.
 	 */
 	private void showDescription(String targetName) {
 		clearDescriptionField();
@@ -691,14 +694,14 @@ public class AntTargetsGroup extends ExternalToolGroup {
 			return;
 		TargetInfo targetInfo = (TargetInfo) mapTargetNamesToTargetInfos.get(targetName);
 		if (targetInfo != null && targetInfo.getDescription() != null)
-			description.setText(targetInfo.getDescription());
+			descriptionField.setText(targetInfo.getDescription());
 	}
 	
 	/*
-	 * Clears the description field.
+	 * Clears the descriptionField field.
 	 */
 	 private void clearDescriptionField() {
-	 	description.setText(""); //$NON-NLS-1$
+	 	descriptionField.setText(""); //$NON-NLS-1$
 	 }
 	 
 	 /*
@@ -708,7 +711,7 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	 	Iterator i = subTargets.iterator();
 	 	while (i.hasNext()) {
 	 		String target = (String) i.next();
-	 		availableTargets.add(target);
+	 		availableTargetsList.add(target);
 	 	}
 	 }
 	 
@@ -716,8 +719,8 @@ public class AntTargetsGroup extends ExternalToolGroup {
 	  * Hides sub-targets in the available targets list.
 	  */
 	 private void hideSubTargets() {
-	 	int startOfSubTargets = availableTargets.getItemCount() - subTargets.size();
-	 	int endOfSubTargets = availableTargets.getItemCount() - 1;
-	 	availableTargets.remove(startOfSubTargets, endOfSubTargets);
+	 	int startOfSubTargets = availableTargetsList.getItemCount() - subTargets.size();
+	 	int endOfSubTargets = availableTargetsList.getItemCount() - 1;
+	 	availableTargetsList.remove(startOfSubTargets, endOfSubTargets);
 	 }
 }
