@@ -53,16 +53,23 @@ public class RunExternalToolAction extends Action {
 	/**
 	 * Create an action to run an external tool
 	 */
-	public RunExternalToolAction(IWorkbenchWindow window, boolean alwaysPromptForArguments) {
-		super();
-		this.window = window;
-		this.alwaysPromptForArguments = alwaysPromptForArguments;
+	public RunExternalToolAction(IWorkbenchWindow window) {
+		this(window, false);
 		setText(ToolMessages.getString("RunExternalToolAction.text")); //$NON-NLS-1$
 		setToolTipText(ToolMessages.getString("RunExternalToolAction.toolTip")); //$NON-NLS-1$
 		setHoverImageDescriptor(ExternalToolsPlugin.getDefault().getImageDescriptor("icons/full/clcl16/run_tool.gif")); //$NON-NLS-1$
 		setImageDescriptor(ExternalToolsPlugin.getDefault().getImageDescriptor("icons/full/elcl16/run_tool.gif")); //$NON-NLS-1$
 		setDisabledImageDescriptor(ExternalToolsPlugin.getDefault().getImageDescriptor("icons/full/dlcl16/run_tool.gif")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IHelpContextIds.RUN_TOOL_ACTION);
+	}
+
+	/**
+	 * Create an action to run an external tool
+	 */
+	protected RunExternalToolAction(IWorkbenchWindow window, boolean alwaysPromptForArguments) {
+		super();
+		this.window = window;
+		this.alwaysPromptForArguments = alwaysPromptForArguments;
 	}
 
 	/**

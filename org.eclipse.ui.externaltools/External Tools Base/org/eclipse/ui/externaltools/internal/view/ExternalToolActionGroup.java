@@ -37,7 +37,7 @@ public class ExternalToolActionGroup extends ActionGroup {
 	private RenameExternalToolAction renameAction;
 	private RefreshViewAction refreshAction;
 	private RunExternalToolAction runAction;
-	private RunExternalToolAction runWithAction;
+	private RunWithExternalToolAction runWithAction;
 	private EditExternalToolPropertiesAction editAction;
 	
 	public ExternalToolActionGroup(ExternalToolView view) {
@@ -153,8 +153,8 @@ public class ExternalToolActionGroup extends ActionGroup {
 		delAction = new DeleteExternalToolAction(page);
 		renameAction = new RenameExternalToolAction(view);
 		refreshAction = new RefreshViewAction(page);
-		runAction = new RunExternalToolAction(page.getWorkbenchWindow(), false);
-		runWithAction = new RunExternalToolAction(page.getWorkbenchWindow(), true);
+		runAction = new RunExternalToolAction(page.getWorkbenchWindow());
+		runWithAction = new RunWithExternalToolAction(page.getWorkbenchWindow());
 		editAction = new EditExternalToolPropertiesAction(page);
 	}
 	
