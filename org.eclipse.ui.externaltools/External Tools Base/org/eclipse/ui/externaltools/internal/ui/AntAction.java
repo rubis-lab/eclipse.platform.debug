@@ -119,10 +119,15 @@ public class AntAction extends Action {
 		ExternalTool[] antTools= registry.getToolsOfType(IExternalToolConstants.TOOL_TYPE_ANT_BUILD);
 		MultiStatus status = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "", null);
 		List tools= new ArrayList();
+		String toolLocation;
 		for (int i= 0, numTools= antTools.length; i < numTools; i++) {
-			if (ToolUtil.expandFileLocation(antTools[i].getLocation(), ExpandVariableContext.EMPTY_CONTEXT, status).equals(file.getLocation().toString())) {
+			toolLocation= ToolUtil.expandFileLocation(antTools[i].getLocation(), ExpandVariableContext.EMPTY_CONTEXT, status);
+			if (toolLocation != null && toolLocation.equals(file.getLocation().toString())) {
 				tools.add(antTools[i]);
 			}
+		}
+		if (!status.isOK()) {
+			MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Ant Error", "An error occurred while expanding the location of one or more ant tools: " + status.getMessage());
 		}
 		if (tools.size() == 1) {
 			tool= (ExternalTool)tools.get(0);
