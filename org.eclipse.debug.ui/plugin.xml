@@ -1177,11 +1177,6 @@
 			expanderClass="org.eclipse.debug.ui.variables.ContainerNameExpander">
 		</variable>
 		<variable
-			tag="build_type"
-			description="%build_type.description"
-			expanderClass="org.eclipse.debug.ui.variables.BuildTypeExpander">
-		</variable>
-		<variable
 			tag="string_prompt"
 			description="%string_prompt.description"
 			expanderClass="org.eclipse.debug.ui.variables.StringPromptExpander">
