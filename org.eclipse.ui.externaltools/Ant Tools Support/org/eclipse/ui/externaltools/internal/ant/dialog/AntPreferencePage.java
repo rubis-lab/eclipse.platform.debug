@@ -14,9 +14,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.ant.core.AntCorePlugin;
-import org.eclipse.ant.internal.core.AntCorePreferences;
-import org.eclipse.ant.internal.core.Task;
-import org.eclipse.ant.internal.core.Type;
+import org.eclipse.ant.core.AntCorePreferences;
+import org.eclipse.ant.core.Task;
+import org.eclipse.ant.core.Type;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
