@@ -31,6 +31,7 @@ import javax.xml.transform.TransformerException;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -42,7 +43,6 @@ import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IValue;
 import org.eclipse.debug.core.model.RuntimeProcess;
@@ -290,9 +290,28 @@ public class DebugPlugin extends Plugin {
 	private static final int NOTIFY_FILTERS = 0;
 	private static final int NOTIFY_EVENTS = 1;
 	
+	/**
+	 * An lock object used to indicate no locking was required.
+	 * @since 3.1
+	 */
+	private static Object NULL_LOCK = new Object();
+	
+	/**
+	 * Queue of debug events to fire to listeners.
+	 * @since 3.1
+	 */
 	private List fEventQueue = new ArrayList();
+	
+	/**
+	 * Job to fire events to listeners.
+	 * @since 3.1
+	 */
 	private EventDispatchJob fEventDispatchJob = new EventDispatchJob();
 	
+	/**
+	 * Event dispatch job
+	 * @since 3.1
+	 */
 	class EventDispatchJob extends Job {
 
 	    /**
@@ -1283,30 +1302,101 @@ public class DebugPlugin extends Plugin {
 	}	
 	
 	/**
+	 * Returns a scheduling rule that can be used to schedule a job
+	 * that performs an access operation on the given debug artifact,
+	 * or <code>null</code> if none.
 	 * 
-	 * @param element
-	 * @return
+	 * @param element debug artifact 
+	 * @return a scheduling rule for an access job, or <code>null</code>
 	 * @since 3.1
 	 */
-	public static ISchedulingRule accessRule(IDebugElement element) {
-	    IDebugRuleFactory factory = (IDebugRuleFactory) element.getAdapter(IDebugRuleFactory.class);
-        if (factory != null) {
-            return factory.accessRule(element);
-        }
+	public static ISchedulingRule accessRule(Object element) {
+		if (element instanceof IAdaptable) {
+			IAdaptable adaptable = (IAdaptable) element;
+		    IDebugRuleFactory factory = (IDebugRuleFactory) adaptable.getAdapter(IDebugRuleFactory.class);
+	        if (factory != null) {
+	            return factory.accessRule(element);
+	        }			
+		}
+
         return null;   
 	}
 	
 	/**
-	 * 
-	 * @param element
-	 * @return
+	 * Obtains and returns a lock on the given debug artifact for an
+	 * access operation. This method blocks until the lock is available.
+	 * The lock must be released by the caller via <code>releaseLock(Object)</code>.
+	 *   
+	 * @param element debug artifact for which an access lock is required
+	 * @return access lock that must be subsequently released
 	 * @since 3.1
 	 */
-	public static ISchedulingRule modificationRule(IDebugElement element) {
-	    IDebugRuleFactory factory = (IDebugRuleFactory) element.getAdapter(IDebugRuleFactory.class);
-        if (factory != null) {
-            return factory.modificationRule(element);
-        }
+	public static Object getAccessLock(Object element) {
+		return getLock(accessRule(element));
+	}
+	
+	/**
+	 * Obtains and returns a lock on the given debug artifact for an
+	 * modify operation. This method blocks until the lock is available.
+	 * The lock must be released by the caller via <code>releaseLock(Object)</code>.
+	 *   
+	 * @param element debug artifact for which a modification lock is required
+	 * @return access lock that must be subsequently released
+	 * @since 3.1
+	 */
+	public static Object getModificationLock(Object element) {
+		return getLock(modificationRule(element));
+	}
+	
+	/**
+	 * Obtains a lock based on the given scheduling rule, in the
+	 * job manager, and returns an object representing a lock 
+	 * that must be subsequently released. If the lock is
+	 * <code>null</code>, no lock is obtained, but a dummy
+	 * lock object is still returned.
+	 *  
+	 * @param rule scheduling rule or <code>null</code>
+	 * @return returns a lock that must be subsequently released
+	 * @since 3.1
+	 */
+	private static Object getLock(ISchedulingRule rule) {
+		if (rule == null) {
+			return NULL_LOCK;
+		}
+		Platform.getJobManager().beginRule(rule, null);
+		return rule;
+	}
+	
+	/**
+	 * Releases the given lock. Must be called pairwise with
+	 * <code>getAccessLock(Object)</code> or <code>getModificationLock(Object)</code>.
+	 * 
+	 * @param lock lock to release
+	 * @since 3.1
+	 */
+	public static void releaseLock(Object lock) {
+		if (lock instanceof ISchedulingRule) {
+			Platform.getJobManager().endRule((ISchedulingRule)lock);
+		}
+	}
+	
+	/**
+	 * Returns a scheduling rule that can be used to schedule a job
+	 * that performs a modification operation on the given debug artifact,
+	 * or <code>null</code> if none.
+	 * 
+	 * @param element debug artifact 
+	 * @return a scheduling rule for a modification job, or <code>null</code>
+	 * @since 3.1
+	 */
+	public static ISchedulingRule modificationRule(Object element) {
+		if (element instanceof IAdaptable) {
+			IAdaptable adaptable = (IAdaptable) element;
+		    IDebugRuleFactory factory = (IDebugRuleFactory) adaptable.getAdapter(IDebugRuleFactory.class);
+	        if (factory != null) {
+	            return factory.modificationRule(element);
+	        }
+		}
         return null;   	    
 	}
 	

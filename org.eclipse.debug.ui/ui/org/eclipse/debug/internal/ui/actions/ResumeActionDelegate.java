@@ -14,6 +14,7 @@ package org.eclipse.debug.internal.ui.actions;
 import java.util.Iterator;
 
 import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.core.model.ISuspendResume;
 import org.eclipse.debug.core.model.IThread;
@@ -88,7 +89,9 @@ public class ResumeActionDelegate extends AbstractListenerActionDelegate {
 	protected boolean isEnabledForAllThreads(Object element) {
 		if (element instanceof IDebugElement) {
             IDebugElement debugElement = (IDebugElement) element;
+            Object lock = null;
             try {
+            	lock = DebugPlugin.getAccessLock(debugElement);
                 IThread[] threads = debugElement.getDebugTarget().getThreads();
                 for (int i = 0; i < threads.length; i++) {
                     if (threads[i].canResume()) {
@@ -96,6 +99,8 @@ public class ResumeActionDelegate extends AbstractListenerActionDelegate {
                     }
                 }
             } catch (DebugException e) {
+            } finally {
+            	DebugPlugin.releaseLock(lock);
             }
         }
 		return false;

@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
@@ -586,14 +585,14 @@ public class LaunchViewEventHandler extends AbstractDebugEventHandler implements
             	case DebugEvent.SUSPEND:
             	    if (source instanceof IThread) {
             	        IThread thread = (IThread)source;
-            		    ISchedulingRule rule = null;
+            		    Object lock = null;
             		    try {
-            		        rule = beginAccessRule(thread);
+            		        lock = DebugPlugin.getAccessLock(thread);
             		        IStackFrame frame = thread.getTopStackFrame();
             		        queueData(frame);
             		    } catch (DebugException e) {
             		    } finally {
-            		        endRule(rule);
+            		        DebugPlugin.releaseLock(lock);
             		    }
             	    }
             	    break;
@@ -601,10 +600,10 @@ public class LaunchViewEventHandler extends AbstractDebugEventHandler implements
             		if (source instanceof IThread) {
             			// When a thread resumes, try to select another suspended thread
             			// in the same target.
-            		    ISchedulingRule rule = null;
+            		    Object lock = null;
             			try {
             			    IDebugTarget target = ((IThread) source).getDebugTarget();
-            			    rule = beginAccessRule(target);
+            			    lock = DebugPlugin.getAccessLock(target);
             				IThread[] threads= target.getThreads();
             				for (int j = 0; j < threads.length; j++) {
             					IStackFrame frame = threads[j].getTopStackFrame();
@@ -615,7 +614,7 @@ public class LaunchViewEventHandler extends AbstractDebugEventHandler implements
             				}
             			} catch (DebugException e) {
             			} finally {
-            			    endRule(rule);
+            			    DebugPlugin.releaseLock(lock);
             			}
             		}
             		break;

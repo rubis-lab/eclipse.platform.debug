@@ -11,7 +11,6 @@
 package org.eclipse.debug.internal.core;
 
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.debug.core.model.IDebugElement;
 
 /**
  * Creates scheduling rules for debug elements.
@@ -21,18 +20,20 @@ import org.eclipse.debug.core.model.IDebugElement;
 public interface IDebugRuleFactory {
 
     /**
-     * Returns a scheduling rule used to schedule a job that accesses a debug element.
+     * Returns a scheduling rule used to schedule a job that accesses a debug artifact,
+     * or <code>null</code> if none.
      * 
-     * @param debugElement debug element to be accessed
-     * @return rule used to schedule a job that accesses a debug element.
+     * @param artifact debug artifact to be accessed
+     * @return rule used to schedule a job that accesses an artifact, or <code>null</code>
      */
-    public ISchedulingRule accessRule(IDebugElement debugElement);
+    public ISchedulingRule accessRule(Object artifact);
     
     /**
      * Returns a scheduling rule used to schedule a job that modifies the state of
-     * a debug element
-     * @param debugElement debug element to be modified
-     * @return rule used to schedule a job that modifies a debug element
+     * a debug artifact, or <code>null</code> if none.
+     * 
+     * @param artifact debug artifact to be modified
+     * @return rule used to schedule a job that modifies an artifact, or <code>null</code>
      */
-    public ISchedulingRule modificationRule(IDebugElement debugElement);
+    public ISchedulingRule modificationRule(Object artifact);
 }

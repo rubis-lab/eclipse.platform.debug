@@ -75,17 +75,23 @@ public class DefaultDebugRuleFactory implements IDebugRuleFactory {
     }
 
     /* (non-Javadoc)
-     * @see org.eclipse.debug.internal.core.IDebugRuleFactory#accessRule(org.eclipse.debug.core.model.IDebugElement)
+     * @see org.eclipse.debug.internal.core.IDebugRuleFactory#accessRule(java.lang.Object)
      */
-    public ISchedulingRule accessRule(IDebugElement debugElement) {
-        return new PessimisticRule(debugElement);
+    public ISchedulingRule accessRule(Object artifact) {
+    	if (artifact instanceof IDebugElement) {
+        	return new PessimisticRule((IDebugElement)artifact);
+    	}
+    	return null;
     }
 
     /* (non-Javadoc)
-     * @see org.eclipse.debug.internal.core.IDebugRuleFactory#modificationRule(org.eclipse.debug.core.model.IDebugElement)
+     * @see org.eclipse.debug.internal.core.IDebugRuleFactory#modificationRule(java.lang.Object)
      */
-    public ISchedulingRule modificationRule(IDebugElement debugElement) {
-        return new PessimisticRule(debugElement);
+    public ISchedulingRule modificationRule(Object artifact) {
+    	if (artifact instanceof IDebugElement) {
+        	return new PessimisticRule((IDebugElement)artifact);
+    	}
+    	return null;
     }
 
 }

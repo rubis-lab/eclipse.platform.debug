@@ -16,13 +16,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
-import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.ui.AbstractDebugView;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -33,8 +30,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.UIJob;
-
-import com.ibm.xslt4j.bcel.generic.FADD;
 
 /**
  * Handles debug events, updating a view and viewer.
@@ -352,26 +347,6 @@ public abstract class AbstractDebugEventHandler implements IDebugEventSetListene
 	 * to do nothing. Subclasses may override.
 	 */
 	protected void viewBecomesHidden() {
-	}
-
-	/**
-	 * 
-	 * @param element
-	 * @return
-	 * @since 3.1
-	 */
-	protected ISchedulingRule beginAccessRule(IDebugElement element) {
-	    ISchedulingRule rule = DebugPlugin.accessRule(element);
-	    if (rule != null) {
-	        Platform.getJobManager().beginRule(rule, null);
-	    }
-	    return rule;
-	}
-	
-	protected void endRule(ISchedulingRule rule) {
-	    if (rule != null) {
-	        Platform.getJobManager().endRule(rule);
-	    }
 	}
 }
 
