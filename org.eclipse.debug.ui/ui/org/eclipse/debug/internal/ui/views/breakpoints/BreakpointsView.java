@@ -185,7 +185,7 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 	 * @param group the group name
 	 */
 	public void setAutoGroup(String group) {
-	    if (group.length() < 1) {
+	    if (group != null && group.length() < 1) {
 	        group= null;
 	    }
 		fAutoGroup= group;
