@@ -1077,6 +1077,14 @@
                menubarPath="removeGroup"
                id="org.eclipse.debug.ui.actions.RemoveAllBreakpoints">
          </action>
+        <action
+               label="%GroupBreakpointsByAction.label"
+               style="pulldown"
+               class="org.eclipse.debug.internal.ui.actions.breakpointGroups.GroupBreakpointsByAction"
+               menubarPath="additions"
+               enablesFor="*"
+               id="org.eclipse.debug.ui.actions.GroupBreakpointsByAction">
+        </action>
       </viewerContribution>
       <!-- Breakpoint actions -->
       <viewerContribution

@@ -13,6 +13,7 @@ package org.eclipse.debug.internal.ui.actions;
 import java.util.List;
 
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsView;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -22,7 +23,7 @@ import org.eclipse.ui.IViewPart;
 /**
  * 
  */
-public class ShowBreakpointsByAction implements IViewActionDelegate {
+public class ShowBreakpointsByAction extends Action implements IViewActionDelegate {
 	
 	private BreakpointsView fView;
 
@@ -32,16 +33,23 @@ public class ShowBreakpointsByAction implements IViewActionDelegate {
 	public void init(IViewPart view) {
 		fView= (BreakpointsView) view;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.action.IAction#run()
+	 */
+	public void run() {
+	    ShowBreakpointsByDialog dialog = new ShowBreakpointsByDialog(fView);
+		if (dialog.open() == Dialog.OK) {
+			List selectedContainers = dialog.getSelectedContainers();
+			fView.setBreakpointContainerFactories(selectedContainers);
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
 	public void run(IAction action) {
-		ShowBreakpointsByDialog dialog = new ShowBreakpointsByDialog(fView);
-		if (dialog.open() == Dialog.OK) {
-			List selectedContainers = dialog.getSelectedContainers();
-			fView.setBreakpointContainerFactories(selectedContainers);
-		}
+		run();
 	}
 
 	/* (non-Javadoc)

@@ -38,7 +38,7 @@ public class BreakpointsViewContentProvider implements ITreeContentProvider {
 			children= breakpoints;
 		} else if (parent instanceof IBreakpointManager) {
 			IBreakpointContainerFactory factory = (IBreakpointContainerFactory) fBreakpointContainerFactories.get(0);
-			children= factory.getContainers(breakpoints, "");
+			children= getFactoryChildren(factory, "", breakpoints);
 		} else if (parent instanceof IBreakpointContainer) {
 			IBreakpointContainer container = ((IBreakpointContainer) parent);
 			IBreakpointContainerFactory parentFactory = container.getParentFactory();
@@ -50,16 +50,21 @@ public class BreakpointsViewContentProvider implements ITreeContentProvider {
 				children= container.getBreakpoints();
 			} else {
 				IBreakpointContainerFactory nextFactory = (IBreakpointContainerFactory) fBreakpointContainerFactories.get(index + 1);
-				children= nextFactory.getContainers(container.getBreakpoints(), getParentId(container));
-				if (children.length == 1) {
-					children= getElements(children[0]);
-				}
+				children= getFactoryChildren(nextFactory, getParentId(container), container.getBreakpoints());
 			}
 		} else {
 			children= new Object[0];
 		}
 		for (int i = 0; i < children.length; i++) {
 			fParentMap.put(children[i], parent);
+		}
+		return children;
+	}
+	
+	public Object[] getFactoryChildren(IBreakpointContainerFactory factory, String parentId, IBreakpoint[] breakpoints) {
+	    Object[] children= factory.getContainers(breakpoints, parentId);
+		if (children.length == 1) {
+			children= getElements(children[0]);
 		}
 		return children;
 	}
