@@ -52,7 +52,7 @@ public final class ExternalTool {
 	 * 
 	 * @param type the type of external tool.
 	 * @param name the name given to the external tool. Must only
-	 * 		contain letters, numbers, and spaces.
+	 * 		contain letters, numbers, hyphens, and spaces.
 	 */
 	public ExternalTool(String type, String name) throws CoreException {
 		super();
@@ -69,8 +69,8 @@ public final class ExternalTool {
 
 	/**
 	 * Validates the specified tool name only includes letters,
-	 * numbers, and spaces. Must contain at least one letter
-	 * or number.
+	 * numbers, hyphens, and spaces. Must contain at least one
+	 * letter or number.
 	 * 
 	 * @param name the proposed name for the external tool
 	 * @return a string indicating the invalid format or <code>null</code> if valid.
@@ -82,8 +82,10 @@ public final class ExternalTool {
 			for (int i = 0; i < name.length(); i++) {
 				char ch = name.charAt(i);
 				if (!Character.isLetterOrDigit(ch)) {
-					if (!Character.isSpaceChar(ch))
-						return ToolMessages.getString("ExternalTool.nameContainsInvalidChar"); //$NON-NLS-1$
+					if (!Character.isSpaceChar(ch)) {
+						if (ch != '-')
+							return ToolMessages.getString("ExternalTool.nameContainsInvalidChar"); //$NON-NLS-1$
+					}
 				} else {
 					leastOneChar = true;
 				}

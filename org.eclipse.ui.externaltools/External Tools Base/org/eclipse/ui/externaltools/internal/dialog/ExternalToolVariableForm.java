@@ -9,7 +9,6 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
-import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -21,6 +20,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
+import org.eclipse.ui.externaltools.group.IGroupDialogPage;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolVariable;
 import org.eclipse.ui.externaltools.model.ToolUtil;
 import org.eclipse.ui.externaltools.variable.IVariableComponent;
@@ -36,7 +36,7 @@ public class ExternalToolVariableForm {
 	private String variableListLabelText;
 	private ExternalToolVariable[] variables;
 	private IVariableComponent[] components;
-	private DialogPage page;
+	private IGroupDialogPage page;
 	
 	private Label variableListLabel;
 	private List variableList;
@@ -56,7 +56,7 @@ public class ExternalToolVariableForm {
 		this.components = new IVariableComponent[variables.length];
 	}
 
-	public Composite createContents(Composite parent, DialogPage page) {
+	public Composite createContents(Composite parent, IGroupDialogPage page) {
 		this.page = page;
 		
 		Composite mainComposite = new Composite(parent, SWT.NONE);
@@ -194,5 +194,17 @@ public class ExternalToolVariableForm {
 		setComponentVisible(activeComponentIndex, false);
 		activeComponentIndex = variableList.getSelectionIndex();
 		setComponentVisible(activeComponentIndex, true);
+	}
+
+	/**
+	 * Validates the current variable selection is and
+	 * its value are acceptable.
+	 */
+	public void validate() {
+		if (activeComponentIndex != -1) {
+			IVariableComponent component = components[activeComponentIndex];
+			if (component != null)
+				component.validate();
+		}
 	}
 }

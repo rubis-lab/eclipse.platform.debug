@@ -88,7 +88,7 @@ public class ExternalToolRefreshGroup extends ExternalToolGroup {
 			updateForm(scope);
 		}
 		
-		isValid();
+		validate();
 
 		return mainComposite;
 	}
@@ -168,13 +168,13 @@ public class ExternalToolRefreshGroup extends ExternalToolGroup {
 	 * Method declared on IExternalToolGroup.
 	 */
 	public boolean isValid() {
-		if (variableForm != null) {
-			if (!variableForm.isValid())
-				return false;
-		}
-		
-		getPage().setMessage(null, getPage().NONE);
-		return true;
+		if (!super.isValid())
+			return false;
+			
+		if (variableForm != null)
+			return variableForm.isValid();
+		else
+			return true;
 	}
 
 	/* (non-Javadoc)
@@ -259,5 +259,19 @@ public class ExternalToolRefreshGroup extends ExternalToolGroup {
 		}
 		if (recursiveField != null)
 			tool.setRefreshRecursive(recursiveField.getSelection());
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on IExternalToolGroup.
+	 */
+	public void validate() {
+		if (variableForm != null) {
+			variableForm.validate();
+			if (!variableForm.isValid())
+				return;
+		}
+		
+		getPage().setMessage(null, getPage().NONE);
+		setIsValid(true);
 	}
 }

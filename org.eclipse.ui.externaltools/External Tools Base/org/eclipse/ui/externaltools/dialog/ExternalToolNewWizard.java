@@ -12,6 +12,7 @@ Contributors:
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -122,7 +123,16 @@ public abstract class ExternalToolNewWizard extends Wizard implements INewWizard
 				IExternalToolConstants.VAR_RESOURCE_LOC, 
 				path);
 			mainGroup.setInitialLocation(loc);
-			mainGroup.setInitialName(path);
+
+			String name = path.replace(IPath.SEPARATOR, '-');
+			int start = 0;
+			while (name.charAt(start) == '-' && start < name.length())
+				start++;
+			int end = name.lastIndexOf('.');
+			if (end == -1)
+				end = name.length();
+			name = name.substring(start, end);
+			mainGroup.setInitialName(name);
 		}
 	}
 

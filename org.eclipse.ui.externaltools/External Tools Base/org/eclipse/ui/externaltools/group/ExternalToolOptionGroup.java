@@ -111,7 +111,7 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 			promptArgField.setSelection(isEditMode() ? tool.getPromptForArguments() : initialPromptArg);
 		}
 
-		isValid();
+		validate();
 
 		return mainComposite;
 	}
@@ -145,7 +145,7 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 
 		Button button = new Button(comp, SWT.PUSH);
 		button.setText(ToolMessages.getString("ExternalToolOptionGroup.argumentVariableLabel")); //$NON-NLS-1$
-		getPage().setButtonLayoutData(button);
+		getPage().setButtonGridData(button);
 
 		promptArgField = new Button(parent, SWT.CHECK);
 		promptArgField.setText(ToolMessages.getString("ExternalToolOptionGroup.promptArgLabel")); //$NON-NLS-1$
@@ -343,14 +343,6 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 	/* (non-Javadoc)
 	 * Method declared on IExternalToolGroup.
 	 */
-	public boolean isValid() {
-		getPage().setMessage(null, getPage().NONE);
-		return true;
-	}
-
-	/* (non-Javadoc)
-	 * Method declared on IExternalToolGroup.
-	 */
 	public void restoreValues(ExternalTool tool) {
 		if (showMessageField != null)
 			showMessageField.setSelection(tool.getLogMessages());
@@ -448,5 +440,12 @@ public class ExternalToolOptionGroup extends ExternalToolGroup {
 			tool.setArguments(argumentField.getText().trim());
 		if (promptArgField != null)
 			tool.setPromptForArguments(promptArgField.getSelection());
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on IExternalToolGroup.
+	 */
+	public void validate() {
+		// do nothing
 	}
 }

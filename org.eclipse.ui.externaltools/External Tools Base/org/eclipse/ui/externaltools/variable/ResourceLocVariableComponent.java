@@ -11,7 +11,6 @@ Contributors:
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -27,6 +26,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.ui.externaltools.group.IGroupDialogPage;
 import org.eclipse.ui.externaltools.internal.core.ToolMessages;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
@@ -39,7 +39,8 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
  * </p>
  */
 public class ResourceLocVariableComponent implements IVariableComponent {
-	private DialogPage page;
+	private IGroupDialogPage page;
+	private boolean isValid = true;
 	
 	protected Group mainGroup;
 	protected Button selectedResourceButton;
@@ -56,7 +57,7 @@ public class ResourceLocVariableComponent implements IVariableComponent {
 	/* (non-Javadoc)
 	 * Method declared on IVariableComponent.
 	 */
-	public void createContents(Composite parent, String varTag, DialogPage page) {
+	public void createContents(Composite parent, String varTag, IGroupDialogPage page) {
 		this.page = page;
 		
 		// main composite
@@ -135,7 +136,7 @@ public class ResourceLocVariableComponent implements IVariableComponent {
 	/**
 	 * Returns the dialog page this component is part of
 	 */
-	protected final DialogPage getDialogPage() {
+	protected final IGroupDialogPage getPage() {
 		return page;
 	}
 	
@@ -168,13 +169,24 @@ public class ResourceLocVariableComponent implements IVariableComponent {
 	 * Method declared on IVariableComponent.
 	 */
 	public boolean isValid() {
-		if (specificResourceButton == null || specificResourceButton.getSelection()) {
-			return validateResourceListSelection();
-		}
-		
-		return true;
+		return isValid;
 	}
 
+	/**
+	 * Sets whether the component's values are all valid.
+	 * Updates the components's page valid state. No action
+	 * taken if new valid state same as current one.
+	 * 
+	 * @param isValid <code>true</code> if all values valid,
+	 * 		<code>false</code> otherwise
+	 */
+	protected final void setIsValid(boolean isValid) {
+		if (this.isValid != isValid) {
+			this.isValid = isValid;
+			this.page.updateValidState();
+		}
+	}
+	
 	/**
 	 * Updates the enablement of the resource list if needed
 	 */
@@ -209,13 +221,35 @@ public class ResourceLocVariableComponent implements IVariableComponent {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * Method declared on IVariableComponent.
+	 */
+	public void validate() {
+		if (specificResourceButton == null || specificResourceButton.getSelection()) {
+			validateResourceListSelection();
+		}
+
+		getPage().setMessage(null, getPage().NONE);
+		setIsValid(true);
+	}
+
 	/**
 	 * Returns whether that the resource list selection is valid.
 	 * If the list was not created, returns <code>true</code>.
+	 * 
+	 * @return <code>true</code> to continue validating other
+	 * 	fields, <code>false</code> to stop.
 	 */
 	protected boolean validateResourceListSelection() {
 		if (resourceList == null)
 			return true;
-		return !resourceList.getSelection().isEmpty();
+			
+		if (resourceList.getSelection().isEmpty()) {
+			getPage().setMessage(ToolMessages.getString("ResourceLocVariableComponent.selectionRequired"), getPage().WARNING); //$NON-NLS-1$
+			setIsValid(false);
+			return false;
+		}
+		
+		return true;
 	}
 }

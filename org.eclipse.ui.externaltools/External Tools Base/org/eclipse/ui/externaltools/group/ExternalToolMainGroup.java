@@ -42,7 +42,7 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 	
 	private ModifyListener modifyListener = new ModifyListener() {
 		public void modifyText(ModifyEvent e) {
-			isValid();
+			validate();
 		}
 	};
 	
@@ -90,7 +90,7 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 				nameField.addModifyListener(modifyListener);
 		}
 		
-		isValid();
+		validate();
 
 		return mainComposite;
 	}
@@ -136,7 +136,7 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 		
 		Button button = new Button(parent, SWT.PUSH );
 		button.setText(ToolMessages.getString("ExternalToolMainGroup.locationBrowseLabel")); //$NON-NLS-1$
-		getPage().setButtonLayoutData(button);
+		getPage().setButtonGridData(button);
 
 		createSpacer(parent);
 	}
@@ -192,7 +192,7 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 		
 		Button button = new Button(parent, SWT.PUSH );
 		button.setText(ToolMessages.getString("ExternalToolMainGroup.workDirBrowseLabel")); //$NON-NLS-1$
-		getPage().setButtonLayoutData(button);
+		getPage().setButtonGridData(button);
 
 		createSpacer(parent);
 	}
@@ -239,20 +239,6 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 			return null;
 	}
 	
-	/* (non-Javadoc)
-	 * Method declared on IExternalToolGroup.
-	 */
-	public boolean isValid() {
-		if (!validateLocation())
-			return false;
-		if (!validateWorkDirectory())
-			return false;
-		if (!validateName())
-			return false;
-		getPage().setMessage(null, getPage().NONE);
-		return true;
-	}
-
 	/* (non-Javadoc)
 	 * Method declared on IExternalToolGroup.
 	 */
@@ -312,13 +298,26 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 			tool.setDescription(descriptionField.getText().trim());
 	}
 	
+	/* (non-Javadoc)
+	 * Method declared on IExternalToolGroup.
+	 */
+	public void validate() {
+		if (!validateLocation())
+			return;
+		if (!validateWorkDirectory())
+			return;
+		if (!validateName())
+			return;
+		getPage().setMessage(null, getPage().NONE);
+		setIsValid(true);
+	}
+
 	/**
-	 * Validates the content of the location field and
+	 * Validates the content of the location field, and
 	 * sends any message to the reporter.
 	 * 
-	 * @return <code>true</code> is the location field contains
-	 * 	valid information, <code>false</code> otherwise or if the
-	 *	field does not exist.
+	 * @return <code>true</code> to continue validating other
+	 * 	fields, <code>false</code> to stop.
 	 */
 	protected boolean validateLocation() {
 		if (locationField == null)
@@ -327,6 +326,7 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 		String value = locationField.getText().trim();
 		if (value.length() < 1) {
 			getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.locationRequired"), getPage().NONE); //$NON-NLS-1$
+			setIsValid(false);
 			return false;
 		}
 
@@ -336,20 +336,56 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 			value = ToolUtil.expandFileLocation(value, ExpandVariableContext.EMPTY_CONTEXT);
 		} catch (CoreException e) {
 			getPage().setMessage(e.getStatus().getMessage(), getPage().WARNING);
+			setIsValid(false);
 			return false;			
 		}
 		
 		if (value == null) { // The resource could not be found.
-			getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.invalidLocation"), getPage().WARNING); //$NON-NLS-1$
-			return false;			
+			getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.invalidLocation"), getPage().INFORMATION); //$NON-NLS-1$
+			return true;			
 		}
 		
 		File file = new File(value);
 		if (!file.exists()) { // The file does not exist.
-			getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.invalidLocation"), getPage().WARNING); //$NON-NLS-1$
+			getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.invalidLocation"), getPage().INFORMATION); //$NON-NLS-1$
+			return true;
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Validates the content of the name field and
+	 * sends any message to the reporter.
+	 * 
+	 * @return <code>true</code> to continue validating other
+	 * 	fields, <code>false</code> to stop.
+	 */
+	protected boolean validateName() {
+		if (isEditMode() || nameField == null)
+			return true;
+			
+		String value = nameField.getText().trim();
+		if (value.length() < 1) {
+			getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.nameRequired"), getPage().WARNING); //$NON-NLS-1$
+			setIsValid(false);
 			return false;
 		}
 		
+		String errorText = ExternalTool.validateToolName(value);
+		if (errorText != null) {
+			getPage().setMessage(errorText, getPage().WARNING); //$NON-NLS-1$
+			setIsValid(false);
+			return false;
+		}
+		
+		boolean exists = ExternalToolsPlugin.getDefault().getToolRegistry(nameField.getShell()).hasToolNamed(value);
+		if (exists) {
+			getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.nameAlreadyExist"), getPage().WARNING); //$NON-NLS-1$
+			setIsValid(false);
+			return false;
+		}
+
 		return true;
 	}
 	
@@ -357,9 +393,8 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 	 * Validates the content of the working directory field and
 	 * sends any message to the reporter.
 	 * 
-	 * @return <code>true</code> is the working directory field contains
-	 * 	valid information, <code>false</code> otherwise or if the
-	 *	field does not exist.
+	 * @return <code>true</code> to continue validating other
+	 * 	fields, <code>false</code> to stop.
 	 */
 	protected boolean validateWorkDirectory() {
 		if (workDirectoryField == null)
@@ -373,53 +408,21 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 				value = ToolUtil.expandDirectoryLocation(value, ExpandVariableContext.EMPTY_CONTEXT);
 			} catch (CoreException e) {
 				getPage().setMessage(e.getStatus().getMessage(), getPage().WARNING);
+				setIsValid(false);
 				return false;			
 			}
 			
 			if (value == null) { // The resource could not be found.
-				getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.invalidWorkDir"), getPage().WARNING); //$NON-NLS-1$
-				return false;			
+				getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.invalidWorkDir"), getPage().INFORMATION); //$NON-NLS-1$
+				return true;			
 			}			
 			File file = new File(value);
 			if (!file.exists()) { // The directory does not exist.
-				getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.invalidWorkDir"), getPage().WARNING); //$NON-NLS-1$
-				return false;
+				getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.invalidWorkDir"), getPage().INFORMATION); //$NON-NLS-1$
+				return true;
 			}
 		}
 		
-		return true;
-	}
-	
-	/**
-	 * Validates the content of the name field and
-	 * sends any message to the reporter.
-	 * 
-	 * @return <code>true</code> is the name field contains
-	 * 	valid information, <code>false</code> otherwise or if the
-	 *	field does not exist.
-	 */
-	protected boolean validateName() {
-		if (isEditMode() || nameField == null)
-			return true;
-			
-		String value = nameField.getText().trim();
-		if (value.length() < 1) {
-			getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.nameRequired"), getPage().WARNING); //$NON-NLS-1$
-			return false;
-		}
-		
-		String errorText = ExternalTool.validateToolName(value);
-		if (errorText != null) {
-			getPage().setMessage(errorText, getPage().WARNING); //$NON-NLS-1$
-			return false;
-		}
-		
-		boolean exists = ExternalToolsPlugin.getDefault().getToolRegistry(nameField.getShell()).hasToolNamed(value);
-		if (exists) {
-			getPage().setMessage(ToolMessages.getString("ExternalToolMainGroup.nameAlreadyExist"), getPage().WARNING); //$NON-NLS-1$
-			return false;
-		}
-
 		return true;
 	}
 }

@@ -182,7 +182,7 @@ public class ExternalToolRegistry {
 	 */
 	private IPath generateToolFilename(String toolName) {
 		String filename = toolName.replace(' ', '_');
-		return TOOLS_PATH.append(filename);
+		return TOOLS_PATH.append(filename + TOOLS_EXTENSION);
 	}
 
 	/**

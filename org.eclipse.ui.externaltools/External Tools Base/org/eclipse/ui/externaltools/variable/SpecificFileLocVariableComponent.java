@@ -56,8 +56,15 @@ public class SpecificFileLocVariableComponent extends ResourceLocVariableCompone
 	protected boolean validateResourceListSelection() {
 		if (resourceList == null)
 			return true;
+			
 		IStructuredSelection sel = (IStructuredSelection) resourceList.getSelection();
 		IResource resource = (IResource) sel.getFirstElement();
-		return resource != null && resource.getType() == resource.FILE;
+		if (resource == null || resource.getType() != resource.FILE) {
+			getPage().setMessage(ToolMessages.getString("ResourceLocVariableComponent.selectionRequired"), getPage().WARNING); //$NON-NLS-1$
+			setIsValid(false);
+			return false;
+		}
+		
+		return true;
 	}
 }

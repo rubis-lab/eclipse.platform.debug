@@ -9,7 +9,6 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
-import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.externaltools.model.ExternalTool;
@@ -26,7 +25,7 @@ public abstract class ExternalToolGroup implements IExternalToolGroup {
 	/**
 	 * Dialog page this group is part of.
 	 */
-	private DialogPage page;
+	private IGroupDialogPage page;
 	
 	/**
 	 * Whether the group is working with an existing external
@@ -34,6 +33,11 @@ public abstract class ExternalToolGroup implements IExternalToolGroup {
 	 */
 	private boolean isEditMode = true;
 
+	/**
+	 * Whether the group's values are all valid.
+	 */
+	private boolean isValid = true;
+	
 	/**
 	 * Creates the group.
 	 */
@@ -44,7 +48,7 @@ public abstract class ExternalToolGroup implements IExternalToolGroup {
 	/* (non-Javadoc)
 	 * Method declared on IExternalToolGroup.
 	 */
-	public final Control createContents(Composite parent, ExternalTool tool, DialogPage page) {
+	public final Control createContents(Composite parent, ExternalTool tool, IGroupDialogPage page) {
 		this.page = page;
 		this.isEditMode = tool != null;
 		return createGroupContents(parent, tool);
@@ -71,7 +75,7 @@ public abstract class ExternalToolGroup implements IExternalToolGroup {
 	 * 
 	 * @return the dialog page this group is part of
 	 */
-	public final DialogPage getPage() {
+	protected final IGroupDialogPage getPage() {
 		return page;
 	}
 
@@ -83,15 +87,32 @@ public abstract class ExternalToolGroup implements IExternalToolGroup {
 	 * @return <code>true</code> if the external tool exist already, or
 	 * 		<code>false</code> if the external tool is yet to be created.
 	 */
-	public final boolean isEditMode() {
+	protected final boolean isEditMode() {
 		return isEditMode;
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on IExternalToolGroup.
 	 */
-	public abstract boolean isValid();
+	public boolean isValid() {
+		return isValid;
+	}
 
+	/**
+	 * Sets whether the group's values are all valid.
+	 * Updates the group's page valid state. No action
+	 * taken if new valid state same as current one.
+	 * 
+	 * @param isValid <code>true</code> if all values valid,
+	 * 		<code>false</code> otherwise
+	 */
+	protected final void setIsValid(boolean isValid) {
+		if (this.isValid != isValid) {
+			this.isValid = isValid;
+			this.page.updateValidState();
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * Method declared on IExternalToolGroup.
 	 */
@@ -101,4 +122,9 @@ public abstract class ExternalToolGroup implements IExternalToolGroup {
 	 * Method declared on IExternalToolGroup.
 	 */
 	public abstract void updateTool(ExternalTool tool);
+
+	/* (non-Javadoc)
+	 * Method declared on IExternalToolGroup.
+	 */
+	public abstract void validate();
 }

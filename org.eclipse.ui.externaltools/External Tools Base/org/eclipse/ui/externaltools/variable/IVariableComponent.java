@@ -9,9 +9,9 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
-import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.externaltools.group.IGroupDialogPage;
 
 /**
  * Represents the API for a client extending one of the
@@ -42,7 +42,7 @@ public interface IVariableComponent {
 	 * @param varTag the variable tag name to create the controls for
 	 * @param page the dialog page this visual component will be part of
 	 */
-	public void createContents(Composite parent, String varTag, DialogPage page);
+	public void createContents(Composite parent, String varTag, IGroupDialogPage page);
 
 	/**
 	 * Returns the variable value as specified by
@@ -53,7 +53,7 @@ public interface IVariableComponent {
 	public String getVariableValue();
 
 	/**
-	 * Validates the variable's visual component has an
+	 * Returns whether the variable's visual component has an
 	 * acceptable value.
 	 * 
 	 * @return <code>true</code> if all value acceptable, or <code>false</code> otherwise
@@ -67,4 +67,10 @@ public interface IVariableComponent {
 	 * @param varValue the variable value the visual component should indicate
 	 */
 	public void setVariableValue(String varValue);
+
+	/**
+	 * Validates visual component current values entered by the
+	 * user and updates it's valid state if needed
+	 */
+	public void validate();
 }

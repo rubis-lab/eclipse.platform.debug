@@ -14,8 +14,10 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.externaltools.group.IExternalToolGroup;
+import org.eclipse.ui.externaltools.group.IGroupDialogPage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
@@ -27,7 +29,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
  * to be extended.
  * </p>
  */
-public class ExternalToolGroupWizardPage extends WizardPage {
+public class ExternalToolGroupWizardPage extends WizardPage implements IGroupDialogPage {
 	private IExternalToolGroup group;
 	private String helpContextId;
 
@@ -47,7 +49,7 @@ public class ExternalToolGroupWizardPage extends WizardPage {
 	 * Method declared on IDialogPage.
 	 */
 	public void createControl(Composite parent) {
-		if (group != null) {
+		if (group != null && getControl() == null) {
 			initializeDialogUnits(parent);
 			Composite composite = new Composite(parent, SWT.NULL);
 			composite.setLayout(new GridLayout());
@@ -76,13 +78,19 @@ public class ExternalToolGroupWizardPage extends WizardPage {
 	}
 
 	/* (non-Javadoc)
-	 * Method declared on IWizardPage.
+	 * Method declared on IGroupDialogPage.
 	 */
-	public boolean isPageComplete() {
-		if (!super.isPageComplete())
-			return false;
-		if (group != null)
-			return group.isValid();
-		return true;
+	public GridData setButtonGridData(Button button) {
+		return setButtonLayoutData(button);
 	}
+
+	/* (non-Javadoc)
+	 * Method declared on IGroupDialogPage.
+	 */
+	 public void updateValidState() {
+	 	if (group != null)
+	 		setPageComplete(group.isValid());
+	 	else
+	 		setPageComplete(true);
+	 }
 }

@@ -9,7 +9,6 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
-import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.externaltools.model.ExternalTool;
@@ -33,7 +32,7 @@ public interface IExternalToolGroup {
 	 * @param page the dialog page this group will be part of
 	 * @return the control for the group
 	 */
-	public Control createContents(Composite parent, ExternalTool tool, DialogPage page);
+	public Control createContents(Composite parent, ExternalTool tool, IGroupDialogPage page);
 	
 	/**
 	 * Disposed of the group's resources. This can be called
@@ -42,7 +41,7 @@ public interface IExternalToolGroup {
 	public void dispose();
 	
 	/**
-	 * Validates the group's components have acceptable
+	 * Returns whether the group's components have acceptable
 	 * values.
 	 * 
 	 * @return <code>true</code> if all values acceptable, or <code>false</code> otherwise
@@ -62,4 +61,10 @@ public interface IExternalToolGroup {
 	 * collected by the group's visual components.
 	 */
 	public void updateTool(ExternalTool tool);
+	
+	/**
+	 * Validates this group's current values entered by the
+	 * user and updates it's valid state if needed
+	 */
+	public void validate();
 }

@@ -11,9 +11,9 @@ Contributors:
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.externaltools.group.IGroupDialogPage;
 import org.eclipse.ui.externaltools.internal.core.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.variable.IVariableComponent;
 
@@ -98,7 +98,7 @@ public abstract class ExternalToolVariable {
 		/* (non-Javadoc)
 		 * Method declared on IVariableComponent.
 		 */
-		public void createContents(Composite parent, String varTag, DialogPage page) {
+		public void createContents(Composite parent, String varTag, IGroupDialogPage page) {
 		}
 		
 		/* (non-Javadoc)
@@ -119,6 +119,12 @@ public abstract class ExternalToolVariable {
 		 * Method declared on IVariableComponent.
 		 */
 		public void setVariableValue(String varValue) {
+		}
+
+		/* (non-Javadoc)
+		 * Method declared on IVariableComponent.
+		 */
+		public void validate() {
 		}
 	}
 }
