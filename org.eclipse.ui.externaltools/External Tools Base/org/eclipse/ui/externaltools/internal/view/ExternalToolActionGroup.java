@@ -137,8 +137,15 @@ public class ExternalToolActionGroup extends ActionGroup {
 	 * Runs the default action by invoking the appropriate action
 	 */
 	public void runDefaultAction(IStructuredSelection selection) {
-		runAction.setTool(getSelectedTool(selection));
-		runAction.run();
+		ExternalTool tool = getSelectedTool(selection);
+		runAction.setTool(tool);
+		runWithAction.setTool(tool);
+		if (tool != null) {
+			if (tool.getPromptForArguments())
+				runWithAction.run();
+			else
+				runAction.run();
+		}
 	}
 
 	/**
