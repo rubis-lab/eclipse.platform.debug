@@ -14,30 +14,30 @@ import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.model.IExternalToolConstants;
 
 /**
- * Registry of all available path location variables.
+ * Registry of all available argument variables.
  */
-public class PathLocationVariableRegistry extends ExternalToolVariableRegistry {
+public class ArgumentVariableRegistry extends ExternalToolVariableRegistry {
 
 	/**
 	 * Creates the registry and loads the variables.
 	 */
-	public PathLocationVariableRegistry(String extensionPointId) {
-		super(extensionPointId);
+	public ArgumentVariableRegistry() {
+		super(IExternalToolConstants.PL_ARGUMENT_VARIABLES);
 	}
 
 	/**
-	 * Returns the path location variable for the given tag
+	 * Returns the argument variable for the given tag
 	 * or <code>null</code> if none.
 	 */
-	public PathLocationVariable getPathLocationVariable(String tag) {
-		return (PathLocationVariable) findVariable(tag);
+	public ArgumentVariable getArgumentVariable(String tag) {
+		return (ArgumentVariable) findVariable(tag);
 	}
 	
 	/**
-	 * Returns the list of path location variables in the registry.
+	 * Returns the list of argument variables in the registry.
 	 */
-	public PathLocationVariable[] getPathLocationVariables() {
-		PathLocationVariable[] results = new PathLocationVariable[getVariableCount()];
+	public ArgumentVariable[] getArgumentVariables() {
+		ArgumentVariable[] results = new ArgumentVariable[getVariableCount()];
 		copyVariables(results);
 		return results;
 	}
@@ -46,6 +46,6 @@ public class PathLocationVariableRegistry extends ExternalToolVariableRegistry {
 	 * Method declared on ExternalToolVariableRegistry.
 	 */
 	protected ExternalToolVariable newVariable(String tag, String description, IConfigurationElement element) {
-		return new PathLocationVariable(tag, description, element);
+		return new ArgumentVariable(tag, description, element);
 	}
 }

@@ -24,34 +24,34 @@ import org.eclipse.ui.externaltools.internal.model.ToolMessages;
  * This class is not intended to be extended by clients.
  * </p>
  */
-public class SpecificFileLocVariableComponent extends ResourceLocVariableComponent {
+public class SpecificFileResourceLocComponent extends ResourceLocComponent {
 
 	/**
 	 * Creates an instance
 	 */
-	public SpecificFileLocVariableComponent() {
+	public SpecificFileResourceLocComponent() {
 		super();
 	}
 
 	/* (non-Javadoc)
-	 * Method declared on ResourceLocVariableComponent.
+	 * Method declared on ResourceLocComponent.
 	 */
 	protected void createSelectedResourceOption() {
 		// Do not present this option...
 	}
 	
 	/* (non-Javadoc)
-	 * Method declared on ResourceLocVariableComponent.
+	 * Method declared on ResourceLocComponent.
 	 */
 	protected void createSpecificResourceOption() {
 		Label label = new Label(mainGroup, SWT.NONE);
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		label.setLayoutData(data);
-		label.setText(ToolMessages.getString("ResourceLocVariableComponent.specificResLabel")); //$NON-NLS-1$
+		label.setText(ToolMessages.getString("ResourceLocComponent.specificResLabel")); //$NON-NLS-1$
 	}
 
 	/* (non-Javadoc)
-	 * Method declared on ResourceLocVariableComponent.
+	 * Method declared on ResourceLocComponent.
 	 */
 	protected boolean validateResourceListSelection() {
 		if (resourceList == null)
@@ -60,7 +60,7 @@ public class SpecificFileLocVariableComponent extends ResourceLocVariableCompone
 		IStructuredSelection sel = (IStructuredSelection) resourceList.getSelection();
 		IResource resource = (IResource) sel.getFirstElement();
 		if (resource == null || resource.getType() != resource.FILE) {
-			getPage().setMessage(ToolMessages.getString("ResourceLocVariableComponent.selectionRequired"), getPage().WARNING); //$NON-NLS-1$
+			getPage().setMessage(ToolMessages.getString("ResourceLocComponent.selectionRequired"), getPage().WARNING); //$NON-NLS-1$
 			setIsValid(false);
 			return false;
 		}

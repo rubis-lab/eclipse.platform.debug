@@ -17,17 +17,17 @@ import org.eclipse.core.runtime.IPath;
  * Expands the <code>resource_loc</code> variable location into
  * an <code>IPath</code> to the resource.
  */
-public class ResourceLocVariableLocation implements IVariableLocation {
+public class ResourceLocExpander implements IVariableLocationExpander {
 
 	/**
 	 * Create an instance
 	 */
-	public ResourceLocVariableLocation() {
+	public ResourceLocExpander() {
 		super();
 	}
 
 	/* (non-Javadoc)
-	 * Method declared on IVariableLocation.
+	 * Method declared on IVariableLocationExpander.
 	 */
 	public IPath getPath(String varTag, String varValue, ExpandVariableContext context) {
 		IPath path = null;

@@ -38,7 +38,7 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
  * This class is not intended to be extended by clients.
  * </p>
  */
-public class ResourceLocVariableComponent implements IVariableComponent {
+public class ResourceLocComponent implements IVariableComponent {
 	private IGroupDialogPage page;
 	private boolean isValid = true;
 	
@@ -50,7 +50,7 @@ public class ResourceLocVariableComponent implements IVariableComponent {
 	/**
 	 * Creates the component
 	 */
-	public ResourceLocVariableComponent() {
+	public ResourceLocComponent() {
 		super();
 	}
 
@@ -104,7 +104,7 @@ public class ResourceLocVariableComponent implements IVariableComponent {
 	 */
 	protected void createSelectedResourceOption() {
 		selectedResourceButton = new Button(mainGroup, SWT.RADIO);
-		selectedResourceButton.setText(ToolMessages.getString("ResourceLocVariableComponent.selectedResLabel")); //$NON-NLS-1$
+		selectedResourceButton.setText(ToolMessages.getString("ResourceLocComponent.selectedResLabel")); //$NON-NLS-1$
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		selectedResourceButton.setLayoutData(data);
 	}
@@ -115,7 +115,7 @@ public class ResourceLocVariableComponent implements IVariableComponent {
 	 */
 	protected void createSpecificResourceOption() {
 		specificResourceButton = new Button(mainGroup, SWT.RADIO);
-		specificResourceButton.setText(ToolMessages.getString("ResourceLocVariableComponent.specificResLabel")); //$NON-NLS-1$
+		specificResourceButton.setText(ToolMessages.getString("ResourceLocComponent.specificResLabel")); //$NON-NLS-1$
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		specificResourceButton.setLayoutData(data);
 		
@@ -245,7 +245,7 @@ public class ResourceLocVariableComponent implements IVariableComponent {
 			return true;
 			
 		if (resourceList.getSelection().isEmpty()) {
-			getPage().setMessage(ToolMessages.getString("ResourceLocVariableComponent.selectionRequired"), getPage().WARNING); //$NON-NLS-1$
+			getPage().setMessage(ToolMessages.getString("ResourceLocComponent.selectionRequired"), getPage().WARNING); //$NON-NLS-1$
 			setIsValid(false);
 			return false;
 		}

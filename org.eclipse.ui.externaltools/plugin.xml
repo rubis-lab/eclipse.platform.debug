@@ -75,8 +75,8 @@
 		<variable
 			tag="resource_loc"
 			description="Expands to the resource's absolute path on the system's hard drive."
-			componentClass="org.eclipse.ui.externaltools.variable.SpecificFileLocVariableComponent"
-			locationClass="org.eclipse.ui.externaltools.variable.ResourceLocVariableLocation">
+			componentClass="org.eclipse.ui.externaltools.variable.SpecificFileResourceLocComponent"
+			expanderClass="org.eclipse.ui.externaltools.variable.ResourceLocExpander">
 		</variable>
 	</extension>
 

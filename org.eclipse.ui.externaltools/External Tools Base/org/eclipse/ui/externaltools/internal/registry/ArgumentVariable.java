@@ -10,36 +10,35 @@ Contributors:
 **********************************************************************/
 
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.ui.externaltools.variable.IVariableLocationExpander;
 import org.eclipse.ui.externaltools.variable.ExpandVariableContext;
+import org.eclipse.ui.externaltools.variable.IVariableTextExpander;
 
 /**
- * Represents the variable for the path location
+ * Represents the variable for the argument
  */
-public final class PathLocationVariable extends ExternalToolVariable {
-	private static final DefaultLocationExpander defaultExpander = new DefaultLocationExpander();
+public final class ArgumentVariable extends ExternalToolVariable {
+	private static final DefaultTextExpander defaultExpander = new DefaultTextExpander();
 	
-	private IVariableLocationExpander expander = null;
+	private IVariableTextExpander expander = null;
 
 	/**
-	 * Creates a path location variable
+	 * Creates an argument variable
 	 * 
 	 * @param tag the variable tag
 	 * @param description a short description of what the variable will expand to
 	 * @param element the configuration element
 	 */
-	/*package*/ PathLocationVariable(String tag, String description, IConfigurationElement element) {
+	/*package*/ ArgumentVariable(String tag, String description, IConfigurationElement element) {
 		super(tag, description, element);
 	}
 
 	/**
 	 * Returns the object that can expand the variable
-	 * into a path location.
+	 * as text.
 	 */
-	public IVariableLocationExpander getExpander() {
+	public IVariableTextExpander getExpander() {
 		if (expander == null) {
-			expander = (IVariableLocationExpander) createObject(ExternalToolVariableRegistry.TAG_EXPANDER_CLASS);
+			expander = (IVariableTextExpander) createObject(ExternalToolVariableRegistry.TAG_EXPANDER_CLASS);
 			if (expander == null)
 				expander = defaultExpander;
 		}
@@ -48,14 +47,14 @@ public final class PathLocationVariable extends ExternalToolVariable {
 
 
 	/**
-	 * Default variable location implementation which does 
+	 * Default variable text expander implementation which does
 	 * not expand variables, but just returns <code>null</code>.
 	 */	
-	private static final class DefaultLocationExpander implements IVariableLocationExpander {
+	private static final class DefaultTextExpander implements IVariableTextExpander {
 		/* (non-Javadoc)
-		 * Method declared on IVariableLocationExpander.
+		 * Method declared on IVariableTextExpander.
 		 */
-		public IPath getPath(String varTag, String varValue, ExpandVariableContext context) {
+		public String getText(String varTag, String varValue, ExpandVariableContext context) {
 			return null;
 		}
 	}

@@ -17,6 +17,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.externaltools.internal.core.IPreferenceConstants;
+import org.eclipse.ui.externaltools.internal.registry.ArgumentVariableRegistry;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolRegistry;
 import org.eclipse.ui.externaltools.internal.registry.ExternalToolTypeRegistry;
 import org.eclipse.ui.externaltools.internal.registry.PathLocationVariableRegistry;
@@ -38,8 +39,9 @@ public final class ExternalToolsPlugin extends AbstractUIPlugin {
 	private ExternalToolRegistry toolRegistry;
 	private ExternalToolTypeRegistry typeRegistry;
 	private RefreshScopeVariableRegistry refreshVarRegistry;
-	private PathLocationVariableRegistry fileLocationRegistry;
-	private PathLocationVariableRegistry dirLocationRegistry;
+	private PathLocationVariableRegistry fileLocVarRegistry;
+	private PathLocationVariableRegistry dirLocVarRegistry;
+	private ArgumentVariableRegistry argumentVarRegistry;
 	
 	/**
 	 * Create an instance of the External Tools plug-in.
@@ -72,21 +74,30 @@ public final class ExternalToolsPlugin extends AbstractUIPlugin {
 	}
 	
 	/**
+	 * Returns the registry of refresh scope variables.
+	 */
+	public ArgumentVariableRegistry getArgumentVariableRegistry() {
+		if (argumentVarRegistry == null)
+			argumentVarRegistry = new ArgumentVariableRegistry();
+		return argumentVarRegistry;
+	}
+	
+	/**
 	 * Returns the registry of directory location variables.
 	 */
 	public PathLocationVariableRegistry getDirectoryLocationVariableRegistry() {
-		if (dirLocationRegistry == null)
-			dirLocationRegistry = new PathLocationVariableRegistry(IExternalToolConstants.PL_DIRECTORY_VARIABLES);
-		return dirLocationRegistry;
+		if (dirLocVarRegistry == null)
+			dirLocVarRegistry = new PathLocationVariableRegistry(IExternalToolConstants.PL_DIRECTORY_VARIABLES);
+		return dirLocVarRegistry;
 	}
 	
 	/**
 	 * Returns the registry of file location variables.
 	 */
 	public PathLocationVariableRegistry getFileLocationVariableRegistry() {
-		if (fileLocationRegistry == null)
-			fileLocationRegistry = new PathLocationVariableRegistry(IExternalToolConstants.PL_FILE_VARIABLES);
-		return fileLocationRegistry;
+		if (fileLocVarRegistry == null)
+			fileLocVarRegistry = new PathLocationVariableRegistry(IExternalToolConstants.PL_FILE_VARIABLES);
+		return fileLocVarRegistry;
 	}
 	
 	/**

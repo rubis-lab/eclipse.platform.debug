@@ -29,7 +29,8 @@ public abstract class ExternalToolVariableRegistry {
 	//		<variable
 	//			tag={string}
 	//			description={string}
-	//			componentClass={string:IVariableComponent}>
+	//			componentClass={string:IVariableComponent}
+	//			expanderClass={string:IVariable***Expander}>
 	//		</variable>
 	// </extension>
 	//
@@ -39,8 +40,9 @@ public abstract class ExternalToolVariableRegistry {
 	 */
 	/*package*/ static final String TAG_VARIABLE = "variable"; //$NON-NLS-1$
 	/*package*/ static final String TAG_TAG = "tag"; //$NON-NLS-1$
-	/*package*/ static final String TAG_COMPONENT_CLASS = "componentClass"; //$NON-NLS-1$
 	/*package*/ static final String TAG_DESCRIPTION = "description"; //$NON-NLS-1$
+	/*package*/ static final String TAG_COMPONENT_CLASS = "componentClass"; //$NON-NLS-1$
+	/*package*/ static final String TAG_EXPANDER_CLASS = "expanderClass"; //$NON-NLS-1$
 
 
 	/**
@@ -103,6 +105,7 @@ public abstract class ExternalToolVariableRegistry {
 					if (element.getName().equals(TAG_VARIABLE)) {
 						String tag = element.getAttribute(TAG_TAG);
 						String description = element.getAttribute(TAG_DESCRIPTION);
+						String className = element.getAttribute(TAG_EXPANDER_CLASS);
 						
 						boolean valid = true;
 						if (tag == null || tag.length() == 0) {
@@ -113,9 +116,11 @@ public abstract class ExternalToolVariableRegistry {
 							valid = false;
 							ExternalToolsPlugin.getDefault().log("Missing description attribute value for variable element.", null); //$NON-NLS-1$
 						}
+						if (className == null || className.length() == 0) {
+							valid = false;
+							ExternalToolsPlugin.getDefault().log("Missing expander class attribute value for variable element.", null); //$NON-NLS-1$
+						}
 
-						valid = valid && validateElement(element);
-						
 						if (valid)
 							variables.put(tag, newVariable(tag, description, element));
 					}
@@ -128,11 +133,4 @@ public abstract class ExternalToolVariableRegistry {
 	 * Creates a new variable from the specified information.
 	 */
 	protected abstract ExternalToolVariable newVariable(String tag, String description, IConfigurationElement element);
-	
-	/**
-	 * Validates the specific variable type attributes are
-	 * acceptable. Returns <code>true</code> is valid, or
-	 * <code>false</code> otherwise.
-	 */
-	protected abstract boolean validateElement(IConfigurationElement element);
 }

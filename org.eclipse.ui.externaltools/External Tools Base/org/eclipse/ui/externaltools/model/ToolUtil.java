@@ -71,6 +71,22 @@ public final class ToolUtil {
 	}
 	
 	/**
+	 * Returns a list of individual arguments where all
+	 * variables have been expanded.
+	 * 
+	 * @param arguments the arguments with leading and trailing
+	 * 		spaces already removed.
+	 * @param context the context used to expand the variable(s)
+	 * @return the list of individual arguments
+	 */
+	public static String[] expandArguments(String arguments, ExpandVariableContext context) throws CoreException {
+		if (arguments == null || arguments.length() == 0)
+			return new String[0];
+
+		return new String[0];
+	}
+	
+	/**
 	 * Returns the expanded directory location if represented by a
 	 * directory variable. Otherwise, the directory location given is
 	 * return unless an unknown variable was detected.
@@ -111,7 +127,7 @@ public final class ToolUtil {
 		}
 		
 		// Expand the variable into a IPath if possible
-		IPath path = variable.getLocation().getPath(varDef.name, varDef.argument, context);
+		IPath path = variable.getExpander().getPath(varDef.name, varDef.argument, context);
 		if (path == null) {
 			String text = ToolMessages.format("ToolUtil.dirLocVarExpandFailed", new Object[] {varDef.name}); //$NON-NLS-1$
 			throw ExternalToolsPlugin.getDefault().newError(text, null);
@@ -161,7 +177,7 @@ public final class ToolUtil {
 		}
 		
 		// Expand the variable into a IPath if possible
-		IPath path = variable.getLocation().getPath(varDef.name, varDef.argument, context);
+		IPath path = variable.getExpander().getPath(varDef.name, varDef.argument, context);
 		if (path == null) {
 			String text = ToolMessages.format("ToolUtil.fileLocVarExpandFailed", new Object[] {varDef.name}); //$NON-NLS-1$
 			throw ExternalToolsPlugin.getDefault().newError(text, null);
@@ -205,23 +221,6 @@ public final class ToolUtil {
 		}
 		
 		return varDef;
-	}
-	
-	/**
-	 * Saves any dirty editors if user preference
-	 */
-	public static void saveDirtyEditors(IWorkbenchWindow window) {
-		IPreferenceStore store = ExternalToolsPlugin.getDefault().getPreferenceStore();
-		boolean autoSave = store.getBoolean(IPreferenceConstants.AUTO_SAVE);
-		if (autoSave) {
-			IWorkbenchWindow[] windows = window.getWorkbench().getWorkbenchWindows();
-			for (int i=0; i < windows.length; i++) {
-				IWorkbenchPage[] pages = windows[i].getPages();
-				for (int j = 0; j < pages.length; j++) {
-					pages[j].saveAllEditors(false);
-				}
-			}
-		}
 	}
 	
 	/**

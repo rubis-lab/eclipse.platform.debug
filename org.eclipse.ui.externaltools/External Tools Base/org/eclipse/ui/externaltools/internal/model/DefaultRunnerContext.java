@@ -1,65 +1,94 @@
 package org.eclipse.ui.externaltools.internal.model;
 
 /**********************************************************************
-Copyright (c) 2002 IBM Corp. and others.
-All rights reserved.   This program and the accompanying materials
-are made available under the terms of the Common Public License v0.5
+Copyright (c) 2002 IBM Corp. and others. All rights reserved.
+This file is made available under the terms of the Common Public License v1.0
 which accompanies this distribution, and is available at
-http://www.eclipse.org/legal/cpl-v05.html
+http://www.eclipse.org/legal/cpl-v10.html
  
 Contributors:
 **********************************************************************/
+
 import java.io.File;
-import java.util.ArrayList;
 
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.jface.dialogs.*;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.*;
-import org.eclipse.ui.externaltools.internal.core.ExternalToolsRunner;
-import org.eclipse.ui.externaltools.internal.model.*;
 import org.eclipse.ui.externaltools.model.*;
+import org.eclipse.ui.externaltools.variable.ExpandVariableContext;
 
 /**
  * Context to run the external tool in.
  */
 public final class DefaultRunnerContext implements IRunnerContext {
 	private ExternalTool tool;
-	private IProject currentProject;
-	private IResource selectedResource;
-	private IWorkingSetManager workingSetManager;
-	private ArrayList antTargets = new ArrayList();
+	private ExpandVariableContext expandVarCtx;
 	private String expandedLocation;
-	private String expandedArguments;
+	private String[] expandedArguments;
 	private String expandedDirectory;
-	private String buildType = ToolUtil.BUILD_TYPE_NONE;
+	private String buildType = IExternalToolConstants.BUILD_TYPE_NONE;
 	
 	/**
 	 * Create a new context
 	 * 
 	 * @param tool the external tool for which the context applies to
 	 * @param currentProject the project to run the external tool on, or <code>null</code>
-	 * @param manager the working set manager
 	 */
-	public DefaultRunnerContext(ExternalTool tool, IProject currentProject, IWorkingSetManager manager) {
-		this(tool, currentProject, null, manager);
+	public DefaultRunnerContext(ExternalTool tool, IProject project) {
+		super();
+		this.tool = tool;
+		this.expandVarCtx = new ExpandVariableContext(project);
 	}
 
 	/**
-	 * Create a new context
+	 * Create a new context. The project will be determine from the
+	 * specified selected resource.
 	 * 
 	 * @param tool the external tool for which the context applies to
-	 * @param currentProject the project to run the external tool on, or <code>null</code>
-	 * @param selectedResource the selected resource to run the external tool on, or <code>null</code>
-	 * @param manager the working set manager
+	 * @param selectedResource the selected resource to run the external
+	 * 		tool on, or <code>null</code>
 	 */
-	public DefaultRunnerContext(ExternalTool tool, IProject currentProject, IResource selectedResource, IWorkingSetManager manager) {
+	public DefaultRunnerContext(ExternalTool tool, IResource selectedResource) {
 		super();
 		this.tool = tool;
-		this.currentProject = currentProject;
-		this.selectedResource = selectedResource;
-		this.workingSetManager = manager;
+		this.expandVarCtx = new ExpandVariableContext(selectedResource);
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on IRunnerContext.
+	 */
+	public String getExpandedLocation() {
+		return expandedLocation;
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on IRunnerContext.
+	 */
+	public String[] getExpandedArguments() {
+		return expandedArguments;
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on IRunnerContext.
+	 */
+	public String getExpandedWorkingDirectory() {
+		return expandedDirectory;
+	}
+	
+	/* (non-Javadoc)
+	 * Method declared on IRunnerContext.
+	 */
+	public String getExtraAttribute(String key) {
+		return tool.getExtraAttribute(key);
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on IRunnerContext.
+	 */
+	public boolean getLogMessages() {
+		return tool.getLogMessages();	
 	}
 
 	/* (non-Javadoc)
@@ -72,50 +101,8 @@ public final class DefaultRunnerContext implements IRunnerContext {
 	/* (non-Javadoc)
 	 * Method declared on IRunnerContext.
 	 */
-	public String[] getAntTargets() {
-		// Required because ant target variable tags
-		// are embedded in the tool's arguments and
-		// must be expanded beforehand.
-		getExpandedArguments();
-		
-		String[] results = new String[antTargets.size()];	
-		antTargets.toArray(results);
-		return results;
-	}
-
-	/* (non-Javadoc)
-	 * Method declared on IRunnerContext.
-	 */
-	public String getExpandedLocation() {
-		if (expandedLocation == null)
-			expandedLocation = expandVariables(tool.getLocation(), false);
-		return expandedLocation;
-	}
-
-	/* (non-Javadoc)
-	 * Method declared on IRunnerContext.
-	 */
-	public String getExpandedArguments() {
-		if (expandedArguments == null)
-			expandedArguments = expandVariables(tool.getArguments(), true);
-		return expandedArguments;
-	}
-
-	/* (non-Javadoc)
-	 * Method declared on IRunnerContext.
-	 */
-	public String getExpandedWorkingDirectory() {
-		if (expandedDirectory == null)
-			expandedDirectory = expandVariables(tool.getWorkingDirectory(), false);
-		return expandedDirectory;
-	}
-	
-	/**
-	 * Returns whether or not the execution log should appear
-	 * on the log console.
-	 */
-	public boolean getShowLog() {
-		return tool.getShowLog();	
+	public boolean getRunInBackground() {
+		return tool.getRunInBackground();
 	}
 
 	/**
@@ -311,13 +298,8 @@ public final class DefaultRunnerContext implements IRunnerContext {
 	 * @parman addQuotes whether or not to add enclosing quotation marks
 	 */
 	private void appendVariable(String var, StringBuffer buf, boolean addQuotes) {
-		if (var != null) {
-			if (addQuotes && ToolUtil.hasSpace(var))
-				buf.append("\""); //$NON-NLS-1$
+		if (var != null)
 			buf.append(var);
-			if (addQuotes && ToolUtil.hasSpace(var))
-				buf.append("\""); //$NON-NLS-1$			
-		}
 	}
 	
 	/**
@@ -347,56 +329,16 @@ public final class DefaultRunnerContext implements IRunnerContext {
 	}
 	
 	/**
-	 * Runs the external tool and does a resource refresh if specified.
-	 * The tool is validated within this context before being
-	 * runned. Any problems will cause an exception to be thrown.
+	 * Runs the external tool is the context is valid. Once the tool
+	 * has run, resources are refreshed based on the scope. Any problems
+	 * while validating or running the tool will cause an exception
+	 * to be thrown.
 	 * 
 	 * @param monitor the monitor to report progress to, or <code>null</code>.
 	 */
 	public void run(IProgressMonitor monitor) throws CoreException, InterruptedException {
-		String problem = validateInContext();
-		if (problem != null) {
-			IStatus status = new Status(IStatus.WARNING, ExternalToolsPlugin.PLUGIN_ID, 0, problem, null);
-			throw new CoreException(status);
-		}
-		
+		validateContext();
 		executeRunner(monitor);
-	}
-
-	/**
-	 * Runs the external tool and does a resource refresh if specified.
-	 * The tool is validated within this context before being
-	 * runned. Any problems are displayed to the user in a dialog box.
-	 * 
-	 * @param monitor the monitor to report progress to, or <code>null</code>.
-	 * @param shell the shell to parent the error message dialog
-	 */
-	public void run(IProgressMonitor monitor, final Shell shell) throws InterruptedException {
-		try {
-			final String problem = validateInContext();
-			if (problem != null) {
-				shell.getDisplay().syncExec(new Runnable() { 
-					public void run() {
-						MessageDialog.openError(
-							shell, 
-							ToolMessages.getString("DefaultRunnerContext.errorShellTitle"), //$NON-NLS-1$
-							problem);
-					}
-				});
-			} else {
-				executeRunner(monitor);
-			}
-		} catch (final CoreException e) {
-			shell.getDisplay().syncExec(new Runnable() { 
-				public void run() {
-					ErrorDialog.openError(
-						shell,
-						ToolMessages.getString("DefaultRunnerContext.errorShellTitle"), //$NON-NLS-1$
-						ToolMessages.getString("DefaultRunnerContext.errorMessage"), //$NON-NLS-1$
-						e.getStatus());
-				}
-			});
-		}
 	}
 
 	/**
@@ -454,44 +396,49 @@ public final class DefaultRunnerContext implements IRunnerContext {
 	}
 	
 	/**
-	 * Validates the external tool to ensure the external tool location and
-	 * working directory exist in the file system.
+	 * Set the build type for this context based on the kind of build
+	 * being performed by the builder. This is set when the external
+	 * tool is being run as a builder.
 	 * 
-	 * @return the problem text is validate fails, or <code>null</code>
-	 * 		if all seems valid.
+	 * @param buildKind the kind of build being performed (see <code>IncrementalProjectBuilder</code>).
 	 */
-	private String validateInContext() {
-		String loc = getExpandedLocation();
-		if (loc == null || loc.length() == 0)
-			return ToolMessages.format("DefaultRunnerContext.invalidLocation", new Object[] {tool.getName()}); //$NON-NLS-1$
-		File file = new File(loc);
-		if (!file.isFile())
-			return  ToolMessages.format("DefaultRunnerContext.invalidLocation", new Object[] {tool.getName()}); //$NON-NLS-1$
-		
-		String dir = getExpandedWorkingDirectory();
-		if (dir != null && dir.length() > 0) {
-			File path = new File(dir);
-			if (!path.isDirectory())
-				return ToolMessages.format("DefaultRunnerContext.invalidDirectory", new Object[] {tool.getName()}); //$NON-NLS-1$
-		}
-		
-		return null;
+	public void setBuildType(int buildKind) {
+		if (buildKind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
+			buildType = IExternalToolConstants.BUILD_TYPE_INCREMENTAL;
+		else if (buildKind == IncrementalProjectBuilder.FULL_BUILD)
+			buildType = IExternalToolConstants.BUILD_TYPE_FULL;
+		else if (buildKind == IncrementalProjectBuilder.AUTO_BUILD)
+			buildType = IExternalToolConstants.BUILD_TYPE_AUTO;
+		else 
+			buildType = IExternalToolConstants.BUILD_TYPE_NONE;
 	}
 	
 	/**
-	 * Set the build type for this runner context. The build type is the type 
-	 * of build (one of ToolUtil.BUILD_TYPE_INCREMENTAL, ToolUtil.BUILD_TYPE_AUTO,
-	 * or ToolUtil.BUILD_TYPE_FULL) if the tool being run is running as a project
-	 * builder, or ToolUtil.BUILD_TYPE_NONE otherwise.
+	 * Validates the context in which to run the external tool.
+	 * This will cause the location, arguments, and working
+	 * directory to be expanded and verified.
 	 */
-	/*package*/ void setBuildType(int kind) {
-		if (kind == IncrementalProjectBuilder.INCREMENTAL_BUILD)
-			buildType = ToolUtil.BUILD_TYPE_INCREMENTAL;
-		else if (kind == IncrementalProjectBuilder.FULL_BUILD)
-			buildType = ToolUtil.BUILD_TYPE_FULL;
-		else if (kind == IncrementalProjectBuilder.AUTO_BUILD)
-			buildType = ToolUtil.BUILD_TYPE_AUTO;
-		else 
-			buildType = ToolUtil.BUILD_TYPE_NONE;
+	private void validateContext() throws CoreException {
+		expandedLocation = ToolUtil.expandFileLocation(tool.getLocation(), expandVarCtx);
+		if (expandedLocation == null || expandedLocation.length() == 0) {
+			String msg = ToolMessages.format("DefaultRunnerContext.invalidLocation", new Object[] {tool.getName()}); //$NON-NLS-1$
+			ExternalToolsPlugin.getDefault().newError(msg, null);
+		}
+		File file = new File(expandedLocation);
+		if (!file.isFile()) {
+			String msg = ToolMessages.format("DefaultRunnerContext.invalidLocation", new Object[] {tool.getName()}); //$NON-NLS-1$
+			ExternalToolsPlugin.getDefault().newError(msg, null);
+		}
+		
+		expandedDirectory = ToolUtil.expandDirectoryLocation(tool.getWorkingDirectory(), expandVarCtx);
+		if (expandedDirectory != null && expandedDirectory.length() > 0) {
+			File path = new File(expandedDirectory);
+			if (!path.isDirectory()) {
+				String msg = ToolMessages.format("DefaultRunnerContext.invalidDirectory", new Object[] {tool.getName()}); //$NON-NLS-1$
+				ExternalToolsPlugin.getDefault().newError(msg, null);
+			}
+		}
+		
+		expandedArguments = ToolUtil.expandArguments(tool.getArguments(), expandVarCtx);
 	}
 }

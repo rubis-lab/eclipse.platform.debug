@@ -18,11 +18,6 @@ Contributors:
  */
 public interface IRunnerContext {
 	/**
-	 * Returns the name of the external tool.
-	 */
-	public String getName();
-	
-	/**
 	 * Returns the arguments for the external tool. All
 	 * variables embedded in the arguments have been fully
 	 * expanded.
@@ -58,6 +53,11 @@ public interface IRunnerContext {
 	 */
 	public boolean getLogMessages();
 
+	/**
+	 * Returns the name of the external tool.
+	 */
+	public String getName();
+	
 	/**
 	 * Returns whether to run the external tool in the
 	 * background so as not to block the UI.

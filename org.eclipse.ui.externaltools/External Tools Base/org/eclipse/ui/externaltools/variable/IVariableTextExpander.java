@@ -9,12 +9,8 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
-import org.eclipse.core.runtime.IPath;
-
 /**
- * Represents the API for a client extending one of the
- * variable extension points to provide location path of
- * a file or directory.
+ * Responsible for expanding a variable into text format.
  * <p>
  * Implementation of this interface will be treated like
  * a singleton. That is, only one instance will be created
@@ -24,17 +20,16 @@ import org.eclipse.core.runtime.IPath;
  * may implement this interface.
  * </p>
  */
-public interface IVariableLocation {
+public interface IVariableTextExpander {
 	/**
-	 * Returns the path location to a file or directory
-	 * for the given variable tag and value. The path does
-	 * not need to exist.
+	 * Returns the expanded text for the given variable
+	 * tag and value.
 	 * 
 	 * @param varTag the variable tag name
 	 * @param varValue the value for the variable
 	 * @param context the context the variable should use to expand itself
-	 * @return the <code>IPath</code> to a file/directory
+	 * @return the text of the expanded variable
 	 * 		or <code>null</code> if not possible
 	 */
-	public IPath getPath(String varTag, String varValue, ExpandVariableContext context);
+	public String getText(String varTag, String varValue, ExpandVariableContext context);
 }
