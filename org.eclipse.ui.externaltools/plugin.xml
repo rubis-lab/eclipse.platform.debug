@@ -20,8 +20,105 @@
 
 
 <!-- extension point definitions -->
+	<extension-point id="toolTypes" name="%ExtPoint.toolTypes"/>
+	<extension-point id="argumentVariables" name="%ExtPoint.argumentVariables"/>
+	<extension-point id="directoryVariables" name="%ExtPoint.directoryVariables"/>
+	<extension-point id="fileVariables" name="%ExtPoint.fileVariables"/>
+	<extension-point id="refreshVariables" name="%ExtPoint.refreshVariables"/>
 
 <!-- Extensions -->
+	<extension point="org.eclipse.ui.externaltools.toolTypes">
+		<toolType
+			id="programType"
+			name="%ToolType.programName"
+			description="%ToolType.programDescription"
+			icon="icons/full/obj16/ttype_program.gif"
+			class="someclassnamehere">
+		</toolType>
+		<toolType
+			id="antBuildType"
+			name="%ToolType.antBuildName"
+			description="%ToolType.antBuildDescription"
+			icon="icons/full/obj16/ttype_ant.gif"
+			class="someclassnamehere">
+		</toolType>
+	</extension>
+
+	<extension point="org.eclipse.ui.newWizards"> 
+		<category 
+			id="org.eclipse.ui.externaltools.newWizards"
+			name="%CategoryNewWizard.externalTools">
+		</category> 
+		<wizard 
+			id="org.eclipse.ui.externaltools.ProgramNewWizard" 
+			name="%NewWizard.programName" 
+			category="org.eclipse.ui.externaltools.newWizards" 
+			icon="icons/full/obj16/ttype_program.gif" 
+			class="org.eclipse.ui.externaltools.internal.dialog.ProgramExternalToolNewWizard"> 
+			<description> 
+				%NewWizard.programDescription 
+			</description> 
+		</wizard> 
+		<wizard 
+			id="org.eclipse.ui.externaltools.AntBuildNewWizard" 
+			name="%NewWizard.antBuildName" 
+			category="org.eclipse.ui.externaltools.newWizards" 
+			icon="icons/full/obj16/ttype_ant.gif" 
+			class="org.eclipse.ui.externaltools.internal.dialog.AntExternalToolNewWizard"> 
+			<description> 
+				%NewWizard.antBuildDescription 
+			</description> 
+		</wizard> 
+	</extension> 
+
+	<extension point="org.eclipse.ui.externaltools.fileVariables">
+		<variable
+			tag="resource_loc"
+			description="Expands to the resource's absolute path on the system's hard drive."
+			componentClass="org.eclipse.ui.externaltools.variable.SpecificFileLocVariableComponent"
+			locationClass="org.eclipse.ui.externaltools.variable.ResourceLocVariableLocation">
+		</variable>
+	</extension>
+
+	<extension point="org.eclipse.ui.externaltools.refreshVariables">
+		<variable
+			tag="workspace"
+			description="Expands to the workspace root resource."
+			refreshClass="someclassnamehere">
+		</variable>
+		<variable
+			tag="project"
+			description="Expands to a project resource."
+			componentClass="someclassnamehere"
+			refreshClass="someclassnamehere">
+		</variable>
+		<variable
+			tag="container"
+			description="Expands to a folder or project resource."
+			componentClass="someclassnamehere"
+			refreshClass="someclassnamehere">
+		</variable>
+		<variable
+			tag="resource"
+			description="Expands to a resource."
+			componentClass="org.eclipse.ui.externaltools.variable.SpecificFileLocVariableComponent"
+			refreshClass="someclassnamehere">
+		</variable>
+		<variable
+			tag="working_set"
+			description="Expands to a group of resources."
+			componentClass="someclassnamehere"
+			refreshClass="someclassnamehere">
+		</variable>
+	</extension>
+
+
+<!-- Old Stuff -->
+<!-- Old Stuff -->
+<!-- Old Stuff -->
+<!-- Old Stuff -->
+<!-- Old Stuff -->
+
 	<extension point="org.eclipse.core.resources.builders"
 		id="ExternalToolBuilder"
 		name="%Builder.externalTools">
@@ -100,7 +197,7 @@
 	<extension point="org.eclipse.ui.views">
 		<category 
 			id="org.eclipse.ui.externaltools.views"
-			name="%Category.externalTools">
+			name="%CategoryView.externalTools">
 		</category>
 		<view
 			id="org.eclipse.ui.externaltools.LogConsoleView"
@@ -110,11 +207,19 @@
 			category="org.eclipse.ui.externaltools.views"
 			class="org.eclipse.ui.externaltools.internal.ui.LogConsoleView">
 		</view>
+		<view
+			id="org.eclipse.ui.externaltools.ExternalToolView"
+	  		name="%View.externalToolView"
+			icon="icons/full/cview16/external_tools.gif"
+			fastViewWidthRatio="0.30"
+			category="org.eclipse.ui.externaltools.views"
+			class="org.eclipse.ui.externaltools.internal.view.ExternalToolView">
+		</view>
 	</extension>
 
     <extension point="org.eclipse.ant.core.extraClasspathEntries">
      	<extraClasspathEntry
-         	library="lib/antbuilder.jar">
+         	library="lib/antrunner.jar">
       	</extraClasspathEntry>
     </extension>
 
