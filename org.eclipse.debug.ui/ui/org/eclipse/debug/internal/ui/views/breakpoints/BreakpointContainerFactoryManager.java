@@ -49,9 +49,11 @@ public class BreakpointContainerFactoryManager {
 		for (int i = 0; i < configurationElements.length; i++) {
 			IConfigurationElement element= configurationElements[i];
 			String id= element.getAttribute("id"); //$NON-NLS-1$
-			if (id != null) {
+			String label= element.getAttribute("label"); //$NON-NLS-1$
+			if (id != null && label != null) {
 				try {
 					IBreakpointContainerFactory factory = (IBreakpointContainerFactory) element.createExecutableExtension("class"); //$NON-NLS-1$
+					factory.setLabel(label);
 					if (factory != null) {
 						fFactories.put(id, factory);
 					}
@@ -69,6 +71,14 @@ public class BreakpointContainerFactoryManager {
 	 */
 	public IBreakpointContainerFactory getFactory(String identifier) {
 		return (IBreakpointContainerFactory) fFactories.get(identifier);
+	}
+	
+	/**
+	 * Returns the available breakpoint container factories.
+	 * @return the available breakpoint container factories
+	 */
+	public IBreakpointContainerFactory[] getFactories() {
+		return (IBreakpointContainerFactory[]) fFactories.values().toArray(new IBreakpointContainerFactory[0]);
 	}
 
 }

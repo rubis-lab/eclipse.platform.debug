@@ -26,6 +26,12 @@ public interface IBreakpointContainerFactory {
 	 */
 	public IBreakpointContainer[] getContainers(IBreakpoint[] breakpoints, String parentId);
 	
+	public String getLabel();
+	
+	public String setLabel(String label);
+	
+	public String getIdentifier();
+	
 	/**
 	 * Disposes this container factory. Allows the factory to clean up any
 	 * resources related to images that it may have used for containers 

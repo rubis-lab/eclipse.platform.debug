@@ -14,6 +14,7 @@ package org.eclipse.debug.internal.ui.views.breakpoints;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
 
 import org.eclipse.core.runtime.CoreException;
@@ -74,8 +75,10 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 	private boolean fIsTrackingSelection= false;
 	// Persistance constants
 	private static String KEY_IS_TRACKING_SELECTION= "isTrackingSelection"; //$NON-NLS-1$
+	private static String KEY_BREAKPOINT_CONTAINER_FACTORIES= "breakpointContainerFactories"; //$NON-NLS-1$
 	private static String KEY_VALUE="value"; //$NON-NLS-1$
 	private String fAutoGroup= null;
+	private BreakpointsViewContentProvider fContentProvider;
 	
 	/**
 	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
@@ -94,7 +97,8 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 	 */
 	protected Viewer createViewer(Composite parent) {
 		final CheckboxTreeViewer viewer = new CheckboxTreeViewer(new Tree(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CHECK));
-		viewer.setContentProvider(new BreakpointsViewContentProvider());
+		fContentProvider= new BreakpointsViewContentProvider();
+		viewer.setContentProvider(fContentProvider);
 		viewer.setLabelProvider(new DelegatingModelPresentation() {
 			public Image getImage(Object item) {
 				if (item instanceof IBreakpointContainer) {
@@ -130,6 +134,7 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 		// Necessary so that the PropertySheetView hears about selections in this view
 		getSite().setSelectionProvider(viewer);
 		initIsTrackingSelection();
+		initBreakpointContainerFactories();
 		setEventHandler(new BreakpointsViewEventHandler(this));
 		return viewer;
 	}
@@ -149,6 +154,32 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 		}
 		setTrackSelection(false);
 	}
+	
+	private void initBreakpointContainerFactories() {
+		IMemento memento = getMemento();
+		if (memento != null) {
+			IMemento node = memento.getChild(KEY_BREAKPOINT_CONTAINER_FACTORIES);
+			if (node != null) {
+				String factoryIds = node.getString(KEY_VALUE);
+				BreakpointContainerFactoryManager manager = BreakpointContainerFactoryManager.getDefault();
+				List factories= new ArrayList();
+				int start= 0;
+				int index= factoryIds.indexOf(',');
+				while (index != -1 && start < factoryIds.length() - 1) {
+					String factoryId= factoryIds.substring(start, index);
+					if (factoryId.length() > 0) {
+						IBreakpointContainerFactory factory = manager.getFactory(factoryId);
+						if (factory != null) {
+							factories.add(factory);
+						}
+					}
+					start= index + 1;
+					index= factoryIds.indexOf(',', start);
+				}
+				fContentProvider.setBreakpointContainerFactories(factories);
+			}
+		}
+	}
 
 	/**
 	 * Sets the initial checked state of the items in the viewer.
@@ -164,34 +195,47 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 		}
 		ListIterator iterator= elementsToCheck.listIterator();
 		while (iterator.hasNext()) {
+			updateCheckedState(iterator.next(), viewer, provider);
+		}
+	}
+	
+	public void updateCheckedState(Object element, CheckboxTreeViewer viewer, ITreeContentProvider provider) {
+		if (element instanceof IBreakpoint) {
 			try {
-				Object element= iterator.next();
-				if (element instanceof IBreakpoint && !((IBreakpoint) element).isEnabled()) {
-					iterator.remove();
-				} else if (element instanceof IBreakpointContainer) {
-					IBreakpoint[] children = ((IBreakpointContainer) element).getBreakpoints();
-					int enabledChildren= 0;
-					for (int i = 0; i < children.length; i++) {
-						IBreakpoint breakpoint = children[i];
-						if (breakpoint.isEnabled()) {
-							iterator.add(breakpoint);
-							enabledChildren++;
-						}
-					}
-					if (enabledChildren != children.length && enabledChildren > 0) {
-						// If some but not all children are enabled, gray the container node
-						viewer.setGrayed(element, true);
-					} else if (enabledChildren == 0) {
-						// Uncheck the container node if no children are enabled
-						iterator.remove();
-						viewer.setGrayed(element, false);
-					}
-				}
+				viewer.setChecked(element, ((IBreakpoint) element).isEnabled());
 			} catch (CoreException e) {
 				DebugUIPlugin.log(e);
 			}
+		} else if (element instanceof IBreakpointContainer) {
+			IBreakpoint[] breakpoints = ((IBreakpointContainer) element).getBreakpoints();
+			int enabledChildren= 0;
+			for (int i = 0; i < breakpoints.length; i++) {
+				IBreakpoint breakpoint = breakpoints[i];
+				try {
+					if (breakpoint.isEnabled()) {
+						enabledChildren++;
+					}
+				} catch (CoreException e) {
+					DebugUIPlugin.log(e);
+				}
+			}
+			if (enabledChildren == 0) {
+				// Uncheck the container node if no children are enabled
+				viewer.setGrayChecked(element, false);
+			} else if (enabledChildren == breakpoints.length) {
+				// Check the container if all children are enabled
+				viewer.setGrayed(element, false);
+				viewer.setChecked(element, true);
+			} else {
+				// If some but not all children are enabled, gray the container node
+				viewer.setGrayChecked(element, true);
+			}
+			// Update any children (breakpoints and containers)
+			Object[] children = provider.getChildren(element);
+			for (int i = 0; i < children.length; i++) {
+				updateCheckedState(children[i], viewer, provider);
+			}
 		}
-		viewer.setCheckedElements(elementsToCheck.toArray());
 	}
 	
 	/**
@@ -287,7 +331,7 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 		ITreeContentProvider contentProvider= getTreeContentProvider();
 		try {
 			breakpoint.setEnabled(enable);
-			updateParentContainers(breakpoint, enable);
+			updateParentsCheckedState(breakpoint, enable);
 			viewer.update(breakpoint, null);
 		} catch (CoreException e) {
 			String titleState= enable ? DebugUIViewsMessages.getString("BreakpointsView.6") : DebugUIViewsMessages.getString("BreakpointsView.7"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -307,7 +351,7 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 	 * @param object
 	 * @param enable
 	 */
-	public void updateParentContainers(Object object, boolean enable) {
+	public void updateParentsCheckedState(Object object, boolean enable) {
 		Object parent= getTreeContentProvider().getParent(object);
 		if (!(parent instanceof IBreakpointContainer)) {
 			return;
@@ -332,7 +376,7 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 			} catch (CoreException e) {
 			}
 		}
-		updateParentContainers(parent, enable);
+		updateParentsCheckedState(parent, enable);
 	}
 
 	/**
@@ -521,6 +565,16 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
 		super.saveState(memento);
 		IMemento node= memento.createChild(KEY_IS_TRACKING_SELECTION);
 		node.putString(KEY_VALUE, String.valueOf(fIsTrackingSelection));
+		
+		StringBuffer buffer= new StringBuffer();
+		List breakpointContainerFactories = getBreakpointContainerFactories();
+		Iterator iter = breakpointContainerFactories.iterator();
+		while (iter.hasNext()) {
+			IBreakpointContainerFactory factory= (IBreakpointContainerFactory) iter.next();
+			buffer.append(factory.getIdentifier()).append(',');
+		}
+		node = memento.createChild(KEY_BREAKPOINT_CONTAINER_FACTORIES);
+		node.putString(KEY_VALUE, buffer.toString());
 	}
 
 	/* (non-Javadoc)
@@ -584,5 +638,17 @@ public class BreakpointsView extends AbstractDebugView implements ISelectionList
               }
           }
 		super.doubleClick(event);
+	}
+
+	/**
+	 * @param selectedContainers
+	 */
+	public void setBreakpointContainerFactories(List selectedContainers) {
+		fContentProvider.setBreakpointContainerFactories(selectedContainers);
+		getViewer().refresh();
+	}
+	
+	public List getBreakpointContainerFactories() {
+		return fContentProvider.getBreakpointContainerFactories();
 	}
 }

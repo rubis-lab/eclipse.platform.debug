@@ -16,20 +16,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.model.IBreakpoint;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.eclipse.debug.internal.ui.DebugUIPlugin;
 
 /**
  * 
  */
-public class BreakpointProjectContainerFactory extends AbstractBreakpointContainerFactory {
-	
-	private ILabelProvider fImageProvider= new WorkbenchLabelProvider();
-	
-	public BreakpointProjectContainerFactory() {
+public class BreakpointGroupContainerFactory extends AbstractBreakpointContainerFactory {
+
+	public BreakpointGroupContainerFactory() {
 	}
 
 	/* (non-Javadoc)
@@ -40,49 +36,46 @@ public class BreakpointProjectContainerFactory extends AbstractBreakpointContain
 		List other= new ArrayList();
 		for (int i = 0; i < breakpoints.length; i++) {
 			IBreakpoint breakpoint = breakpoints[i];
-			IMarker marker = breakpoint.getMarker();
-			if (marker != null) {
-				IProject project = marker.getResource().getProject();
-				if (project != null) {
-					List list = (List) map.get(project);
-					if (list == null) {
-						list= new ArrayList();
-						map.put(project, list);
-					}
-					list.add(breakpoint);
-					continue;
-				}
+			String group= null;
+			try {
+				group = breakpoint.getGroup();
+			} catch (CoreException e) {
+				DebugUIPlugin.log(e);
 			}
-			// No project available
+			if (group != null) {
+				List list = (List) map.get(group);
+				if (list == null) {
+					list= new ArrayList();
+					map.put(group, list);
+				}
+				list.add(breakpoint);
+				continue;
+			}
+			// No group
 			other.add(breakpoint);
 		}
 		List containers= new ArrayList(map.size());
-		Set projects = map.keySet();
-		Iterator iter= projects.iterator();
+		Set groups = map.keySet();
+		Iterator iter= groups.iterator();
 		while (iter.hasNext()) {
-			IProject project= (IProject) iter.next();
-			List list= (List) map.get(project);
+			String group= (String) iter.next();
+			List list= (List) map.get(group);
 			BreakpointContainer container= new BreakpointContainer(
 					(IBreakpoint[]) list.toArray(new IBreakpoint[0]),
 					this,
-					project.getName(),
+					group,
 					parentId);
-			container.setImage(fImageProvider.getImage(project));
 			containers.add(container);
 		}
 		if (other.size() > 0) {
 			BreakpointContainer container= new BreakpointContainer(
 					(IBreakpoint[]) other.toArray(new IBreakpoint[0]),
 					this,
-					"(no project)",
+					"(no group)",
 					parentId);
 			containers.add(container);
 		}
 		return (IBreakpointContainer[]) containers.toArray(new IBreakpointContainer[containers.size()]);
-	}
-	
-	public void dispose() {
-		fImageProvider.dispose();
 	}
 
 }

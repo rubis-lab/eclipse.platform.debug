@@ -84,26 +84,6 @@ public class BreakpointsViewEventHandler implements IBreakpointsListener, IActiv
 						}
 						CheckboxTreeViewer viewer = fView.getCheckboxViewer();
 						viewer.refresh();
-						if (autoGroup != null) {
-						    // After updating to pick up structural changes (possible new group creation),
-						    // update the checked state of the default group.
-							int enabledChildren= 0;
-							Object[] children = fView.getTreeContentProvider().getChildren(autoGroup);
-							for (int i = 0; i < children.length; i++) {
-                                try {
-                                    if (((IBreakpoint) children[i]).isEnabled()) {
-                                        enabledChildren++;
-                                    }
-                                } catch (CoreException e) {
-                                }
-                            }
-							if (enabledChildren == children.length) {
-							    viewer.setChecked(autoGroup, true);
-							    viewer.setGrayed(autoGroup, false);
-							} else {
-							    viewer.setGrayChecked(autoGroup, enabledChildren > 0);
-							}
-						}
 						MultiStatus status= new MultiStatus(DebugUIPlugin.getUniqueIdentifier(), IStatus.ERROR, DebugUIViewsMessages.getString("BreakpointsViewEventHandler.4"), null); //$NON-NLS-1$
 						for (int i = 0; i < breakpoints.length; i++) {
 							IBreakpoint breakpoint = breakpoints[i];
@@ -116,6 +96,7 @@ public class BreakpointsViewEventHandler implements IBreakpointsListener, IActiv
 								if (viewer.getChecked(breakpoint) != enabled) {
 									viewer.setChecked(breakpoint, breakpoint.isEnabled());								
 								}
+								fView.updateParentsCheckedState(breakpoint, enabled);
 
                                 if (!DebugPlugin.getDefault().getBreakpointManager().isEnabled()) {
                                 	fView.updateViewerBackground();
@@ -145,6 +126,7 @@ public class BreakpointsViewEventHandler implements IBreakpointsListener, IActiv
 					if (fView.isAvailable()) {
 						CheckboxTreeViewer viewer= (CheckboxTreeViewer)fView.getViewer();
 						viewer.refresh();
+						fView.initializeCheckedState();
 						fView.updateObjects();
 					}
 				}

@@ -57,6 +57,9 @@ public class BreakpointsViewContentProvider implements ITreeContentProvider {
 			} else {
 				IBreakpointContainerFactory nextFactory = (IBreakpointContainerFactory) fBreakpointContainerFactories.get(index + 1);
 				children= nextFactory.getContainers(container.getBreakpoints(), getParentId(container));
+				if (children.length == 1) {
+					children= getElements(children[0]);
+				}
 			}
 		} else {
 			children= new Object[0];
@@ -83,6 +86,10 @@ public class BreakpointsViewContentProvider implements ITreeContentProvider {
 			((IBreakpointContainerFactory) iter.next()).dispose();
 		}
 		fBreakpointContainerFactories= factories;
+	}
+	
+	public List getBreakpointContainerFactories() {
+		return fBreakpointContainerFactories;
 	}
 
 	/* (non-Javadoc)

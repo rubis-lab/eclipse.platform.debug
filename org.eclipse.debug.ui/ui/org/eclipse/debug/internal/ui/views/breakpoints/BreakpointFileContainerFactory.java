@@ -26,7 +26,7 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 /**
  * 
  */
-public class BreakpointFileContainerFactory implements IBreakpointContainerFactory {
+public class BreakpointFileContainerFactory extends AbstractBreakpointContainerFactory {
 
 	private ILabelProvider fImageProvider= new WorkbenchLabelProvider();
 	

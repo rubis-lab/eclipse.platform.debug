@@ -701,6 +701,14 @@
                label="%clearDefaultGroup.label"
                tooltip="%clearDefaultGroup.tooltip">
          </action>
+         <action
+               id="org.eclipse.debug.ui.breakpointsView.toolbar.showByAction"
+               menubarPath="defaultBreakpointGroup"
+               class="org.eclipse.debug.internal.ui.actions.ShowBreakpointsByAction"
+               helpContextId="show_breakpoints_by_action_context"
+               label="Show By..."
+               tooltip="Choose how to show breakpoints">
+         </action>
       </viewContribution>
 <!-- Contributions to Expression View Toolbar -->
       <viewContribution
@@ -2195,12 +2203,19 @@ M4 = Platform-specific fourth key
           point="org.eclipse.debug.ui.breakpointContainerFactories">
           <breakpointContainerFactory
           	class="org.eclipse.debug.internal.ui.views.breakpoints.BreakpointProjectContainerFactory"
-          	id="org.eclipse.debug.ui.breakpointProjectContainerFactory"/>
+          	id="org.eclipse.debug.ui.breakpointProjectContainerFactory"
+          	label="Project"/>
           <breakpointContainerFactory
           	class="org.eclipse.debug.internal.ui.views.breakpoints.BreakpointFileContainerFactory"
-          	id="org.eclipse.debug.ui.breakpointFileContainerFactory"/>
+          	id="org.eclipse.debug.ui.breakpointFileContainerFactory"
+          	label="File"/>
           <breakpointContainerFactory
           	class="org.eclipse.debug.internal.ui.views.breakpoints.BreakpointTypeContainerFactory"
-          	id="org.eclipse.debug.ui.breakpointTypeContainerFactory"/>
+          	id="org.eclipse.debug.ui.breakpointTypeContainerFactory"
+          	label="Breakpoint Type"/>
+          <breakpointContainerFactory
+          	class="org.eclipse.debug.internal.ui.views.breakpoints.BreakpointGroupContainerFactory"
+          	id="org.eclipse.debug.ui.breakpointGroupContainerFactory"
+          	label="Group"/>
     </extension>
 </plugin>

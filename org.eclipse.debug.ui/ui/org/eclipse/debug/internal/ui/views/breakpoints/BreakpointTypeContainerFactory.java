@@ -22,7 +22,7 @@ import org.eclipse.debug.core.model.IBreakpoint;
 /**
  * 
  */
-public class BreakpointTypeContainerFactory implements IBreakpointContainerFactory {
+public class BreakpointTypeContainerFactory extends AbstractBreakpointContainerFactory {
 	
 	public BreakpointTypeContainerFactory() {
 	}
@@ -61,8 +61,5 @@ public class BreakpointTypeContainerFactory implements IBreakpointContainerFacto
 			containers.add(container);
 		}
 		return (IBreakpointContainer[]) containers.toArray(new IBreakpointContainer[containers.size()]);
-	}
-	
-	public void dispose() {
 	}
 }
