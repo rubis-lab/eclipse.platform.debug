@@ -38,9 +38,13 @@ public final class ArgumentVariable extends ExternalToolVariable {
 	 */
 	public IVariableTextExpander getExpander() {
 		if (expander == null) {
-			expander = (IVariableTextExpander) createObject(ExternalToolVariableRegistry.TAG_EXPANDER_CLASS);
-			if (expander == null)
+			try {
+				expander = (IVariableTextExpander) createObject(ExternalToolVariableRegistry.TAG_EXPANDER_CLASS);
+			} catch (ClassCastException exception) {
+			}
+			if (expander == null) {
 				expander = defaultExpander;
+			}
 		}
 		return expander;
 	}
