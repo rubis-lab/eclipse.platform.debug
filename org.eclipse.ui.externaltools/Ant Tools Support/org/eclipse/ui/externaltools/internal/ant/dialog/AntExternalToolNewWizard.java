@@ -16,11 +16,15 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.externaltools.dialog.ExternalToolGroupWizardPage;
 import org.eclipse.ui.externaltools.dialog.ExternalToolNewWizard;
+import org.eclipse.ui.externaltools.internal.ant.model.AntUtil;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.IHelpContextIds;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
+import org.eclipse.ui.externaltools.internal.registry.ExternalToolRegistry;
 import org.eclipse.ui.externaltools.model.ExternalTool;
+import org.eclipse.ui.externaltools.model.ExternalToolStorage;
 import org.eclipse.ui.externaltools.model.IExternalToolConstants;
+import org.eclipse.ui.externaltools.model.ToolUtil;
 
 /**
  * Wizard that will create a new external tool of type Ant build.
@@ -114,7 +118,14 @@ public class AntExternalToolNewWizard extends ExternalToolNewWizard {
 		String fileLocation= null;
 		if (xmlFile != null) {
 			fileLocation= xmlFile.getLocation().toFile().getAbsolutePath();
-			mainGroup.setInitialName("Temp garbage");
+			String baseName= xmlFile.getName() + " [" + xmlFile.getProject().getName() + "]" ;
+			String name= baseName;
+			int index= 0;
+			while (ExternalToolsPlugin.getDefault().getToolRegistry(getShell()).hasToolNamed(name)) {
+				name= baseName +  "_" + index;
+			}
+			mainGroup.setInitialName(name);
+			mainGroup.setInitialLocation(ToolUtil.buildVariableTag(IExternalToolConstants.VAR_WORKSPACE_LOC, xmlFile.getFullPath().toString()));
 			mainGroup.setInitialLocation(fileLocation);
 		}
 		super.createPageControls(pageContainer);
