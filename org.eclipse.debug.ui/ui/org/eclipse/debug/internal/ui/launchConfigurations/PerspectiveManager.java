@@ -17,10 +17,12 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
@@ -34,10 +36,15 @@ import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.IInternalDebugUIConstants;
+import org.eclipse.debug.internal.ui.views.launch.LaunchView;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IPerspectiveDescriptor;
@@ -268,6 +275,18 @@ public class PerspectiveManager implements ILaunchListener, IDebugEventSetListen
 		if (page != null) {
 			try {
 				page.showView(IDebugUIConstants.ID_DEBUG_VIEW, null, IWorkbenchPage.VIEW_VISIBLE);
+				final LaunchView view = (LaunchView) page.findView(IDebugUIConstants.ID_DEBUG_VIEW);
+				view.selectionChanged(new SelectionChangedEvent(new ISelectionProvider() {
+                    public void addSelectionChangedListener(ISelectionChangedListener listener) {
+                    }
+                    public ISelection getSelection() {
+                        return view.getViewer().getSelection();
+                    }
+                    public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+                    }
+                    public void setSelection(ISelection selection) {
+                    }
+                }, view.getViewer().getSelection()));
 			} catch (PartInitException e) {
 				DebugUIPlugin.log(e);
 			}

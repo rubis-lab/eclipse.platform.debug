@@ -47,11 +47,10 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsoleView;
+import org.eclipse.ui.console.IHyperlink;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleInputStream;
 import org.eclipse.ui.console.IOConsoleOutputStream;
-import org.eclipse.ui.part.IPageBookViewPage;
 
 /**
  * A console for a system process
@@ -62,18 +61,17 @@ import org.eclipse.ui.part.IPageBookViewPage;
  * @since 3.0
  */
 public class ProcessConsole extends IOConsole implements IConsole, IDebugEventSetListener, IPropertyChangeListener {
-	
 	private IProcess fProcess = null;
 	private List streamListeners = new ArrayList();
     private IConsoleColorProvider fColorProvider;
 	private IOConsoleInputStream in;
-    private ConsoleLineNotifier fLineNotifier;
+   
 	
 	/**
 	 * Proxy to a console document
 	 */
 	public ProcessConsole(IProcess process, IConsoleColorProvider colorProvider) {
-		super("", null); //$NON-NLS-1$
+		super("", IDebugUIConstants.ID_PROCESS_CONSOLE_TYPE, null); //$NON-NLS-1$
 		fProcess = process;
 		
 		fColorProvider = colorProvider;
@@ -86,14 +84,6 @@ public class ProcessConsole extends IOConsole implements IConsole, IDebugEventSe
 		Color color = fColorProvider.getColor(IDebugUIConstants.ID_STANDARD_INPUT_STREAM);
 		in.setColor(color);
 		
-	}
-    
-    
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.console.IConsole#createPage(org.eclipse.ui.console.IConsoleView)
-	 */
-	public IPageBookViewPage createPage(IConsoleView view) {
-		return new ProcessConsolePage(view, this);
 	}
 
 	/**
@@ -245,6 +235,8 @@ public class ProcessConsole extends IOConsole implements IConsole, IDebugEventSe
 	protected void dispose() {
 		super.dispose();
 		
+		fColorProvider.disconnect();
+		
 		synchronized(streamListeners) {
 		    for(Iterator i = streamListeners.iterator(); i.hasNext(); ) {
 		        StreamListener listener = (StreamListener) i.next();
@@ -281,35 +273,26 @@ public class ProcessConsole extends IOConsole implements IConsole, IDebugEventSe
 	 * @see org.eclipse.debug.core.IDebugEventSetListener#handleDebugEvents(org.eclipse.debug.core.DebugEvent[])
 	 */
 	public void handleDebugEvents(DebugEvent[] events) {
-		for (int i = 0; i < events.length; i++) {
-			DebugEvent event = events[i];
-			if (event.getSource().equals(getProcess())) {
-			    
-			    if (event.getKind() == DebugEvent.TERMINATE) {
-			        setFinished();
-					DebugPlugin.getDefault().removeDebugEventListener(this);
-			    }
-			    
-				Runnable r = new Runnable() {
-					public void run() {
-						setName(computeName());
-						warnOfContentChange();
-					}
-				};	
-				DebugUIPlugin.getStandardDisplay().asyncExec(r);
-			}
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.console.IOConsole#partitionerFinished()
-	 */
-	public void partitionerFinished() {
-	    super.partitionerFinished();
-	    if (fLineNotifier != null) {
-	        fLineNotifier.streamsClosed();
+	    for (int i = 0; i < events.length; i++) {
+	        DebugEvent event = events[i];
+	        if (event.getSource().equals(getProcess())) {
+	            
+	            if (event.getKind() == DebugEvent.TERMINATE) {
+	                setFinished();
+	                DebugPlugin.getDefault().removeDebugEventListener(this);
+	            }
+	            
+	            Runnable r = new Runnable() {
+	                public void run() {
+	                    setName(computeName());
+	                    warnOfContentChange();
+	                }
+	            };	
+	            DebugUIPlugin.getStandardDisplay().asyncExec(r);
+	        }
 	    }
 	}
+	
 	
 	private void warnOfContentChange() {
 		ConsolePlugin.getDefault().getConsoleManager().warnOfContentChange(DebugUITools.getConsole(fProcess));
@@ -360,6 +343,16 @@ public class ProcessConsole extends IOConsole implements IConsole, IDebugEventSe
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.eclipse.debug.ui.console.IConsole#addLink(org.eclipse.ui.console.IHyperlink, int, int)
+     */
+    public void addLink(IHyperlink link, int offset, int length) {
+        try {
+            addHyperlink(link, offset, length);
+        } catch (BadLocationException e) {
+            DebugUIPlugin.log(e);
+        }
+    }
 
     /* (non-Javadoc)
      * @see org.eclipse.debug.ui.console.IConsole#getRegion(org.eclipse.debug.ui.console.IConsoleHyperlink)
@@ -435,17 +428,4 @@ public class ProcessConsole extends IOConsole implements IConsole, IDebugEventSe
             return Status.OK_STATUS;
         }
     }
-
-
-    /**
-     * @param lineNotifier
-     */
-    public void setLineNotifier(ConsoleLineNotifier lineNotifier) {
-        fLineNotifier = lineNotifier;
-        fLineNotifier.connect(this);
-        if (fProcess.isTerminated()) {
-            setFinished();
-        }
-    }
-
 }

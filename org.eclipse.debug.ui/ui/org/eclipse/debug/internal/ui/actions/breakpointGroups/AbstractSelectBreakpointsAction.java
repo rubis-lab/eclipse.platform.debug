@@ -52,11 +52,11 @@ public abstract class AbstractSelectBreakpointsAction extends AbstractBreakpoint
     public List chooseSimilarBreakpoints() {
         Set breakpointsToSelect= new HashSet();
         IBreakpoint[] breakpoints = DebugPlugin.getDefault().getBreakpointManager().getBreakpoints();
-        for (int i = 0; i < fBreakpoints.length; i++) {
-            IBreakpoint selected = fBreakpoints[i];
-            for (int j = 0; j < breakpoints.length; j++) {
-                IBreakpoint breakpoint = breakpoints[j];
-                if (breakpointsMatch(selected, breakpoint)) {
+        for (int i = 0; i < breakpoints.length; i++) {
+            IBreakpoint breakpoint = breakpoints[i];
+            for (int j = 0; j < fBreakpoints.length; j++) {
+                IBreakpoint selected = fBreakpoints[j];
+                if (breakpointsMatch(breakpoint, selected)) {
                     breakpointsToSelect.add(breakpoint);
                 }
             }

@@ -291,6 +291,14 @@
             </separator>
          </menu>
          <action
+               definitionId="org.eclipse.debug.ui.commands.OpenRunConfigurations"
+               label="%OpenRunConfigurations.label"
+               helpContextId="open_run_configurations_action_context"
+               class="org.eclipse.debug.internal.ui.actions.OpenRunConfigurations"
+               menubarPath="org.eclipse.ui.run/runGroup"
+               id="org.eclipse.debug.ui.actions.OpenRunConfigurations">
+         </action>
+         <action
                label="%RunWithConfigurationAction.label"
                pulldown="true"
                helpContextId="run_with_configuration_action_context"
@@ -338,6 +346,14 @@
                helpContextId="run_action_context"
                label="%RunDropDownAction.label"
                pulldown="true">
+         </action>
+         <action
+               definitionId="org.eclipse.debug.ui.commands.OpenDebugConfigurations"
+               label="%OpenDebugConfigurations.label"
+               helpContextId="open_debug_configurations_action_context"
+               class="org.eclipse.debug.internal.ui.actions.OpenDebugConfigurations"
+               menubarPath="org.eclipse.ui.run/debugGroup"
+               id="org.eclipse.debug.ui.actions.OpenDebugConfigurations">
          </action>
          <action
                label="%DebugWithConfigurationAction.label"
@@ -459,6 +475,14 @@
                pulldown="true">
          </action>
          <action
+               definitionId="org.eclipse.debug.ui.commands.OpenProfileConfigurations"
+               label="%OpenProfileConfigurations.label"
+               helpContextId="open_profile_configurations_action_context"
+               class="org.eclipse.debug.internal.ui.actions.OpenProfileConfigurations"
+               menubarPath="org.eclipse.ui.run/profileGroup"
+               id="org.eclipse.debug.ui.actions.OpenProfileConfigurations">
+         </action>
+         <action
                label="%ProfileWithConfigurationAction.label"
                pulldown="true"
                helpContextId="profile_with_configuration_action_context"
@@ -504,7 +528,7 @@
       <viewContribution
             targetID="org.eclipse.debug.ui.DebugView"
             id="org.eclipse.debug.ui.debugview.toolbar">
-<!-- Thread Group -->
+      <!-- Thread Group -->
          <action
                id="org.eclipse.debug.ui.debugview.toolbar.removeAllTerminated"
                toolbarPath="threadGroup"
@@ -574,7 +598,7 @@
                   class="org.eclipse.debug.core.model.ISuspendResume">
             </selection>
          </action>
-<!-- Step Group -->
+      <!-- Step Group -->
          <action
                id="org.eclipse.debug.ui.debugview.toolbar.stepReturn"
                toolbarPath="stepReturnGroup"
@@ -620,7 +644,7 @@
                   class="org.eclipse.debug.core.model.IStep">
             </selection>
          </action>
-<!-- Render Group -->
+      <!-- Render Group -->
          <action
                id="org.eclipse.debug.ui.debugview.toolbar.toggleStepFilters"
                toolbarPath="renderGroup"
@@ -856,7 +880,7 @@
       <viewerContribution
             targetID="org.eclipse.debug.ui.DebugView"
             id="org.eclipse.debug.ui.debugview.popupMenu">
-<!-- Edit Group -->
+      <!-- Edit Group -->
          <action
                label="%CopyToClipboardAction.label"
                icon="icons/full/elcl16/copy_edit_co.gif"
@@ -868,7 +892,7 @@
                   class="org.eclipse.debug.core.model.IDebugElement">
             </selection>
          </action>
-<!-- Launch Group -->
+      <!-- Launch Group -->
          <action
                label="%TerminateAllAction.label"
                icon="icons/full/elcl16/terminate_all_co.gif"
@@ -896,7 +920,7 @@
                   class="org.eclipse.debug.core.model.ITerminate">
             </selection>
          </action>
-<!-- Thread Group -->
+      <!-- Thread Group -->
          <action
                label="%RemoveAllTerminatedAction.label"
                icon="icons/full/elcl16/rem_all_co.gif"
@@ -954,7 +978,7 @@
                   class="org.eclipse.debug.core.model.ISuspendResume">
             </selection>
          </action>
-<!-- Step Group -->
+      <!-- Step Group -->
          <action
                label="%StepReturnAction.label"
                icon="icons/full/elcl16/stepreturn_co.gif"
@@ -994,7 +1018,7 @@
                   class="org.eclipse.debug.core.model.IStep">
             </selection>
          </action>
-<!-- Render Group -->  
+      <!-- Render Group -->  
          <action
                label="%StepWithFiltersAction.label"
                icon="icons/full/elcl16/stepbystep_co.gif"
@@ -1011,12 +1035,42 @@
       <viewerContribution
             targetID="org.eclipse.debug.ui.BreakpointView"
             id="org.eclipse.debug.ui.breakpointview.popupMenu">
+         <menu
+               label="Select"
+               path="additions"
+               id="selectMenu">
+            <separator
+                  name="additions">
+            </separator>
+         </menu>
          <action
                label="%SelectAll.label"
                helpContextId="select_all_breakpoints_action_context"
                class="org.eclipse.debug.internal.ui.actions.SelectAllBreakpointsAction"
-               menubarPath="breakpointSelectGroup"
+               menubarPath="selectMenu/additions"
                id="org.eclipse.debug.ui.actions.SelectAllBreakpointsAction">
+         </action>
+         <menu
+               label="Group All By"
+               path="additions"
+               id="groupAllByMenu">
+            <separator
+                  name="additions">
+            </separator>
+         </menu>
+         <action
+               label="File"
+               helpContextId="group_all_by_file_action_context"
+               class="org.eclipse.debug.internal.ui.actions.breakpointGroups.GroupAllByFileAction"
+               menubarPath="groupAllByMenu/additions"
+               id="org.eclipse.debug.ui.actions.GroupAllByFileAction">
+         </action>
+         <action
+               label="Project"
+               helpContextId="group_all_by_project_action_context"
+               class="org.eclipse.debug.internal.ui.actions.breakpointGroups.GroupAllByProjectAction"
+               menubarPath="groupAllByMenu/additions"
+               id="org.eclipse.debug.ui.actions.GroupAllByProjectAction">
          </action>
          <action
                label="%RemoveAllAction.label"
@@ -1040,14 +1094,14 @@
                label="Select By Type"
                helpContextId="select_breakpoints_by_type_action_context"
                class="org.eclipse.debug.internal.ui.actions.breakpointGroups.SelectBreakpointsByTypeAction"
-               menubarPath="breakpointSelectGroup"
+               menubarPath="selectMenu/additions"
                id="org.eclipse.debug.ui.actions.SelectBreakpointsByType">
          </action>
          <action
                label="Select By File"
                helpContextId="select_breakpoints_by_file_action_context"
                class="org.eclipse.debug.internal.ui.actions.breakpointGroups.SelectBreakpointsByResourceAction"
-               menubarPath="breakpointSelectGroup"
+               menubarPath="selectMenu/additions"
                id="org.eclipse.debug.ui.actions.SelectBreakpointsByFile">
          </action>
          <action
@@ -1126,7 +1180,7 @@
       <viewerContribution
             targetID="org.eclipse.debug.ui.VariableView"
             id="org.eclipse.debug.ui.variablesView.popupMenu">
-<!-- Variable Group -->
+      <!-- Variable Group -->
          <action
                label="%CopyVariablesToClipboardAction.label"
                icon="icons/full/elcl16/copy_edit_co.gif"
@@ -1150,7 +1204,7 @@
       <viewerContribution
             targetID="org.eclipse.debug.ui.ExpressionView"
             id="org.eclipse.debug.ui.expressionView.popupMenu">
-<!-- Expression Group -->
+      <!-- Expression Group -->
          <action
                label="%RemoveAllAction.label"
                icon="icons/full/elcl16/rem_all_co.gif"
@@ -1195,7 +1249,7 @@
       <viewerContribution
             targetID="org.eclipse.debug.ui.RegistersView"
             id="org.eclipse.debug.ui.registersView.popupMenu">
-<!-- Variable Group -->
+      <!-- Variable Group -->
          <action
                menubarPath="variableGroup"
                class="org.eclipse.debug.internal.ui.actions.CopyVariablesToClipboardActionDelegate"
@@ -1968,6 +2022,12 @@ M4 = Platform-specific fourth key
 			class="org.eclipse.debug.internal.ui.actions.LaunchablePropertyTester"
 			id="org.eclipse.debug.ui.propertyTesters.launchable">		
 	  </propertyTester>      
+      <propertyTester
+            namespace="org.eclipse.debug.ui"
+            type="org.eclipse.ui.console.IOConsole"
+            class="org.eclipse.debug.internal.ui.views.console.JavaConsoleTrackerPropertyTester"
+            properties="processTypeTest"
+            id="org.eclipse.jdt.debug.ui.JavaConsolePropertyTester"/>
    </extension>
 <!-- Context extensions -->
   <extension
@@ -2042,5 +2102,26 @@ M4 = Platform-specific fourth key
 	            value="org.eclipse.debug.internal.ui.views.memory.HexRenderer">
 	        </rendering_property>
 	  </rendering>
+   </extension>
+   <extension
+         point="org.eclipse.ui.console.consolePatternMatchListener">
+      <consolePatternMatchListener
+            class="org.eclipse.debug.internal.ui.views.console.ConsoleLineNotifier"
+            id="org.eclipse.debug.ui.consoleLineNotifier"
+            regex=".*\r(\n?)|.*\n">
+         <enablement>
+            <instanceof value="org.eclipse.debug.internal.ui.views.console.ProcessConsole"/>
+         </enablement>
+      </consolePatternMatchListener>
+   </extension>
+   <extension
+         point="org.eclipse.ui.console.consolePageParticipant">
+      <consolePageParticipant
+            class="org.eclipse.debug.internal.ui.views.console.ProcessConsolePageParticipant"
+            id="org.eclipse.debug.ui.processConsolePageParticipant">
+         <enablement>
+            <instanceof value="org.eclipse.debug.internal.ui.views.console.ProcessConsole"/>
+         </enablement>
+      </consolePageParticipant>
    </extension>   
 </plugin>

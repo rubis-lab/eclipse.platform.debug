@@ -154,6 +154,9 @@ public abstract class Breakpoint extends PlatformObject implements IBreakpoint {
 	 * @see IBreakpoint#setGroup(String)
 	 */
 	public void setGroup(String group) throws CoreException {
+	    if (group.length() == 0) {
+	        group= null;
+	    }
 		setAttribute(GROUP, group);
 	}
 	
