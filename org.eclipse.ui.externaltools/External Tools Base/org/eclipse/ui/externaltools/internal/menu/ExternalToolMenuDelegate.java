@@ -1,30 +1,23 @@
 package org.eclipse.ui.externaltools.internal.menu;
 
 /**********************************************************************
-Copyright (c) 2002 IBM Corp. and others.
-All rights reserved.   This program and the accompanying materials
-are made available under the terms of the Common Public License v0.5
+Copyright (c) 2002 IBM Corp. and others. All rights reserved.
+This file is made available under the terms of the Common Public License v1.0
 which accompanies this distribution, and is available at
-http://www.eclipse.org/legal/cpl-v05.html
+http://www.eclipse.org/legal/cpl-v10.html
  
 Contributors:
 **********************************************************************/
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.*;
 import org.eclipse.jface.action.*;
-import org.eclipse.jface.dialogs.*;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.*;
 import org.eclipse.ui.actions.ActionDelegate;
+import org.eclipse.ui.externaltools.action.*;
 import org.eclipse.ui.externaltools.internal.core.*;
-import org.eclipse.ui.externaltools.internal.view.ExternalToolView;
 import org.eclipse.ui.externaltools.model.*;
 
 /**
@@ -37,7 +30,6 @@ import org.eclipse.ui.externaltools.model.*;
 public class ExternalToolMenuDelegate extends ActionDelegate implements IWorkbenchWindowPulldownDelegate2, IMenuCreator {
 	private IWorkbenchWindow window;
 	private IAction realAction;
-	private ExternalTool lastTool;
 	
 	/**
 	 * Creates the action delegate
@@ -125,7 +117,7 @@ public class ExternalToolMenuDelegate extends ActionDelegate implements IWorkben
 			}
 		});
 		// Disable option if no tool has been run yet.
-		runRecent.setEnabled(lastTool != null);
+		runRecent.setEnabled(getLastTool() != null);
 		
 		// Add a separator.
 		new MenuItem(menu, SWT.SEPARATOR);
@@ -171,74 +163,13 @@ public class ExternalToolMenuDelegate extends ActionDelegate implements IWorkben
 	 * Runs the specified tool
 	 */
 	private void runTool(final ExternalTool tool) {
-		if (tool == null)
-			return;
-			
-		ToolUtil.saveDirtyEditors(window);
-			
-		// Selection is assigned BEFORE Log Console is given focus.
-		// Otherwise incorrect selection is used. Selection is assigned outside
-		// runnable.run(IProgressMonitor) to avoid invalid thread access.
-		final ISelection sel = window.getSelectionService().getSelection();
-		final IWorkbenchPart activePart = window.getPartService().getActivePart();
-									
-		if (tool.getLogMessages()) {
-//			ToolUtil.showLogConsole(window);
-//			ToolUtil.clearLogDocument();
-		}
-		
-		IRunnableWithProgress runnable = new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				IResource resource = null;
-
-				// Get the focused resource.
-				if (sel instanceof IStructuredSelection) {
-					Object result = ((IStructuredSelection)sel).getFirstElement();
-					if (result instanceof IResource) {
-						resource = (IResource) result;
-					} else if (result instanceof IAdaptable) {
-						resource = (IResource)((IAdaptable) result).getAdapter(IResource.class);
-					}
-				}
-				
-				if (resource == null) {
-					// If the active part is an editor, get the file resource used as input.
-					if (activePart instanceof IEditorPart) {
-						IEditorPart editorPart = (IEditorPart) activePart;
-						IEditorInput input = editorPart.getEditorInput();
-						resource = (IResource) input.getAdapter(IResource.class);
-					} 
-				}
-
-				DefaultRunnerContext context;
-				if (resource != null)
-					context = new DefaultRunnerContext(tool, resource.getProject(), resource, window.getWorkbench().getWorkingSetManager());
-				else
-					context = new DefaultRunnerContext(tool, null, window.getWorkbench().getWorkingSetManager());
-				context.run(monitor, window.getShell());
-			};
-		};
-		
-		// Keep track of the most recently run tool.
-		lastTool = tool;
-		
-		try {
-			new ProgressMonitorDialog(window.getShell()).run(true, true, runnable);		
-		} catch (InterruptedException e) {
-			return;
-		} catch (InvocationTargetException e) {
-			IStatus status = null;
-			if (e.getTargetException() instanceof CoreException)
-				status = ((CoreException)e.getTargetException()).getStatus();
-			else
-				status = new Status(IStatus.ERROR, IExternalToolConstants.PLUGIN_ID, 0, ToolMessages.getString("ExternalToolsAction.internalError"), e.getTargetException()); //$NON-NLS-1$;
-			ErrorDialog.openError(
-				window.getShell(), 
-				ToolMessages.getString("ExternalToolMenuDelegate.runErrorTitle"), //$NON-NLS-1$;
-				ToolMessages.getString("ExternalToolMenuDelegate.runProblem"), //$NON-NLS-1$;
-				status);
-			return;
-		}
+		RunExternalToolAction runToolAction;
+		if (tool.getPromptForArguments())
+		 	runToolAction = new RunWithExternalToolAction(window);
+		else
+		 	runToolAction = new RunExternalToolAction(window);
+		runToolAction.setTool(tool);
+		runToolAction.run();
 	}
 	
 	/**
@@ -258,10 +189,16 @@ public class ExternalToolMenuDelegate extends ActionDelegate implements IWorkben
 	 * Run the most recently run external tool.
 	 */
 	private void runLastTool() {
-		if (lastTool == null)
+		if (getLastTool() == null)
 			return;
-		runTool(lastTool);	
+		runTool(getLastTool());	
 	}
 	
+	/**
+	 * Returns the tool which was run most recently.
+	 */
+	 private ExternalTool getLastTool() {
+	 	return FavoritesManager.getInstance().getLastTool();	
+	 }
 	
 }

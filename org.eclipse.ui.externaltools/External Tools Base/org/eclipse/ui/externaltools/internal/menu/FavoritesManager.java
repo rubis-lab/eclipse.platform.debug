@@ -1,11 +1,10 @@
 package org.eclipse.ui.externaltools.internal.menu;
 
 /**********************************************************************
-Copyright (c) 2002 IBM Corp. and others.
-All rights reserved.   This program and the accompanying materials
-are made available under the terms of the Common Public License v0.5
+Copyright (c) 2002 IBM Corp. and others. All rights reserved.
+This file is made available under the terms of the Common Public License v1.0
 which accompanies this distribution, and is available at
-http://www.eclipse.org/legal/cpl-v05.html
+http://www.eclipse.org/legal/cpl-v10.html
  
 Contributors:
 **********************************************************************/
@@ -25,12 +24,14 @@ public final class FavoritesManager {
 	private static final FavoritesManager INSTANCE = new FavoritesManager();
 	private final StorageListener storageListener = new StorageListener();
 	private Set favorites = new TreeSet(new ExternalToolComparator());	
+	private ExternalTool lastTool;
 
 	// Private constructor to ensure this class is a singleton.
 	private FavoritesManager() {
 		// Add the favorites manager as a storage listener so
 		// it can react to changes in the registry.
 		ExternalToolStorage.addStorageListener(storageListener);
+		updateFavorites();
 	}
 	
 	/**
@@ -64,12 +65,28 @@ public final class FavoritesManager {
 	public ExternalTool[] getFavorites() {
 		return (ExternalTool[])favorites.toArray(new ExternalTool[favorites.size()]);
 	}
+	
+	/**
+	 * Returns the last run tool if there is one,
+	 * <code>null</code> otherwise.
+	 */
+	public ExternalTool getLastTool() {
+		return lastTool;	
+	}
+	
+	/**
+	 * Sets the last run tool to be the given tool.
+	 */
+	public void setLastTool(ExternalTool tool) {
+		lastTool = tool;
+	}
 
 	/**
 	 * Updates the favorites list based on whether
 	 * each tool in the registry is a favorite.
 	 */	
 	private void updateFavorites() {
+		boolean lastToolDeleted = true;
 		favorites.clear();
 		
 		ExternalToolType[] types = 
@@ -81,8 +98,13 @@ public final class FavoritesManager {
 			for (int j=0; j < tools.length; j++) {
 				if (tools[j].getShowInMenu())
 					add(tools[j]);
+				if (tools[j] == lastTool)
+					lastToolDeleted = false;
 			}
-		}		
+		}
+		
+		if (lastToolDeleted)
+			lastTool = null;	
 	}
 	
 	/**
@@ -106,6 +128,8 @@ public final class FavoritesManager {
 		 */
 		public void toolDeleted(ExternalTool tool) {
 			remove(tool);
+			if (lastTool == tool)
+				setLastTool(null);
 		}
 	
 		/* (non-Javadoc)

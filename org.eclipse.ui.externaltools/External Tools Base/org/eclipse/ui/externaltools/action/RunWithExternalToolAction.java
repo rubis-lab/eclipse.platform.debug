@@ -9,13 +9,11 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.externaltools.internal.core.ExternalToolsPlugin;
-import org.eclipse.ui.externaltools.internal.core.ToolMessages;
-import org.eclipse.ui.externaltools.model.ExternalTool;
+import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.externaltools.internal.core.*;
 import org.eclipse.ui.externaltools.internal.ui.IHelpContextIds;
+import org.eclipse.ui.externaltools.model.ExternalTool;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
@@ -27,8 +25,8 @@ public class RunWithExternalToolAction extends RunExternalToolAction {
 	/**
 	 * Create an action to run an external tool.
 	 */
-	public RunWithExternalToolAction(IWorkbenchPage page) {
-		super(page);
+	public RunWithExternalToolAction(IWorkbenchWindow window) {
+		super(window);
 		setText(ToolMessages.getString("RunWithExternalToolAction.text")); //$NON-NLS-1$
 		setToolTipText(ToolMessages.getString("RunWithExternalToolAction.toolTip")); //$NON-NLS-1$
 		setHoverImageDescriptor(ExternalToolsPlugin.getDefault().getImageDescriptor("icons/full/clcl16/runwith_tool.gif")); //$NON-NLS-1$
@@ -41,6 +39,6 @@ public class RunWithExternalToolAction extends RunExternalToolAction {
 	 * Method declared on Action.
 	 */
 	public void run() {
-		org.eclipse.jface.dialogs.MessageDialog.openInformation(getPage().getWorkbenchWindow().getShell(), "Action", "This action is not yet implemented");
+		super.run(); // for now do same as RunExternalToolAction
 	}
 }

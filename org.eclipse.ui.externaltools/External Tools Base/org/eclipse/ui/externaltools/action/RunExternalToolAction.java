@@ -9,28 +9,34 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.*;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.externaltools.internal.core.ExternalToolsPlugin;
-import org.eclipse.ui.externaltools.internal.core.ToolMessages;
-import org.eclipse.ui.externaltools.model.ExternalTool;
+import org.eclipse.jface.dialogs.*;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.*;
+import org.eclipse.ui.*;
+import org.eclipse.ui.externaltools.internal.core.*;
+import org.eclipse.ui.externaltools.internal.menu.FavoritesManager;
 import org.eclipse.ui.externaltools.internal.ui.IHelpContextIds;
+import org.eclipse.ui.externaltools.model.*;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
  * Action to run an external tool.
  */
 public class RunExternalToolAction extends Action {
-	private IWorkbenchPage page;
+	private IWorkbenchWindow window;
 	private ExternalTool tool;
 	
 	/**
 	 * Create an action to run an external tool
 	 */
-	public RunExternalToolAction(IWorkbenchPage page) {
+	public RunExternalToolAction(IWorkbenchWindow window) {
 		super();
-		this.page = page;
+		this.window = window;
 		setText(ToolMessages.getString("RunExternalToolAction.text")); //$NON-NLS-1$
 		setToolTipText(ToolMessages.getString("RunExternalToolAction.toolTip")); //$NON-NLS-1$
 		setHoverImageDescriptor(ExternalToolsPlugin.getDefault().getImageDescriptor("icons/full/clcl16/run_tool.gif")); //$NON-NLS-1$
@@ -40,11 +46,18 @@ public class RunExternalToolAction extends Action {
 	}
 
 	/**
-	 * Returns the workbench page this action
-	 * in to be run in.
+	 * Returns the last external tool to be run.
 	 */
-	protected final IWorkbenchPage getPage() {
-		return page;
+	public final static ExternalTool getLastTool() {
+		return FavoritesManager.getInstance().getLastTool();	
+	}
+
+	/**
+	 * Returns the workbench window this action
+	 * is to be run in.
+	 */
+	protected final IWorkbenchWindow getWindow() {
+		return window;
 	}
 	
 	/**
@@ -58,7 +71,10 @@ public class RunExternalToolAction extends Action {
 	 * Method declared on Action.
 	 */
 	public void run() {
-		org.eclipse.jface.dialogs.MessageDialog.openInformation(page.getWorkbenchWindow().getShell(), "Action", "This action is not yet implemented");
+		org.eclipse.jface.dialogs.MessageDialog.openInformation(getWindow().getShell(), "Action", "This action is not yet implemented");
+		
+		// Keep track of the most recently run tool.
+		FavoritesManager.getInstance().setLastTool(tool);
 	}
 
 	/**

@@ -159,8 +159,8 @@ public class ExternalToolActionGroup extends ActionGroup {
 		delAction = new DeleteExternalToolAction(page);
 		renameAction = new RenameExternalToolAction(view);
 		refreshAction = new RefreshViewAction(page);
-		runAction = new RunExternalToolAction(page);
-		runWithAction = new RunWithExternalToolAction(page);
+		runAction = new RunExternalToolAction(page.getWorkbenchWindow());
+		runWithAction = new RunWithExternalToolAction(page.getWorkbenchWindow());
 		editAction = new EditExternalToolPropertiesAction(page);
 	}
 	
