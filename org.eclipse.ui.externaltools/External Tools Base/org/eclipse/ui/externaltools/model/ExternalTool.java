@@ -12,8 +12,11 @@ Contributors:
 import java.util.ArrayList;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
+import org.eclipse.ui.model.IWorkbenchAdapter;
 
 /**
  * This class represents an external tool that can be run. The tool
@@ -30,8 +33,10 @@ import org.eclipse.ui.externaltools.internal.model.ToolMessages;
  * This class is not intended to be extended by clients
  * </p>
  */
-public final class ExternalTool {
+public final class ExternalTool implements IAdaptable {
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
+	
+	private ToolWorkbenchAdapter workbenchAdapter;
 	
 	private String type = EMPTY_STRING;
 	private String name = EMPTY_STRING;
@@ -99,7 +104,19 @@ public final class ExternalTool {
 		else
 			return ToolMessages.getString("ExternalTool.nameMustContainOneChar"); //$NON-NLS-1$
 	}
-	
+
+	/* (non-Javadoc)
+	 * Method declared on IAdaptable.
+	 */
+	public Object getAdapter(Class adapter) {
+		if (adapter == IWorkbenchAdapter.class) {
+			if (workbenchAdapter == null)
+				workbenchAdapter = new ToolWorkbenchAdapter();
+			return workbenchAdapter;
+		}
+		return null;
+	}
+
 	/**
 	 * Returns the extra attribute value
 	 * 
@@ -438,6 +455,29 @@ public final class ExternalTool {
 			super();
 			this.key = key;
 			this.value = value;
+		}
+	}
+	
+	/**
+	 * Internal workbench adapter implementation
+	 */
+	private static class ToolWorkbenchAdapter implements IWorkbenchAdapter {
+		public Object[] getChildren(Object o) {
+			return new Object[0];
+		}
+		
+		public ImageDescriptor getImageDescriptor(Object o) {
+			String type = ((ExternalTool)o).getType();
+			return ExternalToolsPlugin.getDefault().getTypeRegistry().getToolTypeImageDescriptor(type);
+		}
+
+		public String getLabel(Object o) {
+			return ((ExternalTool)o).getName();
+		}
+		
+		public Object getParent(Object o) {
+			String type = ((ExternalTool)o).getType();
+			return ExternalToolsPlugin.getDefault().getTypeRegistry().getToolType(type);
 		}
 	}
 }

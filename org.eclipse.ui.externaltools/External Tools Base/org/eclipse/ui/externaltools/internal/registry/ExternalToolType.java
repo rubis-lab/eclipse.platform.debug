@@ -13,19 +13,25 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.model.IExternalToolRunner;
+import org.eclipse.ui.model.IWorkbenchAdapter;
 
 /**
  * This class represents the definition of an external
  * tool type.
  */
-public final class ExternalToolType {
+public final class ExternalToolType implements IAdaptable {
+	private ToolTypeWorkbenchAdapter workbenchAdapter;
+	
 	private String id;
 	private String name;
 	private IConfigurationElement element;
@@ -44,6 +50,18 @@ public final class ExternalToolType {
 		this.id = id;
 		this.name = name;
 		this.element = element;
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on IAdaptable.
+	 */
+	public Object getAdapter(Class adapter) {
+		if (adapter == IWorkbenchAdapter.class) {
+			if (workbenchAdapter == null)
+				workbenchAdapter = new ToolTypeWorkbenchAdapter();
+			return workbenchAdapter;
+		}
+		return null;
 	}
 
 	/**
@@ -110,5 +128,28 @@ public final class ExternalToolType {
 			}
 		}
 		return runner;
+	}
+
+
+	/**
+	 * Internal workbench adapter implementation
+	 */
+	private static class ToolTypeWorkbenchAdapter implements IWorkbenchAdapter {
+		public Object[] getChildren(Object o) {
+			ExternalToolType type = (ExternalToolType)o;
+			return ExternalToolsPlugin.getDefault().getToolRegistry(null).getToolsOfType(type.getId());
+		}
+		
+		public ImageDescriptor getImageDescriptor(Object o) {
+			return PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER);
+		}
+
+		public String getLabel(Object o) {
+			return ((ExternalToolType)o).getName();
+		}
+		
+		public Object getParent(Object o) {
+			return null;
+		}
 	}
 }

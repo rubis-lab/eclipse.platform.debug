@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPluginRegistry;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.model.IExternalToolConstants;
 
@@ -67,6 +68,17 @@ public class ExternalToolTypeRegistry {
 				return type;
 		}
 		return null;
+	}
+	
+	/**
+	 * Returns the tool type image for the specified id.
+	 */
+	public ImageDescriptor getToolTypeImageDescriptor(String toolTypeId) {
+		ExternalToolType type = getToolType(toolTypeId);
+		if (type == null)
+			return ImageDescriptor.getMissingImageDescriptor();
+		else
+			return type.getImageDescriptor();
 	}
 	
 	/**

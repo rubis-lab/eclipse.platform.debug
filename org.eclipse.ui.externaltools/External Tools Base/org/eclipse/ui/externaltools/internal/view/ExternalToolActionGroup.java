@@ -19,9 +19,9 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.actions.RefreshAction;
 import org.eclipse.ui.actions.TextActionHandler;
-import org.eclipse.ui.externaltools.action.*;
+import org.eclipse.ui.externaltools.action.RunExternalToolAction;
+import org.eclipse.ui.externaltools.action.RunWithExternalToolAction;
 import org.eclipse.ui.externaltools.model.ExternalTool;
 
 /**
@@ -155,7 +155,7 @@ public class ExternalToolActionGroup extends ActionGroup {
 		refreshAction = new RefreshViewAction(page);
 		runAction = new RunExternalToolAction(page.getWorkbenchWindow());
 		runWithAction = new RunWithExternalToolAction(page.getWorkbenchWindow());
-		editAction = new EditExternalToolPropertiesAction(page);
+		editAction = new EditExternalToolPropertiesAction(view);
 	}
 	
 	/* (non-Javadoc)

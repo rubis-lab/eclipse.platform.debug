@@ -12,6 +12,7 @@ Contributors:
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.IHelpContextIds;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
@@ -23,21 +24,21 @@ import org.eclipse.ui.help.WorkbenchHelp;
  * the selected external tool.
  */
 public class EditExternalToolPropertiesAction extends Action {
-	private IWorkbenchPage page;
 	private ExternalTool selectedTool;
+	private PropertyDialogAction propAction;
 
 	/**
 	 * Create an action to edit the selected external tool.
 	 */
-	public EditExternalToolPropertiesAction(IWorkbenchPage page) {
+	public EditExternalToolPropertiesAction(ExternalToolView view) {
 		super();
-		this.page = page;
 		setText(ToolMessages.getString("EditExternalToolPropertiesAction.text")); //$NON-NLS-1$
 		setToolTipText(ToolMessages.getString("EditExternalToolPropertiesAction.toolTip")); //$NON-NLS-1$
 		setHoverImageDescriptor(ExternalToolsPlugin.getDefault().getImageDescriptor("icons/full/clcl16/prop_tool.gif")); //$NON-NLS-1$
 		setImageDescriptor(ExternalToolsPlugin.getDefault().getImageDescriptor("icons/full/elcl16/prop_tool.gif")); //$NON-NLS-1$
 		setDisabledImageDescriptor(ExternalToolsPlugin.getDefault().getImageDescriptor("icons/full/dlcl16/prop_tool.gif")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IHelpContextIds.EDIT_TOOL_PROPERTIES_ACTION);
+		propAction = new PropertyDialogAction(view.getSite().getShell(), view.getTreeViewer());
 	}
 
 	/**
@@ -51,7 +52,8 @@ public class EditExternalToolPropertiesAction extends Action {
 	 * Method declared on Action.
 	 */
 	public void run() {
-		org.eclipse.jface.dialogs.MessageDialog.openInformation(page.getWorkbenchWindow().getShell(), "Action", "This action is not yet implemented");
+		if (propAction.isEnabled())
+			propAction.run();
 	}
 
 	/**
