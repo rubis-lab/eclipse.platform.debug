@@ -141,6 +141,11 @@ public class RunExternalToolAction extends Action {
 		if (tool == null)
 			return;
 
+		// Get the selection now to avoid invalid thread access and current
+		// active part changes when perspective and/or console is shown.
+		ISelection sel = window.getSelectionService().getSelection();
+		IWorkbenchPart activePart = window.getPartService().getActivePart();
+
 		if (alwaysPromptForArguments || tool.getPromptForArguments()) {
 			if (!promptForArguments())
 				return;
@@ -149,15 +154,10 @@ public class RunExternalToolAction extends Action {
 		if (tool.getSaveDirtyEditors())
 			saveDirtyEditors();
 
-		// Get the selection now to avoid invalid thread access and current
-		// active part changes when perspective and/or console is shown.
-		ISelection sel = window.getSelectionService().getSelection();
-		IWorkbenchPart activePart = window.getPartService().getActivePart();
-
 		if (tool.getOpenPerspective() != null)
 			openPerspective(tool.getOpenPerspective());
 
-		if (tool.getLogMessages())
+		if (tool.getShowConsole())
 			openLogConsole();
 			
 		try {
@@ -211,7 +211,7 @@ public class RunExternalToolAction extends Action {
 	
 	
 	/**
-	 * Helper class to that implements the runnable interface
+	 * Helper class that implements the runnable interface
 	 * and will run the external tool.
 	 */
 	private static final class ToolRunnable implements IRunnableWithProgress {

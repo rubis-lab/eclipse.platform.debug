@@ -18,6 +18,13 @@ Contributors:
  */
 public interface IRunnerContext {
 	/**
+	 * Returns whether the external tool runner should capture
+	 * output messages from the running tool and log these
+	 * messages.
+	 */
+	public boolean getCaptureOutput();
+	
+	/**
 	 * Returns the arguments for the external tool. All
 	 * variables embedded in the arguments have been fully
 	 * expanded.

@@ -213,18 +213,10 @@
 	</extension>
 
 	<extension point="org.eclipse.core.resources.builders"
-		id="ExternalToolBuilderProxy"
-		name="%Builder.externalTools">
-		<builder> 
-			<run class="org.eclipse.ui.externaltools.internal.model.ExternalToolBuilderProxy"/> 
-		</builder> 
-	</extension>
-
-	<extension point="org.eclipse.core.resources.builders"
 		id="ExternalToolBuilder"
 		name="%Builder.externalTools">
 		<builder> 
-			<run class="org.eclipse.ui.externaltools.internal.model.ExternalToolOldBuilder"/> 
+			<run class="org.eclipse.ui.externaltools.internal.model.ExternalToolBuilder"/> 
 		</builder> 
 	</extension>
 

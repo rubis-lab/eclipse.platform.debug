@@ -292,7 +292,7 @@ public final class BuilderPropertyPage extends PropertyPage {
 		if (items != null && items.length == 1) {
 			TableItem item = items[0];
 			ICommand buildCommand = (ICommand)item.getData();
-			if (buildCommand.getBuilderName().equals(ExternalToolBuilderProxy.ID)) {
+			if (buildCommand.getBuilderName().equals(ExternalToolBuilder.ID)) {
 				editButton.setEnabled(true);
 				removeButton.setEnabled(true);
 				int selection = builderTable.getSelectionIndex();
@@ -376,7 +376,7 @@ public final class BuilderPropertyPage extends PropertyPage {
 	 */
 	private void updateCommandItem(TableItem item, ICommand command) {
 		String builderID = command.getBuilderName();
-		if (builderID.equals(ExternalToolBuilderProxy.ID)) {
+		if (builderID.equals(ExternalToolBuilder.ID)) {
 			ExternalTool tool = ExternalTool.fromArgumentMap(command.getArguments());
 			if (tool == null) {
 				item.setText(ToolMessages.getString("BuilderPropertyPage.invalidBuildTool")); //$NON-NLS-1$

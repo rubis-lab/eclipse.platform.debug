@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.ui.externaltools.internal.registry.ExternalToolMigration;
 import org.eclipse.ui.externaltools.model.ExternalTool;
 import org.eclipse.ui.externaltools.model.IExternalToolConstants;
 
@@ -23,24 +24,28 @@ import org.eclipse.ui.externaltools.model.IExternalToolConstants;
  * This project builder implementation will run an external tool during the
  * build process. 
  * <p>
- * Note that there is only ever one instance of ExternalToolBuilderProxy per project,
+ * Note that there is only ever one instance of ExternalToolBuilder per project,
  * and the external tool to run is specified in the builder's arguments.
  * </p>
  */
-public class ExternalToolBuilderProxy extends IncrementalProjectBuilder {
-	public static final String ID = "org.eclipse.ui.externaltools.ExternalToolBuilderProxy";
+public final class ExternalToolBuilder extends IncrementalProjectBuilder {
+	public static final String ID = "org.eclipse.ui.externaltools.ExternalToolBuilder"; //$NON-NLS-1$;
+	
+	private static final String NEW_NAME = "ExternalToolOldBuilderName"; //$NON-NLS-1$;
+	private static final String TAG_TOOL_VERSION = "!{tool_version}"; //$NON-NLS-1$;
+	private static final String VERSION_21 = "2.1"; //$NON-NLS-1$;
 
 	/**
 	 * Creates an uninitialized external tool builder.
 	 */
-	public ExternalToolBuilderProxy() {
+	public ExternalToolBuilder() {
 		super();
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on IncrementalProjectBuilder.
 	 */
-	protected final IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException {
+	protected IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException {
 		ExternalTool tool = getToolFromMap(args);
 		if (tool == null)
 			return null;
@@ -73,7 +78,12 @@ public class ExternalToolBuilderProxy extends IncrementalProjectBuilder {
 	 * Returns the external tool based on the arguments
 	 * or <code>null</code> if not possible;
 	 */
-	/* package */ ExternalTool getToolFromMap(Map args) {
-		return null;
+	private ExternalTool getToolFromMap(Map args) {
+		String version = (String) args.get(TAG_TOOL_VERSION);
+		if (VERSION_21.equals(version)) {
+			return null;
+		} else {
+			return ExternalToolMigration.toolFromArgumentMap(args, null, NEW_NAME);
+		}
 	}
 }

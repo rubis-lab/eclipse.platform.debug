@@ -14,8 +14,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 import org.eclipse.ui.externaltools.model.IExternalToolRunner;
 import org.eclipse.ui.externaltools.model.IRunnerContext;
+import org.eclipse.ui.externaltools.model.IRunnerLog;
 
 /**
  * Responsible for running ant build files.
@@ -44,23 +46,43 @@ public class AntFileRunner implements IExternalToolRunner {
 			
 			// Setup the arguments
 			String[] args = runnerContext.getExpandedArguments();
+			String[] runnerArgs = args;
 			String baseDir = runnerContext.getExpandedWorkingDirectory();
 			if (baseDir.length() > 0) {
 				// Ant requires the working directory to be specified
 				// as one of the arguments, so it needs to be appended.
-				String[] newArgs = new String[args.length + 1];
-				System.arraycopy(args, 0, newArgs, 0, args.length);
-				newArgs[args.length] = BASE_DIR_PREFIX + baseDir;
-				runner.setArguments(newArgs);
-			} else {
-				runner.setArguments(args);	
+				runnerArgs = new String[args.length + 1];
+				System.arraycopy(args, 0, runnerArgs, 0, args.length);
+				runnerArgs[args.length] = BASE_DIR_PREFIX + baseDir;
 			}
+			runner.setArguments(runnerArgs);
 			
 			runner.setBuildFileLocation(runnerContext.getExpandedLocation());
 			if (targets.length > 0)
 				runner.setExecutionTargets(targets);
-			runner.addBuildLogger(ANT_LOGGER_CLASS);
+			if (runnerContext.getCaptureOutput())
+				runner.addBuildLogger(ANT_LOGGER_CLASS);
 			
+			// Print out the command used to run the ant build file.
+			if (IRunnerLog.LEVEL_VERBOSE <= runnerContext.getLog().getFilterLevel()) {
+				runnerContext.getLog().append(
+					ToolMessages.getString("AntFileRunner.callingAntRunner"), //$NON-NLS-1$;
+					IRunnerLog.LEVEL_VERBOSE);
+				runnerContext.getLog().append(
+					ToolMessages.format("AntFileRunner.antFile", new Object[] {runnerContext.getExpandedLocation()}), //$NON-NLS-1$;
+					IRunnerLog.LEVEL_VERBOSE);
+				for (int i = 1; i < runnerArgs.length; i++) {
+					runnerContext.getLog().append(
+						ToolMessages.format("AntFileRunner.argument", new Object[] {runnerArgs[i]}), //$NON-NLS-1$;
+						IRunnerLog.LEVEL_VERBOSE);
+				}
+				for (int i = 0; i < targets.length; i++) {
+					runnerContext.getLog().append(
+						ToolMessages.format("AntFileRunner.target", new Object[] {targets[i]}), //$NON-NLS-1$;
+						IRunnerLog.LEVEL_VERBOSE);
+				}
+			}
+
 			if (!monitor.isCanceled())
 				runner.run(monitor);
 		} catch (CoreException e) {

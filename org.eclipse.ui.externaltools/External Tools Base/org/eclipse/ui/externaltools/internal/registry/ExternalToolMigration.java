@@ -224,7 +224,8 @@ public final class ExternalToolMigration {
 			tool.setArguments(arguments);
 			tool.setWorkingDirectory((String)args.get(TAG_TOOL_DIRECTORY));
 			tool.setRefreshScope(refresh);
-			tool.setLogMessages(showLog);
+			tool.setCaptureOutput(showLog);
+			tool.setShowConsole(showLog);
 			tool.setRunInBackground(!block);
 			tool.setRunForBuildKinds(toBuildTypesArray((String)args.get(TAG_TOOL_BUILD_TYPES)));
 			if (targetNames != null && targetNames.length() > 0) {

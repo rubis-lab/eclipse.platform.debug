@@ -54,7 +54,8 @@ public final class ExternalTool implements IAdaptable {
 	private String openPerspective = null;
 	private String refreshScope = null;
 	private boolean refreshRecursive = true;
-	private boolean logMessages = true;
+	private boolean captureOutput = true;
+	private boolean showConsole = true;
 	private boolean runInBackground = true;
 	private boolean promptForArguments = false;
 	private boolean showInMenu = false;
@@ -272,11 +273,19 @@ public final class ExternalTool implements IAdaptable {
 	}
 	
 	/**
-	 * Returns whether to log messages from the running
-	 * tool to the console.
+	 * Returns whether to capture output messages from the 
+	 * running tool.
 	 */
-	public boolean getLogMessages() {
-		return logMessages;	
+	public boolean getCaptureOutput() {
+		return captureOutput;	
+	}
+
+	/**
+	 * Returns whether to show the log console when
+	 * the tool is run.
+	 */
+	public boolean getShowConsole() {
+		return showConsole;	
 	}
 
 	/**
@@ -399,13 +408,21 @@ public final class ExternalTool implements IAdaptable {
 	}
 	
 	/**
-	 * Sets whether to log messages from the running
-	 * tool to the console.
+	 * Sets whether to capture output messages from the 
+	 * running tool.
 	 */
-	public void setLogMessages(boolean logMessages) {
-		this.logMessages = logMessages;	
+	public void setCaptureOutput(boolean captureOutput) {
+		this.captureOutput = captureOutput;	
 	}
-	
+
+	/**
+	 * Sets whether to show the log console when
+	 * the tool is run.
+	 */
+	public void setShowConsole(boolean showConsole) {
+		this.showConsole = showConsole;	
+	}
+
 	/**
 	 * Sets whether to run the external tool in the
 	 * background so as not to block the UI.

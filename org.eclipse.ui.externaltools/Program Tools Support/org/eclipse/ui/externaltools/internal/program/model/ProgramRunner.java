@@ -48,7 +48,7 @@ public final class ProgramRunner implements IExternalToolRunner {
 	 */
 	public void run(IProgressMonitor monitor, IRunnerContext runnerContext, MultiStatus status) {
 		// Runtime exec requires an array where the first element is
-		// the file to run, and the remainind elements are the
+		// the file to run, and the remaining elements are the
 		// arguments to past along.
 		String[] args = runnerContext.getExpandedArguments();
 		String[] commands = new String[args.length + 1];
@@ -66,6 +66,26 @@ public final class ProgramRunner implements IExternalToolRunner {
 			if (monitor.isCanceled())
 				return;
 
+			// Print out the command used to run the program.
+			if (IRunnerLog.LEVEL_VERBOSE <= runnerContext.getLog().getFilterLevel()) {
+				runnerContext.getLog().append(
+					ToolMessages.getString("ProgramRunner.callingRuntimeExec"), //$NON-NLS-1$;
+					IRunnerLog.LEVEL_VERBOSE);
+				runnerContext.getLog().append(
+					ToolMessages.format("ProgramRunner.program", new Object[] {commands[0]}), //$NON-NLS-1$;
+					IRunnerLog.LEVEL_VERBOSE);
+				for (int i = 1; i < commands.length; i++) {
+					runnerContext.getLog().append(
+						ToolMessages.format("ProgramRunner.argument", new Object[] {commands[i]}), //$NON-NLS-1$;
+						IRunnerLog.LEVEL_VERBOSE);
+				}
+				if (workingDirectory != null) {
+					runnerContext.getLog().append(
+						ToolMessages.format("ProgramRunner.workDir", new Object[] {workingDirectory.toString()}), //$NON-NLS-1$;
+						IRunnerLog.LEVEL_VERBOSE);
+				}
+			}
+			
 			// Run the program
 			boolean[] finished = new boolean[] {false};
 			Process p;
@@ -75,16 +95,18 @@ public final class ProgramRunner implements IExternalToolRunner {
 				p = Runtime.getRuntime().exec(commands);
 				
 			// Collect the program's output in the background
-			startThread(
-				p.getInputStream(),
-				runnerContext.getLog(),
-				IRunnerLog.LEVEL_INFO,
-				finished);
-			startThread(
-				p.getErrorStream(), 
-				runnerContext.getLog(), 
-				IRunnerLog.LEVEL_ERROR, 
-				finished);
+			if (runnerContext.getCaptureOutput()) {
+				startThread(
+					p.getInputStream(),
+					runnerContext.getLog(),
+					IRunnerLog.LEVEL_INFO,
+					finished);
+				startThread(
+					p.getErrorStream(), 
+					runnerContext.getLog(), 
+					IRunnerLog.LEVEL_ERROR, 
+					finished);
+			}
 
 			if (monitor.isCanceled()) {
 				p.destroy();

@@ -35,7 +35,9 @@ public interface IRunnerLog {
 	
 	/**
 	 * Returns the current level used for filtering
-	 * messages.
+	 * messages. Any calls to <code>append</code> with
+	 * a level greater than this filter value will be
+	 * ignored.
 	 */
 	public int getFilterLevel();
 }

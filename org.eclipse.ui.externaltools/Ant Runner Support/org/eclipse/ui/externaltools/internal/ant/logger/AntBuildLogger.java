@@ -11,12 +11,13 @@ Contributors:
 **********************************************************************/
 import java.io.PrintStream;
 
-import org.apache.tools.ant.*;
-import org.eclipse.core.runtime.*;
+import org.apache.tools.ant.BuildEvent;
+import org.apache.tools.ant.BuildLogger;
+import org.apache.tools.ant.Project;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.externaltools.internal.core.*;
-import org.eclipse.ui.externaltools.internal.model.*;
-import org.eclipse.ui.externaltools.internal.ui.*;
+import org.eclipse.ui.externaltools.internal.model.ToolMessages;
+import org.eclipse.ui.externaltools.internal.ui.LogConsoleDocument;
+import org.eclipse.ui.externaltools.internal.ui.OutputStructureElement;
 
 public class AntBuildLogger implements BuildLogger {
 
@@ -170,10 +171,5 @@ public class AntBuildLogger implements BuildLogger {
 	}
 
 	public void setOutputPrintStream(PrintStream output) {
-	}
-	private IProgressMonitor monitorFor(IProgressMonitor monitor) {
-		if (monitor == null)
-			return new NullProgressMonitor();
-		return monitor;
 	}
 }

@@ -111,6 +111,13 @@ public final class DefaultRunnerContext implements IRunnerContext {
 	/* (non-Javadoc)
 	 * Method declared on IRunnerContext.
 	 */
+	 public boolean getCaptureOutput() {
+	 	return tool.getCaptureOutput();
+	 }
+	 
+	/* (non-Javadoc)
+	 * Method declared on IRunnerContext.
+	 */
 	public String getExpandedLocation() {
 		return expandedLocation;
 	}

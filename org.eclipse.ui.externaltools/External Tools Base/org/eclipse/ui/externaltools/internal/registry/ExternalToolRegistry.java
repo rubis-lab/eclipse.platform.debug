@@ -27,16 +27,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IMemento;
-import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
-import org.eclipse.ui.externaltools.internal.core.*;
-import org.eclipse.ui.externaltools.internal.model.*;
-import org.eclipse.ui.externaltools.model.*;
-import org.eclipse.ui.texteditor.AddTaskAction;
+import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
+import org.eclipse.ui.externaltools.internal.model.ToolMessages;
+import org.eclipse.ui.externaltools.model.ExternalTool;
+import org.eclipse.ui.externaltools.model.IExternalToolConstants;
 
 /**
  * The registry of available external tools.
@@ -69,7 +67,8 @@ public class ExternalToolRegistry {
 	private static final String TAG_NAME = "name"; //$NON-NLS-1$
 	private static final String TAG_LOCATION = "location"; //$NON-NLS-1$
 	private static final String TAG_WORK_DIR = "workDirectory"; //$NON-NLS-1$
-	private static final String TAG_LOG_MSG = "logMessages"; //$NON-NLS-1$
+	private static final String TAG_CAPTURE_OUTPUT = "captureOutput"; //$NON-NLS-1$
+	private static final String TAG_SHOW_CONSOLE = "showConsole"; //$NON-NLS-1$
 	private static final String TAG_RUN_BKGRND = "runInBackground"; //$NON-NLS-1$
 	private static final String TAG_OPEN_PERSP = "openPerspective"; //$NON-NLS-1$
 	private static final String TAG_PROMPT_ARGS = "promptForArguments"; //$NON-NLS-1$
@@ -391,7 +390,8 @@ public class ExternalToolRegistry {
 			
 			tool.setLocation(memento.getString(TAG_LOCATION));
 			tool.setWorkingDirectory(memento.getString(TAG_WORK_DIR));
-			tool.setLogMessages(TRUE.equals(memento.getString(TAG_LOG_MSG)));
+			tool.setCaptureOutput(TRUE.equals(memento.getString(TAG_CAPTURE_OUTPUT)));
+			tool.setShowConsole(TRUE.equals(memento.getString(TAG_SHOW_CONSOLE)));
 			tool.setRunInBackground(TRUE.equals(memento.getString(TAG_RUN_BKGRND)));
 			tool.setPromptForArguments(TRUE.equals(memento.getString(TAG_PROMPT_ARGS)));
 			tool.setShowInMenu(TRUE.equals(memento.getString(TAG_SHOW_MENU)));
@@ -493,7 +493,8 @@ public class ExternalToolRegistry {
 		memento.putString(TAG_NAME, tool.getName());
 		memento.putString(TAG_LOCATION, tool.getLocation());
 		memento.putString(TAG_WORK_DIR, tool.getWorkingDirectory());
-		memento.putString(TAG_LOG_MSG, tool.getLogMessages() ? TRUE : FALSE);
+		memento.putString(TAG_CAPTURE_OUTPUT, tool.getCaptureOutput() ? TRUE : FALSE);
+		memento.putString(TAG_SHOW_CONSOLE, tool.getShowConsole() ? TRUE : FALSE);
 		memento.putString(TAG_RUN_BKGRND, tool.getRunInBackground() ? TRUE : FALSE);
 		memento.putString(TAG_PROMPT_ARGS, tool.getPromptForArguments() ? TRUE : FALSE);
 		memento.putString(TAG_SHOW_MENU, tool.getShowInMenu() ? TRUE : FALSE);
