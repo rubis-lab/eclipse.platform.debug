@@ -96,13 +96,13 @@
 			tag="container"
 			description="Expands to a folder or project resource."
 			componentClass="someclassnamehere"
-			expanderClass="someclassnamehere">
+			expanderClass="org.eclipse.ui.externaltools.variable.ResourceLocExpander">
 		</variable>
 		<variable
 			tag="resource"
 			description="Expands to a resource."
-			componentClass="org.eclipse.ui.externaltools.variable.SpecificFileLocVariableComponent"
-			expanderClass="someclassnamehere">
+			componentClass="org.eclipse.ui.externaltools.variable.ResourceLocComponent"
+			expanderClass="org.eclipse.ui.externaltools.variable.ResourceLocExpander">
 		</variable>
 		<variable
 			tag="working_set"

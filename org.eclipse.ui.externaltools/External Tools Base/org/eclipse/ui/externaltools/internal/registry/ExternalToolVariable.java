@@ -11,17 +11,22 @@ Contributors:
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.jface.resource.JFaceColors;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.externaltools.group.IGroupDialogPage;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
+import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 import org.eclipse.ui.externaltools.variable.IVariableComponent;
 
 /**
  * Abtract representation of the different variables.
  */
 public abstract class ExternalToolVariable {
-	private static final IVariableComponent defaultComponent = new DefaultVariableComponent();
+	private static final IVariableComponent defaultComponent = new DefaultVariableComponent(false);
 	
 	private String tag;
 	private String description;
@@ -61,9 +66,13 @@ public abstract class ExternalToolVariable {
 	 * visual editing of the variable's value.
 	 */
 	public final IVariableComponent getComponent() {
+		String className = element.getAttribute(ExternalToolVariableRegistry.TAG_COMPONENT_CLASS);
+		if (className == null || className.trim().length() == 0)
+			return defaultComponent;
+			
 		Object component = createObject(ExternalToolVariableRegistry.TAG_COMPONENT_CLASS);
 		if (component == null)
-			return defaultComponent;
+			return new DefaultVariableComponent(true);
 		else
 			return (IVariableComponent)component;
 	}
@@ -88,17 +97,32 @@ public abstract class ExternalToolVariable {
 	 * allow variable value editing visually.
 	 */	
 	private static final class DefaultVariableComponent implements IVariableComponent {
+		private boolean showError = false;
+		private Label message = null;
+		
+		public DefaultVariableComponent(boolean showError) {
+			super();
+			this.showError = showError;
+		}
+		
 		/* (non-Javadoc)
 		 * Method declared on IVariableComponent.
 		 */
 		public Control getControl() {
-			return null;
+			return message;
 		}
 				
 		/* (non-Javadoc)
 		 * Method declared on IVariableComponent.
 		 */
 		public void createContents(Composite parent, String varTag, IGroupDialogPage page) {
+			if (showError) {
+				message = new Label(parent, SWT.NONE);
+				GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+				message.setLayoutData(data);
+				message.setText(ToolMessages.getString("ExternalToolVariable.componentErrorMessage")); //$NON-NLS-1$
+				message.setForeground(JFaceColors.getErrorText(message.getDisplay()));
+			}
 		}
 		
 		/* (non-Javadoc)

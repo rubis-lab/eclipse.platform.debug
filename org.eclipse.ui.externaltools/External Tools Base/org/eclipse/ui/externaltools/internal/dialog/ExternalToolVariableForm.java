@@ -10,6 +10,7 @@ Contributors:
 **********************************************************************/
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -41,6 +42,7 @@ public class ExternalToolVariableForm {
 	private Label variableListLabel;
 	private List variableList;
 	private Composite variableComposite;
+	private StackLayout variableLayout;
 	private int activeComponentIndex = -1;
 	
 	/**
@@ -80,23 +82,43 @@ public class ExternalToolVariableForm {
 		variableList.setLayoutData(data);
 
 		variableComposite = new Composite(mainComposite, SWT.NONE);
-		layout = new GridLayout();
-		layout.marginWidth = 0;
-		layout.marginHeight = 0;
-		layout.numColumns = 1;
+		variableLayout = new StackLayout();
+		variableLayout.marginWidth = 0;
+		variableLayout.marginHeight = 0;
 		data = new GridData(GridData.FILL_BOTH);
-		variableComposite.setLayout(layout);
+		variableComposite.setLayout(variableLayout);
 		variableComposite.setLayoutData(data);
+		
+		createVariableComponents(data);
 		
 		populateVariableList();
 		
 		variableList.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				updateVariableComposite(null);
+				updateVariableComposite(null, false);
 			}
 		});
 		
 		return mainComposite;
+	}
+	
+	/**
+	 * Creates the visual component for each variable
+	 * and determine the initial size so the form
+	 * can be layout properly.
+	 */
+	private void createVariableComponents(GridData data) {
+		for (int i = 0; i < variables.length; i++) {
+			ExternalToolVariable var = variables[i];
+			components[i] = var.getComponent();
+			components[i].createContents(variableComposite, var.getTag(), page);
+			Control control = components[i].getControl();
+			if (control != null) {
+				Point newSize = control.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+				data.widthHint = Math.max(newSize.x, data.widthHint);
+				data.heightHint = Math.max(newSize.y, data.heightHint);
+			}
+		}
 	}
 	
 	/**
@@ -105,10 +127,7 @@ public class ExternalToolVariableForm {
 	 */
 	public String getSelectedVariable() {
 		if (activeComponentIndex != -1) {
-			String varValue = null;
-			IVariableComponent component = components[activeComponentIndex];
-			if (component != null)
-				varValue = component.getVariableValue();
+			String varValue = components[activeComponentIndex].getVariableValue();
 			return ToolUtil.buildVariableTag(variables[activeComponentIndex].getTag(), varValue);
 		}
 
@@ -120,11 +139,8 @@ public class ExternalToolVariableForm {
 	 * valid, including the selected variable value.
 	 */
 	public boolean isValid() {
-		if (activeComponentIndex != -1) {
-			IVariableComponent component = components[activeComponentIndex];
-			if (component != null)
-				return component.isValid();
-		}
+		if (activeComponentIndex != -1)
+			return components[activeComponentIndex].isValid();
 		
 		return true;
 	}
@@ -147,38 +163,22 @@ public class ExternalToolVariableForm {
 			for (int i = 0; i < variables.length; i++) {
 				if (varName.equals(variables[i].getTag())) {
 					variableList.select(i);
-					updateVariableComposite(varValue);
+					updateVariableComposite(varValue, true);
 					return;
 				}
 			}
 		}
 		
 		variableList.deselectAll();
-		updateVariableComposite(varValue);
+		updateVariableComposite(varValue, false);
 	}
 	
-	private void setComponentVisible(int index, boolean visible) {
+	private void setComponentVisible(int index) {
 		if (index == -1)
-			return;
-		IVariableComponent component = components[index];
-		if (component == null) {
-			ExternalToolVariable var = variables[index];
-			component = var.getComponent();
-			component.createContents(variableComposite, var.getTag(), page);
-			components[index] = component;
-		}
-		Control control = component.getControl();
-		if (control != null) {
-			control.setVisible(visible);
-			if (visible) {
-				Point newSize = control.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-				Point oldSize = variableComposite.getSize();
-				GridData data = (GridData)variableComposite.getLayoutData();
-				data.widthHint = Math.max(newSize.x, oldSize.x);
-				data.heightHint = Math.max(newSize.y, oldSize.y);
-				variableComposite.getParent().layout(true);
-			}
-		}
+			variableLayout.topControl = null;
+		else
+			variableLayout.topControl = components[index].getControl();
+		variableComposite.layout();
 	}
 	
 	/**
@@ -190,10 +190,11 @@ public class ExternalToolVariableForm {
 		variableComposite.setVisible(enabled);
 	}
 	
-	private void updateVariableComposite(String value) {
-		setComponentVisible(activeComponentIndex, false);
+	private void updateVariableComposite(String value, boolean setValue) {
 		activeComponentIndex = variableList.getSelectionIndex();
-		setComponentVisible(activeComponentIndex, true);
+		setComponentVisible(activeComponentIndex);
+		if (activeComponentIndex != -1 && setValue)
+			components[activeComponentIndex].setVariableValue(value);
 	}
 
 	/**
@@ -201,10 +202,7 @@ public class ExternalToolVariableForm {
 	 * its value are acceptable.
 	 */
 	public void validate() {
-		if (activeComponentIndex != -1) {
-			IVariableComponent component = components[activeComponentIndex];
-			if (component != null)
-				component.validate();
-		}
+		if (activeComponentIndex != -1)
+			components[activeComponentIndex].validate();
 	}
 }

@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.externaltools.group.IGroupDialogPage;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
+import org.eclipse.ui.externaltools.model.ToolUtil;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
@@ -69,7 +70,7 @@ public class ResourceLocComponent implements IVariableComponent {
 		GridData gridData = new GridData(GridData.FILL_BOTH);
 		mainGroup.setLayout(layout);
 		mainGroup.setLayoutData(gridData);
-		mainGroup.setText(varTag);
+		mainGroup.setText(ToolUtil.buildVariableTag(varTag, null));
 		
 		createSelectedResourceOption();
 		createSpecificResourceOption();
@@ -107,6 +108,7 @@ public class ResourceLocComponent implements IVariableComponent {
 		selectedResourceButton.setText(ToolMessages.getString("ResourceLocComponent.selectedResLabel")); //$NON-NLS-1$
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		selectedResourceButton.setLayoutData(data);
+		selectedResourceButton.setSelection(true);
 	}
 	
 	/**
@@ -118,6 +120,7 @@ public class ResourceLocComponent implements IVariableComponent {
 		specificResourceButton.setText(ToolMessages.getString("ResourceLocComponent.specificResLabel")); //$NON-NLS-1$
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		specificResourceButton.setLayoutData(data);
+		specificResourceButton.setSelection(false);
 		
 		specificResourceButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -200,18 +203,19 @@ public class ResourceLocComponent implements IVariableComponent {
 	 */
 	public void setVariableValue(String varValue) {
 		if (varValue == null || varValue.length() == 0) {
-			if (selectedResourceButton != null) {
+			if (selectedResourceButton != null)
 				selectedResourceButton.setSelection(true);
-				return;
-			}
-			if (resourceList != null) {
-				resourceList.setSelection(StructuredSelection.EMPTY);
-				return;
-			}
+			if (specificResourceButton != null)
+				specificResourceButton.setSelection(false);
+			if (resourceList != null)
+				resourceList.getTree().setEnabled(false);
 		} else {
+			if (selectedResourceButton != null)
+				selectedResourceButton.setSelection(false);
 			if (specificResourceButton != null)
 				specificResourceButton.setSelection(true);
 			if (resourceList != null) {
+				resourceList.getTree().setEnabled(true);
 				IResource member = ResourcesPlugin.getWorkspace().getRoot().findMember(varValue);
 				if (member != null)
 					resourceList.setSelection(new StructuredSelection(member), true);
@@ -225,7 +229,7 @@ public class ResourceLocComponent implements IVariableComponent {
 	 * Method declared on IVariableComponent.
 	 */
 	public void validate() {
-		if (specificResourceButton == null || specificResourceButton.getSelection()) {
+		if (specificResourceButton != null && specificResourceButton.getSelection()) {
 			validateResourceListSelection();
 		}
 
