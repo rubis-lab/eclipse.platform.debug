@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.ui.variables.*;
 import org.eclipse.ui.externaltools.internal.launchConfigurations.ExternalToolsUtil;
 
 /**
