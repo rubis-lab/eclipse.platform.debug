@@ -9,32 +9,57 @@ http://www.eclipse.org/legal/cpl-v05.html
  
 Contributors:
 **********************************************************************/
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-import org.eclipse.core.resources.*;
-import org.eclipse.core.runtime.*;
-import org.eclipse.jface.dialogs.*;
-import org.eclipse.jface.viewers.*;
+import org.eclipse.core.resources.ICommand;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.program.Program;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.events.*;
-import org.eclipse.swt.graphics.*;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.dialogs.PropertyPage;
-import org.eclipse.ui.externaltools.internal.model.*;
+import org.eclipse.ui.externaltools.internal.model.ExternalToolBuilder;
+import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
+import org.eclipse.ui.externaltools.internal.model.ToolMessages;
+import org.eclipse.ui.externaltools.internal.registry.ExternalToolRegistry;
+import org.eclipse.ui.externaltools.internal.view.NewExternalToolAction;
+import org.eclipse.ui.externaltools.model.ExternalTool;
+import org.eclipse.ui.externaltools.model.IExternalToolConstants;
 
 /**
  * Property page to add external tools in between builders.
  */
 public final class BuilderPropertyPage extends PropertyPage {
 	private static final int BUILDER_TABLE_WIDTH = 250;
+	private static final String NEW_NAME= "BuilderPropertyPageName"; //$NON-NLS-1$
+	private static final String IMG_BUILDER= "icons/full/obj16/builder.gif"; //$NON-NLS-1$;
+	private static final String IMG_INVALID_BUILD_TOOL = "icons/full/obj16/invalid_build_tool.gif"; //$NON-NLS-1$
 
 	private Table builderTable;
 	private Button upButton, downButton, newButton, editButton, removeButton;
 	private ArrayList imagesToDispose = new ArrayList();
-	private Image antImage, builderImage, externalToolImage, invalidBuildToolImage;
+	private Image builderImage, invalidBuildToolImage;
 
 	/**
 	 * Creates an initialized property page
@@ -108,7 +133,7 @@ public final class BuilderPropertyPage extends PropertyPage {
 	 * Edits an exisiting build command that invokes an external tool.
 	 */
 	private void editTool(ICommand command) {
-		ExternalTool tool = ExternalTool.fromArgumentMap(command.getArguments());
+		ExternalTool tool = ExternalToolRegistry.toolFromBuildCommandArgs(command.getArguments(), NEW_NAME);
 		if (tool == null)
 			return;
 		EditDialog dialog;
@@ -142,13 +167,9 @@ public final class BuilderPropertyPage extends PropertyPage {
 	 * Method declared on PreferencePage.
 	 */
 	protected Control createContents(Composite parent) {
-		externalToolImage = ExternalToolsPlugin.getDefault().getImageDescriptor(ExternalToolsPlugin.IMG_EXTERNAL_TOOL).createImage();
-		antImage = ExternalToolsPlugin.getDefault().getImageDescriptor(ExternalToolsPlugin.IMG_ANT_TOOL).createImage();
-		builderImage = ExternalToolsPlugin.getDefault().getImageDescriptor(ExternalToolsPlugin.IMG_BUILDER).createImage();
-		invalidBuildToolImage = ExternalToolsPlugin.getDefault().getImageDescriptor(ExternalToolsPlugin.IMG_INVALID_BUILD_TOOL).createImage();
+		builderImage = ExternalToolsPlugin.getDefault().getImageDescriptor(IMG_BUILDER).createImage();
+		invalidBuildToolImage = ExternalToolsPlugin.getDefault().getImageDescriptor(IMG_INVALID_BUILD_TOOL).createImage();
 
-		imagesToDispose.add(externalToolImage);
-		imagesToDispose.add(antImage);
 		imagesToDispose.add(builderImage);
 		imagesToDispose.add(invalidBuildToolImage);
 		
@@ -272,7 +293,7 @@ public final class BuilderPropertyPage extends PropertyPage {
 		if (e instanceof CoreException) {
 			status = ((CoreException)e).getStatus();
 		} else {
-			status = new Status(IStatus.ERROR, ExternalToolsPlugin.PLUGIN_ID, 0, ToolMessages.getString("BuilderPropertyPage.statusMessage"), e); //$NON-NLS-1$
+			status = new Status(IStatus.ERROR, IExternalToolConstants.PLUGIN_ID, 0, ToolMessages.getString("BuilderPropertyPage.statusMessage"), e); //$NON-NLS-1$
 		}
 		ErrorDialog.openError(
 			getShell(),
@@ -376,18 +397,16 @@ public final class BuilderPropertyPage extends PropertyPage {
 	private void updateCommandItem(TableItem item, ICommand command) {
 		String builderID = command.getBuilderName();
 		if (builderID.equals(ExternalToolBuilder.ID)) {
-			ExternalTool tool = ExternalTool.fromArgumentMap(command.getArguments());
+			ExternalTool tool = ExternalToolRegistry.toolFromBuildCommandArgs(command.getArguments(), NEW_NAME);
 			if (tool == null) {
 				item.setText(ToolMessages.getString("BuilderPropertyPage.invalidBuildTool")); //$NON-NLS-1$
 				item.setImage(invalidBuildToolImage);
 				return;
 			}
 			item.setText(tool.getName());
-			if (tool.TOOL_TYPE_ANT.equals(tool.getType())) {
-				item.setImage(antImage);
-			} else {
-				item.setImage(externalToolImage);
-			}
+			Image toolImage= ExternalToolsPlugin.getDefault().getTypeRegistry().getToolType(tool.getType()).getImageDescriptor().createImage();
+			imagesToDispose.add(toolImage);
+			item.setImage(toolImage);
 		} else {
 			// Get the human-readable name of the builder
 			IExtension extension = Platform.getPluginRegistry().getExtension(ResourcesPlugin.PI_RESOURCES, 	ResourcesPlugin.PT_BUILDERS, builderID);
