@@ -9,16 +9,27 @@ http://www.eclipse.org/legal/cpl-v05.html
  
 Contributors:
 **********************************************************************/
+import org.eclipse.ant.core.TargetInfo;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.externaltools.internal.ant.model.*;
-import org.eclipse.ui.externaltools.internal.model.*;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.NewWizardAction;
+import org.eclipse.ui.externaltools.internal.ant.dialog.AntExternalToolNewWizard;
+import org.eclipse.ui.externaltools.internal.ant.model.AntUtil;
+import org.eclipse.ui.externaltools.internal.model.DefaultRunnerContext;
+import org.eclipse.ui.externaltools.internal.model.IHelpContextIds;
+import org.eclipse.ui.externaltools.internal.model.ToolMessages;
+import org.eclipse.ui.externaltools.model.ExternalTool;
+import org.eclipse.ui.externaltools.model.ExternalToolStorage;
+import org.eclipse.ui.externaltools.model.IExternalToolConstants;
+import org.eclipse.ui.externaltools.model.IStorageListener;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
@@ -47,34 +58,60 @@ public class AntAction extends Action {
 	 * Method declared on IAction.
 	 */
 	public void run() {
-		if (file == null)
-			return;
-
-		AntTargetList targetList = null;
-		try {
-			targetList = AntUtil.getTargetList(file.getLocation());
-		} catch (CoreException e) {
-			ErrorDialog.openError(
-				window.getShell(),
-				ToolMessages.getString("AntAction.runErrorTitle"), //$NON-NLS-1$
-				ToolMessages.format("AntAction.errorReadAntFile", new Object[] {file.getFullPath().toString()}), //$NON-NLS-1$;
-				e.getStatus());
+		if (file == null) {
 			return;
 		}
 		
-		if (targetList == null) {
-			MessageDialog.openError(
-				window.getShell(),
-				ToolMessages.getString("AntAction.runErrorTitle"), //$NON-NLS-1$;
-				ToolMessages.format("AntAction.noAntTargets", new Object[] {file.getFullPath().toString()})); //$NON-NLS-1$;
-			return;
-		}
+		new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), new AntExternalToolNewWizard(file)).open();
+		ExternalToolStorage.addStorageListener(new IStorageListener() {
+			public void toolDeleted(ExternalTool tool) {
+			}
 
-		AntLaunchWizard wizard = new AntLaunchWizard(targetList, file, window);
-		wizard.setNeedsProgressMonitor(true);
-		WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
-		dialog.create();
-		WorkbenchHelp.setHelp(dialog.getShell(), IHelpContextIds.ANT_LAUNCH_WIZARD);		
-		dialog.open();
+			public void toolCreated(ExternalTool tool) {
+				if (tool.getLocation().equals(file.getLocation().toString())) {
+					MultiStatus status = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "", null);
+					new DefaultRunnerContext(tool, file).run(null, status);
+					Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+					if (!status.isOK()) {
+						MessageDialog.openError(shell, "Ant Error", "An exception occurred while running ant");
+					}
+					ExternalToolStorage.deleteTool(tool, shell);
+				}
+				ExternalToolStorage.removeStorageListener(this);
+			}
+
+			public void toolModified(ExternalTool tool) {
+			}
+
+			public void toolsRefreshed() {
+			}
+		});
+		
+//		TargetInfo[] targetList = null;
+//		try {
+//			targetList = AntUtil.getTargets(file.getFullPath().makeAbsolute().toString()); // getTargetList(file.getLocation());
+//		} catch (CoreException e) {
+//			ErrorDialog.openError(
+//				window.getShell(),
+//				ToolMessages.getString("AntAction.runErrorTitle"), //$NON-NLS-1$
+//				ToolMessages.format("AntAction.errorReadAntFile", new Object[] {file.getFullPath().toString()}), //$NON-NLS-1$;
+//				e.getStatus());
+//			return;
+//		}
+//		
+//		if (targetList == null) {
+//			MessageDialog.openError(
+//				window.getShell(),
+//				ToolMessages.getString("AntAction.runErrorTitle"), //$NON-NLS-1$;
+//				ToolMessages.format("AntAction.noAntTargets", new Object[] {file.getFullPath().toString()})); //$NON-NLS-1$;
+//			return;
+//		}
+//
+//		AntLaunchWizard wizard = new AntLaunchWizard(targetList, file, window);
+//		wizard.setNeedsProgressMonitor(true);
+//		WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
+//		dialog.create();
+//		WorkbenchHelp.setHelp(dialog.getShell(), IHelpContextIds.ANT_LAUNCH_WIZARD);		
+//		dialog.open();
 	}
 }

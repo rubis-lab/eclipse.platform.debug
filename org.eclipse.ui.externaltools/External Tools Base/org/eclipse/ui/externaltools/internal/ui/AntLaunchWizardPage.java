@@ -9,17 +9,30 @@ http://www.eclipse.org/legal/cpl-v05.html
  
 Contributors:
 **********************************************************************/
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 
+import org.eclipse.ant.core.TargetInfo;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.*;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
-import org.eclipse.ui.externaltools.internal.model.*;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
+import org.eclipse.ui.externaltools.internal.model.IHelpContextIds;
+import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
@@ -31,7 +44,7 @@ public class AntLaunchWizardPage extends WizardPage {
 	private static final int SIZING_SELECTION_WIDGET_HEIGHT = 200;
 	private static final int SIZING_SELECTION_WIDGET_WIDTH = 200;
 
-	private AntTargetList targetList;
+	private TargetInfo[] targetList;
 	private String initialTargets[];
 	private String initialArguments;
 	private boolean initialDisplayLog = true;
@@ -42,7 +55,7 @@ public class AntLaunchWizardPage extends WizardPage {
 	private Button showLog;
 	private Text argumentsField;
 
-	public AntLaunchWizardPage(AntTargetList targetList) {
+	public AntLaunchWizardPage(TargetInfo[] targetList) {
 		super("AntScriptPage"); //$NON-NLS-1$;
 		this.targetList = targetList;
 		setTitle(ToolMessages.getString("AntLaunchWizard.dialogTitle")); //$NON-NLS-1$;
@@ -85,8 +98,12 @@ public class AntLaunchWizardPage extends WizardPage {
 				return ((String)o1).compareTo((String) o2);
 			}
 		});
-		if (targetList.getDefaultTarget() != null)
-			labelProvider.setDefaultTargetName(targetList.getDefaultTarget());
+		for (int i= 0, numTargets= targetList.length; i < numTargets; i++) {
+			if (targetList[i].isDefault()) {
+				labelProvider.setDefaultTargetName(targetList[i].getName());
+				break;
+			}
+		}
 		listViewer.setLabelProvider(labelProvider);
 		listViewer.setContentProvider(new AntTargetContentProvider());
 		listViewer.setInput(targetList);
@@ -156,11 +173,10 @@ public class AntLaunchWizardPage extends WizardPage {
 	 */	
 	private void selectInitialTargets() {
 		if (initialTargets != null && initialTargets.length > 0) {
-			String[] targets = targetList.getTargets();
 			for (int i = 0; i < initialTargets.length; i++) {
-				for (int j = 0; j < targets.length; j++) {
-					if (targets[j].equals(initialTargets[i])) {
-						String target = targets[j];
+				for (int j = 0; j < targetList.length; j++) {
+					if (targetList[j].equals(initialTargets[i])) {
+						String target = targetList[j].getName();
 						listViewer.setChecked(target, true);
 						selectedTargets.add(target);
 						break;
@@ -168,10 +184,11 @@ public class AntLaunchWizardPage extends WizardPage {
 				}
 			}
 		} else {
-			String target = targetList.getDefaultTarget();
-			if (target != null) {
-				listViewer.setChecked(target, true);
-				selectedTargets.add(target);
+			for (int i= 0, numTargets= targetList.length; i < numTargets; i++) {
+				if (targetList[i].isDefault()) {
+					listViewer.setChecked(targetList[i], true);
+					selectedTargets.add(targetList[i]);
+				}
 			}
 		}
 		

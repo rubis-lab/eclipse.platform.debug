@@ -9,7 +9,11 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
 **********************************************************************/
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.externaltools.dialog.ExternalToolGroupWizardPage;
 import org.eclipse.ui.externaltools.dialog.ExternalToolNewWizard;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
@@ -23,12 +27,18 @@ import org.eclipse.ui.externaltools.model.IExternalToolConstants;
  */
 public class AntExternalToolNewWizard extends ExternalToolNewWizard {
 	private AntTargetsGroup antTargetsGroup;
+	private IFile xmlFile;
 
 	/**
 	 * Creates the wizard for a new external tool
 	 */
 	public AntExternalToolNewWizard() {
 		super(IExternalToolConstants.TOOL_TYPE_ANT_BUILD);
+	}
+	
+	public AntExternalToolNewWizard(IFile file) {
+		super(IExternalToolConstants.TOOL_TYPE_ANT_BUILD);
+		xmlFile= validateXMLFile(file);
 	}
 
 	/* (non-Javadoc)
@@ -41,6 +51,17 @@ public class AntExternalToolNewWizard extends ExternalToolNewWizard {
 		addRefreshPage();
 		
 		optionGroup.setPromptForArgumentLabel(ToolMessages.getString("AntExternalToolNewWizard.promptForArgumentLabel")); //$NON-NLS-1$
+	}
+	
+	/**
+	 * Returns whether the given resource is an XML file
+	 * based on the resource's file extension
+	 * 	 * @param resource the resource to examine	 * @return whether the given resource is an XML file	 */
+	private IFile validateXMLFile(IFile file) {
+		if ("xml".equals(file.getFileExtension().toLowerCase())) {
+			return file;
+		}
+		return null;
 	}
 
 	/* (non-Javadoc)
@@ -85,4 +106,21 @@ public class AntExternalToolNewWizard extends ExternalToolNewWizard {
 			return;
 		antTargetsGroup = new AntTargetsGroup();
 	}
+	public IWizardPage getStartingPage() {
+		return super.getStartingPage();
+	}
+
+	public void createPageControls(Composite pageContainer) {
+		String fileLocation= null;
+		if (xmlFile != null) {
+			fileLocation= xmlFile.getLocation().toFile().getAbsolutePath();
+			mainGroup.setInitialName("Temp garbage");
+			mainGroup.setInitialLocation(fileLocation);
+		}
+		super.createPageControls(pageContainer);
+		if (fileLocation != null) {
+			antTargetsGroup.setFileLocation(fileLocation);
+		}
+	}
+
 }

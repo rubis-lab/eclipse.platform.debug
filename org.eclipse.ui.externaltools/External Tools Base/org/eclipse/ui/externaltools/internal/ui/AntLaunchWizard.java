@@ -12,12 +12,15 @@ Contributors:
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
+import org.eclipse.ant.core.TargetInfo;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.*;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.externaltools.internal.ant.model.AntUtil;
 import org.eclipse.ui.externaltools.internal.model.*;
 import org.eclipse.ui.externaltools.model.*;
 
@@ -37,7 +40,7 @@ public class AntLaunchWizard extends Wizard {
 	/**
 	 * The Ant project described in the xml file.
 	 */
-	private AntTargetList targetList = null;
+	private TargetInfo[] targetList = null;
 
 	/**
 	 * The external tool representing the Ant file
@@ -67,18 +70,21 @@ public class AntLaunchWizard extends Wizard {
 	 * @param antProject
 	 * @param antFile
 	 */
-	public AntLaunchWizard(AntTargetList targetList, IFile antFile, IWorkbenchWindow window) {
+	public AntLaunchWizard(TargetInfo[] targetList, IFile antFile, IWorkbenchWindow window) {
 		super();
 		this.targetList = targetList;
 		this.antFile = antFile;
 		this.window = window;
 		String antPath = antFile.getFullPath().toString();
-		this.antTool = ExternalToolsPlugin.getDefault().getRegistry().getExternalTool(antPath);
+		this.antTool = ExternalToolsPlugin.getDefault().getToolRegistry(getShell()).getToolNamed(antPath);
 		if (this.antTool == null) {
-			this.antTool = new ExternalTool();
-			this.antTool.setName(antPath);
-			this.antTool.setType(ExternalTool.TOOL_TYPE_ANT);
-			this.antTool.setLocation(ToolUtil.buildVariableTag(ExternalTool.VAR_WORKSPACE_LOC, antPath));
+			try {
+				this.antTool = new ExternalTool(IExternalToolConstants.TOOL_TYPE_ANT_BUILD, antPath);
+			} catch (CoreException exception) {
+				MessageDialog.openError(getShell(), "Ant Error", "An exception occurred launching ant file");
+				return;
+			}
+			this.antTool.setLocation(ToolUtil.buildVariableTag(IExternalToolConstants.VAR_WORKSPACE_LOC, antPath));
 			this.isNewTool = true;
 		}
 		setWindowTitle(ToolMessages.getString("AntLaunchWizard.shellTitle")); //$NON-NLS-1$;
@@ -93,11 +99,11 @@ public class AntLaunchWizard extends Wizard {
 		
 		String args = antTool.getArguments();
 		StringBuffer buf = new StringBuffer();
-		String[] targets = ToolUtil.extractVariableArguments(args, ExternalTool.VAR_ANT_TARGET, buf);
+		String[] targets = AntUtil.parseRunTargets(antTool.getExtraAttribute(AntUtil.RUN_TARGETS_ATTRIBUTE));
 		
 		page1.setInitialTargets(targets);
 		page1.setInitialArguments(buf.toString());
-		page1.setInitialDisplayLog(antTool.getShowLog());
+		page1.setInitialDisplayLog(antTool.getShowConsole());
 	}
 	
 	/* (non-Javadoc)
@@ -105,16 +111,20 @@ public class AntLaunchWizard extends Wizard {
 	 */
 	public boolean performFinish() {
 		updateTool();
-		ToolUtil.saveDirtyEditors(window);
-		if (antTool.getShowLog()) {
-			ToolUtil.showLogConsole(window);
-			ToolUtil.clearLogDocument();
-		}
+//		ToolUtil.saveDirtyEditors(window);
+//		if (antTool.getShowConsole()) {
+//			ToolUtil.showLogConsole(window);
+//			ToolUtil.clearLogDocument();
+//		}
 		
 		IRunnableWithProgress runnable = new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				DefaultRunnerContext context = new DefaultRunnerContext(antTool, antFile.getProject(), window.getWorkbench().getWorkingSetManager());
-				context.run(monitor, window.getShell());
+				DefaultRunnerContext context = new DefaultRunnerContext(antTool, antFile); //new DefaultRunnerContext(antTool, antFile.getProject(), window.getWorkbench().getWorkingSetManager());
+				MultiStatus status = new MultiStatus(IExternalToolConstants.PLUGIN_ID, 0, "", null); //$NON-NLS-1$
+				context.run(monitor, status);
+				if (!status.isOK()) {
+					MessageDialog.openError(getShell(), "Ant Error", "An exception occurred while running ant");
+				}
 			};
 		};
 
@@ -127,7 +137,7 @@ public class AntLaunchWizard extends Wizard {
 			if (e.getTargetException() instanceof CoreException)
 				status = ((CoreException)e.getTargetException()).getStatus();
 			else
-				status = new Status(IStatus.ERROR, ExternalToolsPlugin.PLUGIN_ID, 0, ToolMessages.getString("AntLaunchWizard.internalAntError"), e.getTargetException()); //$NON-NLS-1$;
+				status = new Status(IStatus.ERROR, IExternalToolConstants.PLUGIN_ID, 0, ToolMessages.getString("AntLaunchWizard.internalAntError"), e.getTargetException()); //$NON-NLS-1$;
 			ErrorDialog.openError(
 				getShell(), 
 				ToolMessages.getString("AntLaunchWizard.runErrorTitle"), //$NON-NLS-1$;
@@ -145,16 +155,15 @@ public class AntLaunchWizard extends Wizard {
 	private void updateTool() {
 		StringBuffer buf = new StringBuffer(page1.getArguments());
 		String[] targets = page1.getSelectedTargets();
-		ToolUtil.buildVariableTags(ExternalTool.VAR_ANT_TARGET, targets, buf);
+		ToolUtil.buildVariableTag(AntUtil.RUN_TARGETS_ATTRIBUTE, AntUtil.combineRunTargets(targets), buf);
 		
 		antTool.setArguments(buf.toString());
-		antTool.setShowLog(page1.getShowLog());
+		antTool.setShowConsole(page1.getShowLog());
 
-		ArrayList tools = ExternalToolsPlugin.getDefault().getRegistry().getExternalTools();
 		if (isNewTool) {
-			tools.add(antTool);
+			ExternalToolsPlugin.getDefault().getToolRegistry(getShell()).saveTool(antTool);
 			isNewTool = false;
 		}
-		ExternalToolsPlugin.getDefault().getRegistry().setExternalTools(tools);
+
 	}
 }
