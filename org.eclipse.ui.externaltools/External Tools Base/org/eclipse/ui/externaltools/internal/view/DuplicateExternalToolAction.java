@@ -18,10 +18,10 @@ import org.eclipse.ui.externaltools.model.ExternalTool;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
- * Action that will copy the currently selected
- * external tool in the view to the clipboard.
+ * Action that will duplicate the currently selected
+ * external tool.
  */
-public class CopyExternalToolAction extends Action {
+public class DuplicateExternalToolAction extends Action {
 	private IWorkbenchPage page;
 	private ExternalTool selectedTool;
 
@@ -29,15 +29,15 @@ public class CopyExternalToolAction extends Action {
 	 * Create an action to copy the selected external
 	 * tool to the clipboard
 	 */
-	public CopyExternalToolAction(IWorkbenchPage page) {
+	public DuplicateExternalToolAction(IWorkbenchPage page) {
 		super();
 		this.page = page;
-		setText(ToolMessages.getString("CopyExternalToolAction.text")); //$NON-NLS-1$
-		setToolTipText(ToolMessages.getString("CopyExternalToolAction.toolTip")); //$NON-NLS-1$
+		setText("Duplicate");
+		setToolTipText("Duplicate the selected tool");
 		setHoverImageDescriptor(ExternalToolsPlugin.getDefault().getImageDescriptor("icons/full/clcl16/copy_tool.gif")); //$NON-NLS-1$
 		setImageDescriptor(ExternalToolsPlugin.getDefault().getImageDescriptor("icons/full/elcl16/copy_tool.gif")); //$NON-NLS-1$
 		setDisabledImageDescriptor(ExternalToolsPlugin.getDefault().getImageDescriptor("icons/full/dlcl16/copy_tool.gif")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IHelpContextIds.COPY_TOOL_ACTION);
+		WorkbenchHelp.setHelp(this, IHelpContextIds.DUPLICATE_TOOL_ACTION);
 	}
 
 	/**

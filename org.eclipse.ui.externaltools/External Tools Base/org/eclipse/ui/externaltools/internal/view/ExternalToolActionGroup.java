@@ -31,8 +31,7 @@ public class ExternalToolActionGroup extends ActionGroup {
 	private ExternalToolView view;
 	private TextActionHandler textActionHandler;
 	private NewExternalToolAction newAction;
-	private CopyExternalToolAction copyAction;
-	private PasteExternalToolAction pasteAction;
+	private DuplicateExternalToolAction copyAction;
 	private DeleteExternalToolAction delAction;
 	private RenameExternalToolAction renameAction;
 	private RefreshViewAction refreshAction;
@@ -58,7 +57,6 @@ public class ExternalToolActionGroup extends ActionGroup {
 		
 		textActionHandler = new TextActionHandler(actionBars); // hooks handlers
 		textActionHandler.setCopyAction(copyAction);
-		textActionHandler.setPasteAction(pasteAction);
 		textActionHandler.setDeleteAction(delAction);
 		renameAction.setTextActionHandler(textActionHandler);
 		
@@ -83,7 +81,6 @@ public class ExternalToolActionGroup extends ActionGroup {
 		menu.add(new Separator());
 
 		menu.add(copyAction);
-		menu.add(pasteAction);
 		menu.add(delAction);
 		menu.add(renameAction);
 		menu.add(new Separator());
@@ -148,8 +145,7 @@ public class ExternalToolActionGroup extends ActionGroup {
 	protected void makeActions() {
 		IWorkbenchPage page = view.getSite().getPage();
 		newAction = new NewExternalToolAction();
-		copyAction = new CopyExternalToolAction(page);
-		pasteAction = new PasteExternalToolAction(view);
+		copyAction = new DuplicateExternalToolAction(page);
 		delAction = new DeleteExternalToolAction(page);
 		renameAction = new RenameExternalToolAction(view);
 		refreshAction = new RefreshViewAction(page);
@@ -174,7 +170,6 @@ public class ExternalToolActionGroup extends ActionGroup {
 			(IStructuredSelection) getContext().getSelection());
 
 		copyAction.setSelectedTool(selectedTool);
-//		pasteAction.setEnabled();
 		delAction.setSelectedTool(selectedTool);
 		renameAction.setSelectedTool(selectedTool);
 		runAction.setTool(selectedTool);

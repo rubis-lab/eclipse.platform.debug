@@ -21,8 +21,7 @@ public interface IHelpContextIds {
 
 	// Actions
 	public static final String NEW_TOOL_ACTION = PREFIX + "new_tool_action_context"; //$NON-NLS-1$
-	public static final String COPY_TOOL_ACTION = PREFIX + "copy_tool_action_context"; //$NON-NLS-1$
-	public static final String PASTE_TOOL_ACTION = PREFIX + "paste_tool_action_context"; //$NON-NLS-1$
+	public static final String DUPLICATE_TOOL_ACTION = PREFIX + "duplicate_tool_action_context"; //$NON-NLS-1$
 	public static final String DELETE_TOOL_ACTION = PREFIX + "delete_tool_action_context"; //$NON-NLS-1$
 	public static final String RENAME_TOOL_ACTION = PREFIX + "rename_tool_action_context"; //$NON-NLS-1$
 	public static final String REFRESH_VIEW_ACTION = PREFIX + "refresh_view_action_context"; //$NON-NLS-1$
