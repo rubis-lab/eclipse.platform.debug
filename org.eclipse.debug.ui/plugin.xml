@@ -1069,35 +1069,6 @@
                menubarPath="selectGroup"
                id="org.eclipse.debug.ui.actions.SelectAllBreakpointsAction">
          </action>
-         <menu
-               label="%groupAllBy.label"
-               path="breakpointGroupGroup"
-               id="groupAllByMenu">
-            <separator
-                  name="additions">
-            </separator>
-         </menu>
-         <action
-               label="%file.label"
-               helpContextId="group_all_by_file_action_context"
-               class="org.eclipse.debug.internal.ui.actions.breakpointGroups.GroupAllByFileAction"
-               menubarPath="groupAllByMenu/additions"
-               id="org.eclipse.debug.ui.actions.GroupAllByFileAction">
-         </action>
-         <action
-               label="%project.label"
-               helpContextId="group_all_by_project_action_context"
-               class="org.eclipse.debug.internal.ui.actions.breakpointGroups.GroupAllByProjectAction"
-               menubarPath="groupAllByMenu/additions"
-               id="org.eclipse.debug.ui.actions.GroupAllByProjectAction">
-         </action>
-         <action
-               label="%breakpointType.label"
-               helpContextId="group_all_by_type_action_context"
-               class="org.eclipse.debug.internal.ui.actions.breakpointGroups.GroupAllByTypeAction"
-               menubarPath="groupAllByMenu/additions"
-               id="org.eclipse.debug.ui.actions.GroupAllByTypeAction">
-         </action>
          <action
                label="%RemoveAllAction.label"
                icon="icons/full/elcl16/rem_all_co.gif"
@@ -1105,29 +1076,6 @@
                class="org.eclipse.debug.internal.ui.actions.RemoveAllBreakpointsAction"
                menubarPath="removeGroup"
                id="org.eclipse.debug.ui.actions.RemoveAllBreakpoints">
-         </action>
-      </viewerContribution>
-      <!-- Breakpoint/Group actions -->
-      <viewerContribution
-            targetID="org.eclipse.debug.ui.BreakpointView"
-            id="org.eclipse.debug.ui.breakpointview.breakpointActions">
-         <visibility>
-            <or>
-               <objectClass
-                  name="org.eclipse.debug.core.model.IBreakpoint">
-               </objectClass>
-               <objectClass
-                  name="java.lang.String">
-               </objectClass>
-            </or>
-         </visibility>
-         <action
-               label="%RemoveAction.label"
-               icon="icons/full/elcl16/rem_co.gif"
-               helpContextId="remove_breakpoint_action_context"
-               class="org.eclipse.debug.internal.ui.actions.RemoveBreakpointAction"
-               menubarPath="removeGroup"
-               id="org.eclipse.debug.ui.actions.RemoveBreakpoint">
          </action>
       </viewerContribution>
       <!-- Breakpoint actions -->
