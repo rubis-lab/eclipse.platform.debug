@@ -144,6 +144,20 @@ public abstract class Breakpoint extends PlatformObject implements IBreakpoint {
 	}
 	
 	/**
+	 * @see IBreakpoint#getGroup()
+	 */
+	public String getGroup() throws CoreException {
+		return getMarker().getAttribute(GROUP, null);
+	}
+	
+	/**
+	 * @see IBreakpoint#setGroup(String)
+	 */
+	public void setGroup(String group) throws CoreException {
+		setAttribute(GROUP, group);
+	}
+	
+	/**
 	 * Convenience method to set the given boolean attribute of
 	 * this breakpoint's underlying marker in a workspace
 	 * runnable. Setting marker attributes in a workspace runnable
