@@ -11,15 +11,24 @@ Contributors:
 
 import java.io.File;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
-import org.eclipse.ui.externaltools.group.ExternalToolGroup.ValidationStatus;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.externaltools.internal.model.ExternalToolsPlugin;
 import org.eclipse.ui.externaltools.internal.model.ToolMessages;
 import org.eclipse.ui.externaltools.model.ExternalTool;
@@ -43,6 +52,7 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 	protected Text workDirectoryField;
 	protected Text nameField;
 	protected Text descriptionField;
+	private Button locationButton;
 	
 	private ModifyListener modifyListener = new ModifyListener() {
 		public void modifyText(ModifyEvent e) {
@@ -138,11 +148,31 @@ public class ExternalToolMainGroup extends ExternalToolGroup {
 		data.widthHint = SIZING_TEXT_FIELD_WIDTH;
 		locationField.setLayoutData(data);
 		
-		Button button = new Button(parent, SWT.PUSH );
-		button.setText(ToolMessages.getString("ExternalToolMainGroup.locationBrowseLabel")); //$NON-NLS-1$
-		getPage().setButtonGridData(button);
+		locationButton= new Button(parent, SWT.PUSH );
+		locationButton.setText(ToolMessages.getString("ExternalToolMainGroup.locationBrowseLabel")); //$NON-NLS-1$
+		locationButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleButtonPressed((Button)e.widget);
+			}
+		});
+		getPage().setButtonGridData(locationButton);
 
 		createSpacer(parent);
+	}
+	
+	private void handleButtonPressed(Button button) {
+		if (button == locationButton) {
+			FileDialog dialog = new FileDialog(getShell(), SWT.NONE);
+			dialog.setFileName(locationField.getText());
+			String filename = dialog.open();
+			if (filename != null) {
+				locationField.setText(filename);
+			}
+		}
+	}
+	
+	private Shell getShell() {
+		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 	}
 	
 	/**
