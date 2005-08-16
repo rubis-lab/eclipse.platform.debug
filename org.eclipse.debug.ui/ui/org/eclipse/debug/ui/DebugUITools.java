@@ -41,6 +41,8 @@ import org.eclipse.debug.internal.ui.launchConfigurations.LaunchGroupExtension;
 import org.eclipse.debug.internal.ui.memory.MemoryRenderingManager;
 import org.eclipse.debug.internal.ui.sourcelookup.SourceLookupFacility;
 import org.eclipse.debug.internal.ui.stringsubstitution.SelectedResourceManager;
+import org.eclipse.debug.internal.ui.views.updatePolicy.IUpdatePolicyManager;
+import org.eclipse.debug.internal.ui.views.updatePolicy.UpdatePolicyMgr;
 import org.eclipse.debug.ui.memory.IMemoryRenderingManager;
 import org.eclipse.debug.ui.sourcelookup.ISourceLookupResult;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -681,5 +683,15 @@ public class DebugUITools {
      */
     public static IMemoryRenderingManager getMemoryRenderingManager() {
         return MemoryRenderingManager.getDefault();
+    }
+    
+    /**
+     * Returns the update policy manager.
+     * @return the update policy manager
+     * 
+     * @since 3.2
+     */
+    public static IUpdatePolicyManager getUpdatePolicyManager() {
+    	return UpdatePolicyMgr.getDefault();
     }
 }

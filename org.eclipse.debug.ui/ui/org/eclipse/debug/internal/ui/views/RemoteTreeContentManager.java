@@ -11,7 +11,10 @@
 package org.eclipse.debug.internal.ui.views;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -19,6 +22,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
+import org.eclipse.debug.internal.ui.views.updatePolicy.IRemoteContentListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.internal.progress.PendingUpdateAdapter;
@@ -55,6 +59,8 @@ public class RemoteTreeContentManager extends DeferredTreeContentManager {
     private List fCollectors = new ArrayList();
     private List fAdapaters = new ArrayList();
     
+    private Set fListeners = new HashSet();
+    
     /**
      * Fetching children is done in a single background job.
      * This makes fetching single threaded/serial per view.
@@ -84,6 +90,13 @@ public class RemoteTreeContentManager extends DeferredTreeContentManager {
 					adapter = (IDeferredWorkbenchAdapter) fAdapaters.remove(0);
 				}
 				adapter.fetchDeferredChildren(element, collector, monitor);
+				
+				Iterator iter = fListeners.iterator();
+				while (iter.hasNext())
+				{
+					IRemoteContentListener listener = (IRemoteContentListener)iter.next();
+					listener.contentRetrieved();
+				}
 			}
 			if (monitor.isCanceled()) {
 				return Status.CANCEL_STATUS;
@@ -331,5 +344,15 @@ public class RemoteTreeContentManager extends DeferredTreeContentManager {
     		fAdapaters.clear();
     		fCollectors.clear();
     	}
+    }
+    
+    public void addListener(IRemoteContentListener listener)
+    {
+    	fListeners.add(listener);
+    }
+    
+    public void removeListener(IRemoteContentListener listener)
+    {
+    	fListeners.remove(listener);
     }
 }

@@ -18,6 +18,7 @@
    <extension-point id="memoryRenderings" name="%memoryRenderingsExtensionPointName" schema="schema/memoryRenderings.exsd"/>
    <extension-point id="breakpointOrganizers" name="%BreakpointOrganizersName" schema="schema/breakpointOrganizers.exsd"/>
    <extension-point id="variableValueEditors" name="%VariableValueEditorsName" schema="schema/variableValueEditors.exsd"/>
+   <extension-point id="viewUpdatePolicy" name="%viewUpdaterExtensionPointName" schema="schema/viewUpdatePolicy.exsd"/>
 
 <!-- Extensions -->
    <extension
@@ -2424,6 +2425,34 @@ M4 = Platform-specific fourth key
        <keyword
              id="org.eclipse.debug.ui.viewManagement"
              label="%preferenceKeywords.viewManagement"/>
+    </extension>
+    <extension
+          point="org.eclipse.debug.ui.viewUpdatePolicy">
+          <policy
+                class="org.eclipse.debug.internal.ui.views.updatePolicy.TimerPolicyHandler"
+                description="Update every half second"
+                id="org.eclipse.debug.ui.updatePolicy.timer"
+                name="Timer Update"/>
+          <policy
+                class="org.eclipse.debug.internal.ui.views.updatePolicy.DebugContextChangedPolicyHandler"
+                description="Update when debug context is changed"
+                id="org.eclipse.debug.ui.updatePolicy.debugContextChanged"
+                name="Debug Context Changed"/>
+          <policy
+                class="org.eclipse.debug.internal.ui.views.updatePolicy.DelayedDebugEvtPolicyHandler"
+                description="Delayed update upon debug events"
+                id="org.eclipse.debug.ui.updatePolicy.delayedDebugEvt"
+                name="Delayed Debug Events Update"/>
+          <policy
+                class="org.eclipse.debug.internal.ui.views.updatePolicy.DebugEventPolicyHandler"
+                description="Update upon debug events"
+                id="org.eclipse.debug.ui.updatePolicy.debugEvt"
+                name="Debug Event Update"/>
+          <policy
+                class="org.eclipse.debug.internal.ui.views.updatePolicy.ExprChangedPolicyHandler"
+                description="Update when an expression has changed"
+                id="org.eclipse.debug.ui.updatePolicy.exprChanged"
+                name="Expression Changed Update"/>
     </extension>
 
 </plugin>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,47 +8,31 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.internal.ui.views.variables;
 
+
+package org.eclipse.debug.internal.ui.views.updatePolicy;
 
 import java.util.ArrayList;
 
 import org.eclipse.debug.core.DebugEvent;
-import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IExpression;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.ISuspendResume;
 import org.eclipse.debug.core.model.IThread;
 import org.eclipse.debug.core.model.IVariable;
-import org.eclipse.debug.internal.ui.views.AbstractDebugEventHandler;
-import org.eclipse.debug.internal.ui.views.RemoteTreeContentManager;
-import org.eclipse.debug.ui.AbstractDebugView;
 
-/**
- * Updates the variables view
- */
-public class VariablesViewEventHandler extends AbstractDebugEventHandler {	
-	
-	private RemoteTreeContentManager fContentManager = null;
-	
-	/**
-	 * Constructs a new event handler on the given view
-	 * 
-	 * @param view variables view
-	 */
-	public VariablesViewEventHandler(AbstractDebugView view) {
-		super(view);
-		
-		// TODO:  do not handle debug event
-		DebugPlugin plugin= DebugPlugin.getDefault();
-		plugin.removeDebugEventListener(this);
-	}
+public class DebugEventPolicyHandler extends AbstractDebugEventPolicyHandler {
 	
 	/**
 	 * @see AbstractDebugEventHandler#handleDebugEvents(DebugEvent[])
 	 */
 	protected void doHandleDebugEvents(DebugEvent[] events, Object data) {
+		
+		if (isDisposed())
+			return;
+		
 		for (int i = 0; i < events.length; i++) {	
 			DebugEvent event = events[i];
 			switch (event.getKind()) {
@@ -61,40 +45,22 @@ public class VariablesViewEventHandler extends AbstractDebugEventHandler {
 				case DebugEvent.RESUME:
 						doHandleResumeEvent(event);
 					break;
+				case DebugEvent.TERMINATE:
+					doHandleTerminateEvent(event);
+					break;					
 			}
 		}
 	}
-	
-	/**
-	 * @see AbstractDebugEventHandler#updateForDebugEvents(DebugEvent[])
-	 */
-	protected void updateForDebugEvents(DebugEvent[] events, Object data) {
-		for (int i = 0; i < events.length; i++) {	
-			DebugEvent event = events[i];
-			switch (event.getKind()) {
-				case DebugEvent.TERMINATE:
-					doHandleTerminateEvent(event);
-					break;
-			}
-		}
-	}	
 
 	/**
 	 * Clear cached variable expansion state
 	 */
 	protected void doHandleResumeEvent(DebugEvent event) {
 		if (!event.isStepStart() && !event.isEvaluation()) {
-			// clear variable expansion state
-			getVariablesView().clearExpandedVariables(event.getSource());
+			getView().clearCache(event.getSource());
 		}
 		if (!event.isEvaluation()) {
-			Object input = getVariablesView().getVariablesViewer().getInput();
-			if (input instanceof IStackFrame) {
-				IStackFrame frame = (IStackFrame)input;
-				if (event.getSource().equals(frame.getThread())) {
-					fContentManager.cancel();
-				}
-			}
+			getView().cancelPendingRefresh();
 		}
 	}
 
@@ -104,14 +70,14 @@ public class VariablesViewEventHandler extends AbstractDebugEventHandler {
 	 * no more active debug targets.
 	 */
 	protected void doHandleTerminateEvent(DebugEvent event) {
-		getVariablesView().clearExpandedVariables(event.getSource());
+		getView().clearCache(event.getSource());
 	}
 	
 	/**
 	 * Process a SUSPEND event
 	 */
 	protected void doHandleSuspendEvent(DebugEvent event) {
-		if (event.getDetail() != DebugEvent.EVALUATION_IMPLICIT) {
+		if (!event.isEvaluation()) {
 			// Don't refresh everytime an implicit evaluation finishes
 			if (event.getSource() instanceof ISuspendResume) {
 				if (!((ISuspendResume)event.getSource()).isSuspended()) {
@@ -119,8 +85,7 @@ public class VariablesViewEventHandler extends AbstractDebugEventHandler {
 					return;
 				}
 			}
-			refresh();
-			getVariablesView().populateDetailPane();
+			getView().refresh((IDebugElement)event.getSource(), true);
 		}		
 	}
 	
@@ -131,37 +96,18 @@ public class VariablesViewEventHandler extends AbstractDebugEventHandler {
 		if (event.getDetail() == DebugEvent.STATE) {
 			// only process variable state changes
 			if (event.getSource() instanceof IVariable) {
-				refresh(event.getSource());
-				getVariablesView().populateDetailPane();
+				getView().refresh((IDebugElement)event.getSource(), true);
 			}
 		} else {
 			if (!(event.getSource() instanceof IExpression)) {
 				if (event.getSource() instanceof IVariable) {
-					refresh(event.getSource());
+					getView().refresh((IDebugElement)event.getSource(), true);
 				} else {
-					refresh();
+					getView().refresh(getDebugContext(), true);
 				}
-				getVariablesView().populateDetailPane();
 			}
 		}	
 	}	
-
-	/**
-	 * Returns the view that event handler updates.
-	 */
-	protected VariablesView getVariablesView() {
-		return (VariablesView)getView();
-	}
-	
-	/**
-	 * Also update the details area.
-	 * 
-	 * @see org.eclipse.debug.internal.ui.views.AbstractDebugEventHandler#viewBecomesVisible()
-	 */
-	protected void viewBecomesVisible() {
-		super.viewBecomesVisible();
-		getVariablesView().populateDetailPane();
-	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.internal.ui.views.AbstractDebugEventHandler#filterEvents(org.eclipse.debug.core.DebugEvent[])
@@ -193,10 +139,6 @@ public class VariablesViewEventHandler extends AbstractDebugEventHandler {
 		return (DebugEvent[]) all.toArray(new DebugEvent[all.size()]);
 	}
 	
-	public void setContentManager(RemoteTreeContentManager manager) { 
-		fContentManager = manager;
-	}
-
 	protected boolean isFiltered(DebugEvent event) {
 		if (event.getKind() == DebugEvent.CHANGE) {
 			Object source = event.getSource();
@@ -220,5 +162,5 @@ public class VariablesViewEventHandler extends AbstractDebugEventHandler {
 		}
 		return false;
 	}
-}
 
+}

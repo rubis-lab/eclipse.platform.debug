@@ -16,17 +16,24 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.core.model.IErrorReportingExpression;
 import org.eclipse.debug.core.model.IExpression;
+import org.eclipse.debug.core.model.IRegisterGroup;
+import org.eclipse.debug.core.model.IStackFrame;
+import org.eclipse.debug.core.model.IVariable;
 import org.eclipse.debug.core.model.IWatchExpression;
 import org.eclipse.debug.internal.ui.IDebugHelpContextIds;
 import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
 import org.eclipse.debug.internal.ui.views.DebugViewInterimLabelProvider;
 import org.eclipse.debug.internal.ui.views.DebugViewLabelDecorator;
 import org.eclipse.debug.internal.ui.views.RemoteTreeViewer;
+import org.eclipse.debug.internal.ui.views.updatePolicy.ExprDebugContextChgPolicy;
+import org.eclipse.debug.internal.ui.views.updatePolicy.ExprEvtPolicy;
+import org.eclipse.debug.internal.ui.views.updatePolicy.IUpdatePolicy;
+import org.eclipse.debug.internal.ui.views.updatePolicy.IUpdatePolicyManager;
 import org.eclipse.debug.internal.ui.views.variables.AvailableLogicalStructuresAction;
 import org.eclipse.debug.internal.ui.views.variables.RemoteVariablesContentProvider;
 import org.eclipse.debug.internal.ui.views.variables.VariablesView;
-import org.eclipse.debug.internal.ui.views.variables.VariablesViewEventHandler;
 import org.eclipse.debug.internal.ui.views.variables.VariablesViewMessages;
+import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -39,6 +46,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -105,9 +113,9 @@ public class ExpressionView extends VariablesView {
 	 * 
 	 * @return an event handler
 	 */
-	protected VariablesViewEventHandler createEventHandler() {
-		return new ExpressionViewEventHandler(this);
-	}		
+//	protected VariablesViewEventHandler createEventHandler() {
+//		return new ExpressionViewEventHandler(this);
+//	}		
 	
 	/**
 	 * @see AbstractDebugView#getHelpContextId()
@@ -249,4 +257,65 @@ public class ExpressionView extends VariablesView {
      */
     public void saveState(IMemento memento) {
     }
+
+	public IUpdatePolicy[] getMandatoryUpdatePolicies() {
+		
+		IUpdatePolicy[] policies = new IUpdatePolicy[3];
+		
+		// for activating models
+		policies[0] = new VarViewDebugContextPolicy();
+		
+		// for setting expression context
+		policies[1] = new ExprDebugContextChgPolicy();
+		
+		// for handling expression add/remove events
+		policies[2] = new ExprEvtPolicy();
+		
+		return policies;
+	}
+
+	public void refresh(final IDebugElement elm, boolean getContent) {
+		
+		if (isAvailable()) {
+			 showViewer();
+			 if (getViewer() instanceof TreeViewer)
+			 {
+				 TreeViewer treeViewer = (TreeViewer)getViewer();
+				 
+				 if (elm instanceof IStackFrame ||
+					 elm instanceof IVariable || 
+					 elm instanceof IExpression ||
+					 elm instanceof IRegisterGroup)
+				 {
+					 treeViewer.refresh(elm);
+				 }
+				 else
+					 getViewer().refresh();
+			 }
+			 else
+			 {
+				 getViewer().refresh();
+			 }
+		}
+		
+		updateAction("ContentAssist"); //$NON-NLS-1$
+		updateAction("FindVariable"); //$NON-NLS-1$
+	}
+	
+
+	public void setInput(IDebugElement elm) {
+		return;
+	}
+
+	public IUpdatePolicy[] getDefaultUpdatePolicies() {
+		IUpdatePolicy[] policies = new IUpdatePolicy[2];
+		
+		IUpdatePolicyManager mgr = DebugUITools.getUpdatePolicyManager();
+		IUpdatePolicy policy = mgr.getPolicy("org.eclipse.debug.ui.updatePolicy.exprChanged"); //$NON-NLS-1$
+		policies[0] = policy;
+		
+		policy = mgr.getPolicy("org.eclipse.debug.ui.updatePolicy.debugEvt"); //$NON-NLS-1$
+		policies[1] = policy;
+		return policies;
+	}
 }

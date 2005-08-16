@@ -219,6 +219,5 @@ public class RemoteVariablesContentProvider extends BaseWorkbenchContentProvider
 	public RemoteVariableContentManager getContentManager() {
 		return fManager;
 	}
-	
 }
 

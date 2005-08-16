@@ -25,8 +25,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IExpression;
+import org.eclipse.debug.core.model.IRegisterGroup;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IThread;
 import org.eclipse.debug.core.model.IValue;
@@ -45,7 +47,6 @@ import org.eclipse.debug.internal.ui.actions.FindVariableAction;
 import org.eclipse.debug.internal.ui.actions.ShowTypesAction;
 import org.eclipse.debug.internal.ui.actions.ToggleDetailPaneAction;
 import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
-import org.eclipse.debug.internal.ui.views.AbstractDebugEventHandlerView;
 import org.eclipse.debug.internal.ui.views.AbstractViewerState;
 import org.eclipse.debug.internal.ui.views.DebugViewDecoratingLabelProvider;
 import org.eclipse.debug.internal.ui.views.DebugViewInterimLabelProvider;
@@ -53,6 +54,15 @@ import org.eclipse.debug.internal.ui.views.DebugViewLabelDecorator;
 import org.eclipse.debug.internal.ui.views.IDebugExceptionHandler;
 import org.eclipse.debug.internal.ui.views.IRemoteTreeViewerUpdateListener;
 import org.eclipse.debug.internal.ui.views.RemoteTreeViewer;
+import org.eclipse.debug.internal.ui.views.updatePolicy.AbstractDebugViewExtension;
+import org.eclipse.debug.internal.ui.views.updatePolicy.DebugModel;
+import org.eclipse.debug.internal.ui.views.updatePolicy.DebugViewSelectionChangedPolicyHandler;
+import org.eclipse.debug.internal.ui.views.updatePolicy.IDebugViewExtension;
+import org.eclipse.debug.internal.ui.views.updatePolicy.IDebugViewUpdateListener;
+import org.eclipse.debug.internal.ui.views.updatePolicy.IRemoteContentListener;
+import org.eclipse.debug.internal.ui.views.updatePolicy.IUpdatePolicy;
+import org.eclipse.debug.internal.ui.views.updatePolicy.IUpdatePolicyHandler;
+import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.IValueDetailListener;
@@ -83,6 +93,7 @@ import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -110,7 +121,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.INullSelectionListener;
-import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -126,12 +136,119 @@ import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 /**
  * This view shows variables and their values for a particular stack frame
  */
-public class VariablesView extends AbstractDebugEventHandlerView implements ISelectionListener, 
+public class VariablesView extends AbstractDebugViewExtension implements 
 																	IPropertyChangeListener,
 																	IValueDetailListener,
-																	IDebugExceptionHandler,
-																	INullSelectionListener {
+																	IDebugExceptionHandler {
+	
+	public class VarViewDebugContextPolicy implements IUpdatePolicy
+	{
+		public static final String POLICY_ID = "org.eclipse.debug.ui.VarViewSelEvtUpdatePolicy"; //$NON-NLS-1$
 
+		public String getName() {
+			return null;
+		}
+
+		public String getDescription() {
+			return null;
+		}
+
+		public boolean isHidden() {
+			return true;
+		}
+
+		public IUpdatePolicyHandler createHandler() throws CoreException {
+			return new VarViewDebugContextPolicyHandler();
+		}
+
+		public String getId() {
+			return POLICY_ID;
+		}
+		
+	}
+	
+	protected class VarViewDebugContextPolicyHandler extends DebugViewSelectionChangedPolicyHandler implements INullSelectionListener
+	{
+
+		public void becomesVisible(IDebugViewExtension view) {
+			
+			IViewPart part = getSite().getPage().findView(IDebugUIConstants.ID_DEBUG_VIEW);
+			if (part != null) {
+				ISelection selection = getSite().getPage().getSelection(IDebugUIConstants.ID_DEBUG_VIEW);
+				selectionChanged(part, selection);
+			}
+			
+			super.becomesVisible(view);
+		}
+
+		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+			if (!isAvailable() || !isVisible()) {
+				return;
+			}
+			
+			if (selection == null)
+			{
+				deactivateModel(null);
+				setInput(null);
+				return;
+			}
+			
+			if (selection.isEmpty())
+			{
+				deactivateModel(null);
+				setInput(null);
+				return;
+			}
+			
+			if (selection instanceof IStructuredSelection)
+			{
+				IStructuredSelection ssel = (IStructuredSelection)selection;
+				if (ssel.size() == 1)
+				{
+					Object obj = ssel.getFirstElement();
+					if (obj instanceof IDebugElement)
+					{
+						IDebugElement newInput = (IDebugElement)obj;
+						if (!newInput.equals(getViewer().getInput()))
+						{
+							if (getViewer().getInput() instanceof IDebugElement)
+							{
+								// deactivate old model
+								IDebugElement oldInput = getDebugContext();
+								
+								if (oldInput != null)
+								{
+									if (!oldInput.getModelIdentifier().equals(newInput.getModelIdentifier()))
+									{
+										deactivateModel(oldInput.getModelIdentifier());
+									}
+								}
+							}
+								
+							// activate new model
+							DebugModel[] models = getDebugModels(newInput.getModelIdentifier());
+							
+							if (models.length == 0)
+							{
+								DebugModel model = new DebugModel(newInput.getModelIdentifier(), getView());
+								addDebugModels(new DebugModel[] {model});
+							}
+							activateModel(newInput);
+						}
+					}
+					else
+					{
+						deactivateModel(null);
+						setInput(null);
+					}
+				}
+			}
+			
+			updateAction("ContentAssist"); //$NON-NLS-1$
+			updateAction("FindVariable"); //$NON-NLS-1$
+		}
+	}
+	
 	/**
 	 * A decorating label provider which adds coloring to variables to
 	 * reflect their changed state
@@ -155,7 +272,6 @@ public class VariablesView extends AbstractDebugEventHandlerView implements ISel
 			}
 			return super.getForeground(element);
 		}
-	
 	}
 	
 	/**
@@ -348,6 +464,8 @@ public class VariablesView extends AbstractDebugEventHandlerView implements ISel
     private boolean fShowLogical;
 
     private IRemoteTreeViewerUpdateListener fUpdateListener;
+    
+    private VarViewDebugContextPolicyHandler fSelectionPolicyHandler;
 
 	/**
 	 * Remove myself as a selection listener
@@ -357,7 +475,8 @@ public class VariablesView extends AbstractDebugEventHandlerView implements ISel
 	 */
 	public void dispose() {
 		getViewSite().getActionBars().getStatusLineManager().remove(fStatusLineItem);
-		getSite().getPage().removeSelectionListener(IDebugUIConstants.ID_DEBUG_VIEW, this);
+		
+//		getSite().getPage().removeSelectionListener(IDebugUIConstants.ID_DEBUG_VIEW, this);
 		DebugUIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 		JFaceResources.getFontRegistry().removeListener(this);
 		Viewer viewer = getViewer();
@@ -369,6 +488,7 @@ public class VariablesView extends AbstractDebugEventHandlerView implements ISel
         if (action != null && action instanceof FindVariableAction) {
             ((FindVariableAction) action).dispose();
         }
+        
 		super.dispose();
 	}
 
@@ -528,7 +648,8 @@ public class VariablesView extends AbstractDebugEventHandlerView implements ISel
 	public void propertyChange(PropertyChangeEvent event) {
 		String propertyName= event.getProperty();
 		if (propertyName.equals(IDebugPreferenceConstants.CHANGED_VARIABLE_COLOR)) {
-			getEventHandler().refresh();
+			// TODO:  property changed updater?
+			refresh((IDebugElement)getViewer().getInput(), false);
 		} else if (propertyName.equals(IInternalDebugUIConstants.DETAIL_PANE_FONT)) {
 			getDetailViewer().getTextWidget().setFont(JFaceResources.getFont(IInternalDebugUIConstants.DETAIL_PANE_FONT));			
 		} else if (propertyName.equals(IDebugUIConstants.PREF_MAX_DETAIL_LENGTH)) {
@@ -618,6 +739,17 @@ public class VariablesView extends AbstractDebugEventHandlerView implements ISel
 		// add tree viewer
 		final TreeViewer variablesViewer = new VariablesViewer(getSashForm(), SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL, this);
 		RemoteVariablesContentProvider provider = createContentProvider(variablesViewer);
+		
+		provider.getContentManager().addListener(new IRemoteContentListener() {
+			public void contentRetrieved() {
+				IDebugViewUpdateListener[] listeners = getUpdateListeners();
+				for (int i=0; i<listeners.length; i++)
+				{
+					listeners[i].viewUpdated();
+				}
+			}
+		});
+		
 		variablesViewer.setContentProvider(provider);
 		variablesViewer.setLabelProvider(createLabelProvider(variablesViewer));
 		variablesViewer.setUseHashlookup(true);
@@ -636,13 +768,16 @@ public class VariablesView extends AbstractDebugEventHandlerView implements ISel
 		variablesViewer.addPostSelectionChangedListener(getTreeSelectionChangedListener());
 		getVariablesViewSelectionProvider().setUnderlyingSelectionProvider(variablesViewer);
 		getSite().setSelectionProvider(getVariablesViewSelectionProvider());
-
+		
 		// listen to selection in debug view
-		getSite().getPage().addSelectionListener(IDebugUIConstants.ID_DEBUG_VIEW, this);
-		VariablesViewEventHandler handler = createEventHandler();
-		handler.setContentManager(provider.getContentManager());
-		setEventHandler(handler);
-
+		// TODO:  view update - remove selection listener
+//		getSite().getPage().addSelectionListener(IDebugUIConstants.ID_DEBUG_VIEW, this);
+//		VariablesViewEventHandler handler = createEventHandler();
+//		handler.setContentManager(provider.getContentManager());
+//		setEventHandler(handler);
+		
+		setupMandatoryModel();
+		
 		return variablesViewer;
 	}
 	
@@ -653,6 +788,11 @@ public class VariablesView extends AbstractDebugEventHandlerView implements ISel
 	 */
 	protected IBaseLabelProvider createLabelProvider(StructuredViewer viewer) {
 		return new VariablesViewDecoratingLabelProvider(viewer, new DebugViewInterimLabelProvider(getModelPresentation()), new DebugViewLabelDecorator(getModelPresentation()));
+	}
+	
+	protected DebugViewSelectionChangedPolicyHandler createSelectionEvtUpdater()
+	{
+		return new VarViewDebugContextPolicyHandler();
 	}
 
 	/**
@@ -1328,21 +1468,72 @@ public class VariablesView extends AbstractDebugEventHandlerView implements ISel
 	 *
 	 * @see ISelectionListener#selectionChanged(IWorkbenchPart, ISelection)
 	 */
-	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-		if (!isAvailable() || !isVisible()) {
-			return;
-		}
-		
-		if (selection == null) {
-			setViewerInput(new StructuredSelection());
-		} else if (selection instanceof IStructuredSelection) {
-			setViewerInput((IStructuredSelection) selection);
-		} else {
-			getDetailViewer().setEditable(false);
-		}
-		updateAction("ContentAssist"); //$NON-NLS-1$
-		updateAction("FindVariable"); //$NON-NLS-1$
-	}
+//	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+//		
+//		//TODO:  test new updater
+//		if (!isAvailable() || !isVisible()) {
+//			return;
+//		}
+//		
+//		if (selection == null)
+//		{
+//			deactivateModel(null);
+//			setInput(null);
+//			return;
+//		}
+//		
+//		if (selection.isEmpty())
+//		{
+//			deactivateModel(null);
+//			setInput(null);
+//			return;
+//		}
+//		
+//		if (selection instanceof IStructuredSelection)
+//		{
+//			IStructuredSelection ssel = (IStructuredSelection)selection;
+//			if (ssel.size() == 1)
+//			{
+//				Object obj = ssel.getFirstElement();
+//				if (obj instanceof IDebugElement)
+//				{
+//					IDebugElement newInput = (IDebugElement)obj;
+//					if (!newInput.equals(getViewer().getInput()))
+//					{
+//						// deactivate old model
+//						IDebugElement oldInput = (IDebugElement)getViewer().getInput();
+//						
+//						if (oldInput != null)
+//						{
+//							if (!oldInput.getModelIdentifier().equals(newInput.getModelIdentifier()))
+//							{
+//								deactivateModel(oldInput.getModelIdentifier());
+//							}
+//						}
+//						
+//						// activate new model
+//						DebugModel[] models = getDebugModels(newInput.getModelIdentifier());
+//						
+//						if (models.length == 0)
+//						{
+//							DebugModel model = new DebugModel(newInput.getModelIdentifier(), this);
+//							addDebugModels(new DebugModel[] {model});
+//						}
+//						
+//						activateModel(newInput);
+//					}
+//				}
+//				else
+//				{
+//					deactivateModel(null);
+//					setInput(null);
+//				}
+//			}
+//		}
+//		
+//		updateAction("ContentAssist"); //$NON-NLS-1$
+//		updateAction("FindVariable"); //$NON-NLS-1$
+//	}
 	
 	/**
 	 * Delegate to the <code>DOUBLE_CLICK_ACTION</code>,
@@ -1469,11 +1660,7 @@ public class VariablesView extends AbstractDebugEventHandlerView implements ISel
 	 */
 	protected void becomesVisible() {
 		super.becomesVisible();
-		IViewPart part = getSite().getPage().findView(IDebugUIConstants.ID_DEBUG_VIEW);
-		if (part != null) {
-			ISelection selection = getSite().getPage().getSelection(IDebugUIConstants.ID_DEBUG_VIEW);
-			selectionChanged(part, selection);
-		}
+
 	}
 
 	/**
@@ -1553,4 +1740,130 @@ public class VariablesView extends AbstractDebugEventHandlerView implements ISel
 			return ""; //$NON-NLS-1$
 		}
 	}
+
+	public void refresh(IDebugElement elm, boolean getContent) {
+		
+		if (elm == null)
+		{
+			getViewer().setInput(null);
+			return;
+		}
+		
+		if ((getViewer().getInput() == null && elm instanceof IStackFrame) ||
+			(getViewer().getInput() != elm && getContent && elm instanceof IStackFrame))
+		{
+			setInput(elm);
+			return;
+		}
+		
+		if (isAvailable()) {
+			 showViewer();
+			 if (getViewer() instanceof TreeViewer)
+			 {
+				 TreeViewer treeViewer = (TreeViewer)getViewer();
+				 
+				 if (elm instanceof IStackFrame ||
+					 elm instanceof IVariable || 
+					 elm instanceof IExpression ||
+					 elm instanceof IRegisterGroup)
+					 treeViewer.refresh(elm);
+				 else
+					 getViewer().refresh();
+			 }
+			 else
+			 {
+				 getViewer().refresh();
+			 }
+		}
+		updateAction("ContentAssist"); //$NON-NLS-1$
+		updateAction("FindVariable"); //$NON-NLS-1$
+	}
+
+	public void cancelPendingRefresh() {
+		Viewer viewer = getViewer();
+		if (viewer instanceof VariablesViewer)
+		{
+			VariablesViewer varViewer = (VariablesViewer)viewer;
+			IContentProvider provider = varViewer.getContentProvider();
+			if (provider instanceof RemoteVariablesContentProvider)
+			{
+				RemoteVariablesContentProvider  remoteProvider = (RemoteVariablesContentProvider)provider;
+				remoteProvider.getContentManager().cancel();
+			}
+		}
+		
+	}
+
+	public void clearCache(Object src) {
+		clearExpandedVariables(src);
+	}
+	
+	protected void clearStatusLine() {
+		IStatusLineManager manager = getViewSite().getActionBars().getStatusLineManager(); 
+		manager.setErrorMessage(null);
+		manager.setMessage(null);
+	}
+
+	public void setInput(IDebugElement elm) {
+		
+		Object input = getViewer().getInput();
+		IDebugElement current = null;
+		if (input instanceof IDebugElement)
+		{
+			current = (IDebugElement)input;
+			if (current != null) {
+				// save state
+				fLastState = getViewerState();
+				fSelectionStates.put(current, fLastState);
+			}
+		}
+		
+		if (elm instanceof IStackFrame)
+		{
+			getViewer().setInput(elm);
+			getDetailViewer().setEditable(true);
+		}
+		else
+		{
+			getViewer().setInput(null);
+			getDetailViewer().setEditable(false);
+		}
+		
+		if (current != null)
+		{
+			current = (IDebugElement)getViewer().getInput();
+			if (current != null) {
+				if (current != null) {
+					setDebugModel(current.getModelIdentifier());
+				}
+				restoreState();
+			}		
+		}
+		showViewer();
+	}
+
+	public void populateView(IDebugElement elm) {
+		getViewer().setInput(elm);
+	}
+
+	public IUpdatePolicy[] getDefaultUpdatePolicies() {
+		IUpdatePolicy[] policies = new IUpdatePolicy[2];
+		
+		IUpdatePolicy policy = DebugUITools.getUpdatePolicyManager().getPolicy("org.eclipse.debug.ui.updatePolicy.debugContextChanged"); //$NON-NLS-1$
+		if (policy != null)
+			policies[0] = policy;
+		
+		policy = DebugUITools.getUpdatePolicyManager().getPolicy("org.eclipse.debug.ui.updatePolicy.debugEvt"); //$NON-NLS-1$
+		if (policy != null)
+			policies[1] = policy;
+		
+		return policies;
+	}
+
+	public IUpdatePolicy[] getMandatoryUpdatePolicies() {
+
+		IUpdatePolicy policy = new VarViewDebugContextPolicy();
+		return new IUpdatePolicy[]{policy};
+	}
+
 }
