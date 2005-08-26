@@ -64,6 +64,28 @@ public class UpdatePolicyMgr implements IUpdatePolicyManager {
 		return (IUpdatePolicySet[])returnList.toArray(new IUpdatePolicySet[returnList.size()]);
 	}
 	
+	public IUpdatePolicySet getPrimaryPolicySet(String viewId, String modelId)
+	{
+		IUpdatePolicySet[] policySets = getPolicySets(viewId, modelId);
+		
+		// only one policy set specified, returned as primary
+		if (policySets.length == 1)
+			return policySets[0];
+		
+		// find the primary one
+		for (int i=0; i<policySets.length; i++)
+		{
+			if (policySets[i].isPrimary())
+				return policySets[i];
+		}
+		
+		// none is specified as primary, return the first one found
+		if (policySets.length > 0)
+			return policySets[0];
+		
+		return null;
+	}
+	
 	private void parseExtensionPoint()
 	{
         IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(DebugUIPlugin.getUniqueIdentifier(), IUpdatePolicyConstants.EXTENSION_POINT_UPDATE_POLICY);
@@ -95,6 +117,17 @@ public class UpdatePolicyMgr implements IUpdatePolicyManager {
 
 	public IUpdatePolicy getPolicy(String policyId) {
 		return (IUpdatePolicy) fPolicies.get(policyId);
+	}
+
+	public IUpdatePolicySet getPolicySet(String id) {
+		Iterator iter = fPolicySets.iterator();
+		while(iter.hasNext())
+		{
+			UpdatePolicySet policySet = (UpdatePolicySet)iter.next();
+			if (policySet.getId().equals(id))
+				return policySet;
+		}
+		return null;
 	}
 
 }

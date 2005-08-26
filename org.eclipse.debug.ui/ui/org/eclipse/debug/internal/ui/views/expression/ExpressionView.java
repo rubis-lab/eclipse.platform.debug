@@ -17,7 +17,6 @@ import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.core.model.IErrorReportingExpression;
 import org.eclipse.debug.core.model.IExpression;
 import org.eclipse.debug.core.model.IRegisterGroup;
-import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IVariable;
 import org.eclipse.debug.core.model.IWatchExpression;
 import org.eclipse.debug.internal.ui.IDebugHelpContextIds;
@@ -150,6 +149,9 @@ public class ExpressionView extends VariablesView {
 	*/
 	protected void fillContextMenu(IMenuManager menu) {
 
+		// TODO:  HACK TO MAKE UPDATE POLICY ACTIONS SHOW UP
+		// REMOVE AND CONTRIBUTE ACTIONS BY EXTENSION POINT
+		super.fillContextMenu(menu);
 		menu.add(new Separator(IDebugUIConstants.EMPTY_EXPRESSION_GROUP));
 		menu.add(new Separator(IDebugUIConstants.EXPRESSION_GROUP));
 		menu.add(getAction("ChangeVariableValue")); //$NON-NLS-1$
@@ -282,8 +284,7 @@ public class ExpressionView extends VariablesView {
 			 {
 				 TreeViewer treeViewer = (TreeViewer)getViewer();
 				 
-				 if (elm instanceof IStackFrame ||
-					 elm instanceof IVariable || 
+				 if (elm instanceof IVariable || 
 					 elm instanceof IExpression ||
 					 elm instanceof IRegisterGroup)
 				 {
@@ -303,7 +304,12 @@ public class ExpressionView extends VariablesView {
 	}
 	
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.views.variables.VariablesView#setInput(org.eclipse.debug.core.model.IDebugElement)
+	 */
 	public void setInput(IDebugElement elm) {
+		// expression cannot change input.  Expression Manager is the 
+		// input to the view and cannot be changed.
 		return;
 	}
 

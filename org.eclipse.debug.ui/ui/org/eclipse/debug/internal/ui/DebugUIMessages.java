@@ -208,9 +208,16 @@ public class DebugUIMessages extends NLS {
 	public static String TableRenderingContentProvider_0;
 	public static String TableRenderingContentProvider_1;
 	public static String TableRenderingContentProvider_2;
+	public static String SetUpdatePolicyAction_0;
+	public static String SetUpdatePolicyAction_1;
+	public static String SetUpdatePolicyAction_3;
+	public static String SetUpdatePolicyAction_6;	
+	
 	
 	static {
 		// load message values from bundle file
 		NLS.initializeMessages(BUNDLE_NAME, DebugUIMessages.class);
 	}
+
+
 }

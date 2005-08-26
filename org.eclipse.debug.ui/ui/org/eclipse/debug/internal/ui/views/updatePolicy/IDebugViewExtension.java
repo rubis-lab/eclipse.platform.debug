@@ -14,10 +14,13 @@ package org.eclipse.debug.internal.ui.views.updatePolicy;
 
 import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.ui.IDebugView;
+import org.eclipse.jface.util.IPropertyChangeListener;
 
 /**
  *
  */
+// TODO:  remove dependency to IDebugView
+// to allow memory renderings to implemen this interface
 public interface IDebugViewExtension extends IDebugView{
 	
 	/**
@@ -80,4 +83,27 @@ public interface IDebugViewExtension extends IDebugView{
 	 * all the time.
 	 */
 	public IUpdatePolicy[] getMandatoryUpdatePolicies();
+	
+	/**
+	 * Add listener to be notified when the update policy set in the view is changed
+	 * @param listener
+	 */
+	public void addListener(IPropertyChangeListener listener);
+	
+	/**
+	 * Remove listener to be notified when the update policy set in the view is changed
+	 * @param listener
+	 */
+	public void removeListener(IPropertyChangeListener listener);
+	
+	/**
+	 * Sets active policy set in this view.
+	 * @param policySetId
+	 */
+	public void setActivePolicySet(String policySetId);
+	
+	/**
+	 * @return active policy set in this view
+	 */
+	public String getActivePolicySet();
 }

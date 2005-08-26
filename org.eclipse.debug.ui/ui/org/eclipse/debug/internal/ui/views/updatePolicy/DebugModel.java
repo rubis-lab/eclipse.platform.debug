@@ -16,22 +16,88 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPersistableElement;
 
-public class DebugModel {
+public class DebugModel extends PlatformObject implements IPersistableElement{
 
 	private static final IUpdatePolicyHandler[] EMPTY = new IUpdatePolicyHandler[0];
+	public static final String ATTR_MODEL_ID = "modelId"; //$NON-NLS-1$
+	public static final String ATTR_ACTIVE_POLICY_SET = "activePolicySet"; //$NON-NLS-1$
 	
 	private Set fPolicyHandlers = new HashSet();
 	private String fModelIdentifier;
 	private IDebugViewExtension fView;
+	private IUpdatePolicySet fActivePolicySet;
+	private boolean fIsActive = false;
+	private IPropertyChangeListener fListener;
+	private IDebugElement fDebugContext;
+	
+	/**
+	 * Constructs using a memento
+	 * @param memento
+	 */
+	public DebugModel(IMemento memento, IDebugViewExtension view)
+	{
+		fView = view;
+		addListeners();
+		
+		String modelId = memento.getString(DebugModel.ATTR_MODEL_ID);
+		fModelIdentifier = modelId;
+				
+		String activePolicySet = memento.getString(DebugModel.ATTR_ACTIVE_POLICY_SET);
+		if (activePolicySet != null)
+		{
+			IUpdatePolicySet set = DebugUITools.getUpdatePolicyManager().getPolicySet(activePolicySet);
+			fActivePolicySet = set;
+			// do not activate handlers unless the model is activated
+		}
+	}
 	
 	public DebugModel(String modelIdentifier, IDebugViewExtension view)
 	{
 		fModelIdentifier = modelIdentifier;
 		fView = view;
+		
+		addListeners();
+	}
+	
+	private void addListeners() {
+		fListener = new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				if (fIsActive) {
+					if (event.getProperty().equals(
+							AbstractDebugViewExtension.PROPERTY_UPDATE_POLICY)) {
+						Object obj = event.getNewValue();
+						if (obj instanceof String) {
+							String newId = (String) obj;
+							if (!newId.equals(fActivePolicySet.getId())) {
+								IUpdatePolicySet set = DebugUITools.getUpdatePolicyManager().getPolicySet(newId);
+								if (set != null) {
+									unloadHandlers();
+									loadHandlers(set);
+								} else {
+									DebugUIPlugin.logErrorMessage("Unable to load policy set: " + newId); //$NON-NLS-1$
+								}
+							}
+						}
+					}
+				}
+			}
+		};
+			
+		fView.addListener(fListener);
+	}
+	
+	private void removeListeners()
+	{
+		fView.removeListener(fListener);
 	}
 	
 	public String getModelIdentifier()
@@ -66,8 +132,17 @@ public class DebugModel {
 
 	public void activateModel(IDebugElement debugContext) {
 		
+		fIsActive = true;
+		fDebugContext = debugContext;
 		if (fPolicyHandlers.isEmpty())
-			loadHandlers();
+		{
+			IUpdatePolicySet set = null;
+			if (fActivePolicySet == null)
+				set = DebugUITools.getUpdatePolicyManager().getPrimaryPolicySet(fView.getSite().getId(), fModelIdentifier);
+			else
+				set = fActivePolicySet;
+			loadHandlers(set);
+		}
 		
 		if (debugContext != null)
 		{
@@ -77,10 +152,7 @@ public class DebugModel {
 				IUpdatePolicyHandler[] handlers = getPolicyHandlers();
 				for (int i=0; i<handlers.length; i++)
 				{
-					// TODO:  look at for Expressions View
-					// if enabled, delayed update does not work
-					// if disabled, views not updated when view becomes visible
-//					if (handlers[i].getDebugContext() != debugContext)
+					if (handlers[i].getDebugContext() != debugContext)
 						handlers[i].setDebugContext(debugContext);
 				}
 				return;
@@ -90,46 +162,43 @@ public class DebugModel {
 	
 	public void deactivateModel()
 	{
+		fIsActive = false;
 		unloadHandlers();
 	}
 	
 	public void dispose()
 	{
+		removeListeners();
 		unloadHandlers();
 		fPolicyHandlers = null;
 	}
 	
-	public void loadHandlers()
+	public void loadHandlers(IUpdatePolicySet policySet)
 	{
-		// when input is changed, load handlers
-		IUpdatePolicySet[] policySets = DebugUITools.getUpdatePolicyManager().getPolicySets(fView.getSite().getId(), getModelIdentifier());
-		
-		if (policySets.length > 0)
+		// when input is changed, load handler
+		if (policySet != null)
 		{
-			for (int i=0; i<policySets.length; i++)
-			{
-				try {
-					
-					String [] policyIds = policySets[i].getPolicies();
-					
-					for (int j=0; j<policyIds.length; j++)
+			try {
+				fActivePolicySet = policySet;
+				String [] policyIds = policySet.getPolicies();
+				
+				for (int j=0; j<policyIds.length; j++)
+				{
+					IUpdatePolicy policy = DebugUITools.getUpdatePolicyManager().getPolicy(policyIds[j]);
+					if (policy != null)
 					{
-						IUpdatePolicy policy = DebugUITools.getUpdatePolicyManager().getPolicy(policyIds[j]);
-						if (policy != null)
+						IUpdatePolicyHandler handler = policy.createHandler();
+						
+						if (handler != null)
 						{
-							IUpdatePolicyHandler handler = policy.createHandler();
-							
-							if (handler != null)
-							{
-								handler.init(policy, fView);
-							}		
-							fPolicyHandlers.add(handler);
-						}
+							handler.init(policy, fView);
+						}		
+						fPolicyHandlers.add(handler);
 					}
-				} catch (CoreException e) {
-					// log error
-					DebugUIPlugin.log(e);
 				}
+			} catch (CoreException e) {
+				// log error
+				DebugUIPlugin.log(e);
 			}
 		}
 		else
@@ -158,5 +227,31 @@ public class DebugModel {
 			handlers[i].dispose();
 			fPolicyHandlers.remove(handlers[i]);
 		}
+	}
+	
+	public IUpdatePolicySet[] getPolicySets()
+	{
+		return DebugUITools.getUpdatePolicyManager().getPolicySets(fView.getSite().getId(), fModelIdentifier);
+	}
+	
+	public IUpdatePolicySet getActivePolicySet() 
+	{
+		return fActivePolicySet;
+	}
+
+	public void saveState(IMemento memento) {
+		memento.putString(ATTR_MODEL_ID, fModelIdentifier);
+		
+		if (fActivePolicySet != null)
+			memento.putString(ATTR_ACTIVE_POLICY_SET, fActivePolicySet.getId());
+	}
+
+	public String getFactoryId() {
+		return null;
+	}
+	
+	public IDebugElement getDebugContext()
+	{
+		return fDebugContext;
 	}
 }

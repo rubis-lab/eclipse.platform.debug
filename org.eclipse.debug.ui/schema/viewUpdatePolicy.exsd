@@ -48,10 +48,10 @@
          <sequence>
             <element ref="policy_id" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
-         <attribute name="viewId" type="string" use="required">
+         <attribute name="viewId" type="string">
             <annotation>
                <documentation>
-                  The identifier of the view that this policy should be applied to.
+                  The identifier of the view that this policy set should be applied to.  If unspecified, the policy set is applied to all debug views.
                </documentation>
             </annotation>
          </attribute>
@@ -87,6 +87,13 @@
             <annotation>
                <documentation>
                   
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="primary" type="string">
+            <annotation>
+               <documentation>
+                  Indicate if the policy set is a primary policy set.  Primary policy set is applied whenever the model is activated in a view.  If policy set is not primary, user has to select the policy set for it to be enabled.  If unspecified, the policy set is not primary.
                </documentation>
             </annotation>
          </attribute>

@@ -30,6 +30,7 @@ public class UpdatePolicySet implements IUpdatePolicySet{
 	private static final String ATTR_NAME = "name"; //$NON-NLS-1$
 	private static final String ATTR_DESCRIPTION = "description"; //$NON-NLS-1$
 	private static final String ATTR_HIDDEN = "hidden"; //$NON-NLS-1$
+	private static final String ATTR_PRIMARY = "primary"; //$NON-NLS-1$
 	private static final String ELMT_POLICY_ID = "policy_id"; //$NON-NLS-1$
 
 	
@@ -47,11 +48,15 @@ public class UpdatePolicySet implements IUpdatePolicySet{
      * @exception CoreException if invalid
      */
     void validate() throws CoreException {
-        verifyPresent(ATTR_VIEWID);
         verifyPresent(ATTR_MODELID);
         verifyPresent(ATTR_ID);
-        
         verifyElmPresent(ELMT_POLICY_ID);
+        
+        if (!isHidden())
+        {
+        	verifyPresent(ATTR_NAME);
+        	verifyPresent(ATTR_DESCRIPTION);
+        }
     }
     
     /**
@@ -118,8 +123,16 @@ public class UpdatePolicySet implements IUpdatePolicySet{
      */
     public boolean isApplicable(String viewId, String modelId)
     {
-    	if (viewId.equals(getViewId()) && modelId.equals(getModelId()))
-    		return true;
+    	if (getViewId() != null)
+    	{
+	    	if (viewId.equals(getViewId()) && modelId.equals(getModelId()))
+	    		return true;
+    	}
+    	else
+    	{
+    		if (modelId.equals(getModelId()))
+    			return true;
+    	}
     	return false;
     }
 
@@ -139,6 +152,20 @@ public class UpdatePolicySet implements IUpdatePolicySet{
         }
         
         return hidden.booleanValue();
+	}
+
+	public boolean isPrimary() {
+    	Boolean hidden = new Boolean("false");  //$NON-NLS-1$
+        if (fConfigurationElement.getAttribute(ATTR_PRIMARY) != null)
+        {
+        	hidden = new Boolean(fConfigurationElement.getAttribute(ATTR_PRIMARY));
+        }
+        
+        return hidden.booleanValue();
+	}
+
+	public String getId() {
+		return fConfigurationElement.getAttribute(ATTR_ID);
 	}
 
 }

@@ -46,5 +46,15 @@ public interface IUpdatePolicySet {
 	 * @return if the policy is hidden
 	 */
 	public boolean isHidden();
+	
+	/**
+	 * @return if policy set is primary
+	 */
+	public boolean isPrimary();
+	
+	/**
+	 * @return the id of this policy set
+	 */
+	public String getId();
 
 }

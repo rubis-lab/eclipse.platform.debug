@@ -34,6 +34,7 @@ import org.eclipse.debug.core.model.IThread;
 import org.eclipse.debug.core.model.IValue;
 import org.eclipse.debug.core.model.IVariable;
 import org.eclipse.debug.internal.ui.DebugPluginImages;
+import org.eclipse.debug.internal.ui.DebugUIMessages;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.DelegatingModelPresentation;
 import org.eclipse.debug.internal.ui.IDebugHelpContextIds;
@@ -182,9 +183,9 @@ public class VariablesView extends AbstractDebugViewExtension implements
 		}
 
 		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-			if (!isAvailable() || !isVisible()) {
-				return;
-			}
+//			if (!isAvailable() || !isVisible()) {
+//				return;
+//			}
 			
 			if (selection == null)
 			{
@@ -208,32 +209,52 @@ public class VariablesView extends AbstractDebugViewExtension implements
 					Object obj = ssel.getFirstElement();
 					if (obj instanceof IDebugElement)
 					{
-						IDebugElement newInput = (IDebugElement)obj;
-						if (!newInput.equals(getViewer().getInput()))
+						IDebugElement newContext = (IDebugElement)obj;
+						DebugModel[] activeModels = getActiveModels();
+						IDebugElement oldContext = null;
+						if (activeModels.length > 0)
 						{
-							if (getViewer().getInput() instanceof IDebugElement)
-							{
-								// deactivate old model
-								IDebugElement oldInput = getDebugContext();
-								
-								if (oldInput != null)
-								{
-									if (!oldInput.getModelIdentifier().equals(newInput.getModelIdentifier()))
-									{
-										deactivateModel(oldInput.getModelIdentifier());
-									}
-								}
-							}
-								
-							// activate new model
-							DebugModel[] models = getDebugModels(newInput.getModelIdentifier());
+							// TODO:  what happens when a view has multiple debug context
+							// Not possible now, but possible in the futre.
+							oldContext = activeModels[0].getDebugContext();
+						}
+						
+						boolean load = false;
+						
+						if (oldContext == null && newContext != null)
+						{
+							load = true;
+						}
+						else if (oldContext != null && newContext == null)
+						{
+							load = true;
+						}
+						else if (oldContext != null && newContext != null && !oldContext.equals(newContext))
+						{
+							load = true;
+						}
+						
+						if (load)
+						{
+							// unload old ones
+							if (oldContext != null)
+								deactivateModel(oldContext.getModelIdentifier());
+							else
+								deactivateModel(null);
 							
-							if (models.length == 0)
+							// load new ones
+							if (newContext != null)
 							{
-								DebugModel model = new DebugModel(newInput.getModelIdentifier(), getView());
-								addDebugModels(new DebugModel[] {model});
+								// activate new model
+								DebugModel[] models = getDebugModels(newContext.getModelIdentifier());
+								
+								if (models.length == 0)
+								{
+									DebugModel model = new DebugModel(newContext.getModelIdentifier(), getView());
+									addDebugModels(new DebugModel[] {model});
+								}
+								activateModel(newContext);
 							}
-							activateModel(newInput);
 						}
 					}
 					else
@@ -464,8 +485,6 @@ public class VariablesView extends AbstractDebugViewExtension implements
     private boolean fShowLogical;
 
     private IRemoteTreeViewerUpdateListener fUpdateListener;
-    
-    private VarViewDebugContextPolicyHandler fSelectionPolicyHandler;
 
 	/**
 	 * Remove myself as a selection listener
@@ -1081,6 +1100,7 @@ public class VariablesView extends AbstractDebugViewExtension implements
 	*/
 	protected void fillContextMenu(IMenuManager menu) {
 
+		super.fillContextMenu(menu);
 		menu.add(new Separator(IDebugUIConstants.EMPTY_VARIABLE_GROUP));
 		menu.add(new Separator(IDebugUIConstants.VARIABLE_GROUP));
 		menu.add(getAction("FindVariable")); //$NON-NLS-1$
@@ -1091,6 +1111,7 @@ public class VariablesView extends AbstractDebugViewExtension implements
 		}
 		menu.add(new Separator(IDebugUIConstants.EMPTY_RENDER_GROUP));
 		menu.add(new Separator(IDebugUIConstants.EMPTY_NAVIGATION_GROUP));
+		
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
 	

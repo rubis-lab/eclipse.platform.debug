@@ -22,6 +22,20 @@ public interface IUpdatePolicyManager {
 	IUpdatePolicySet[] getPolicySets(String viewId, String modelId);
 	
 	/**
+	 * @param viewId
+	 * @param modelId
+	 * @return the primary policy set applicable to the given view id and model id
+	 * Return null if none is found.
+	 */
+	IUpdatePolicySet getPrimaryPolicySet(String viewId, String modelId);
+	
+	/**
+	 * @param id
+	 * @return the policy set matching the given id.  Return null if none is found.
+	 */
+	IUpdatePolicySet getPolicySet(String id);
+	
+	/**
 	 * @param policyId
 	 * @return the policy with the given policy id
 	 */

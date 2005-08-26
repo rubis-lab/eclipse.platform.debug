@@ -24,6 +24,9 @@ public class DebugContextChangedPolicyHandler extends AbstractUpdatePolicyHandle
 	public void setDebugContext(IDebugElement debugContext) {
 		super.setDebugContext(debugContext);
 		
+		if (!getView().isVisible())
+			return;
+		
 		if (debugContext instanceof IStackFrame)
 			getView().refresh(debugContext, true);
 		else
