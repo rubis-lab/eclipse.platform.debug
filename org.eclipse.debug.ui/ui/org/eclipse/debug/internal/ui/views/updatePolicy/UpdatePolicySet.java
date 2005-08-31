@@ -36,10 +36,38 @@ public class UpdatePolicySet implements IUpdatePolicySet{
 	
 	private IConfigurationElement fConfigurationElement;
 	private Set fUpdatePolicies;
+	private String fName;
+	private String fDescription;
+	private String fId;
 
 	public UpdatePolicySet(IConfigurationElement elm)
 	{
 		fConfigurationElement = elm;
+	}
+	
+	public UpdatePolicySet()
+	{
+	}
+	
+	public void init(String id, String name, String description, String[] policies)
+	{
+		fId = id;
+		fName = name;
+		fDescription = description;
+		fUpdatePolicies = new HashSet();
+		for (int i=0; i<policies.length; i++)
+		{
+			fUpdatePolicies.add(policies[i]);
+		}
+	}
+	
+	public void setPolicies(String[] policies)
+	{
+		fUpdatePolicies.clear();
+		for (int i=0; i<policies.length; i++)
+		{
+			fUpdatePolicies.add(policies[i]);
+		}
 	}
 	
     /**
@@ -48,7 +76,11 @@ public class UpdatePolicySet implements IUpdatePolicySet{
      * @exception CoreException if invalid
      */
     void validate() throws CoreException {
-        verifyPresent(ATTR_MODELID);
+    	
+    	// no need to validate if fConfigurationElement is null
+    	if (fConfigurationElement == null)
+    		return;
+    	
         verifyPresent(ATTR_ID);
         verifyElmPresent(ELMT_POLICY_ID);
         
@@ -86,6 +118,9 @@ public class UpdatePolicySet implements IUpdatePolicySet{
      */
     public String getViewId()
     {
+		if (fConfigurationElement == null)
+			return null;
+		
     	return fConfigurationElement.getAttribute(ATTR_VIEWID);
     }
     
@@ -94,6 +129,9 @@ public class UpdatePolicySet implements IUpdatePolicySet{
      */
     public String getModelId()
     {
+		if (fConfigurationElement == null)
+			return null;
+		
     	return fConfigurationElement.getAttribute(ATTR_MODELID);
     }
 
@@ -107,6 +145,9 @@ public class UpdatePolicySet implements IUpdatePolicySet{
 	
 	private void initPolicies()
 	{
+		if (fConfigurationElement == null)
+			return;
+		
 		IConfigurationElement[] configElmts = fConfigurationElement.getChildren(ELMT_POLICY_ID);
 		fUpdatePolicies = new HashSet();
 		
@@ -123,28 +164,43 @@ public class UpdatePolicySet implements IUpdatePolicySet{
      */
     public boolean isApplicable(String viewId, String modelId)
     {
-    	if (getViewId() != null)
+    	String setViewId = getViewId();
+    	String setModelId = getModelId();
+    	
+    	boolean applicable = true;
+    	
+    	if (setViewId != null)
     	{
-	    	if (viewId.equals(getViewId()) && modelId.equals(getModelId()))
-	    		return true;
+    		if (!setViewId.equals(viewId))
+    			applicable = false;
     	}
-    	else
+    	
+    	if (setModelId != null)
     	{
-    		if (modelId.equals(getModelId()))
-    			return true;
+    		if (!setModelId.equals(modelId))
+    			applicable = false;
     	}
-    	return false;
+    	
+    	return applicable;
     }
 
 	public String getName() {
-		return fConfigurationElement.getAttribute(ATTR_NAME);
+		if (fName == null && fConfigurationElement != null)
+			fName = fConfigurationElement.getAttribute(ATTR_NAME);
+		return fName;
 	}
 
 	public String getDescription() {
-		return fConfigurationElement.getAttribute(ATTR_DESCRIPTION);
+		if (fDescription == null && fConfigurationElement != null)
+			fDescription = fConfigurationElement.getAttribute(ATTR_NAME);
+		return fDescription;
 	}
 
 	public boolean isHidden() {
+		
+		if (fConfigurationElement == null)
+			return false;
+		
     	Boolean hidden = new Boolean("false");  //$NON-NLS-1$
         if (fConfigurationElement.getAttribute(ATTR_HIDDEN) != null)
         {
@@ -155,6 +211,10 @@ public class UpdatePolicySet implements IUpdatePolicySet{
 	}
 
 	public boolean isPrimary() {
+		
+		if (fConfigurationElement == null)
+			return false;
+		
     	Boolean hidden = new Boolean("false");  //$NON-NLS-1$
         if (fConfigurationElement.getAttribute(ATTR_PRIMARY) != null)
         {
@@ -165,7 +225,32 @@ public class UpdatePolicySet implements IUpdatePolicySet{
 	}
 
 	public String getId() {
-		return fConfigurationElement.getAttribute(ATTR_ID);
+		if (fId == null && fConfigurationElement != null)
+			fId = fConfigurationElement.getAttribute(ATTR_ID);
+		return fId;
+	}
+
+	public boolean canEdit() {
+		// policy set created by extension point cannot be modified
+		return isUserDefined();
+	}
+
+	public boolean canRemove() {
+		// policy set created by extension point cannot be removed
+		return isUserDefined();
+	}
+
+	public void setName(String name) {
+		fName = name;
+	}
+
+	public void setDescription(String description) {
+		fDescription = description;
+	}
+	
+	public boolean isUserDefined()
+	{
+		return fConfigurationElement == null;
 	}
 
 }

@@ -12,6 +12,8 @@
 
 package org.eclipse.debug.internal.ui.views.updatePolicy;
 
+import org.eclipse.debug.core.DebugException;
+
 public interface IUpdatePolicyManager {
 
 	/**
@@ -20,6 +22,11 @@ public interface IUpdatePolicyManager {
 	 * @return the policy sets applicable to the given view id and model id
 	 */
 	IUpdatePolicySet[] getPolicySets(String viewId, String modelId);
+	
+	/**
+	 * @return all policy sets
+	 */
+	IUpdatePolicySet[] getAllPolicySets();
 	
 	/**
 	 * @param viewId
@@ -40,4 +47,38 @@ public interface IUpdatePolicyManager {
 	 * @return the policy with the given policy id
 	 */
 	IUpdatePolicy getPolicy(String policyId);
+	
+	/**
+	 * @return all update policies
+	 */
+	IUpdatePolicy[] getAllPolicies();
+	
+	/**
+	 * @param policySet
+	 * @throws DebugException if error has occurred adding the policy set
+	 */
+	public void addPolicySet(IUpdatePolicySet policySet) throws DebugException;
+	
+	/**
+	 * @param policySet
+	 * @throws DebugException if error has occurred removing the policy set
+	 */
+	public void removePolicySet(IUpdatePolicySet policySet) throws DebugException;
+	
+	/**
+	 * Notify UpdatePolicyManager that the policy set has changed.
+	 * This will cause the policy set manager to fire a change event
+	 * @param policySet the policy set changed
+	 */
+	public void policySetChanged(IUpdatePolicySet policySet);
+	
+	/**
+	 * @param listener listener to be notfied when user-defined policy set are added/removed from the manager
+	 */
+	public void addPolicySetListener(IUpdatePolicySetListener listener);
+	
+	/**
+	 * @param listener listener to remove
+	 */
+	public void removePolicySetListener(IUpdatePolicySetListener listener);
 }

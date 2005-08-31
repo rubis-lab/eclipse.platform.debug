@@ -34,7 +34,6 @@ import org.eclipse.debug.core.model.IThread;
 import org.eclipse.debug.core.model.IValue;
 import org.eclipse.debug.core.model.IVariable;
 import org.eclipse.debug.internal.ui.DebugPluginImages;
-import org.eclipse.debug.internal.ui.DebugUIMessages;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.DelegatingModelPresentation;
 import org.eclipse.debug.internal.ui.IDebugHelpContextIds;
@@ -220,6 +219,7 @@ public class VariablesView extends AbstractDebugViewExtension implements
 						}
 						
 						boolean load = false;
+			
 						
 						if (oldContext == null && newContext != null)
 						{
@@ -228,20 +228,20 @@ public class VariablesView extends AbstractDebugViewExtension implements
 						else if (oldContext != null && newContext == null)
 						{
 							load = true;
+							deactivateModel(oldContext.getModelIdentifier());
 						}
 						else if (oldContext != null && newContext != null && !oldContext.equals(newContext))
 						{
 							load = true;
+							
+							// unload old ones
+							if (!oldContext.getModelIdentifier().equals(newContext.getModelIdentifier()))
+								deactivateModel(oldContext.getModelIdentifier());
 						}
 						
 						if (load)
 						{
-							// unload old ones
-							if (oldContext != null)
-								deactivateModel(oldContext.getModelIdentifier());
-							else
-								deactivateModel(null);
-							
+
 							// load new ones
 							if (newContext != null)
 							{

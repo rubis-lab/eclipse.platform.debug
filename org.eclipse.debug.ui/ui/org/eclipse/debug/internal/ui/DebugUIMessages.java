@@ -212,12 +212,32 @@ public class DebugUIMessages extends NLS {
 	public static String SetUpdatePolicyAction_1;
 	public static String SetUpdatePolicyAction_3;
 	public static String SetUpdatePolicyAction_6;	
-	
-	
+	public static String PolicySetDialog_1;
+	public static String PolicySetDialog_2;
+	public static String PolicySetDialog_3;
+	public static String PolicySetDialog_4;
+	public static String PolicySetDialog_6;
+	public static String PolicySetDialog_7;
+	public static String PolicySetDialog_9;
+	public static String PolicySetDialog_10;
+	public static String PolicySetDialog_11;
+	public static String PolicySetDialog_12;
+	public static String PolicySetDialog_14;
+	public static String PolicySetDialog_15;
+	public static String PolicySetDialog_16;
+	public static String PolicySetDialog_17;
+	public static String PolicySetDialog_0;
+	public static String PolicySetDialog_25;
+	public static String PolicySetDialog_26;
+	public static String UpdatePolicyMgr_0;
+	public static String UpdatePolicyMgr_1;
+	public static String UpdatePolicyMgr_2;
+	public static String UpdatePolicyMgr_3;
+	public static String UpdatePolicyMgr_4;
+
 	static {
 		// load message values from bundle file
 		NLS.initializeMessages(BUNDLE_NAME, DebugUIMessages.class);
 	}
-
 
 }

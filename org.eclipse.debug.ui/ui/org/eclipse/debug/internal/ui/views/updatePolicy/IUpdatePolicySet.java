@@ -33,14 +33,31 @@ public interface IUpdatePolicySet {
 	public String[] getPolicies();
 	
 	/**
+	 * @param ids set new policies in the policy set
+	 *
+	 */
+	public void setPolicies(String[] ids);
+	
+	/**
 	 * @return name of the policy set
 	 */
 	public String getName();
 	
 	/**
+	 * Sets the name of this policy set
+	 * @param name
+	 */
+	public void setName(String name);
+	
+	/**
 	 * @return description of the policy set
 	 */
 	public String getDescription();
+
+	/**
+	 * Sets the description of this policy set
+	 */
+	public void setDescription(String description);
 	
 	/**
 	 * @return if the policy is hidden
@@ -56,5 +73,17 @@ public interface IUpdatePolicySet {
 	 * @return the id of this policy set
 	 */
 	public String getId();
+	
+	/**
+	 * @return if the policy set is editable.  A policy set is editable
+	 * if it is added by an user.
+	 */
+	public boolean canEdit();
+	
+	/**
+	 * @return if the policy set is removable.  A policy set is removable
+	 * if it is added by an user.
+	 */
+	public boolean canRemove();
 
 }

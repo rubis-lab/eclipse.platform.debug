@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.ui.AbstractDebugView;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
@@ -45,8 +46,6 @@ import org.eclipse.ui.XMLMemento;
 
 public abstract class AbstractDebugViewExtension extends AbstractDebugView implements IDebugViewExtension {
 
-	public static final String PROPERTY_UPDATE_POLICY="org.eclipse.debug.ui.updatePolicy"; //$NON-NLS-1$
-	
 	private static final DebugModel[] EMPTY = new DebugModel[0];
 	private static final IUpdatePolicy[] EMPTY_POLICY = new IUpdatePolicy[0];
 	
@@ -289,6 +288,7 @@ public abstract class AbstractDebugViewExtension extends AbstractDebugView imple
 		
 		DebugModel[] models = getActiveModels();
 		
+		// TODO:  move actions to plugin.xml... these strings move to plugin.properties
 		menu.add(new Separator("UpdatePolicy")); //$NON-NLS-1$
 		IMenuManager updatePolicyMenu = new MenuManager("Update Policy",  "updatePolicy"); //$NON-NLS-2$
 		for (int i=0; i<models.length; i++)
@@ -309,6 +309,13 @@ public abstract class AbstractDebugViewExtension extends AbstractDebugView imple
 			}
 		}
 		menu.add(updatePolicyMenu);
+		menu.add(new Action("Manage Policy Set..."){
+
+			public void run() {
+			
+				PolicySetDialog dialog = new PolicySetDialog(DebugUIPlugin.getActiveWorkbenchWindow().getShell());
+				dialog.open();
+			}});
 	}
 
 	public void saveModels(IMemento memento) {	
@@ -435,7 +442,7 @@ public abstract class AbstractDebugViewExtension extends AbstractDebugView imple
 		String oldId = fActivePolicySetId;
 		fActivePolicySetId = policySetId;
 		Object[] listeners = fListeners.getListeners();
-		PropertyChangeEvent evt = new PropertyChangeEvent(this, PROPERTY_UPDATE_POLICY, oldId, fActivePolicySetId);
+		PropertyChangeEvent evt = new PropertyChangeEvent(this, IDebugViewExtension.PROPERTY_UPDATE_POLICY, oldId, fActivePolicySetId);
 		for (int i=0; i<listeners.length; i++)
 		{
 			if (listeners[i] instanceof IPropertyChangeListener)

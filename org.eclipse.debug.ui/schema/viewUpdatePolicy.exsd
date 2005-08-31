@@ -55,10 +55,10 @@
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="modelId" type="string" use="required">
+         <attribute name="modelId" type="string">
             <annotation>
                <documentation>
-                  The model identifier of the debug element being displayed by the view.
+                  The model identifier of the debug element being displayed by the view.  If unspecified, the policy set can be applied to all models.
                </documentation>
             </annotation>
          </attribute>

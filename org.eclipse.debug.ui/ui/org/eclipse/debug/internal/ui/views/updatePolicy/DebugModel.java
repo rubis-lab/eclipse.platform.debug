@@ -25,7 +25,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
 
-public class DebugModel extends PlatformObject implements IPersistableElement{
+public class DebugModel extends PlatformObject implements IPersistableElement, IUpdatePolicySetListener{
 
 	private static final IUpdatePolicyHandler[] EMPTY = new IUpdatePolicyHandler[0];
 	public static final String ATTR_MODEL_ID = "modelId"; //$NON-NLS-1$
@@ -46,7 +46,6 @@ public class DebugModel extends PlatformObject implements IPersistableElement{
 	public DebugModel(IMemento memento, IDebugViewExtension view)
 	{
 		fView = view;
-		addListeners();
 		
 		String modelId = memento.getString(DebugModel.ATTR_MODEL_ID);
 		fModelIdentifier = modelId;
@@ -58,22 +57,21 @@ public class DebugModel extends PlatformObject implements IPersistableElement{
 			fActivePolicySet = set;
 			// do not activate handlers unless the model is activated
 		}
+		addListeners();
 	}
 	
 	public DebugModel(String modelIdentifier, IDebugViewExtension view)
 	{
 		fModelIdentifier = modelIdentifier;
 		fView = view;
-		
 		addListeners();
 	}
 	
 	private void addListeners() {
 		fListener = new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
-				if (fIsActive) {
-					if (event.getProperty().equals(
-							AbstractDebugViewExtension.PROPERTY_UPDATE_POLICY)) {
+				if (fIsActive && fActivePolicySet != null) {
+					if (event.getProperty().equals(IDebugViewExtension.PROPERTY_UPDATE_POLICY)) {
 						Object obj = event.getNewValue();
 						if (obj instanceof String) {
 							String newId = (String) obj;
@@ -143,7 +141,7 @@ public class DebugModel extends PlatformObject implements IPersistableElement{
 				set = fActivePolicySet;
 			loadHandlers(set);
 		}
-		
+		DebugUITools.getUpdatePolicyManager().addPolicySetListener(this);
 		if (debugContext != null)
 		{
 			if (debugContext.getModelIdentifier().equals(getModelIdentifier()))
@@ -164,11 +162,13 @@ public class DebugModel extends PlatformObject implements IPersistableElement{
 	{
 		fIsActive = false;
 		unloadHandlers();
+		DebugUITools.getUpdatePolicyManager().removePolicySetListener(this);
 	}
 	
 	public void dispose()
 	{
 		removeListeners();
+		DebugUITools.getUpdatePolicyManager().removePolicySetListener(this);
 		unloadHandlers();
 		fPolicyHandlers = null;
 	}
@@ -253,5 +253,37 @@ public class DebugModel extends PlatformObject implements IPersistableElement{
 	public IDebugElement getDebugContext()
 	{
 		return fDebugContext;
+	}
+
+	public void policySetAdded(IUpdatePolicySet set) {
+		// do not handle policy set added
+		// not activating the policy set unless user has set it
+		
+	}
+
+	public void policySetRemoved(IUpdatePolicySet set) {
+		// if the current policy set is removed, pick primary policy set
+		if (fActivePolicySet != null && fActivePolicySet == set)
+		{
+			unloadHandlers();
+			IUpdatePolicySet newSet = DebugUITools.getUpdatePolicyManager().getPrimaryPolicySet(fView.getSite().getId(), getModelIdentifier());
+			
+			if (newSet == null)
+			{
+				DebugUIPlugin.logErrorMessage("Cannot find primary policy set: " + fView.getSite().getId() + " " + getModelIdentifier());  //$NON-NLS-1$//$NON-NLS-2$
+				return;
+			}
+			loadHandlers(newSet);
+		}
+	}
+
+	public void policySetChanged(IUpdatePolicySet set) {
+		// if the current policy set is changed, reload policy set
+		if (fActivePolicySet != null && fActivePolicySet == set)
+		{
+			unloadHandlers();
+			loadHandlers(set);
+		}
+		
 	}
 }

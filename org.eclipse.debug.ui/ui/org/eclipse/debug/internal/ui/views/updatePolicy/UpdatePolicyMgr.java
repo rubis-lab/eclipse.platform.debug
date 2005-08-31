@@ -20,19 +20,64 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.internal.ui.DebugUIMessages;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
+import org.eclipse.jface.util.ListenerList;
 
+// TODO:  Need to add code to persist user-defined policy sets
 public class UpdatePolicyMgr implements IUpdatePolicyManager {
 
 	private static final IUpdatePolicySet[] EMPTY = new IUpdatePolicySet[0];
 	private static final String ELEMENT_POLICY_SET = "policySet"; //$NON-NLS-1$
 	private static final String ELEMENT_POLICY = "policy"; //$NON-NLS-1$
 	
+	private static final int ADDED = 0;
+	private static final int REMOVED = 1;
+	private static final int CHANGED = 2;
+	
 	private static IUpdatePolicyManager fgDefault;
 	
 	private List fPolicySets = new ArrayList();
 	private Hashtable fPolicies = new Hashtable();
+	private ListenerList fListeners = new ListenerList();
+	
+	class NotifyListenersRunnable implements ISafeRunnable
+	{
+		private IUpdatePolicySetListener fListener;
+		private int  fEvent;
+		private IUpdatePolicySet fSet;
+		
+		NotifyListenersRunnable(IUpdatePolicySetListener listener, int event, IUpdatePolicySet policySet)
+		{
+			fEvent = event;
+			fListener = listener;
+			fSet = policySet;
+		}
+
+		public void handleException(Throwable exception) {
+			DebugUIPlugin.log(exception);
+		}
+
+		public void run() throws Exception {
+			switch (fEvent) {
+			case ADDED:
+				fListener.policySetAdded(fSet);
+				break;
+			case REMOVED:
+				fListener.policySetRemoved(fSet);
+				break;
+			case CHANGED:
+				fListener.policySetChanged(fSet);
+				break;
+			default:
+				break;
+			}
+		}
+	}
 	
 	public static IUpdatePolicyManager getDefault()
 	{
@@ -130,4 +175,91 @@ public class UpdatePolicyMgr implements IUpdatePolicyManager {
 		return null;
 	}
 
+	public void addPolicySet(IUpdatePolicySet policySet) throws DebugException{
+		
+		validatePolicySet(policySet);
+		
+		Iterator iter = fPolicySets.iterator();
+		
+		while (iter.hasNext())
+		{
+			IUpdatePolicySet existingSet = (IUpdatePolicySet)iter.next();
+			if (existingSet.getId().equals(policySet.getId()))
+			{
+				IStatus status = DebugUIPlugin.newErrorStatus(DebugUIMessages.UpdatePolicyMgr_0, null);
+				throw new DebugException(status);
+			}
+		}
+		
+		fPolicySets.add(policySet);
+		notifyListeners(policySet, ADDED);
+	}
+	
+	private void validatePolicySet(IUpdatePolicySet policySet)throws DebugException
+	{
+		if (policySet.getId() == null)
+		{
+			IStatus status = DebugUIPlugin.newErrorStatus(DebugUIMessages.UpdatePolicyMgr_1, null);
+			throw new DebugException(status);
+		}
+		
+		if (!policySet.isHidden())
+		{
+			if (policySet.getName() == null)
+			{
+				IStatus status = DebugUIPlugin.newErrorStatus(DebugUIMessages.UpdatePolicyMgr_2, null);
+				throw new DebugException(status);			
+			}
+			
+			if (policySet.getDescription() == null)
+			{
+				IStatus status = DebugUIPlugin.newErrorStatus(DebugUIMessages.UpdatePolicyMgr_3, null);
+				throw new DebugException(status);
+			}
+		}
+	}
+
+	public void removePolicySet(IUpdatePolicySet policySet) throws DebugException{
+		if (!policySet.canRemove())
+		{
+			IStatus status = DebugUIPlugin.newErrorStatus(DebugUIMessages.UpdatePolicyMgr_4, null);
+			throw new DebugException(status);
+		}
+		
+		fPolicySets.remove(policySet);
+		notifyListeners(policySet, REMOVED);
+	}
+
+	public IUpdatePolicySet[] getAllPolicySets() {
+		return (IUpdatePolicySet[])fPolicySets.toArray(new IUpdatePolicySet[fPolicySets.size()]);
+	}
+
+	public void addPolicySetListener(IUpdatePolicySetListener listener) {
+		fListeners.add(listener);
+	}
+
+	public void removePolicySetListener(IUpdatePolicySetListener listener) {
+		fListeners.remove(listener);	
+	}
+
+	public void policySetChanged(IUpdatePolicySet policySet) {
+		notifyListeners(policySet, CHANGED);
+	}
+
+	private void notifyListeners(IUpdatePolicySet set, int event)
+	{
+		Object[] listeners = fListeners.getListeners();
+		for (int i=0; i<listeners.length; i++)
+		{
+			if (listeners[i] instanceof IUpdatePolicySetListener)
+			{
+				NotifyListenersRunnable runnable = new NotifyListenersRunnable((IUpdatePolicySetListener)listeners[i],  event, set);
+				Platform.run(runnable);
+			}
+		}
+	}
+
+	public IUpdatePolicy[] getAllPolicies() {
+		return (IUpdatePolicy[])fPolicies.values().toArray(new IUpdatePolicy[fPolicies.values().size()]);
+	}
 }

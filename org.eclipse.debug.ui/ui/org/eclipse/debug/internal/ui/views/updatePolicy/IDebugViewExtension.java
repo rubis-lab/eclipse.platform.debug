@@ -23,6 +23,8 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 // to allow memory renderings to implemen this interface
 public interface IDebugViewExtension extends IDebugView{
 	
+	public static final String PROPERTY_UPDATE_POLICY="org.eclipse.debug.ui.updatePolicy"; //$NON-NLS-1$
+	
 	/**
 	 * Called when the view needs to be refreshed.  The sepcified element and its children
 	 * would be updated.  
