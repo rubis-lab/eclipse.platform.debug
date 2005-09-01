@@ -21,8 +21,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPersistable;
 
-public class UpdatePolicySet implements IUpdatePolicySet{
+public class UpdatePolicySet implements IUpdatePolicySet, IPersistable{
 
 	private static final String ATTR_VIEWID = "viewId"; //$NON-NLS-1$
 	private static final String ATTR_MODELID = "modelId"; //$NON-NLS-1$
@@ -47,6 +49,30 @@ public class UpdatePolicySet implements IUpdatePolicySet{
 	
 	public UpdatePolicySet()
 	{
+	}
+	
+	// TODO:  should be an IElementFactory
+	public static UpdatePolicySet create(IMemento memento)
+	{
+		String id = memento.getString(ATTR_ID);
+		String name = memento.getString(ATTR_NAME);
+		String description = memento.getString(ATTR_DESCRIPTION);
+		
+		String policyIdList = memento.getString(ELMT_POLICY_ID);
+		String[] ids  = null;
+		if (policyIdList != null)
+		{
+			ids = policyIdList.split(","); //$NON-NLS-1$
+		}
+		
+		if (id != null && name != null && description != null && ids != null)
+		{
+			UpdatePolicySet newSet = new UpdatePolicySet();
+			newSet.init(id, name, description, ids);
+			return newSet;
+		}
+		DebugUIPlugin.logErrorMessage("Unable to restore policy set: " + memento.toString()); //$NON-NLS-1$
+		return null;
 	}
 	
 	public void init(String id, String name, String description, String[] policies)
@@ -77,8 +103,8 @@ public class UpdatePolicySet implements IUpdatePolicySet{
      */
     void validate() throws CoreException {
     	
-    	// no need to validate if fConfigurationElement is null
-    	if (fConfigurationElement == null)
+    	// no need to validate if the policy set is user-defined
+    	if (isUserDefined())
     		return;
     	
         verifyPresent(ATTR_ID);
@@ -198,7 +224,7 @@ public class UpdatePolicySet implements IUpdatePolicySet{
 
 	public boolean isHidden() {
 		
-		if (fConfigurationElement == null)
+		if (isUserDefined())
 			return false;
 		
     	Boolean hidden = new Boolean("false");  //$NON-NLS-1$
@@ -212,7 +238,7 @@ public class UpdatePolicySet implements IUpdatePolicySet{
 
 	public boolean isPrimary() {
 		
-		if (fConfigurationElement == null)
+		if (isUserDefined())
 			return false;
 		
     	Boolean hidden = new Boolean("false");  //$NON-NLS-1$
@@ -251,6 +277,25 @@ public class UpdatePolicySet implements IUpdatePolicySet{
 	public boolean isUserDefined()
 	{
 		return fConfigurationElement == null;
+	}
+
+	public void saveState(IMemento memento) {
+		String id = getId();
+		String name = getName();
+		String description = getDescription();
+		String[] policyIds = getPolicies();
+		
+		memento.putString(ATTR_ID,id);
+		memento.putString(ATTR_NAME,name);
+		memento.putString(ATTR_DESCRIPTION,description);
+		
+		StringBuffer buf = new StringBuffer();
+		for (int i=0; i<policyIds.length; i++)
+		{
+			buf.append(policyIds[i]);
+			buf.append(","); //$NON-NLS-1$
+		}
+		memento.putString(ELMT_POLICY_ID,buf.toString());
 	}
 
 }

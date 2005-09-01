@@ -69,6 +69,7 @@ import org.eclipse.debug.internal.ui.views.breakpoints.OtherBreakpointCategory;
 import org.eclipse.debug.internal.ui.views.console.ProcessConsoleManager;
 import org.eclipse.debug.internal.ui.views.launch.DebugElementAdapterFactory;
 import org.eclipse.debug.internal.ui.views.launch.DebugElementHelper;
+import org.eclipse.debug.internal.ui.views.updatePolicy.UpdatePolicyMgr;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
@@ -380,6 +381,8 @@ public class DebugUIPlugin extends AbstractUIPlugin implements ILaunchListener {
 			
 			fServiceTracker.close();
 			fPackageAdminService = null;
+			
+			((UpdatePolicyMgr)DebugUITools.getUpdatePolicyManager()).shutdown();
 			
 		} finally {
 			super.stop(context);
