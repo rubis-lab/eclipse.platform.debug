@@ -48,7 +48,7 @@ public class UpdatePolicyMgr implements IUpdatePolicyManager {
 	private static final String ELEMENT_POLICY = "policy"; //$NON-NLS-1$
 	
 	private static final String POLICY_SET_MEMENTO_TYPE = "policySet"; //$NON-NLS-1$
-	private static final String POLICY_SET_ROOT = "polichSetRoot"; //$NON-NLS-1$
+	private static final String POLICY_SET_ROOT = "policySetRoot"; //$NON-NLS-1$
 	private static final String POLICY_SET_FILE = "policySets.xml"; //$NON-NLS-1$
 	
 	private static final int ADDED = 0;
