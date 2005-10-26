@@ -97,11 +97,9 @@ public class DefaultUpdatePolicy extends AbstractUpdatePolicy implements IModelC
 			// do nothing??
 		}
 		if ((flags & IModelDelta.SELECT) != 0) {
-			getViewer().update(node.getElement());
 			((AsynchronousTreeViewer) getViewer()).setSelection(new TreeSelection(treePath));
 		}
 		if ((flags & IModelDelta.EXPAND) != 0) {
-			getViewer().update(node.getElement());
 			((AsynchronousTreeViewer) getViewer()).expand(new TreeSelection(treePath));
 		}
 	}

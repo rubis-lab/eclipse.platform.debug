@@ -257,10 +257,10 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 						TreeItem treeItem = (TreeItem) treeItems[k];
 						TreePath treePath = getTreePath(treeItem);
 						if (path.startsWith(treePath)) {
-							if (!treeItem.getExpanded()) {
-								expand(treeItem);
+							if (!treeItem.getExpanded() && treeItem.getItemCount() > 0) {
 								update(element);
 								updateChildren(element, treeItem);
+								expand(treeItem);
 								if (path.getSegmentCount() == treePath.getSegmentCount()) {
 									return true;
 								}
