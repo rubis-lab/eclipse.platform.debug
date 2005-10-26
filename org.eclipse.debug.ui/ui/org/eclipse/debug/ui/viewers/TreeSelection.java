@@ -41,7 +41,18 @@ public class TreeSelection implements IStructuredSelection {
         fPaths = paths;
     }
 
-    /* (non-Javadoc)
+    /**
+     * Constructs a selection based on the elements identified by the 
+     * given tree path.
+     *
+     * @param treePath tree path where <code>null</code> indicates an 
+     * empty selection.
+     */
+    public TreeSelection(TreePath treePath) {
+    		this(treePath != null ? new TreePath[] {treePath} : null);
+	}
+
+	/* (non-Javadoc)
      * @see org.eclipse.jface.viewers.IStructuredSelection#getFirstElement()
      */
     public Object getFirstElement() {

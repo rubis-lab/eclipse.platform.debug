@@ -11,7 +11,9 @@
 package org.eclipse.debug.internal.ui.viewers.update;
 
 import org.eclipse.debug.core.DebugEvent;
-import org.eclipse.debug.ui.viewers.AsynchronousViewer;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.ui.viewers.IModelDelta;
+import org.eclipse.debug.ui.viewers.IModelProxy;
 
 /**
  * Handles debug events for an event update policy in a viewer.
@@ -20,22 +22,22 @@ import org.eclipse.debug.ui.viewers.AsynchronousViewer;
  */
 public abstract class DebugEventHandler {
 	
-	private AsynchronousViewer fViewer;
-	
+	private IModelProxy fModelProxy;
+
 	/**
 	 * Constructs an event handler for the given update policy.
 	 * 
 	 * @param policy
 	 */
-	public DebugEventHandler(AsynchronousViewer viewer) {
-		fViewer = viewer;
+	public DebugEventHandler(IModelProxy proxy) {
+		fModelProxy = proxy;
 	}
 	
 	/**
 	 * Disposes this event handler
 	 */
 	public void dispose() {
-		fViewer = null;
+		fModelProxy = null;
 	}
 		
 	/**
@@ -43,90 +45,10 @@ public abstract class DebugEventHandler {
 	 * 
 	 * @return
 	 */
-	protected AsynchronousViewer getViewer() {
-		return fViewer;
+	protected IModelProxy getModelProxy() {
+		return fModelProxy;
 	}
 
-	/**
-	 * Handles a create event. Default implementation is to refresh the
-	 * element's parent. Subclasses may override.
-	 * 
-	 * @param event
-	 */
-	public void handleCreate(DebugEvent event) {
-		Object parent = getParent(event.getSource());
-		if (parent != null) {
-			getViewer().refresh(parent);
-		}
-	}
-	
-	/**
-	 * Returns the parent of the given element or <code>null</code> if unknown.
-	 * 
-	 * @param element
-	 * @return element's parent
-	 */
-	protected Object getParent(Object element) {
-		return null;
-	}
-	
-	/**
-	 * Handles a terminate event. Subclasses may override.
-	 * 
-	 * @param event
-	 */
-	protected void handleTerminate(DebugEvent event) {
-		getViewer().refresh(event.getSource());
-	}	
-	
-	/**
-	 * Handles a suspend event. Subclasses may override.
-	 * 
-	 * @param event
-	 */	
-	protected void handleSuspend(DebugEvent event) {
-		getViewer().refresh(event.getSource());
-	}
-	
-	/**
-	 * Handles a resume event for which a suspend is expected shortly (<500ms).
-	 * 
-	 * @param event
-	 */
-	protected void handleResumeExpectingSuspend(DebugEvent event) {
-		
-	}
-	
-	/**
-	 * Handles a resume event that is not expecting an immediate suspend event
-	 * 
-	 * @param event
-	 */
-	protected void handleResume(DebugEvent event) {
-		getViewer().refresh(event.getSource());
-	}
-	
-	/**
-	 * Handles a change event. Subclasses may override.
-	 * 
-	 * @param event
-	 */
-	protected void handleChange(DebugEvent event) {
-		if (event.getDetail() == DebugEvent.CONTENT) {
-			getViewer().refresh(event.getSource());
-		} else {
-			getViewer().update(event.getSource());
-		}
-	}	
-
-	/**
-	 * Handles an unknown event. Subclasses may override.
-	 * 
-	 * @param event
-	 */
-	protected void handleOther(DebugEvent event) {
-	}
-	
 	/**
 	 * Returns whether this event handler handles the given event
 	 * 
@@ -136,13 +58,76 @@ public abstract class DebugEventHandler {
 	protected abstract boolean handlesEvent(DebugEvent event);
 	
 	/**
+	 * Handles a create event. 
+	 * 
+	 * @param event
+	 */
+	protected void handleCreate(DebugEvent event) {
+		refreshRoot(event);
+	}
+		
+	/**
+	 * Handles a terminate event.
+	 * 
+	 * @param event
+	 */
+	protected void handleTerminate(DebugEvent event) {
+		refreshRoot(event);
+	}
+	
+	/**
+	 * Handles a suspend event.
+	 * 
+	 * @param event
+	 */	
+	protected void handleSuspend(DebugEvent event) {
+		refreshRoot(event);
+	}
+	
+	/**
+	 * Handles a resume event for which a suspend is expected shortly (<500ms).
+	 * 
+	 * @param event
+	 */
+	protected void handleResumeExpectingSuspend(DebugEvent event) {
+		refreshRoot(event);
+	}
+	
+	/**
+	 * Handles a resume event that is not expecting an immediate suspend event
+	 * 
+	 * @param event
+	 */
+	protected void handleResume(DebugEvent event) {
+		refreshRoot(event);
+	}
+	
+	/**
+	 * Handles a change event. 
+	 * 
+	 * @param event
+	 */
+	protected void handleChange(DebugEvent event) {
+		refreshRoot(event);
+	}	
+
+	/**
+	 * Handles an unknown event.
+	 * 
+	 * @param event
+	 */
+	protected void handleOther(DebugEvent event) {
+		refreshRoot(event);
+	}
+	
+	/**
 	 * Notification that a pending suspend event was not received for the given
 	 * resume event within the timeout period.
 	 * 
 	 * @param resume resume event with missing suspend event
 	 */
-	protected void handleSuspendTimeout(DebugEvent resume) {
-		getViewer().refresh(resume.getSource());
+	protected void handleSuspendTimeout(DebugEvent event) {
+		refreshRoot(event);
 	}
 	
 	/**
@@ -153,6 +138,17 @@ public abstract class DebugEventHandler {
 	 * @param resume resume event
 	 */
 	protected void handleLateSuspend(DebugEvent suspend, DebugEvent resume) {
-		getViewer().refresh(suspend.getSource());
+		refreshRoot(suspend);
+	}
+
+	/**
+	 * Fires a model delta to indicate that the launch manager should be refreshed.
+	 * Subclasses should override individual handle events to provide deltas that
+	 * better reflect the actual change in the model.
+	 */
+	protected void refreshRoot(DebugEvent event) {
+		ModelDelta delta = new ModelDelta();
+		delta.addNode(DebugPlugin.getDefault().getLaunchManager(), IModelDelta.CHANGED | IModelDelta.CONTENT);
+		getModelProxy().fireModelChanged(delta);
 	}
 }

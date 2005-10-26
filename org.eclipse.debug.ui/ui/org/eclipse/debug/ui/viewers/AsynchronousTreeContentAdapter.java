@@ -36,7 +36,9 @@ public abstract class AsynchronousTreeContentAdapter implements IAsynchronousTre
     public void retrieveChildren(final Object parent, final IPresentationContext context, final IChildrenRequestMonitor result) {
 		Job job = new Job("Retrieving Children") { //$NON-NLS-1$
 			protected IStatus run(IProgressMonitor monitor) {
-				computeChildren(parent, context, result);
+				if (!monitor.isCanceled()) {
+					computeChildren(parent, context, result);
+				}
 				return Status.OK_STATUS;
 			}
 		};
@@ -50,7 +52,9 @@ public abstract class AsynchronousTreeContentAdapter implements IAsynchronousTre
     public void isContainer(final Object element, final IPresentationContext context, final IContainerRequestMonitor result) {
 		Job job = new Job("Computing hasChildren") { //$NON-NLS-1$
 			protected IStatus run(IProgressMonitor monitor) {
-				computeIsContainer(element, context, result);
+				if (!monitor.isCanceled()) {
+					computeIsContainer(element, context, result);
+				}
 				return Status.OK_STATUS;
 			}
 		};

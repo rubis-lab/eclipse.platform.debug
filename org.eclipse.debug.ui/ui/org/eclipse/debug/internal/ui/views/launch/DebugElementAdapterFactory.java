@@ -35,11 +35,13 @@ import org.eclipse.debug.internal.ui.elements.adapters.StackFrameTreeContentAdap
 import org.eclipse.debug.internal.ui.elements.adapters.ThreadTreeContentAdapter;
 import org.eclipse.debug.internal.ui.elements.adapters.VariableLabelAdapter;
 import org.eclipse.debug.internal.ui.elements.adapters.VariableTreeContentAdapter;
+import org.eclipse.debug.internal.ui.viewers.update.DefaultModelProxyFactory;
 import org.eclipse.debug.internal.ui.viewers.update.DefaultSelectionPolicy;
 import org.eclipse.debug.internal.ui.viewers.update.DefaultUpdatePolicyFactory;
 import org.eclipse.debug.ui.contexts.ISourceDisplayAdapter;
 import org.eclipse.debug.ui.viewers.IAsynchronousLabelAdapter;
 import org.eclipse.debug.ui.viewers.IAsynchronousTreeContentAdapter;
+import org.eclipse.debug.ui.viewers.IModelProxyFactory;
 import org.eclipse.debug.ui.viewers.IModelSelectionPolicy;
 import org.eclipse.debug.ui.viewers.IUpdatePolicyFactory;
 import org.eclipse.ui.model.IWorkbenchAdapter;
@@ -51,7 +53,8 @@ import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
  */
 public class DebugElementAdapterFactory implements IAdapterFactory {
 	
-	private static IUpdatePolicyFactory fgUpdatePolicyAdapter = new DefaultUpdatePolicyFactory();
+	private static IUpdatePolicyFactory fgUpdatePolicyFactoryAdapter = new DefaultUpdatePolicyFactory();
+	private static IModelProxyFactory fgModelProxyFactoryAdapter = new DefaultModelProxyFactory();
 	private static ISourceDisplayAdapter fgStackFrameSourceDisplayAdapter = new StackFrameSourceDisplayAdapter();
     
     private static IAsynchronousLabelAdapter fgDebugLabelAdapter = new AsynchronousDebugLabelAdapter();
@@ -120,7 +123,14 @@ public class DebugElementAdapterFactory implements IAdapterFactory {
         	if (adaptableObject instanceof ILaunch || adaptableObject instanceof IDebugTarget ||
         			adaptableObject instanceof IProcess || adaptableObject instanceof ILaunchManager ||
         			adaptableObject instanceof IStackFrame)
-        	return fgUpdatePolicyAdapter;
+        	return fgUpdatePolicyFactoryAdapter;
+        }
+        
+        if (adapterType.equals(IModelProxyFactory.class)) {
+        	if (adaptableObject instanceof ILaunch || adaptableObject instanceof IDebugTarget ||
+        			adaptableObject instanceof IProcess || adaptableObject instanceof ILaunchManager ||
+        			adaptableObject instanceof IStackFrame)
+        	return fgModelProxyFactoryAdapter;
         }
         
         if (adapterType.equals(ISourceDisplayAdapter.class)) {
@@ -142,7 +152,7 @@ public class DebugElementAdapterFactory implements IAdapterFactory {
      */
     public Class[] getAdapterList() {
         return new Class[] {IWorkbenchAdapter.class, IWorkbenchAdapter2.class, IDeferredWorkbenchAdapter.class, IAsynchronousLabelAdapter.class, IAsynchronousTreeContentAdapter.class,
-        		IUpdatePolicyFactory.class, ISourceDisplayAdapter.class, IModelSelectionPolicy.class};
+        		IUpdatePolicyFactory.class, IModelProxyFactory.class, ISourceDisplayAdapter.class, IModelSelectionPolicy.class};
     }
 
 }

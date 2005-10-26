@@ -16,7 +16,6 @@ import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.viewers.AsynchronousTreeContentAdapter;
 import org.eclipse.debug.ui.viewers.IPresentationContext;
-import org.eclipse.ui.IWorkbenchPart;
 
 public class DebugTargetTreeContentAdapter extends AsynchronousTreeContentAdapter {
 

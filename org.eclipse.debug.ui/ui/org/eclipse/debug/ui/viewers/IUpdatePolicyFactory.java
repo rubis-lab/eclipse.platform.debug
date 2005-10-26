@@ -27,6 +27,6 @@ public interface IUpdatePolicyFactory {
 	 * @param context the context in which the element is being presented
 	 * @return update policy or <code>null</code>
 	 */
-	public IUpdatePolicy createUpdatePolicy(Object element, IPresentationContext context);
+	public IUpdatePolicy createUpdatePolicy(IPresentationContext context);
 
 }

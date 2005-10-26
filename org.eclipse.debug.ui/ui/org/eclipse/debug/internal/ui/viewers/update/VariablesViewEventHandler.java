@@ -11,8 +11,10 @@
 package org.eclipse.debug.internal.ui.viewers.update;
 
 import org.eclipse.debug.core.DebugEvent;
+import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.ISuspendResume;
-import org.eclipse.debug.ui.viewers.AsynchronousViewer;
+import org.eclipse.debug.ui.viewers.IModelDelta;
+import org.eclipse.debug.ui.viewers.IModelProxy;
 
 /**
  *
@@ -20,26 +22,18 @@ import org.eclipse.debug.ui.viewers.AsynchronousViewer;
  */
 public class VariablesViewEventHandler extends DebugEventHandler {
 
-	/**
-	 * Constructs a new event handler.
-	 * 
-	 * @param viewer
-	 */
-	public VariablesViewEventHandler(AsynchronousViewer viewer) {
-		super(viewer);
+	private IStackFrame fFrame;
+
+	public VariablesViewEventHandler(IModelProxy proxy, IStackFrame frame) {
+		super(proxy);
+		fFrame = frame;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.viewers.update.DebugEventHandler#handlesEvent(org.eclipse.debug.core.DebugEvent)
-	 */
 	protected boolean handlesEvent(DebugEvent event) {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.viewers.update.DebugEventHandler#handleSuspend(org.eclipse.debug.core.DebugEvent)
-	 */
-	protected void handleSuspend(DebugEvent event) {
+	protected void refreshRoot(DebugEvent event) {
 		if (event.getDetail() != DebugEvent.EVALUATION_IMPLICIT) {
 			// Don't refresh everytime an implicit evaluation finishes
 			if (event.getSource() instanceof ISuspendResume) {
@@ -48,11 +42,17 @@ public class VariablesViewEventHandler extends DebugEventHandler {
 					return;
 				}
 			}
-			getViewer().refresh();
+			
+			ModelDelta delta = new ModelDelta();
+			delta.addNode(fFrame, IModelDelta.CHANGED | IModelDelta.CONTENT);
+			getModelProxy().fireModelChanged(delta);
 			//TODO: popuplate details pane (should it be built into the viewer?)
 		}
 	}
-	
-	
 
+	protected void handleResume(DebugEvent event) {
+		super.handleResume(event);
+	}
+	
+	
 }

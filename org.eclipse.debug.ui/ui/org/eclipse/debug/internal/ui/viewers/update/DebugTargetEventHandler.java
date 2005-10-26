@@ -11,8 +11,11 @@
 package org.eclipse.debug.internal.ui.viewers.update;
 
 import org.eclipse.debug.core.DebugEvent;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IDebugTarget;
-import org.eclipse.debug.ui.viewers.AsynchronousViewer;
+import org.eclipse.debug.ui.viewers.IModelDelta;
+import org.eclipse.debug.ui.viewers.IModelDeltaNode;
+import org.eclipse.debug.ui.viewers.IModelProxy;
 
 
 /**
@@ -25,15 +28,8 @@ public class DebugTargetEventHandler extends DebugEventHandler {
 	 * 
 	 * @param viewer
 	 */
-	public DebugTargetEventHandler(AsynchronousViewer viewer) {
-		super(viewer);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.viewers.update.DebugEventHandler#getParent(java.lang.Object)
-	 */
-	protected Object getParent(Object element) {
-		return ((IDebugTarget)element).getLaunch();
+	public DebugTargetEventHandler(IModelProxy proxy) {
+		super(proxy);
 	}
 
 	/* (non-Javadoc)
@@ -43,4 +39,32 @@ public class DebugTargetEventHandler extends DebugEventHandler {
 		return event.getSource() instanceof IDebugTarget;
 	}
 
+	protected void handleChange(DebugEvent event) {
+		fireDelta((IDebugTarget) event.getSource(), IModelDelta.CHANGED | IModelDelta.ACTIVATED);
+	}
+
+	protected void handleCreate(DebugEvent event) {
+		fireDelta((IDebugTarget) event.getSource(), IModelDelta.ADDED | IModelDelta.CONTENT);
+	}
+
+	protected void handleResume(DebugEvent event) {
+		fireDelta((IDebugTarget) event.getSource(), IModelDelta.CHANGED | IModelDelta.ACTIVATED);
+	}
+
+	protected void handleSuspend(DebugEvent event) {
+		fireDelta((IDebugTarget) event.getSource(), IModelDelta.CHANGED | IModelDelta.CONTENT);
+	}
+
+	protected void handleTerminate(DebugEvent event) {
+		fireDelta((IDebugTarget) event.getSource(), IModelDelta.CHANGED | IModelDelta.ACTIVATED);
+	}
+
+	private void fireDelta(IDebugTarget target, int flags) {
+		ModelDelta delta = new ModelDelta();
+		IModelDeltaNode node = delta.addNode(DebugPlugin.getDefault().getLaunchManager(), IModelDelta.NOCHANGE);
+		node = node.addNode(target.getLaunch(), IModelDelta.NOCHANGE);
+		node.addNode(target, flags);
+		getModelProxy().fireModelChanged(delta);
+	}
+	
 }

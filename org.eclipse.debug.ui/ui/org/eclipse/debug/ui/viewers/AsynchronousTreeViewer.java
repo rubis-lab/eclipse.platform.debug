@@ -39,20 +39,21 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.progress.WorkbenchJob;
 
 /**
- * A tree viewer that retrieves children and labels asynchronously via
- * adapters and supports duplicate elements in the tree with different parents.
- * Retrieving children and labels asynchrnously allows for arbitrary latency without
- * blocking the UI thread.
+ * A tree viewer that retrieves children and labels asynchronously via adapters
+ * and supports duplicate elements in the tree with different parents.
+ * Retrieving children and labels asynchrnously allows for arbitrary latency
+ * without blocking the UI thread.
  * <p>
- * TODO: tree editor not implemented
- * TODO: table tree - what implications does it have on IPresentationAdapter?
+ * TODO: tree editor not implemented TODO: table tree - what implications does
+ * it have on IPresentationAdapter?
  * 
- * TODO: Deprecate the public/abstract deferred workbench adapter
- *  in favor of the presentation adapter.
+ * TODO: Deprecate the public/abstract deferred workbench adapter in favor of
+ * the presentation adapter.
  * </p>
  * <p>
  * Clients may instantiate and subclass this class.
  * </p>
+ * 
  * @since 3.2
  */
 public class AsynchronousTreeViewer extends AsynchronousViewer {
@@ -63,15 +64,15 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	 * updates on updates of children.
 	 */
 	private Map fItemToParentItem = new HashMap();
-	
+
 	/**
 	 * The tree
 	 */
 	private Tree fTree;
 
 	/**
-	 * Array of tree paths to be expanded. As paths are expanded, those
-	 * entries are set to <code>null</code>.
+	 * Array of tree paths to be expanded. As paths are expanded, those entries
+	 * are set to <code>null</code>.
 	 */
 	private TreePath[] fPendingExpansion;
 
@@ -82,8 +83,7 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	 * viewer has no input, no content provider, a default label provider, no
 	 * sorter, and no filters.
 	 * 
-	 * @param parent
-	 *            the parent control
+	 * @param parent the parent control
 	 */
 	public AsynchronousTreeViewer(Composite parent) {
 		this(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
@@ -94,10 +94,8 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	 * the given parent. The tree control is created using the given SWT style
 	 * bits. The viewer has no input.
 	 * 
-	 * @param parent
-	 *            the parent control
-	 * @param style
-	 *            the SWT style bits used to create the tree.
+	 * @param parent the parent control
+	 * @param style the SWT style bits used to create the tree.
 	 */
 	public AsynchronousTreeViewer(Composite parent, int style) {
 		this(new Tree(parent, style));
@@ -108,8 +106,7 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	 * has no input, no content provider, a default label provider, no sorter,
 	 * and no filters.
 	 * 
-	 * @param tree
-	 *            the tree control
+	 * @param tree the tree control
 	 */
 	public AsynchronousTreeViewer(Tree tree) {
 		super();
@@ -118,7 +115,7 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		setUseHashlookup(false);
 		tree.addTreeListener(new TreeListener() {
 			public void treeExpanded(TreeEvent e) {
-				((TreeItem)e.item).setExpanded(true);
+				((TreeItem) e.item).setExpanded(true);
 				internalRefresh(e.item.getData(), e.item);
 			}
 
@@ -126,15 +123,15 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 			}
 		});
 		tree.addMouseListener(new MouseListener() {
-		
+
 			public void mouseUp(MouseEvent e) {
 			}
-		
+
 			public void mouseDown(MouseEvent e) {
 			}
-		
+
 			public void mouseDoubleClick(MouseEvent e) {
-				TreeItem item = ((Tree)e.widget).getItem(new Point(e.x, e.y));
+				TreeItem item = ((Tree) e.widget).getItem(new Point(e.x, e.y));
 				if (item != null) {
 					if (item.getExpanded()) {
 						item.setExpanded(false);
@@ -160,7 +157,7 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	 * Updates whether the given element has children.
 	 * 
 	 * @param element element to update
-	 * @param widget widget associated with the element in this viewer's tree 
+	 * @param widget widget associated with the element in this viewer's tree
 	 */
 	protected void updateHasChildren(Object element, Widget widget) {
 		IAsynchronousTreeContentAdapter adapter = getTreeContentAdapter(element);
@@ -171,7 +168,6 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		}
 	}
 
-	
 	/**
 	 * Updates the children of the given element.
 	 * 
@@ -188,7 +184,8 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	}
 
 	/**
-	 * Returns the tree element adapter for the given element or <code>null</code> if none.
+	 * Returns the tree element adapter for the given element or
+	 * <code>null</code> if none.
 	 * 
 	 * @param element element to retrieve adapter for
 	 * @return presentation adapter or <code>null</code>
@@ -220,14 +217,14 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 						attemptExpansion();
 						return Status.OK_STATUS;
 					}
-					
+
 				};
 				job.setSystem(true);
 				job.schedule();
-			}		
+			}
 		}
 	}
-	
+
 	/**
 	 * Attempts to expand all pending expansions.
 	 */
@@ -243,8 +240,8 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	}
 
 	/**
-	 * Attempts to expand the given tree path and returns whether the
-	 * expansion was completed.
+	 * Attempts to expand the given tree path and returns whether the expansion
+	 * was completed.
 	 * 
 	 * @param path path to exapand
 	 * @return whether the expansion was completed
@@ -270,7 +267,7 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 								return false;
 							}
 						}
-					} 
+					}
 				}
 			}
 		}
@@ -286,7 +283,9 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		return fTree;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.viewers.StructuredViewer#unmapAllElements()
 	 */
 	protected synchronized void unmapAllElements() {
@@ -294,8 +293,11 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		fItemToParentItem.clear();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.Viewer#inputChanged(java.lang.Object, java.lang.Object)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jface.viewers.Viewer#inputChanged(java.lang.Object,
+	 *      java.lang.Object)
 	 */
 	protected void inputChanged(Object input, Object oldInput) {
 		super.inputChanged(input, oldInput);
@@ -303,8 +305,11 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		refresh();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.viewers.AsynchronousViewer#map(java.lang.Object, org.eclipse.swt.widgets.Widget)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.debug.ui.viewers.AsynchronousViewer#map(java.lang.Object,
+	 *      org.eclipse.swt.widgets.Widget)
 	 */
 	protected void map(Object element, Widget item) {
 		super.map(element, item);
@@ -357,8 +362,8 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	}
 
 	/**
-	 * Constructs and returns a tree path for the given item. Must be called from the
-	 * UI thread.
+	 * Constructs and returns a tree path for the given item. Must be called
+	 * from the UI thread.
 	 * 
 	 * @param item item to constuct a path for
 	 * @return tree path for the item
@@ -373,10 +378,10 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		path.add(0, fTree.getData());
 		return new TreePath(path.toArray());
 	}
-	
+
 	/**
-	 * Called by <code>ContainerRequestMonitor</code> after it is determined if
-	 * the widget contains children.
+	 * Called by <code>ContainerRequestMonitor</code> after it is determined
+	 * if the widget contains children.
 	 * 
 	 * @param widget
 	 * @param containsChildren
@@ -397,12 +402,12 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 				} else {
 					// insert new dummy node to add +
 					newTreeItem(widget, 0);
-					if (((TreeItem)widget).getExpanded()) {
+					if (((TreeItem) widget).getExpanded()) {
 						updateChildren(widget.getData(), widget);
 					}
 				}
 			} else {
-				if (widget instanceof Tree || ((TreeItem)widget).getExpanded()) {
+				if (widget instanceof Tree || ((TreeItem) widget).getExpanded()) {
 					// if expanded, update the children
 					updateChildren(widget.getData(), widget);
 				}
@@ -413,31 +418,32 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 				TreeItem prevChild = prevChildren[i];
 				unmap(prevChild.getData(), prevChild);
 				prevChild.dispose();
-			}				
+			}
 		}
 		attemptExpansion();
 	}
 
 	/**
-	 * Called by <code>ChildrenRequestMonitor</code> after children have been retrieved.
+	 * Called by <code>ChildrenRequestMonitor</code> after children have been
+	 * retrieved.
 	 * 
 	 * @param widget
 	 * @param newChildren
 	 */
 	synchronized void setChildren(final Widget widget, final List newChildren) {
 		preservingSelection(new Runnable() {
-		
+
 			public void run() {
-				//apply filters
+				// apply filters
 				Object[] children = filter(newChildren.toArray());
-				
-				//sort filtered children
+
+				// sort filtered children
 				ViewerSorter viewerSorter = getSorter();
 				if (viewerSorter != null) {
 					viewerSorter.sort(AsynchronousTreeViewer.this, children);
 				}
-				
-				//update tree
+
+				// update tree
 				TreeItem[] prevItems = null;
 				if (widget instanceof Tree) {
 					Tree tree = (Tree) widget;
@@ -445,7 +451,7 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 				} else {
 					prevItems = ((TreeItem) widget).getItems();
 				}
-				
+
 				int index = 0;
 				for (; index < children.length; index++) {
 					Object kid = children[index];
@@ -474,39 +480,40 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 					unmap(oldItem.getData(), oldItem);
 					oldItem.dispose();
 					index++;
-				}		
+				}
 			}
-		
+
 		});
-		
+
 		attemptExpansion();
 		attemptSelection(true);
 	}
-	
+
 	/**
-	 * Expands the given tree item and all of its parents. Does *not* update elements
-	 * or retrieve children.
+	 * Expands the given tree item and all of its parents. Does *not* update
+	 * elements or retrieve children.
 	 * 
 	 * @param child item to expand
 	 */
-    private void expand(TreeItem child) {
-    	if (!child.getExpanded()) {
+	private void expand(TreeItem child) {
+		if (!child.getExpanded()) {
 			child.setExpanded(true);
+
 			TreeItem parent = child.getParentItem();
 			if (parent != null) {
 				expand(parent);
 			}
-    	}
+		}
 	}
 
-    /**
-     * Creates a new tree item as a child of the given widget at the
-     * specified index.
-     * 
-     * @param parent parent widget - a Tree or TreeItem
-     * @param index index at which to create new child
-     * @return tree item
-     */
+	/**
+	 * Creates a new tree item as a child of the given widget at the specified
+	 * index.
+	 * 
+	 * @param parent parent widget - a Tree or TreeItem
+	 * @param index index at which to create new child
+	 * @return tree item
+	 */
 	protected TreeItem newTreeItem(Widget parent, int index) {
 		if (parent instanceof Tree) {
 			return new TreeItem((Tree) parent, SWT.NONE, index);
@@ -535,22 +542,23 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 				TreeItem child = children[i];
 				unmap(child.getData(), child);
 				child.dispose();
-			}			
+			}
 		}
 	}
 
 	/**
 	 * Returns the parent item for an item or <code>null</code> if none.
 	 * 
-	 * @param item
-	 *            item for which parent is requested
+	 * @param item item for which parent is requested
 	 * @return parent item or <code>null</code>
 	 */
 	protected synchronized TreeItem getParentItem(TreeItem item) {
 		return (TreeItem) fItemToParentItem.get(item);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.viewers.StructuredViewer#doFindInputItem(java.lang.Object)
 	 */
 	protected Widget doFindInputItem(Object element) {
@@ -560,7 +568,9 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.viewers.StructuredViewer#doFindItem(java.lang.Object)
 	 */
 	protected Widget doFindItem(Object element) {
@@ -571,7 +581,9 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.viewers.ISelectionProvider#getSelection()
 	 */
 	public ISelection getSelection() {
@@ -583,7 +595,9 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		return new TreeSelection((TreePath[]) list.toArray());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.viewers.StructuredViewer#getSelectionFromWidget()
 	 */
 	protected List getSelectionFromWidget() {
@@ -594,16 +608,21 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		}
 		return Arrays.asList(paths);
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.viewers.AsynchronousViewer#internalRefresh(java.lang.Object, org.eclipse.swt.widgets.Widget)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.debug.ui.viewers.AsynchronousViewer#internalRefresh(java.lang.Object,
+	 *      org.eclipse.swt.widgets.Widget)
 	 */
 	protected void internalRefresh(Object element, Widget item) {
 		super.internalRefresh(element, item);
 		updateHasChildren(element, item);
-	}	
+	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.viewers.StructuredViewer#reveal(java.lang.Object)
 	 */
 	public void reveal(Object element) {
@@ -616,8 +635,11 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.viewers.AsynchronousViewer#doAttemptSelectionToWidget(org.eclipse.jface.viewers.ISelection, boolean)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.debug.ui.viewers.AsynchronousViewer#doAttemptSelectionToWidget(org.eclipse.jface.viewers.ISelection,
+	 *      boolean)
 	 */
 	protected synchronized ISelection doAttemptSelectionToWidget(ISelection selection, boolean reveal) {
 		List remaining = new ArrayList();
@@ -628,7 +650,7 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		for (int i = 0; i < paths.length; i++) {
 			TreePath path = paths[i];
 			if (path == null) {
-				continue; 
+				continue;
 			}
 			TreePath[] treePaths = getTreePaths(path.getLastSegment());
 			boolean selected = false;
@@ -695,8 +717,11 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		item.setExpanded(false);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.viewers.AsynchronousViewer#setColor(org.eclipse.swt.widgets.Widget, org.eclipse.swt.graphics.RGB, org.eclipse.swt.graphics.RGB)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.debug.ui.viewers.AsynchronousViewer#setColor(org.eclipse.swt.widgets.Widget,
+	 *      org.eclipse.swt.graphics.RGB, org.eclipse.swt.graphics.RGB)
 	 */
 	void setColor(Widget widget, RGB foreground, RGB background) {
 		if (widget instanceof TreeItem) {
@@ -706,8 +731,11 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.viewers.AsynchronousViewer#setFont(org.eclipse.swt.widgets.Widget, org.eclipse.swt.graphics.FontData)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.debug.ui.viewers.AsynchronousViewer#setFont(org.eclipse.swt.widgets.Widget,
+	 *      org.eclipse.swt.graphics.FontData)
 	 */
 	void setFont(Widget widget, FontData fontData) {
 		if (widget instanceof TreeItem) {
@@ -716,25 +744,110 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.debug.ui.viewers.AsynchronousViewer#getParent(org.eclipse.swt.widgets.Widget)
 	 */
 	protected Widget getParent(Widget widget) {
 		return (Widget) fItemToParentItem.get(widget);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.debug.ui.viewers.AsynchronousViewer#acceptsSelection(org.eclipse.jface.viewers.ISelection)
 	 */
 	protected boolean acceptsSelection(ISelection selection) {
 		return selection instanceof TreeSelection;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.debug.ui.viewers.AsynchronousViewer#getEmptySelection()
 	 */
 	protected ISelection getEmptySelection() {
 		return new TreeSelection(new TreePath[0]);
+	}
+
+	public void add(final TreePath treePath) {
+		WorkbenchJob job = new WorkbenchJob("AsynchronousTreeViewer.add()") { //$NON-NLS-1$
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				Widget widget = getTree();
+				for (int i = 0; i < treePath.getSegmentCount(); i++) {
+					Object segment = treePath.getSegment(i);
+					if (!segment.equals(getInput())) {
+						Widget child = findChild(widget, segment, true);
+						if (child == null) {
+							return Status.OK_STATUS;
+						}
+						widget = child;
+					}
+				}
+				return Status.OK_STATUS;
+			}
+		};
+
+		job.setSystem(true);
+		job.schedule();
+	}
+
+	private Widget findChild(Widget widget, Object segment, boolean create) {
+		TreeItem[] items = null;
+		if (widget instanceof Tree) {
+			items = ((Tree) widget).getItems();
+		} else if (widget instanceof TreeItem) {
+			items = ((TreeItem) widget).getItems();
+		}
+
+		if (items != null) {
+			for (int i = 0; i < items.length; i++) {
+				TreeItem item = items[i];
+				if (segment.equals(item.getData())) {
+					return item;
+				}
+			}
+		}
+
+		if (create) {
+			// child doesn't exist. create it.
+			List datas = new ArrayList();
+			for (int i = 0; i < items.length; i++) {
+				Object data = items[i].getData();
+				if (data != null)
+					datas.add(data);
+			}
+			datas.add(segment);
+			setChildren(widget, datas);
+
+			// search for the new child and return it...
+			Widget child = findChild(widget, segment, false);
+			return child;
+		}
+
+		return null;
+	}
+
+	public void remove(final TreePath treePath) {
+		WorkbenchJob job = new WorkbenchJob("AsynchronousTreeViewer.remove()") { //$NON-NLS-1$
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				Object lastSegment = treePath.getLastSegment();
+				TreePath[] treePaths = getTreePaths(lastSegment);
+				if (treePaths != null) {
+					for (int i = 0; i < treePaths.length; i++) {
+						TreePath path = treePaths[i];
+						if (path.equals(treePath)) {
+							TreeItem treeItem = path.getTreeItem();
+							unmap(lastSegment, treeItem);
+							treeItem.dispose();
+						}
+					}
+				}
+				return Status.OK_STATUS;
+			}
+		};
+
 	}
 
 }

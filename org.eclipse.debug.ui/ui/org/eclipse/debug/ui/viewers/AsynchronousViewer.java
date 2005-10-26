@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.internal.ui.elements.adapters.AsynchronousDebugLabelAdapter;
+import org.eclipse.debug.internal.ui.viewers.update.DefaultUpdatePolicy;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -107,15 +108,21 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 	private ISelection fCurrentSelection;
 	
 	/**
+	 * The update policy for this viewer.
+	 */
+	private IUpdatePolicy fUpdatePolicy;
+	
+	/**
 	 * Cache of update policies keyed by element
 	 */
-	private Map fUpdatePolicies = new HashMap();
+	private Map fModelProxies = new HashMap();
 	
 	/**
 	 * Creates a presentation adapter viewer 
 	 */
 	protected AsynchronousViewer() {
 		setContentProvider(new NullContentProvider());
+		createUpdatePolicy();
 	}
 	
 	/**
@@ -144,7 +151,8 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 		}
 		fColorCache.clear();
 		
-		disposeAllUpdatePolicies();
+		disposeAllModelProxies();
+		fUpdatePolicy.dispose();
 		
 		unmapAllElements();
 		fPendingUpdates.clear();
@@ -153,13 +161,13 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 	/**
 	 * Unintalls all update policies installed in this viewer
 	 */
-	private void disposeAllUpdatePolicies() {
-		Iterator updatePolicies = fUpdatePolicies.values().iterator();
+	private void disposeAllModelProxies() {
+		Iterator updatePolicies = fModelProxies.values().iterator();
 		while (updatePolicies.hasNext()) {
-			IUpdatePolicy policy = (IUpdatePolicy)updatePolicies.next();
-			policy.dispose();
+			IModelProxy proxy = (IModelProxy)updatePolicies.next();
+			proxy.dispose();
 		}
-		fUpdatePolicies.clear();
+		fModelProxies.clear();
 	}
 
 	/**
@@ -249,17 +257,33 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 	 * @param element element to retrieve adapter for
 	 * @return update policy adapter or <code>null</code>
 	 */
-	protected IUpdatePolicyFactory getUpdatePolicyAdapter(Object element) {
-		IUpdatePolicyFactory adapter = null;
-		if (element instanceof IUpdatePolicyFactory) {
-			adapter = (IUpdatePolicyFactory) element;
+//	protected IUpdatePolicyFactory getUpdatePolicyAdapter(Object element) {
+//		IUpdatePolicyFactory adapter = null;
+//		if (element instanceof IUpdatePolicyFactory) {
+//			adapter = (IUpdatePolicyFactory) element;
+//		} else if (element instanceof IAdaptable) {
+//			IAdaptable adaptable = (IAdaptable) element;
+//			adapter = (IUpdatePolicyFactory) adaptable.getAdapter(IUpdatePolicyFactory.class);
+//		}
+//		return adapter;
+//	}	
+	
+	/**
+	 * Returns the model proxy factory for the given element of <code>null</code> if none.
+	 * 
+	 * @param element element to retrieve adapters for
+	 * @return model proxy factory adapter or <code>null</code>
+	 */
+	protected IModelProxyFactory getModelProxyFactoryAdapter(Object element) {
+		IModelProxyFactory adapter = null;
+		if (element instanceof IModelProxyFactory) {
+			adapter = (IModelProxyFactory) element;
 		} else if (element instanceof IAdaptable) {
 			IAdaptable adaptable = (IAdaptable) element;
-			adapter = (IUpdatePolicyFactory) adaptable.getAdapter(IUpdatePolicyFactory.class);
+			adapter = (IModelProxyFactory) adaptable.getAdapter(IModelProxyFactory.class);
 		}
 		return adapter;
-	}	
-	
+	}
 	/**
 	 * Cancels any conflicting updates for children of the given item, and
 	 * schedules the new update.
@@ -326,7 +350,7 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 		}
 		fElementsToWidgets.clear();
 		fWidgetsToElements.clear();
-		disposeAllUpdatePolicies();
+		disposeAllModelProxies();
 	}
 
 	/**
@@ -368,7 +392,7 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 			items[old.length] = item;
 			fElementsToWidgets.put(element, items);
 		}
-		installUpdatePolicy(element);
+		installModelProxy(element);
 	}
 	
 	/**
@@ -386,37 +410,51 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 		fElementsToWidgets.put(element, widgets);
 	}
 
+	public void createUpdatePolicy() {
+		fUpdatePolicy = new DefaultUpdatePolicy();
+		fUpdatePolicy.init(this);
+	}
+	
 	/**
-	 * Installs the update policy for the given element into this viewer
+	 * Installs the model proxy for the given element into this viewer
 	 * if not already installed.
 	 * 
 	 * @param element element to install an update policy for
 	 */
-	public void installUpdatePolicy(Object element) {
-		synchronized (fUpdatePolicies) {
-			if (!fUpdatePolicies.containsKey(element)) {
-				IUpdatePolicyFactory factory = getUpdatePolicyAdapter(element);
-				if (factory != null) {
-					IUpdatePolicy policy = factory.createUpdatePolicy(element, this.getPresentationContext());
-					if (policy != null) {
-						policy.init(this);
-						fUpdatePolicies.put(element, policy);
+	public void installModelProxy(Object element) {
+		synchronized (fModelProxies) {
+			if (!fModelProxies.containsKey(element)) {
+				IModelProxyFactory modelProxyFactory = getModelProxyFactoryAdapter(element);
+				if (modelProxyFactory != null) {
+					IModelProxy proxy = modelProxyFactory.createModelProxy(element, getPresentationContext());
+					if (proxy != null) {
+						proxy.init(getPresentationContext());
+						fModelProxies.put(element, proxy);
+						
+						if (fUpdatePolicy instanceof IModelChangedListener) {
+							proxy.addModelChangedListener((IModelChangedListener)fUpdatePolicy);
+						}
 					}
 				}
 			}
 		}
 	}
 	
+	
 	/**
-	 * Uninstalls the update policy installed for the given element, if any.
+	 * Uninstalls the model proxy installed for the given element, if any.
 	 * 
 	 * @param element
 	 */
-	protected void disposeUpdatePolicy(Object element) {
-		synchronized (fUpdatePolicies) {
-			IUpdatePolicy policy = (IUpdatePolicy) fUpdatePolicies.remove(element);
-			if (policy != null) {
-				policy.dispose();
+	protected void disposeModelProxy(Object element) {
+		synchronized (fModelProxies) {
+			IModelProxy proxy = (IModelProxy) fModelProxies.remove(element);
+			if (proxy != null) {
+				if (fUpdatePolicy instanceof IModelChangedListener) {
+					proxy.removeModelChangedListener((IModelChangedListener)fUpdatePolicy);
+				}
+				
+				proxy.dispose();
 			}
 		}
 	}
@@ -453,7 +491,7 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 					if (widgets.length == 1) {
 						fElementsToWidgets.remove(kid);
 						// uninstall its update policy, if element no longer in viewer
-						disposeUpdatePolicy(kid);
+						disposeModelProxy(kid);
 					} else {
 						Widget[] newItems = new Widget[widgets.length - 1];
 						System.arraycopy(widgets, 0, newItems, 0, i);
