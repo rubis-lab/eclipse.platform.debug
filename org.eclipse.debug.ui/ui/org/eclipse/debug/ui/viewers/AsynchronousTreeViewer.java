@@ -533,6 +533,12 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 			// when unmapping a dummy item
 			return;
 		}
+		
+		TreeItem[] selection = fTree.getSelection();
+		if (selection.length == 1 && isChild(widget, selection[0])) {
+			setSelection(null);
+		}
+		
 		super.unmap(kid, widget);
 		fItemToParentItem.remove(widget);
 		if (widget instanceof TreeItem) {
@@ -544,6 +550,15 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 				child.dispose();
 			}
 		}
+	}
+
+	private boolean isChild(Widget parent, TreeItem child) {
+		if (child==null) {
+			return false;
+		} else if (parent == child) {
+			return true;
+		}
+		return isChild(parent, child.getParentItem());
 	}
 
 	/**
@@ -643,48 +658,54 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	 */
 	protected synchronized ISelection doAttemptSelectionToWidget(ISelection selection, boolean reveal) {
 		List remaining = new ArrayList();
-		List toSelect = new ArrayList();
-		List theElements = new ArrayList();
-		TreeSelection treeSelection = (TreeSelection) selection;
-		TreePath[] paths = treeSelection.getPaths();
-		for (int i = 0; i < paths.length; i++) {
-			TreePath path = paths[i];
-			if (path == null) {
-				continue;
-			}
-			TreePath[] treePaths = getTreePaths(path.getLastSegment());
-			boolean selected = false;
-			if (treePaths != null) {
-				for (int j = 0; j < treePaths.length; j++) {
-					TreePath existingPath = treePaths[j];
-					if (existingPath.equals(path)) {
-						toSelect.add(existingPath.getTreeItem());
-						theElements.add(path.getLastSegment());
-						selected = true;
-						break;
+		if (!selection.isEmpty()) {
+			List toSelect = new ArrayList();
+			List theElements = new ArrayList();
+			TreeSelection treeSelection = (TreeSelection) selection;
+			TreePath[] paths = treeSelection.getPaths();
+			for (int i = 0; i < paths.length; i++) {
+				TreePath path = paths[i];
+				if (path == null) {
+					continue;
+				}
+				TreePath[] treePaths = getTreePaths(path.getLastSegment());
+				boolean selected = false;
+				if (treePaths != null) {
+					for (int j = 0; j < treePaths.length; j++) {
+						TreePath existingPath = treePaths[j];
+						if (existingPath.equals(path)) {
+							TreeItem treeItem = existingPath.getTreeItem();
+							toSelect.add(treeItem);
+							theElements.add(path.getLastSegment());
+							selected = true;
+							break;
+						}
 					}
 				}
-			}
-			if (!selected) {
-				remaining.add(path);
-			}
-		}
-		if (!toSelect.isEmpty()) {
-			final TreeItem[] items = (TreeItem[]) toSelect.toArray(new TreeItem[toSelect.size()]);
-			// TODO: hack to ensure selection contains 'selected' element
-			// instead of 'equivalent' element. Handles synch problems between
-			// set selection & refresh
-			for (int i = 0; i < items.length; i++) {
-				TreeItem item = items[i];
-				Object element = theElements.get(i);
-				if (item.getData() != element) {
-					remap(element, item);
+				if (!selected) {
+					remaining.add(path);
 				}
 			}
-			fTree.setSelection(items);
-			if (reveal) {
-				fTree.showItem(items[0]);
+			if (!toSelect.isEmpty()) {
+				final TreeItem[] items = (TreeItem[]) toSelect.toArray(new TreeItem[toSelect.size()]);
+				// TODO: hack to ensure selection contains 'selected' element
+				// instead of 'equivalent' element. Handles synch problems
+				// between
+				// set selection & refresh
+				for (int i = 0; i < items.length; i++) {
+					TreeItem item = items[i];
+					Object element = theElements.get(i);
+					if (item.getData() != element) {
+						remap(element, item);
+					}
+				}
+				fTree.setSelection(items);
+				if (reveal) {
+					fTree.showItem(items[0]);
+				}
 			}
+		} else {
+			fTree.setSelection(new TreeItem[0]);
 		}
 		return new TreeSelection((TreePath[]) remaining.toArray(new TreePath[remaining.size()]));
 	}
