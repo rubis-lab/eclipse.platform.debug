@@ -47,7 +47,7 @@ public class ProcessProxy extends AbstractModelProxy implements IDebugEventSetLi
 		ModelDelta delta = new ModelDelta();
 		IModelDeltaNode node = delta.addNode(DebugPlugin.getDefault().getLaunchManager(), IModelDelta.NOCHANGE);
 		node = node.addNode(fProcess.getLaunch(), IModelDelta.NOCHANGE);
-		node.addNode(fProcess, IModelDelta.CHANGED | IModelDelta.ACTIVATED);
+		node.addNode(fProcess, IModelDelta.CHANGED | IModelDelta.STATE);
 		fireModelChanged(delta);
 	}
 

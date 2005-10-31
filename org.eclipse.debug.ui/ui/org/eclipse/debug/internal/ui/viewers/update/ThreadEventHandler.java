@@ -40,15 +40,15 @@ public class ThreadEventHandler extends DebugEventHandler {
 	}
 	
 	protected void handleResumeExpectingSuspend(DebugEvent event) {
-		fireDelta((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.ACTIVATED);
+		fireDelta((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.STATE);
 	}
 
 	protected void handleResume(DebugEvent event) {
-		fireDelta((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.ACTIVATED);
+		fireDelta((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.STATE);
 	}
 
 	protected void handleCreate(DebugEvent event) {
-		fireDelta((IThread) event.getSource(), IModelDelta.ADDED | IModelDelta.ACTIVATED);
+		fireDelta((IThread) event.getSource(), IModelDelta.ADDED | IModelDelta.STATE);
 	}
 
 	protected void handleTerminate(DebugEvent event) {
@@ -56,7 +56,7 @@ public class ThreadEventHandler extends DebugEventHandler {
 	}
 
 	protected void handleChange(DebugEvent event) {
-		fireDelta((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.ACTIVATED);
+		fireDelta((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.STATE);
 	}
 
 	protected void handleLateSuspend(DebugEvent suspend, DebugEvent resume) {

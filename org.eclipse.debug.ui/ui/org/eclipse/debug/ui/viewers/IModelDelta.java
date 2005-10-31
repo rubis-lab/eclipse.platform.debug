@@ -10,7 +10,22 @@
  *******************************************************************************/
 package org.eclipse.debug.ui.viewers;
 
-
+/**
+ * Describes a change within a model. A delta is a hierarchical description of a change
+ * within a model. It constists of a path of nodes. Each node references an element
+ * from a model, and desribes how that element changed.
+ * <p>
+ * An element can be added, removed, or changed. As well, its possible that an element
+ * did not change, but that one of its children changed. When an element changes, an 
+ * additional information describes the change. For example, and element's content may have
+ * changed (its children), or its state may have changed.
+ * </p>
+ * <p>
+ * Optionally, an update action is provided with a node. A node may be expanded
+ * or selected.
+ * </p>
+ * @since 3.2
+ */
 public interface IModelDelta {
 	
 	//change type
@@ -21,10 +36,14 @@ public interface IModelDelta {
 	
 	//how it changed.
 	public static int CONTENT = 1 << 10;
-	public static int ACTIVATED = 1 << 11;
+	public static int STATE = 1 << 11;
+	
+	// action
 	public static int EXPAND = 1 << 12;
 	public static int SELECT = 1 << 13;
 
+	// TODO: should be part of the implementation rather than the interface (i.e.
+	// interface should bre read-only).
 	public IModelDeltaNode addNode(Object element, int flags);
 	public IModelDeltaNode[] getNodes();
 }

@@ -66,7 +66,7 @@ public class DefaultUpdatePolicy extends AbstractUpdatePolicy implements IModelC
 
 	private void handleChange(IModelDeltaNode node) {
 		int flags = node.getFlags();
-		if ((flags & IModelDelta.ACTIVATED) != 0) {
+		if ((flags & IModelDelta.STATE) != 0) {
 			getViewer().update(node.getElement());
 		}
 		if ((flags & IModelDelta.CONTENT) != 0) {
@@ -90,7 +90,7 @@ public class DefaultUpdatePolicy extends AbstractUpdatePolicy implements IModelC
 
 		((AsynchronousTreeViewer) getViewer()).add(treePath);
 
-		if ((flags & IModelDelta.ACTIVATED) != 0) {
+		if ((flags & IModelDelta.STATE) != 0) {
 			// do nothing??
 		}
 		if ((flags & IModelDelta.CONTENT) != 0) {

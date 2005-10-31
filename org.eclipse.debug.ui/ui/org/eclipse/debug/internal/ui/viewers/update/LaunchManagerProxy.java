@@ -58,7 +58,7 @@ public class LaunchManagerProxy extends AbstractModelProxy implements ILaunchesL
 		IModelDeltaNode node = delta.addNode(fLaunchManager, IModelDelta.NOCHANGE);
 		for (int i = 0; i < launches.length; i++) {
 			ILaunch launch = launches[i];
-			node.addNode(launch, IModelDelta.CHANGED | IModelDelta.ACTIVATED);	
+			node.addNode(launch, IModelDelta.CHANGED | IModelDelta.STATE);	
 		}
 		fireModelChanged(delta);
 	}

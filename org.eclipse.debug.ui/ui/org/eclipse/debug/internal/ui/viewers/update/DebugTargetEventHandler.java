@@ -40,7 +40,7 @@ public class DebugTargetEventHandler extends DebugEventHandler {
 	}
 
 	protected void handleChange(DebugEvent event) {
-		fireDelta((IDebugTarget) event.getSource(), IModelDelta.CHANGED | IModelDelta.ACTIVATED);
+		fireDelta((IDebugTarget) event.getSource(), IModelDelta.CHANGED | IModelDelta.STATE);
 	}
 
 	protected void handleCreate(DebugEvent event) {
@@ -48,7 +48,7 @@ public class DebugTargetEventHandler extends DebugEventHandler {
 	}
 
 	protected void handleResume(DebugEvent event) {
-		fireDelta((IDebugTarget) event.getSource(), IModelDelta.CHANGED | IModelDelta.ACTIVATED);
+		fireDelta((IDebugTarget) event.getSource(), IModelDelta.CHANGED | IModelDelta.STATE);
 	}
 
 	protected void handleSuspend(DebugEvent event) {
@@ -56,7 +56,7 @@ public class DebugTargetEventHandler extends DebugEventHandler {
 	}
 
 	protected void handleTerminate(DebugEvent event) {
-		fireDelta((IDebugTarget) event.getSource(), IModelDelta.CHANGED | IModelDelta.ACTIVATED);
+		fireDelta((IDebugTarget) event.getSource(), IModelDelta.CHANGED | IModelDelta.STATE);
 	}
 
 	private void fireDelta(IDebugTarget target, int flags) {

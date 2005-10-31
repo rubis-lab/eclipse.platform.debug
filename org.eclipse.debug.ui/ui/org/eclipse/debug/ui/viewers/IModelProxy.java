@@ -10,13 +10,19 @@
  *******************************************************************************/
 package org.eclipse.debug.ui.viewers;
 
-
+/**
+ * 
+ *
+ * @since 3.2
+ */
 public interface IModelProxy {
 
 	public void init(IPresentationContext context);
 	public void dispose();
 	public void addModelChangedListener(IModelChangedListener listener);
 	public void removeModelChangedListener(IModelChangedListener listener);
+	
+	// TODO: should be part of the implementation rather than the interface
 	public void fireModelChanged(IModelDelta delta);
 	
 }
