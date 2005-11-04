@@ -3,7 +3,7 @@ package org.eclipse.debug.internal.ui.viewers.update;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.debug.ui.viewers.IModelDeltaNode;
+import org.eclipse.debug.internal.ui.viewers.IModelDeltaNode;
 
 public class ModelDeltaNode implements IModelDeltaNode {
 

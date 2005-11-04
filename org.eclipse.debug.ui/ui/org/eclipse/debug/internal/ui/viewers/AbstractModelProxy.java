@@ -1,4 +1,4 @@
-package org.eclipse.debug.ui.viewers;
+package org.eclipse.debug.internal.ui.viewers;
 
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Platform;

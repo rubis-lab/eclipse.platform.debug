@@ -8,21 +8,23 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.ui.viewers;
+package org.eclipse.debug.internal.ui.viewers;
+
+import org.eclipse.debug.internal.ui.viewers.update.ModelDeltaNode;
 
 /**
  * 
  *
  * @since 3.2
  */
-public interface IModelProxy {
-
-	public void init(IPresentationContext context);
-	public void dispose();
-	public void addModelChangedListener(IModelChangedListener listener);
-	public void removeModelChangedListener(IModelChangedListener listener);
+public interface IModelDeltaNode {
+	public IModelDeltaNode getParent();
+	public Object getElement();
+	public int getFlags();
+	public ModelDeltaNode[] getNodes();
 	
-	// TODO: should be part of the implementation rather than the interface
-	public void fireModelChanged(IModelDelta delta);
+	// TODO: should be part of the implementation rather than the interface (i.e.
+	// interface should bre read-only).
+	public IModelDeltaNode addNode(Object object, int flags);
 	
 }

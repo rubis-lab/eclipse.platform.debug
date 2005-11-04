@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.debug.ui.viewers;
+package org.eclipse.debug.internal.ui.viewers;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,14 +38,14 @@ public abstract class AsynchronousLabelAdapter implements IAsynchronousLabelAdap
 		if (requiresUIJob()) {
 			job = new UIJob("Retrieving labels") { //$NON-NLS-1$
 				public IStatus runInUIThread(IProgressMonitor monitor) {
-					computeLabel(element, context, result);
+					computeLabels(element, context, result);
 					return Status.OK_STATUS;
 				}
 			};
 		} else {
 			job = new Job("Retrieving labels") { //$NON-NLS-1$
 				protected IStatus run(IProgressMonitor monitor) {
-					computeLabel(element, context, result);
+					computeLabels(element, context, result);
 					return Status.OK_STATUS;
 				}
 			};
@@ -72,22 +72,22 @@ public abstract class AsynchronousLabelAdapter implements IAsynchronousLabelAdap
 	 * @param context presentation context
 	 * @param result monitor to report results to
 	 */
-	protected void computeLabel(Object element, IPresentationContext context, ILabelRequestMonitor monitor) {
+	protected void computeLabels(Object element, IPresentationContext context, ILabelRequestMonitor monitor) {
 		if (!monitor.isCanceled()) {
 			IStatus status = Status.OK_STATUS;
 			try {
-				monitor.setLabel(getLabel(element, context));
+				monitor.setLabels(getLabels(element, context));
 				if (!monitor.isCanceled()) {
-					monitor.setImageDescriptor(getImageDescriptor(element, context));
+					monitor.setImageDescriptors(getImageDescriptors(element, context));
 				}
 				if (!monitor.isCanceled()) {
-					monitor.setFontData(getFontData(element, context));
+					monitor.setFontDatas(getFontDatas(element, context));
 				}
 				if (!monitor.isCanceled()) {
-					monitor.setBackground(getBackground(element, context));
+					monitor.setBackgrounds(getBackgrounds(element, context));
 				}
 				if (!monitor.isCanceled()) {
-					monitor.setForeground(getForeground(element, context));
+					monitor.setForegrounds(getForegrounds(element, context));
 				}
 			} catch (CoreException e) {
 				status = e.getStatus();
@@ -107,7 +107,7 @@ public abstract class AsynchronousLabelAdapter implements IAsynchronousLabelAdap
 	 * @return label
 	 * @exception CoreException if an exception occurrs computing label
 	 */
-    protected abstract String getLabel(Object element, IPresentationContext context) throws CoreException;
+    protected abstract String[] getLabels(Object element, IPresentationContext context) throws CoreException;
     
     /**
      * Returns an image descriptor for the given element in the specified context
@@ -118,7 +118,7 @@ public abstract class AsynchronousLabelAdapter implements IAsynchronousLabelAdap
      * @return image descriptor or <code>null</code>
      * @throws CoreException if an exception occurrs computing image descriptor
      */
-    protected abstract ImageDescriptor getImageDescriptor(Object element, IPresentationContext context) throws CoreException;
+    protected abstract ImageDescriptor[] getImageDescriptors(Object element, IPresentationContext context) throws CoreException;
     
     /**
      * Returns font data for the given element in the specified context or <code>null</code>
@@ -129,7 +129,7 @@ public abstract class AsynchronousLabelAdapter implements IAsynchronousLabelAdap
      * @return font data or <code>null</code>
      * @throws CoreException if an exception occurrs computing font data
      */
-    protected abstract FontData getFontData(Object element, IPresentationContext context) throws CoreException;
+    protected abstract FontData[] getFontDatas(Object element, IPresentationContext context) throws CoreException;
     
     /**
      * Returns a foreground color for the given element in the specified context or <code>null</code>
@@ -140,7 +140,7 @@ public abstract class AsynchronousLabelAdapter implements IAsynchronousLabelAdap
      * @return color or <code>null</code>
      * @throws CoreException if an exception occurrs computing color
      */
-    protected abstract RGB getForeground(Object element, IPresentationContext context) throws CoreException;
+    protected abstract RGB[] getForegrounds(Object element, IPresentationContext context) throws CoreException;
     
     /**
      * Returns a background color for the given element in the specified context or <code>null</code>
@@ -151,5 +151,5 @@ public abstract class AsynchronousLabelAdapter implements IAsynchronousLabelAdap
      * @return color or <code>null</code>
      * @throws CoreException if an exception occurrs computing color
      */
-    protected abstract RGB getBackground(Object element, IPresentationContext context) throws CoreException;
+    protected abstract RGB[] getBackgrounds(Object element, IPresentationContext context) throws CoreException;
 }

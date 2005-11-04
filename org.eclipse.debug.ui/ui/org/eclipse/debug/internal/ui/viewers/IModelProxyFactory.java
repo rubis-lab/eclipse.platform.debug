@@ -8,28 +8,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.ui.viewers;
-
-
+package org.eclipse.debug.internal.ui.viewers;
 
 /**
- * An update policy updates elements from an instance of a model 
- * in a viewer.
  * 
+ *
  * @since 3.2
  */
-public interface IUpdatePolicy {
-	
-	/**
-	 * Installs this update policy on the given viewer.
-	 * 
-	 * @param viewer viewer to update
-	 */
-	public void init(AsynchronousViewer viewer);
-	
-	/**
-	 * Disposes this update policy.
-	 */
-	public void dispose();
-
+public interface IModelProxyFactory {
+	public IModelProxy createModelProxy(Object element, IPresentationContext context);
 }

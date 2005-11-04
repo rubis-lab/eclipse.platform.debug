@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers.update;
 
-import org.eclipse.debug.ui.viewers.AsynchronousViewer;
-import org.eclipse.debug.ui.viewers.IUpdatePolicy;
+import org.eclipse.debug.internal.ui.viewers.AsynchronousViewer;
+import org.eclipse.debug.internal.ui.viewers.IUpdatePolicy;
 
 /**
  * @since 3.2

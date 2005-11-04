@@ -14,9 +14,9 @@ import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IThread;
-import org.eclipse.debug.ui.viewers.IModelDelta;
-import org.eclipse.debug.ui.viewers.IModelDeltaNode;
-import org.eclipse.debug.ui.viewers.IModelProxy;
+import org.eclipse.debug.internal.ui.viewers.IModelDelta;
+import org.eclipse.debug.internal.ui.viewers.IModelDeltaNode;
+import org.eclipse.debug.internal.ui.viewers.IModelProxy;
 
 /**
  * @since 3.2

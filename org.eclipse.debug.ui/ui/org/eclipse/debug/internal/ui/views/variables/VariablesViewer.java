@@ -3,8 +3,8 @@ package org.eclipse.debug.internal.ui.views.variables;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.ui.viewers.AsynchronousTreeViewer;
-import org.eclipse.debug.ui.viewers.IAsynchronousRequestMonitor;
+import org.eclipse.debug.internal.ui.viewers.AsynchronousTreeViewer;
+import org.eclipse.debug.internal.ui.viewers.IAsynchronousRequestMonitor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.progress.UIJob;
 

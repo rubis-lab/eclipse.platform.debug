@@ -5,10 +5,10 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStackFrame;
+import org.eclipse.debug.internal.ui.viewers.IModelProxy;
+import org.eclipse.debug.internal.ui.viewers.IModelProxyFactory;
+import org.eclipse.debug.internal.ui.viewers.IPresentationContext;
 import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.debug.ui.viewers.IModelProxy;
-import org.eclipse.debug.ui.viewers.IModelProxyFactory;
-import org.eclipse.debug.ui.viewers.IPresentationContext;
 
 public class DefaultModelProxyFactory implements IModelProxyFactory {
 

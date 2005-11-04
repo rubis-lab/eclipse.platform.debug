@@ -17,10 +17,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IExpressionManager;
 import org.eclipse.debug.core.model.IExpression;
+import org.eclipse.debug.internal.ui.viewers.AsynchronousTreeViewer;
+import org.eclipse.debug.internal.ui.viewers.TreePath;
+import org.eclipse.debug.internal.ui.viewers.TreeSelection;
 import org.eclipse.debug.ui.IDebugView;
-import org.eclipse.debug.ui.viewers.AsynchronousTreeViewer;
-import org.eclipse.debug.ui.viewers.TreePath;
-import org.eclipse.debug.ui.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.progress.WorkbenchJob;
 

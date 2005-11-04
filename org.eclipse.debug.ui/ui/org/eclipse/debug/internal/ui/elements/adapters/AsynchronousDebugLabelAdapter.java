@@ -19,12 +19,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.internal.ui.DelegatingModelPresentation;
 import org.eclipse.debug.internal.ui.LazyModelPresentation;
+import org.eclipse.debug.internal.ui.viewers.AsynchronousLabelAdapter;
+import org.eclipse.debug.internal.ui.viewers.ILabelRequestMonitor;
+import org.eclipse.debug.internal.ui.viewers.IPresentationContext;
 import org.eclipse.debug.internal.ui.views.launch.DebugElementHelper;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugView;
-import org.eclipse.debug.ui.viewers.AsynchronousLabelAdapter;
-import org.eclipse.debug.ui.viewers.ILabelRequestMonitor;
-import org.eclipse.debug.ui.viewers.IPresentationContext;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;
@@ -38,9 +38,9 @@ import org.eclipse.ui.IWorkbenchPart;
 public class AsynchronousDebugLabelAdapter extends AsynchronousLabelAdapter {
 	      
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.viewers.AsynchronousLabelAdapter#computeLabel(java.lang.Object, org.eclipse.debug.ui.viewers.IPresentationContext, org.eclipse.debug.ui.viewers.ILabelRequestMonitor)
+	 * @see org.eclipse.debug.ui.viewers.AsynchronousLabelAdapter#computeLabels(java.lang.Object, org.eclipse.debug.ui.viewers.IPresentationContext, org.eclipse.debug.ui.viewers.ILabelRequestMonitor)
 	 */
-	protected void computeLabel(Object element, IPresentationContext context, ILabelRequestMonitor monitor) {
+	protected void computeLabels(Object element, IPresentationContext context, ILabelRequestMonitor monitor) {
     	DelegatingModelPresentation presentation = DebugElementHelper.getPresentation();
     	// Honor view specific settings in a debug view by copying model presentation settings
     	// into the debug element helper's presentation before we get the label. This allows
@@ -62,48 +62,48 @@ public class AsynchronousDebugLabelAdapter extends AsynchronousLabelAdapter {
 			    			Map.Entry entry = (Entry) iterator.next();
 			    			presentation.setAttribute((String) entry.getKey(), entry.getValue());
 			    		}
-			        	super.computeLabel(element, context, monitor);
+			        	super.computeLabels(element, context, monitor);
 			        	return;
 	    			}
 	    		}
 	    	}
 		}
-    	super.computeLabel(element, context, monitor);
+    	super.computeLabels(element, context, monitor);
     }
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.viewers.AsynchronousLabelAdapter#getLabel(java.lang.Object, org.eclipse.debug.ui.viewers.IPresentationContext)
+	 * @see org.eclipse.debug.ui.viewers.AsynchronousLabelAdapter#getLabels(java.lang.Object, org.eclipse.debug.ui.viewers.IPresentationContext)
 	 */
-	protected String getLabel(Object element, IPresentationContext context) throws CoreException {
-		return DebugElementHelper.getLabel(element);
+	protected String[] getLabels(Object element, IPresentationContext context) throws CoreException {
+		return new String[] {DebugElementHelper.getLabel(element)};
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.viewers.AsynchronousLabelAdapter#getImageDescriptor(java.lang.Object, org.eclipse.debug.ui.viewers.IPresentationContext)
+	 * @see org.eclipse.debug.ui.viewers.AsynchronousLabelAdapter#getImageDescriptors(java.lang.Object, org.eclipse.debug.ui.viewers.IPresentationContext)
 	 */
-	protected ImageDescriptor getImageDescriptor(Object element, IPresentationContext context) throws CoreException {
-		return DebugElementHelper.getImageDescriptor(element);
+	protected ImageDescriptor[] getImageDescriptors(Object element, IPresentationContext context) throws CoreException {
+		return new ImageDescriptor[] {DebugElementHelper.getImageDescriptor(element)};
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.viewers.AsynchronousLabelAdapter#getFontData(java.lang.Object, org.eclipse.debug.ui.viewers.IPresentationContext)
+	 * @see org.eclipse.debug.ui.viewers.AsynchronousLabelAdapter#getFontDatas(java.lang.Object, org.eclipse.debug.ui.viewers.IPresentationContext)
 	 */
-	protected FontData getFontData(Object element, IPresentationContext context) throws CoreException {
-		return DebugElementHelper.getFont(element);
+	protected FontData[] getFontDatas(Object element, IPresentationContext context) throws CoreException {
+		return new FontData[] {DebugElementHelper.getFont(element)};
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.viewers.AsynchronousLabelAdapter#getForeground(java.lang.Object, org.eclipse.debug.ui.viewers.IPresentationContext)
+	 * @see org.eclipse.debug.ui.viewers.AsynchronousLabelAdapter#getForegrounds(java.lang.Object, org.eclipse.debug.ui.viewers.IPresentationContext)
 	 */
-	protected RGB getForeground(Object element, IPresentationContext context) throws CoreException {
-		return DebugElementHelper.getForeground(element);
+	protected RGB[] getForegrounds(Object element, IPresentationContext context) throws CoreException {
+		return new RGB[] {DebugElementHelper.getForeground(element)};
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.viewers.AsynchronousLabelAdapter#getBackground(java.lang.Object, org.eclipse.debug.ui.viewers.IPresentationContext)
+	 * @see org.eclipse.debug.ui.viewers.AsynchronousLabelAdapter#getBackgrounds(java.lang.Object, org.eclipse.debug.ui.viewers.IPresentationContext)
 	 */
-	protected RGB getBackground(Object element, IPresentationContext context) throws CoreException {
-		return DebugElementHelper.getBackground(element);
+	protected RGB[] getBackgrounds(Object element, IPresentationContext context) throws CoreException {
+		return new RGB[] {DebugElementHelper.getBackground(element)};
 	}
 
 }

@@ -4,10 +4,10 @@ import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.debug.ui.viewers.AbstractModelProxy;
-import org.eclipse.debug.ui.viewers.IModelDelta;
-import org.eclipse.debug.ui.viewers.IModelDeltaNode;
-import org.eclipse.debug.ui.viewers.IPresentationContext;
+import org.eclipse.debug.internal.ui.viewers.AbstractModelProxy;
+import org.eclipse.debug.internal.ui.viewers.IModelDelta;
+import org.eclipse.debug.internal.ui.viewers.IModelDeltaNode;
+import org.eclipse.debug.internal.ui.viewers.IPresentationContext;
 
 public class ProcessProxy extends AbstractModelProxy implements IDebugEventSetListener {
 

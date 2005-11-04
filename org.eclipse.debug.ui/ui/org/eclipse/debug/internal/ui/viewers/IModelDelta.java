@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.ui.viewers;
+package org.eclipse.debug.internal.ui.viewers;
 
 /**
  * Describes a change within a model. A delta is a hierarchical description of a change

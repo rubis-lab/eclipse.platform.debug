@@ -13,7 +13,7 @@ package org.eclipse.debug.internal.ui.elements.adapters;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.model.IExpression;
 import org.eclipse.debug.core.model.IValue;
-import org.eclipse.debug.ui.viewers.IPresentationContext;
+import org.eclipse.debug.internal.ui.viewers.IPresentationContext;
 
 /**
  *

@@ -15,8 +15,8 @@ import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IVariable;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
+import org.eclipse.debug.internal.ui.viewers.IPresentationContext;
 import org.eclipse.debug.internal.ui.views.launch.DebugElementHelper;
-import org.eclipse.debug.ui.viewers.IPresentationContext;
 import org.eclipse.swt.graphics.RGB;
 
 /**
@@ -29,18 +29,18 @@ public class VariableLabelAdapter extends AsynchronousDebugLabelAdapter {
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.ui.viewers.AsynchronousLabelAdapter#getForeground(java.lang.Object, org.eclipse.debug.ui.viewers.IPresentationContext)
 	 */
-	protected RGB getForeground(Object element, IPresentationContext context) throws CoreException {
+	protected RGB[] getForegrounds(Object element, IPresentationContext context) throws CoreException {
         if (element instanceof IVariable) {
         	IVariable variable = (IVariable) element;
         	try {
 				if (variable.hasValueChanged()) {
-					return DebugUIPlugin.getPreferenceColor(IDebugPreferenceConstants.CHANGED_VARIABLE_COLOR).getRGB();
+					return new RGB[] {DebugUIPlugin.getPreferenceColor(IDebugPreferenceConstants.CHANGED_VARIABLE_COLOR).getRGB()};
 				}
 			} catch (DebugException e) {
 			}
-			return DebugElementHelper.getForeground(element);
+			return new RGB[] {DebugElementHelper.getForeground(element)};
         }
-        return super.getForeground(element, context);
+        return super.getForegrounds(element, context);
 	}
 
 	

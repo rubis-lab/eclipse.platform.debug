@@ -31,10 +31,10 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IThread;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
+import org.eclipse.debug.internal.ui.viewers.AsynchronousTreeViewer;
+import org.eclipse.debug.internal.ui.viewers.TreePath;
+import org.eclipse.debug.internal.ui.viewers.TreeSelection;
 import org.eclipse.debug.internal.ui.views.AbstractDebugEventHandler;
-import org.eclipse.debug.ui.viewers.AsynchronousTreeViewer;
-import org.eclipse.debug.ui.viewers.TreePath;
-import org.eclipse.debug.ui.viewers.TreeSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.progress.WorkbenchJob;
 

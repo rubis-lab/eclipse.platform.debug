@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.ui.viewers;
+package org.eclipse.debug.internal.ui.viewers;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.FontData;
@@ -29,34 +29,34 @@ public interface ILabelRequestMonitor extends IAsynchronousRequestMonitor {
 	 * 
 	 * @param text
 	 */
-    public void setLabel(String text);
+    public void setLabels(String[] text);
     
     /**
      * Sets the font of the label.
      * 
      * @param fontData
      */
-    public void setFontData(FontData fontData);
+    public void setFontDatas(FontData[] fontData);
     
     /**
      * Sets the image of the label.
      * 
      * @param image
      */
-    public void setImageDescriptor(ImageDescriptor image);
+    public void setImageDescriptors(ImageDescriptor[] image);
     
     /**
      * Sets the foreground color of the label.
      * 
      * @param foreground
      */
-    public void setForeground(RGB foreground);
+    public void setForegrounds(RGB[] foreground);
     
     /**
      * Sets the background color of the label.
      * 
      * @param background
      */
-    public void setBackground(RGB background);
+    public void setBackgrounds(RGB[] background);
 
 }

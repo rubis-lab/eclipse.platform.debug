@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.ui.viewers;
+package org.eclipse.debug.internal.ui.viewers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -28,6 +29,8 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.TreeEvent;
 import org.eclipse.swt.events.TreeListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
@@ -744,11 +747,15 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	 * @see org.eclipse.debug.ui.viewers.AsynchronousViewer#setColor(org.eclipse.swt.widgets.Widget,
 	 *      org.eclipse.swt.graphics.RGB, org.eclipse.swt.graphics.RGB)
 	 */
-	void setColor(Widget widget, RGB foreground, RGB background) {
+	void setColors(Widget widget, RGB[] foregrounds, RGB[] backgrounds) {
 		if (widget instanceof TreeItem) {
 			TreeItem item = (TreeItem) widget;
-			item.setForeground(getColor(foreground));
-			item.setBackground(getColor(background));
+			Color[] fgs = getColor(foregrounds);
+			Color[] bgs = getColor(backgrounds);
+			for (int i = 0; i < bgs.length; i++) {
+				item.setForeground(i, fgs[i]);
+				item.setBackground(i, bgs[i]);	
+			}
 		}
 	}
 
@@ -758,10 +765,13 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	 * @see org.eclipse.debug.ui.viewers.AsynchronousViewer#setFont(org.eclipse.swt.widgets.Widget,
 	 *      org.eclipse.swt.graphics.FontData)
 	 */
-	void setFont(Widget widget, FontData fontData) {
+	void setFonts(Widget widget, FontData[] fontData) {
 		if (widget instanceof TreeItem) {
 			TreeItem item = (TreeItem) widget;
-			item.setFont(getFont(fontData));
+			Font[] fonts = getFonts(fontData);
+			for (int i = 0; i < fonts.length; i++) {
+				item.setFont(i, fonts[i]);	
+			}
 		}
 	}
 
@@ -869,6 +879,14 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 			}
 		};
 
+	}
+
+	void setLabels(Widget widget, String[] text, ImageDescriptor[] image) {
+		if (widget instanceof TreeItem) {
+			TreeItem item = (TreeItem) widget;
+			item.setText(text);
+			item.setImage(getImages(image));
+		}
 	}
 
 }

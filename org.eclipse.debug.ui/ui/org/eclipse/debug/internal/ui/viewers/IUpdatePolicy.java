@@ -8,23 +8,28 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.ui.viewers;
+package org.eclipse.debug.internal.ui.viewers;
 
-import org.eclipse.debug.internal.ui.viewers.update.ModelDeltaNode;
+
 
 /**
+ * An update policy updates elements from an instance of a model 
+ * in a viewer.
  * 
- *
  * @since 3.2
  */
-public interface IModelDeltaNode {
-	public IModelDeltaNode getParent();
-	public Object getElement();
-	public int getFlags();
-	public ModelDeltaNode[] getNodes();
+public interface IUpdatePolicy {
 	
-	// TODO: should be part of the implementation rather than the interface (i.e.
-	// interface should bre read-only).
-	public IModelDeltaNode addNode(Object object, int flags);
+	/**
+	 * Installs this update policy on the given viewer.
+	 * 
+	 * @param viewer viewer to update
+	 */
+	public void init(AsynchronousViewer viewer);
 	
+	/**
+	 * Disposes this update policy.
+	 */
+	public void dispose();
+
 }

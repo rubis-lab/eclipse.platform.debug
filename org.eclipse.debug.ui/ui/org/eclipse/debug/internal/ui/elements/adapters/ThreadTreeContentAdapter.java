@@ -13,9 +13,9 @@ package org.eclipse.debug.internal.ui.elements.adapters;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.model.IThread;
+import org.eclipse.debug.internal.ui.viewers.AsynchronousTreeContentAdapter;
+import org.eclipse.debug.internal.ui.viewers.IPresentationContext;
 import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.debug.ui.viewers.AsynchronousTreeContentAdapter;
-import org.eclipse.debug.ui.viewers.IPresentationContext;
 
 public class ThreadTreeContentAdapter extends AsynchronousTreeContentAdapter {
 

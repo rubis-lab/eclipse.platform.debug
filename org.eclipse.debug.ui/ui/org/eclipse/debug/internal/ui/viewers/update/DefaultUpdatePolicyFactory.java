@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers.update;
 
-import org.eclipse.debug.ui.viewers.IPresentationContext;
-import org.eclipse.debug.ui.viewers.IUpdatePolicy;
-import org.eclipse.debug.ui.viewers.IUpdatePolicyFactory;
+import org.eclipse.debug.internal.ui.viewers.IPresentationContext;
+import org.eclipse.debug.internal.ui.viewers.IUpdatePolicy;
+import org.eclipse.debug.internal.ui.viewers.IUpdatePolicyFactory;
 
 /**
  * @since 3.2

@@ -12,13 +12,13 @@ package org.eclipse.debug.internal.ui.viewers.update;
 
 import java.util.ArrayList;
 
-import org.eclipse.debug.ui.viewers.AsynchronousTreeViewer;
-import org.eclipse.debug.ui.viewers.AsynchronousViewer;
-import org.eclipse.debug.ui.viewers.IModelChangedListener;
-import org.eclipse.debug.ui.viewers.IModelDelta;
-import org.eclipse.debug.ui.viewers.IModelDeltaNode;
-import org.eclipse.debug.ui.viewers.TreePath;
-import org.eclipse.debug.ui.viewers.TreeSelection;
+import org.eclipse.debug.internal.ui.viewers.AsynchronousTreeViewer;
+import org.eclipse.debug.internal.ui.viewers.AsynchronousViewer;
+import org.eclipse.debug.internal.ui.viewers.IModelChangedListener;
+import org.eclipse.debug.internal.ui.viewers.IModelDelta;
+import org.eclipse.debug.internal.ui.viewers.IModelDeltaNode;
+import org.eclipse.debug.internal.ui.viewers.TreePath;
+import org.eclipse.debug.internal.ui.viewers.TreeSelection;
 
 /**
  * Update policy for the launch manager.

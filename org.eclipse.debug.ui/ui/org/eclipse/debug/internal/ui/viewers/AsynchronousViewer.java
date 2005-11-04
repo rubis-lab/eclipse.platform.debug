@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.ui.viewers;
+package org.eclipse.debug.internal.ui.viewers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -505,6 +505,17 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 		}
 	}
 
+	Image[] getImages(ImageDescriptor[] descriptors) {
+		if (descriptors == null || descriptors.length == 0) {
+			return new Image[0];
+		}
+		Image[] images = new Image[descriptors.length];
+		for (int i = 0; i < images.length; i++) {
+			images[i] = getImage(descriptors[i]);
+		}
+		return images;
+	}
+	
 	/**
 	 * Returns an image for the given image descriptor or <code>null</code>. Adds the image
 	 * to a cache of images if it does not already exist. The cache is cleared when this viewer
@@ -525,6 +536,18 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 		return image;
 	}
 
+	Font[] getFonts(FontData[] fontDatas) {
+		if (fontDatas == null) {
+			return new Font[0];
+		}
+		
+		Font[] fonts = new Font[fontDatas.length];
+		for (int i = 0; i < fonts.length; i++) {
+			fonts[i] = getFont(fontDatas[i]);
+		}
+		return fonts;
+	}
+	
 	/**
 	 * Returns a font for the given font data or <code>null</code>. Adds the font to this viewer's font 
 	 * cache which is disposed when this viewer is disposed.
@@ -544,6 +567,16 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 		return font;
 	}
 	
+	Color[] getColor(RGB[] rgb) {
+		if (rgb == null) {
+			return new Color[0];
+		}
+		Color[] colors = new Color[rgb.length];
+		for (int i = 0; i < colors.length; i++) {
+			colors[i] = getColor(rgb[i]);
+		}
+		return colors;
+	}
 	/**
 	 * Returns a color for the given RGB or <code>null</code>. Adds the color to this viewer's color 
 	 * cache which is disposed when this viewer is disposed.
@@ -830,7 +863,7 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 	 * @param foreground foreground color of the widget or <code>null</code> if default
 	 * @param background background color of the widget or <code>null</code> if default
 	 */
-	abstract void setColor(Widget widget, RGB foreground, RGB background);
+	abstract void setColors(Widget widget, RGB foreground[], RGB background[]);
 	
 	/**
 	 * Sets the label attributes of the given widget.
@@ -839,13 +872,7 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 	 * @param text label text
 	 * @param image label image or <code>null</code>
 	 */
-	void setLabel(Widget widget, String text, ImageDescriptor image) {
-		if (widget instanceof Item) {
-			Item item = (Item) widget;
-			item.setText(text);
-			item.setImage(getImage(image));
-		}
-	}
+	abstract void setLabels(Widget widget, String[] text, ImageDescriptor[] image);
 	
 	/**
 	 * Sets the font attributes of the given widget.
@@ -853,7 +880,7 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 	 * @param widget widget to update
 	 * @param font font of the widget or <code>null</code> if default.
 	 */
-	abstract void setFont(Widget widget, FontData font);
+	abstract void setFonts(Widget widget, FontData[] font);
 	
 	/**
 	 * Returns the parent widget of the give widget or <code>null</code>
