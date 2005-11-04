@@ -66,21 +66,24 @@ public class DefaultUpdatePolicy extends AbstractUpdatePolicy implements IModelC
 
 	private void handleChange(IModelDeltaNode node) {
 		int flags = node.getFlags();
-		if ((flags & IModelDelta.STATE) != 0) {
-			getViewer().update(node.getElement());
-		}
-		if ((flags & IModelDelta.CONTENT) != 0) {
-			getViewer().refresh(node.getElement());
-		}
-		if ((flags & IModelDelta.SELECT) != 0) {
-			getViewer().update(node.getElement());
-			TreePath treePath = getTreePath(node);
-			((AsynchronousTreeViewer) getViewer()).setSelection(new TreeSelection(treePath));
-		}
-		if ((flags & IModelDelta.EXPAND) != 0) {
-			getViewer().update(node.getElement());
-			TreePath treePath = getTreePath(node);
-			((AsynchronousTreeViewer) getViewer()).expand(new TreeSelection(treePath));
+		AsynchronousViewer viewer = getViewer();
+		if (viewer != null) {
+			if ((flags & IModelDelta.STATE) != 0) {
+				viewer.update(node.getElement());
+			}
+			if ((flags & IModelDelta.CONTENT) != 0) {
+				viewer.refresh(node.getElement());
+			}
+			if ((flags & IModelDelta.SELECT) != 0) {
+				viewer.update(node.getElement());
+				TreePath treePath = getTreePath(node);
+				((AsynchronousTreeViewer) getViewer()).setSelection(new TreeSelection(treePath));
+			}
+			if ((flags & IModelDelta.EXPAND) != 0) {
+				viewer.update(node.getElement());
+				TreePath treePath = getTreePath(node);
+				((AsynchronousTreeViewer) getViewer()).expand(new TreeSelection(treePath));
+			}
 		}
 	}
 
