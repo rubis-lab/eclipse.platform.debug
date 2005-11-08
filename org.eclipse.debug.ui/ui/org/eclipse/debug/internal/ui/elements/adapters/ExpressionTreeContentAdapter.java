@@ -42,4 +42,5 @@ public class ExpressionTreeContentAdapter extends VariableTreeContentAdapter {
         }
         return value.hasVariables();
     }	
+    
 }

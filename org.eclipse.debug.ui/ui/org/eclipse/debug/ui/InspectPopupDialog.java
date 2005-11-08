@@ -11,6 +11,7 @@
 
 package org.eclipse.debug.ui;
 
+import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ import org.eclipse.debug.internal.ui.views.DebugUIViewsMessages;
 import org.eclipse.debug.internal.ui.views.variables.IndexedVariablePartition;
 import org.eclipse.debug.internal.ui.views.variables.VariablesView;
 import org.eclipse.debug.internal.ui.views.variables.VariablesViewer;
+import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -50,8 +52,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.keys.IBindingService;
 
 public class InspectPopupDialog extends DebugPopup {
     private static final int[] DEFAULT_SASH_WEIGHTS = new int[] { 90, 10 };
@@ -59,8 +64,6 @@ public class InspectPopupDialog extends DebugPopup {
     private static final int MIN_WIDTH = 250;
 
     private static final int MIN_HEIGHT = 200;
-
-//    private IWorkbenchPage fPage;
 
     private VariablesViewer fVariablesViewer;
 
@@ -227,7 +230,14 @@ public class InspectPopupDialog extends DebugPopup {
     }
 
     protected String getInfoText() {
-        return DebugUIViewsMessages.InspectPopupDialog_0;
+        IWorkbench workbench = PlatformUI.getWorkbench();
+        IBindingService bindingService = (IBindingService) workbench.getAdapter(IBindingService.class);
+        TriggerSequence[] bindings = bindingService.getActiveBindingsFor(fCommandId);
+        String infoText = null;
+        if (bindings.length > 0) {
+             infoText = MessageFormat.format(DebugUIViewsMessages.InspectPopupDialog_1, new String[] { bindings[0].format(), DebugUIViewsMessages.InspectPopupDialog_0 });
+        }
+        return infoText;
     }
 
     protected void persist() {

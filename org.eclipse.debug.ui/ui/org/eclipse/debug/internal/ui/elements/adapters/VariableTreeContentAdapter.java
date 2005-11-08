@@ -204,6 +204,6 @@ public class VariableTreeContentAdapter extends AsynchronousTreeContentAdapter {
 	 * @see org.eclipse.debug.ui.viewers.AsynchronousTreeContentAdapter#supportsPartId(java.lang.String)
 	 */
 	protected boolean supportsPartId(String id) {
-		return id.equals(IDebugUIConstants.ID_VARIABLE_VIEW) || id.equals(IDebugUIConstants.ID_REGISTER_VIEW);
+        return id.equals(IDebugUIConstants.ID_EXPRESSION_VIEW) || id.equals(IDebugUIConstants.ID_VARIABLE_VIEW) || id.equals(IDebugUIConstants.ID_REGISTER_VIEW);
 	}   	    
 }
