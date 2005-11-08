@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers.update;
 
-import org.eclipse.debug.core.DebugEvent;
-import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.core.model.IStackFrame;
 
 /**
@@ -44,11 +42,4 @@ public class DefaultVariableViewModelProxy extends EventHandlerModelProxy {
 		return new DebugEventHandler[] { new VariablesViewEventHandler(this, fFrame) };
 	}
 
-	protected boolean containsEvent(DebugEvent event) {
-		Object source = event.getSource();
-		if (source instanceof IDebugElement) {
-			return fFrame.getDebugTarget().equals(((IDebugElement) source).getDebugTarget());
-		}
-		return false;
-	}
 }

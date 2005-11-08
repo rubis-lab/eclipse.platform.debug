@@ -36,6 +36,7 @@ public class ThreadEventHandler extends DebugEventHandler {
 	}
 
 	protected void handleSuspend(DebugEvent event) {
+        if (!event.isEvaluation())
 		fireDelta((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.CONTENT | IModelDelta.EXPAND);
 	}
 	

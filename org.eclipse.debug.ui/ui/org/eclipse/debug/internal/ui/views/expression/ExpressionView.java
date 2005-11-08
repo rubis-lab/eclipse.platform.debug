@@ -94,14 +94,7 @@ public class ExpressionView extends VariablesView {
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
 	
-	/** 
-	 * The <code>ExpressionView</code> listens for selection changes in the <code>LaunchesView</code>
-	 * to correctly set the editable state of the details pane. Updates the context of
-	 * watch expressions.
-	 *
-	 * @see ISelectionListener#selectionChanged(IWorkbenchPart, ISelection)
-	 */
-	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+	public void contextActivated(ISelection selection, IWorkbenchPart part) {
 		if (!isVisible()) {
 			return;
 		}
