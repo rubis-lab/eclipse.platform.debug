@@ -78,9 +78,10 @@ public class ThreadEventHandler extends DebugEventHandler {
 			try {
 				 topStackFrame = thread.getTopStackFrame();
 			} catch (DebugException e) {
-				topStackFrame = new Object();
 			}
-			node.addNode(topStackFrame, IModelDelta.CHANGED | IModelDelta.SELECT);
+            if (topStackFrame != null) {
+                node.addNode(topStackFrame, IModelDelta.CHANGED | IModelDelta.SELECT);
+            }
 		}
 		getModelProxy().fireModelChanged(delta);
 	}
