@@ -15,6 +15,7 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.ITerminate;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.actions.RelaunchActionDelegate;
+import org.eclipse.debug.internal.ui.launchConfigurations.LaunchConfigurationManager;
 
 /**
  * Action which terminates a launch and then relaunches it.
@@ -50,7 +51,8 @@ public class TerminateAndRelaunchAction extends AbstractDebugContextActionDelega
      * @see AbstractDebugActionDelegate#isEnabledFor(Object)
      */
     protected boolean isEnabledFor(Object element) {
+    	ILaunch launch = RelaunchActionDelegate.getLaunch(element);
         return element instanceof ITerminate && ((ITerminate)element).canTerminate() &&
-            RelaunchActionDelegate.getLaunch(element) != null;
+        launch != null && LaunchConfigurationManager.isVisible(launch.getLaunchConfiguration());
     }
 }
