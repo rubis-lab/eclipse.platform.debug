@@ -36,33 +36,12 @@ public class LaunchProxy extends AbstractModelProxy implements ILaunchesListener
 				return;
 			}
 		}
-		
-		
 	}
 
 	public void launchesRemoved(ILaunch[] launches) {
-//		for (int i = 0; i < launches.length; i++) {
-//			if (launches[i] == fLaunch) {
-//				ModelDelta delta = new ModelDelta();
-//				IModelDeltaNode node = delta.addNode(fLaunchManager, IModelDelta.NOCHANGE);
-//				node.addNode(fLaunch, IModelDelta.REMOVED);
-//				fireModelChanged(delta);
-//				return;
-//			}
-//		}
 	}
 
 	public void launchesAdded(ILaunch[] launches) {
-//		for (int i = 0; i < launches.length; i++) {
-//			if (launches[i] == fLaunch) {
-//				ModelDelta delta = new ModelDelta();
-//				IModelDeltaNode node = delta.addNode(fLaunchManager, IModelDelta.NOCHANGE);
-//				node.addNode(fLaunch, IModelDelta.ADDED | IModelDelta.CONTENT | IModelDelta.EXPAND);
-//				node.addNode(new Object(), IModelDelta.ADDED | IModelDelta.EXPAND);
-//				fireModelChanged(delta);
-//				return;
-//			}
-//		}
 	}
 
 	public void launchesChanged(ILaunch[] launches) {
