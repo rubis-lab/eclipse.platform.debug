@@ -43,7 +43,7 @@ public interface IModelDelta {
 	public static int SELECT = 1 << 13;
 
 	// TODO: should be part of the implementation rather than the interface (i.e.
-	// interface should bre read-only).
+	// interface should be read-only).
 	public IModelDeltaNode addNode(Object element, int flags);
 	public IModelDeltaNode[] getNodes();
 }
