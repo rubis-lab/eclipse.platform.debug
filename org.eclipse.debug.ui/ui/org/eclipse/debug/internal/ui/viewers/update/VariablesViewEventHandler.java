@@ -50,9 +50,4 @@ public class VariablesViewEventHandler extends DebugEventHandler {
 		}
 	}
 
-	protected void handleResume(DebugEvent event) {
-		super.handleResume(event);
-	}
-	
-	
 }
