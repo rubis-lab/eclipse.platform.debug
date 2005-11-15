@@ -38,6 +38,7 @@ public class DefaultVariableViewModelProxy extends EventHandlerModelProxy {
 	}
 
 	public void dispose() {
+		super.dispose();
 		fFrame = null;
 	}
 
@@ -52,7 +53,7 @@ public class DefaultVariableViewModelProxy extends EventHandlerModelProxy {
         Object source = event.getSource();
         if (source instanceof IDebugElement) {
             IDebugTarget debugTarget = ((IDebugElement) source).getDebugTarget();
-            return fFrame.getDebugTarget().equals(debugTarget);
+            return debugTarget.equals(fFrame.getDebugTarget());
         }
         return false;
     }	
