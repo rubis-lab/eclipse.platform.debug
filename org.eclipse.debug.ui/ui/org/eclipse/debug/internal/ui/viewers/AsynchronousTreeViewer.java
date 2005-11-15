@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -802,7 +803,7 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		return new TreeSelection(new TreePath[0]);
 	}
 
-	public void add(final TreePath treePath) {
+	public synchronized void add(final TreePath treePath) {
 		WorkbenchJob job = new WorkbenchJob("AsynchronousTreeViewer.add()") { //$NON-NLS-1$
 			public IStatus runInUIThread(IProgressMonitor monitor) {
 				Widget widget = getTree();
@@ -860,7 +861,7 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		return null;
 	}
 
-	public void remove(final TreePath treePath) {
+	public synchronized void remove(final TreePath treePath) {
 		WorkbenchJob job = new WorkbenchJob("AsynchronousTreeViewer.remove()") { //$NON-NLS-1$
 			public IStatus runInUIThread(IProgressMonitor monitor) {
 				Object lastSegment = treePath.getLastSegment();
@@ -878,6 +879,10 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 				return Status.OK_STATUS;
 			}
 		};
+        
+        job.setSystem(true);
+        job.setPriority(Job.INTERACTIVE);
+        job.schedule();
 
 	}
 
