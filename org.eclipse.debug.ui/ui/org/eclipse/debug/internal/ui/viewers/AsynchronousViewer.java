@@ -741,6 +741,9 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 	 * Controls whether selection change notification is sent even when
 	 * successive selections are equal.
 	 * 
+	 * TODO: what we really want is to fire selection change on ACTIVATE
+	 * model change, even when selection is the same.
+	 * 
 	 * @return whether to suppress change notification for equal successive
 	 *  selections
 	 */
