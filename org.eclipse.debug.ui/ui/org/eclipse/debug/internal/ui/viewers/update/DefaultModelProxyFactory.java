@@ -16,7 +16,7 @@ public class DefaultModelProxyFactory implements IModelProxyFactory {
 		String id = context.getPart().getSite().getId();
 		if (IDebugUIConstants.ID_DEBUG_VIEW.equals(id)) {
 			if (element instanceof IDebugTarget) {
-				return new EventHandlerModelProxy();
+				return new DebugTargetProxy((IDebugTarget)element);
 			}
 			if (element instanceof ILaunch) {
 				return new LaunchProxy((ILaunch)element);
