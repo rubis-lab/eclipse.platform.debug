@@ -10,9 +10,13 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers.update;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IThread;
 import org.eclipse.debug.internal.ui.viewers.IModelDelta;
 import org.eclipse.debug.internal.ui.viewers.IModelDeltaNode;
@@ -22,6 +26,11 @@ import org.eclipse.debug.internal.ui.viewers.IModelProxy;
  * @since 3.2
  */
 public class ThreadEventHandler extends DebugEventHandler {
+	
+	/** 
+	 * Map of previous TOS per thread
+	 */
+	private Map fLastTopFrame = new HashMap();
 	/**
 	 * Constructs and event handler for a threads in the given viewer.
 	 * 
@@ -32,61 +41,95 @@ public class ThreadEventHandler extends DebugEventHandler {
 	}
 
 	public void dispose() {
+		synchronized (fLastTopFrame) {
+			fLastTopFrame.clear();
+		}
 		super.dispose();
 	}
 
 	protected void handleSuspend(DebugEvent event) {
-        if (!event.isEvaluation())
-		fireDelta((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.CONTENT | IModelDelta.EXPAND);
+        if (!event.isEvaluation()) {
+        	fireDeltaUpdatingTopFrame((IThread) event.getSource(), IModelDelta.NOCHANGE);
+        }
 	}
 	
-	protected void handleResumeExpectingSuspend(DebugEvent event) {
-		fireDelta((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.STATE);
+	private boolean isEqual(Object o1, Object o2) {
+		if (o1 == o2) {
+			return true;
+		}
+		if (o1 == null) {
+			return false;
+		}
+		return o1.equals(o2);
 	}
 
 	protected void handleResume(DebugEvent event) {
-		fireDelta((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.STATE);
+		fireDeltaAndClearTopFrame((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.STATE);
 	}
 
 	protected void handleCreate(DebugEvent event) {
-		fireDelta((IThread) event.getSource(), IModelDelta.ADDED | IModelDelta.STATE);
+		fireDeltaAndClearTopFrame((IThread) event.getSource(), IModelDelta.ADDED | IModelDelta.STATE);
 	}
 
 	protected void handleTerminate(DebugEvent event) {
-		fireDelta((IThread) event.getSource(), IModelDelta.REMOVED);
+		fireDeltaAndClearTopFrame((IThread) event.getSource(), IModelDelta.REMOVED);
 	}
 
 	protected void handleChange(DebugEvent event) {
-		fireDelta((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.STATE);
+		fireDeltaUpdatingTopFrame((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.STATE);
 	}
 
 	protected void handleLateSuspend(DebugEvent suspend, DebugEvent resume) {
-		fireDelta((IThread) suspend.getSource(), IModelDelta.CHANGED | IModelDelta.CONTENT | IModelDelta.EXPAND);
+		fireDeltaUpdatingTopFrame((IThread) suspend.getSource(), IModelDelta.CHANGED | IModelDelta.CONTENT | IModelDelta.EXPAND);
 	}
 
 	protected void handleSuspendTimeout(DebugEvent event) {
-		fireDelta((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.CONTENT);
+		fireDeltaAndClearTopFrame((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.CONTENT);
 	}
-
-	private void fireDelta(IThread thread, int flags) {
-		ModelDelta delta = new ModelDelta();
+	
+	private IModelDeltaNode buildBaseDelta(ModelDelta delta, IThread thread) {
 		IModelDeltaNode node = delta.addNode(DebugPlugin.getDefault().getLaunchManager(), IModelDelta.NOCHANGE);
 		node = node.addNode(thread.getLaunch(), IModelDelta.NOCHANGE);
 		node = node.addNode(thread.getDebugTarget(), IModelDelta.NOCHANGE);
-		node = node.addNode(thread, flags);
-		if ((flags & IModelDelta.EXPAND) != 0) {
-			Object topStackFrame = null;
-			try {
-				 topStackFrame = thread.getTopStackFrame();
-			} catch (DebugException e) {
-			}
-            if (topStackFrame != null) {
-                node.addNode(topStackFrame, IModelDelta.CHANGED | IModelDelta.SELECT);
-            }
+		return node;
+	}
+
+	private void fireDeltaAndClearTopFrame(IThread thread, int flags) {
+		ModelDelta delta = new ModelDelta();
+		IModelDeltaNode node = buildBaseDelta(delta, thread);
+		node.addNode(thread, flags);
+		synchronized (fLastTopFrame) {
+			fLastTopFrame.remove(thread);
 		}
 		getModelProxy().fireModelChanged(delta);
 	}
-
+	
+	private void fireDeltaUpdatingTopFrame(IThread thread, int flags) {
+		ModelDelta delta = new ModelDelta();
+		IModelDeltaNode node = buildBaseDelta(delta, thread);
+    	IStackFrame prev = null;
+    	synchronized (fLastTopFrame) {
+    		 prev = (IStackFrame) fLastTopFrame.get(thread);
+		}
+    	IStackFrame frame = null;
+		try {
+			 frame = thread.getTopStackFrame();
+		} catch (DebugException e) {
+		}
+    	if (isEqual(frame, prev)) {
+    		node = node.addNode(thread, flags | IModelDelta.NOCHANGE); // TODO: expand?
+    	} else {
+			node = node.addNode(thread, flags | IModelDelta.CHANGED | IModelDelta.CONTENT | IModelDelta.EXPAND);
+    	}
+    	if (frame != null) {
+            node.addNode(frame, IModelDelta.CHANGED | IModelDelta.SELECT);
+        }
+    	synchronized (fLastTopFrame) {
+    		fLastTopFrame.put(thread, frame);
+		}
+    	getModelProxy().fireModelChanged(delta);
+	}	
+	
 	protected boolean handlesEvent(DebugEvent event) {
 		return event.getSource() instanceof IThread;
 	}

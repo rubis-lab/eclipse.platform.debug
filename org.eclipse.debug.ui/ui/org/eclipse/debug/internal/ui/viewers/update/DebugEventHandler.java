@@ -90,7 +90,7 @@ public abstract class DebugEventHandler {
 	 * @param event
 	 */
 	protected void handleResumeExpectingSuspend(DebugEvent event) {
-		refreshRoot(event);
+		// do nothing unless the suspend times out
 	}
 	
 	/**
