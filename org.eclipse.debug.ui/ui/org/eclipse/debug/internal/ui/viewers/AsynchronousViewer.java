@@ -166,6 +166,9 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 	        Iterator updatePolicies = fModelProxies.values().iterator();
 	        while (updatePolicies.hasNext()) {
 	            IModelProxy proxy = (IModelProxy)updatePolicies.next();
+	            if (fUpdatePolicy instanceof IModelChangedListener) {
+					proxy.removeModelChangedListener((IModelChangedListener)fUpdatePolicy);
+				}	            
 	            proxy.dispose();
 	        }
 	        
@@ -439,7 +442,6 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 				if (fUpdatePolicy instanceof IModelChangedListener) {
 					proxy.removeModelChangedListener((IModelChangedListener)fUpdatePolicy);
 				}
-				
 				proxy.dispose();
 			}
 		}
@@ -731,7 +733,7 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 			if (isSuppressEqualSelections() && currentSelection.equals(fCurrentSelection)) {
 				return;
 			}
-			updateSelection(fCurrentSelection);
+			updateSelection(currentSelection);
 		}
 	}
 	
@@ -880,8 +882,8 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 	 * @see org.eclipse.jface.viewers.StructuredViewer#updateSelection(org.eclipse.jface.viewers.ISelection)
 	 */
 	protected synchronized void updateSelection(ISelection selection) {
-		super.updateSelection(selection);
 		fCurrentSelection = selection;
+		super.updateSelection(selection);
 	}
 
 	
