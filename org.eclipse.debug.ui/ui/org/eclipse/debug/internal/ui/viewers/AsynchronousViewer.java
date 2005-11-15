@@ -731,7 +731,6 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 			if (isSuppressEqualSelections() && currentSelection.equals(fCurrentSelection)) {
 				return;
 			}
-			fCurrentSelection = currentSelection;
 			updateSelection(fCurrentSelection);
 		}
 	}
@@ -876,5 +875,15 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 	 * @return parent widget or <code>null</code>
 	 */
 	protected abstract Widget getParent(Widget widget);
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.StructuredViewer#updateSelection(org.eclipse.jface.viewers.ISelection)
+	 */
+	protected synchronized void updateSelection(ISelection selection) {
+		super.updateSelection(selection);
+		fCurrentSelection = selection;
+	}
+
+	
 
 }
