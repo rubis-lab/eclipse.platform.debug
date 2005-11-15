@@ -2,61 +2,47 @@ package org.eclipse.debug.internal.ui.viewers.update;
 
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.debug.internal.ui.viewers.AbstractModelProxy;
 import org.eclipse.debug.internal.ui.viewers.IModelDelta;
 import org.eclipse.debug.internal.ui.viewers.IModelDeltaNode;
-import org.eclipse.debug.internal.ui.viewers.IPresentationContext;
 
-public class ProcessProxy extends AbstractModelProxy implements IDebugEventSetListener {
+public class ProcessProxy extends EventHandlerModelProxy {
 
-	private IProcess fProcess;
+    private IProcess fProcess;
 
-	public ProcessProxy(IProcess process) {
-		fProcess = process;
-	}
+    private DebugEventHandler fProcessEventHandler = new DebugEventHandler(this) {
+        protected boolean handlesEvent(DebugEvent event) {
+            return fProcess.equals(event.getSource());
+        }
 
-	public void init(IPresentationContext context) {
-		DebugPlugin.getDefault().addDebugEventListener(this);
-	}
+        protected void handleChange(DebugEvent event) {
+            ModelDelta delta = new ModelDelta();
+            IModelDeltaNode node = delta.addNode(DebugPlugin.getDefault().getLaunchManager(), IModelDelta.NOCHANGE);
+            node = node.addNode(fProcess.getLaunch(), IModelDelta.NOCHANGE);
+            node.addNode(fProcess, IModelDelta.CHANGED | IModelDelta.STATE);
+            fireModelChanged(delta);
 
-	public void dispose() {
-		DebugPlugin.getDefault().removeDebugEventListener(this);
-	}
-	
-	protected synchronized boolean containsEvent(DebugEvent event) {
-		return fProcess.equals(event.getSource());
-	}
+        }
 
-	public void handleDebugEvents(DebugEvent[] events) {
-		for (int i = 0; i < events.length; i++) {
-			DebugEvent event = events[i];
-			switch (event.getKind()) {
-			case DebugEvent.CREATE:
-				handleCreate();
-				break;
-			default:
-				handleChange();
-				break;
-			}
-		}
-	}
+        protected void handleCreate(DebugEvent event) {
+            ModelDelta delta = new ModelDelta();
+            IModelDeltaNode node = delta.addNode(DebugPlugin.getDefault().getLaunchManager(), IModelDelta.NOCHANGE);
+            node = node.addNode(fProcess.getLaunch(), IModelDelta.NOCHANGE);
+            node.addNode(fProcess, IModelDelta.ADDED);
+            fireModelChanged(delta);
+        }
+        
+    };
 
-	private void handleChange() {
-		ModelDelta delta = new ModelDelta();
-		IModelDeltaNode node = delta.addNode(DebugPlugin.getDefault().getLaunchManager(), IModelDelta.NOCHANGE);
-		node = node.addNode(fProcess.getLaunch(), IModelDelta.NOCHANGE);
-		node.addNode(fProcess, IModelDelta.CHANGED | IModelDelta.STATE);
-		fireModelChanged(delta);
-	}
+    public ProcessProxy(IProcess process) {
+        fProcess = process;
+    }
 
-	private void handleCreate() {
-		ModelDelta delta = new ModelDelta();
-		IModelDeltaNode node = delta.addNode(DebugPlugin.getDefault().getLaunchManager(), IModelDelta.NOCHANGE);
-		node = node.addNode(fProcess.getLaunch(), IModelDelta.NOCHANGE);
-		node.addNode(fProcess, IModelDelta.ADDED);
-		fireModelChanged(delta);
-	}
+    protected synchronized boolean containsEvent(DebugEvent event) {
+        return fProcess.equals(event.getSource());
+    }
 
+    protected DebugEventHandler[] createEventHandlers() {
+        return new DebugEventHandler[] {fProcessEventHandler};
+    }
 }
