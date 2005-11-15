@@ -162,12 +162,15 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 	 * Unintalls all update policies installed in this viewer
 	 */
 	private void disposeAllModelProxies() {
-		Iterator updatePolicies = fModelProxies.values().iterator();
-		while (updatePolicies.hasNext()) {
-			IModelProxy proxy = (IModelProxy)updatePolicies.next();
-			proxy.dispose();
-		}
-		fModelProxies.clear();
+	    synchronized(fModelProxies) {
+	        Iterator updatePolicies = fModelProxies.values().iterator();
+	        while (updatePolicies.hasNext()) {
+	            IModelProxy proxy = (IModelProxy)updatePolicies.next();
+	            proxy.dispose();
+	        }
+	        
+	        fModelProxies.clear();
+	    }
 	}
 
 	/**
@@ -250,23 +253,6 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 		}
 		return adapter;
 	}	
-	
-	/**
-	 * Returns the update policy adapter for the given element or <code>null</code> if none.
-	 * 
-	 * @param element element to retrieve adapter for
-	 * @return update policy adapter or <code>null</code>
-	 */
-//	protected IUpdatePolicyFactory getUpdatePolicyAdapter(Object element) {
-//		IUpdatePolicyFactory adapter = null;
-//		if (element instanceof IUpdatePolicyFactory) {
-//			adapter = (IUpdatePolicyFactory) element;
-//		} else if (element instanceof IAdaptable) {
-//			IAdaptable adaptable = (IAdaptable) element;
-//			adapter = (IUpdatePolicyFactory) adaptable.getAdapter(IUpdatePolicyFactory.class);
-//		}
-//		return adapter;
-//	}	
 	
 	/**
 	 * Returns the model proxy factory for the given element of <code>null</code> if none.
