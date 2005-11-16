@@ -13,6 +13,7 @@ package org.eclipse.debug.internal.ui.views.launch;
 
 import java.util.Iterator;
 
+import org.eclipse.core.commands.util.ListenerList;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -70,7 +71,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.ISelection;
@@ -540,6 +540,7 @@ public class LaunchView extends AbstractDebugEventHandlerView implements ISelect
 	 * @see org.eclipse.ui.IWorkbenchPart#dispose()
 	 */
 	public void dispose() {
+		DebugContextManager.getDefault().removeDebugContextProvider(fProvider);
 		fProvider.dispose();
 	    Viewer viewer = getViewer();
 		if (viewer != null) {

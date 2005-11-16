@@ -15,12 +15,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.commands.util.ListenerList;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.ui.contexts.IDebugContextListener;
 import org.eclipse.debug.ui.contexts.IDebugContextProvider;
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPage;
@@ -57,7 +57,7 @@ public class DebugWindowContextService implements IDebugContextService, IPartLis
 		if (part != null) {
 			id = part.getSite().getId();
 		}
-		fProvidersByPartId.put(part, id);
+		fProvidersByPartId.put(id, part);
 		fProviders.add(provider);
 		IWorkbenchPart active = null;
 		IWorkbenchPage activePage = fWindow.getActivePage();
@@ -210,10 +210,6 @@ public class DebugWindowContextService implements IDebugContextService, IPartLis
 	 * @see org.eclipse.ui.IPartListener2#partClosed(org.eclipse.ui.IWorkbenchPartReference)
 	 */
 	public synchronized void partClosed(IWorkbenchPartReference partRef) {
-		IDebugContextProvider provider = (IDebugContextProvider) fProvidersByPartId.get(partRef.getId());
-		if (provider != null) {
-			removeProvider(provider);
-		}
 	}
 
 	/* (non-Javadoc)
