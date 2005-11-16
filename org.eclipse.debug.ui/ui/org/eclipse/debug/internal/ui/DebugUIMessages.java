@@ -169,12 +169,8 @@ public class DebugUIMessages extends NLS {
 	public static String AbstractTableRendering_11;
 	public static String AbstractTableRendering_12;
 	public static String AbstractTableRendering_13;
-	public static String AbstractTableRendering_14;
-	public static String AbstractTableRendering_15;
 	public static String AbstractTableRendering_16;
-	public static String AbstractTableRendering_17;
 	public static String AbstractTableRendering_18;
-	public static String AbstractTableRendering_19;
 	public static String AbstractTableRendering_20;
 	public static String SetPaddedStringDialog_0;
 	public static String SetPaddedStringDialog_1;

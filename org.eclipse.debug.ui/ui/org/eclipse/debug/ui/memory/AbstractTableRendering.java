@@ -889,13 +889,13 @@ public abstract class AbstractTableRendering extends AbstractMemoryRendering imp
 		{
 			// pop up dialog to ask user for default values
 			StringBuffer msgBuffer = new StringBuffer(DebugUIMessages.AbstractTableRendering_20);
-			msgBuffer.append(DebugUIMessages.AbstractTableRendering_14);
+			msgBuffer.append(" "); //$NON-NLS-1$
 			msgBuffer.append(this.getLabel());
-			msgBuffer.append(DebugUIMessages.AbstractTableRendering_15);
+			msgBuffer.append("\n\n"); //$NON-NLS-1$
 			msgBuffer.append(DebugUIMessages.AbstractTableRendering_16);
-			msgBuffer.append(DebugUIMessages.AbstractTableRendering_17);
+			msgBuffer.append("\n"); //$NON-NLS-1$
 			msgBuffer.append(DebugUIMessages.AbstractTableRendering_18);
-			msgBuffer.append(DebugUIMessages.AbstractTableRendering_19);
+			msgBuffer.append("\n\n"); //$NON-NLS-1$
 			
 			int bytePerLine = fBytePerLine;
 			int columnSize = fColumnSize;
