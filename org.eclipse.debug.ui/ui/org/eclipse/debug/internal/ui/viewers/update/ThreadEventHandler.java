@@ -64,7 +64,7 @@ public class ThreadEventHandler extends DebugEventHandler {
 	}
 
 	protected void handleResume(DebugEvent event) {
-		fireDeltaAndClearTopFrame((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.STATE);
+		fireDeltaAndClearTopFrame((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.STATE | IModelDelta.CONTENT);
 	}
 
 	protected void handleCreate(DebugEvent event) {
