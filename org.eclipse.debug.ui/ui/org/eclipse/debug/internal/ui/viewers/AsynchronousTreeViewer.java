@@ -841,23 +841,31 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		}
 
 		if (create) {
-			// child doesn't exist. create it.
-			List datas = new ArrayList();
-			for (int i = 0; i < items.length; i++) {
-				Object data = items[i].getData();
-				if (data != null)
-					datas.add(data);
-			}
-			datas.add(segment);
-			setChildren(widget, datas);
+            boolean expanded = false;
+            if (widget instanceof Tree) {
+                expanded = true;
+            } else if (widget instanceof TreeItem) {
+                expanded = ((TreeItem) widget).getExpanded();
+            }
 
-			// search for the new child and return it...
-			Widget child = findChild(widget, segment, false);
-			return child;
-		}
-
-		return null;
-	}
+            if (expanded) {
+                // child doesn't exist. create it.
+                List datas = new ArrayList();
+                for (int i = 0; i < items.length; i++) {
+                    Object data = items[i].getData();
+                    if (data != null)
+                        datas.add(data);
+                }
+                datas.add(segment);
+                // search for the new child and return it...
+                setChildren(widget, datas);
+                return findChild(widget, segment, false);
+            } else {            
+                updateHasChildren(getElement(widget), widget);
+            }
+        }
+        return null;
+    }
 
 	public synchronized void remove(final TreePath treePath) {
 		WorkbenchJob job = new WorkbenchJob("AsynchronousTreeViewer.remove()") { //$NON-NLS-1$

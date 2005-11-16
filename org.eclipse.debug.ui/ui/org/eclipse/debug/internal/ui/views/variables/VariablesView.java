@@ -372,15 +372,18 @@ public class VariablesView extends AbstractDebugEventHandlerView implements IDeb
     
     protected void restoreState() {
         VariablesViewer viewer = (VariablesViewer) getViewer();
-        Object context= viewer.getInput();
-        if (context != null) {
-            AbstractViewerState state = (AbstractViewerState)fSelectionStates.get(context);
-            if (state == null) {
-                // attempt to restore selection/expansion based on last frame
-                state = fLastState;
-            } 
-            if (state != null) {
-                state.restoreState(viewer);
+        if (viewer != null) {
+            Object context = viewer.getInput();
+            if (context != null) {
+                AbstractViewerState state = (AbstractViewerState) fSelectionStates.get(context);
+                if (state == null) {
+                    // attempt to restore selection/expansion based on last
+                    // frame
+                    state = fLastState;
+                }
+                if (state != null) {
+                    state.restoreState(viewer);
+                }
             }
         }
     }
