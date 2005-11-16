@@ -594,13 +594,6 @@ public class VariablesView extends AbstractDebugEventHandlerView implements IDeb
 
 		// listen to debug context
 		DebugContextManager.getDefault().addDebugContextListener(this, getSite().getWorkbenchWindow());
-		// getSite().getPage().addSelectionListener(IDebugUIConstants.ID_DEBUG_VIEW, this);
-		VariablesViewEventHandler handler = createEventHandler();
-		// TODO: replaced with update policy
-		if (handler != null) {
-			setEventHandler(handler);
-		}
-
 		return variablesViewer;
 	}
 	
@@ -639,17 +632,6 @@ public class VariablesView extends AbstractDebugEventHandlerView implements IDeb
 		detailsViewer.getTextWidget().addMouseListener(getCursorListener());
 		detailsViewer.getTextWidget().addKeyListener(getCursorListener());
 	}
-	
-	
-	/**
-	 * Creates this view's event handler.
-	 * 
-	 * @return an event handler
-	 */
-	protected VariablesViewEventHandler createEventHandler() {
-		// TODO: replaced by update policy
-		return null;
-	}	
 		
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.ui.AbstractDebugView#getHelpContextId()

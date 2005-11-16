@@ -12,15 +12,11 @@ package org.eclipse.debug.internal.ui.views.expression;
 
  
 import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IDebugElement;
-import org.eclipse.debug.core.model.IExpression;
-import org.eclipse.debug.core.model.IWatchExpression;
 import org.eclipse.debug.internal.ui.IDebugHelpContextIds;
 import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
 import org.eclipse.debug.internal.ui.views.variables.AvailableLogicalStructuresAction;
 import org.eclipse.debug.internal.ui.views.variables.VariablesView;
-import org.eclipse.debug.internal.ui.views.variables.VariablesViewEventHandler;
 import org.eclipse.debug.internal.ui.views.variables.VariablesViewMessages;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.action.IAction;
@@ -39,16 +35,6 @@ import org.eclipse.ui.IWorkbenchPart;
  * area.
  */
 public class ExpressionView extends VariablesView {
-	
-	
-	/**
-	 * Creates this view's event handler.
-	 * 
-	 * @return an event handler
-	 */
-	protected VariablesViewEventHandler createEventHandler() {
-		return new ExpressionViewEventHandler(this);
-	}		
 	
 	/**
 	 * @see AbstractDebugView#getHelpContextId()
@@ -98,27 +84,6 @@ public class ExpressionView extends VariablesView {
 		if (!isVisible()) {
 			return;
 		}
-		if (selection instanceof IStructuredSelection) {
-			IDebugElement context = null;
-			IStructuredSelection ss = (IStructuredSelection)selection;
-			if (ss.size() < 2) {
-				Object object = ss.getFirstElement();
-				if (object instanceof IDebugElement) {
-					context= (IDebugElement) object;
-				} else if (object instanceof ILaunch) {
-					context= ((ILaunch) object).getDebugTarget();
-				}
-			}
-			// update watch expressions with new context
-			IExpression[] expressions = DebugPlugin.getDefault().getExpressionManager().getExpressions();
-			for (int i = 0; i < expressions.length; i++) {
-				IExpression expression = expressions[i];
-				if (expression instanceof IWatchExpression) {
-					((IWatchExpression)expression).setExpressionContext(context);
-				}
-			}			
-		} 
-
 		// update actions
 		updateAction("ContentAssist"); //$NON-NLS-1$
 	}

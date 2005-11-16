@@ -13,7 +13,6 @@ package org.eclipse.debug.internal.ui.views.registers;
 import org.eclipse.debug.internal.ui.IDebugHelpContextIds;
 import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
 import org.eclipse.debug.internal.ui.views.variables.VariablesView;
-import org.eclipse.debug.internal.ui.views.variables.VariablesViewEventHandler;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
@@ -53,12 +52,4 @@ public class RegistersView extends VariablesView {
 		return RegistersViewMessages.RegistersView_0; 
 	}
 
-
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.views.variables.VariablesView#createEventHandler()
-	 */
-	protected VariablesViewEventHandler createEventHandler() {
-		return new RegistersViewEventHandler(this);
-	}
 }
