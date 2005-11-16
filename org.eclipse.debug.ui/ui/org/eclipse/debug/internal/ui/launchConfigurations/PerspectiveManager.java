@@ -89,6 +89,8 @@ public class PerspectiveManager implements ILaunchListener, ISuspendTriggerListe
 	 */
 	private boolean fPrompting;
 	private PerspectiveSwitchLock fPerspectiveSwitchLock = new PerspectiveSwitchLock();
+    
+    private int fNumLaunches = 0; 
 	
 	/**
 	 * Lock used to synchronize perspective switching with view activation.
@@ -147,15 +149,18 @@ public class PerspectiveManager implements ILaunchListener, ISuspendTriggerListe
 	}
 
 	/**
-	 * Do nothing.
+	 * If there are no launches, remove the Suspend Trigger Listener
 	 * 
 	 * @see ILaunchListener#launchRemoved(ILaunch)
 	 */
-	public void launchRemoved(ILaunch launch) {
-		ISuspendTrigger trigger = (ISuspendTrigger) launch.getAdapter(ISuspendTrigger.class);
-		if (trigger != null) {
-			trigger.removeSuspendTriggerListener(this);
-		}
+	public synchronized void launchRemoved(ILaunch launch) {
+        fNumLaunches --;
+        if (fNumLaunches == 0) {
+            ISuspendTrigger trigger = (ISuspendTrigger) launch.getAdapter(ISuspendTrigger.class);
+            if (trigger != null) {
+                trigger.removeSuspendTriggerListener(this);
+            }
+        }
 	}
 	
 	/**
@@ -172,15 +177,17 @@ public class PerspectiveManager implements ILaunchListener, ISuspendTriggerListe
 	 * 
 	 * @see ILaunchListener#launchAdded(ILaunch)
 	 */
-	public void launchAdded(ILaunch launch) {
-		
-		ISuspendTrigger trigger = (ISuspendTrigger) launch.getAdapter(ISuspendTrigger.class);
-		if (trigger != null) {
-			trigger.addSuspendTriggerListener(this);
-		}
-		
-		fPerspectiveSwitchLock.startSwitch();
-		
+	public synchronized void launchAdded(ILaunch launch) {
+	    if (fNumLaunches == 0) {
+	        ISuspendTrigger trigger = (ISuspendTrigger) launch.getAdapter(ISuspendTrigger.class);
+	        if (trigger != null) {
+	            trigger.addSuspendTriggerListener(this);
+	        }
+	    }
+	    
+	    fNumLaunches ++;
+	    fPerspectiveSwitchLock.startSwitch();
+	    
 		String perspectiveId = null;
 		// check event filters
 		try {
