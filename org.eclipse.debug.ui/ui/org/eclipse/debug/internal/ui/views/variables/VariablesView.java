@@ -1284,6 +1284,7 @@ public class VariablesView extends AbstractDebugEventHandlerView implements IDeb
 		if (selection instanceof IStructuredSelection) {
 			setViewerInput(((IStructuredSelection)selection).getFirstElement());
 		}
+		showViewer();
 		
 		updateAction("ContentAssist"); //$NON-NLS-1$
 		updateAction("FindVariable"); //$NON-NLS-1$
