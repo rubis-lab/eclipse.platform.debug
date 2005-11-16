@@ -127,6 +127,10 @@ public class TreeSelection implements IStructuredSelection {
                 }
                 return true;
             }
+        } else if (obj instanceof IStructuredSelection) {
+        	if (isEmpty() && ((IStructuredSelection)obj).isEmpty()) {
+        		return true;
+        	}
         }
         return false;
     }

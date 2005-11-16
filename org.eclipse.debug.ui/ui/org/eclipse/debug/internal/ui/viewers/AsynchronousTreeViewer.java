@@ -600,12 +600,10 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.viewers.ISelectionProvider#getSelection()
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.viewers.AsynchronousViewer#newSelectionFromWidget()
 	 */
-	public ISelection getSelection() {
+	protected ISelection newSelectionFromWidget() {
 		Control control = getControl();
 		if (control == null || control.isDisposed()) {
 			return StructuredSelection.EMPTY;

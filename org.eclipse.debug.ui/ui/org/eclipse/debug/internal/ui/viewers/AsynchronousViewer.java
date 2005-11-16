@@ -26,8 +26,11 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
@@ -683,6 +686,44 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 		return !selectionPolicy.isSticky(current, getPresentationContext());
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.StructuredViewer#getSelection()
+	 */
+	public ISelection getSelection() {
+		Control control = getControl();
+		if (control == null || control.isDisposed() || fCurrentSelection == null) {
+			return StructuredSelection.EMPTY;
+		}
+		return fCurrentSelection;
+	}	
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.StructuredViewer#handleSelect(org.eclipse.swt.events.SelectionEvent)
+	 */
+	protected void handleSelect(SelectionEvent event) {
+		// handle case where an earlier selection listener disposed the control.
+		Control control = getControl();
+		if (control != null && !control.isDisposed()) {
+			updateSelection(newSelectionFromWidget());
+		}
+	}	
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.StructuredViewer#handlePostSelect(org.eclipse.swt.events.SelectionEvent)
+	 */
+	protected void handlePostSelect(SelectionEvent e) {
+		SelectionChangedEvent event = new SelectionChangedEvent(this, newSelectionFromWidget());
+		firePostSelectionChanged(event);
+	}	
+	
+	/**
+	 * Creates and returns a new seletion from this viewer, based on the selected
+	 * elements in the widget.
+	 * 
+	 * @return a new selection
+	 */
+	protected abstract ISelection newSelectionFromWidget();
+	
 	/**
 	 * Returns the selection policy associated with the given selection
 	 * or <code>null</code> if none.
@@ -729,7 +770,7 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 			if (fPendingSelection.isEmpty()) {
 				fPendingSelection = null;
 			}
-			ISelection currentSelection = getSelection();
+			ISelection currentSelection = newSelectionFromWidget();
 			if (isSuppressEqualSelections() && currentSelection.equals(fCurrentSelection)) {
 				return;
 			}
@@ -817,7 +858,7 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 			} finally {
 				// restore selection
 				if (oldSelection == null) {
-					oldSelection = new TreeSelection(new TreePath[0]);
+					oldSelection = new StructuredSelection();
 				}
 				if (getControl().getDisplay().getThread() == Thread.currentThread()) {
 					restoreSelection(oldSelection);
@@ -842,7 +883,7 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 	protected synchronized void restoreSelection(ISelection oldSelection) {
 		doAttemptSelectionToWidget(oldSelection, false);
 		// send out notification if old and new differ
-		fCurrentSelection = getSelection();
+		fCurrentSelection = newSelectionFromWidget();
 		if (!fCurrentSelection.equals(oldSelection))
 			handleInvalidSelection(oldSelection, fCurrentSelection);		
 	}
