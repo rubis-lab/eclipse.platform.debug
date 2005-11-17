@@ -50,9 +50,9 @@ import org.eclipse.debug.internal.ui.contexts.actions.FindVariableAction;
 import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
 import org.eclipse.debug.internal.ui.viewers.AsynchronousTreeViewer;
 import org.eclipse.debug.internal.ui.viewers.PresentationContext;
-import org.eclipse.debug.internal.ui.views.AbstractDebugEventHandlerView;
 import org.eclipse.debug.internal.ui.views.AbstractViewerState;
 import org.eclipse.debug.internal.ui.views.IDebugExceptionHandler;
+import org.eclipse.debug.ui.AbstractDebugView;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.IValueDetailListener;
@@ -119,7 +119,7 @@ import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 /**
  * This view shows variables and their values for a particular stack frame
  */
-public class VariablesView extends AbstractDebugEventHandlerView implements IDebugContextListener,
+public class VariablesView extends AbstractDebugView implements IDebugContextListener,
 																	IPropertyChangeListener,
 																	IValueDetailListener,
 																	IDebugExceptionHandler {
@@ -490,7 +490,7 @@ public class VariablesView extends AbstractDebugEventHandlerView implements IDeb
 	public void propertyChange(PropertyChangeEvent event) {
 		String propertyName= event.getProperty();
 		if (propertyName.equals(IDebugPreferenceConstants.CHANGED_VARIABLE_COLOR)) {
-			getEventHandler().refresh();
+			getViewer().refresh();
 		} else if (propertyName.equals(IInternalDebugUIConstants.DETAIL_PANE_FONT)) {
 			getDetailViewer().getTextWidget().setFont(JFaceResources.getFont(IInternalDebugUIConstants.DETAIL_PANE_FONT));			
 		} else if (propertyName.equals(IInternalDebugUIConstants.PREF_MAX_DETAIL_LENGTH)) {
@@ -1473,4 +1473,9 @@ public class VariablesView extends AbstractDebugEventHandlerView implements IDeb
 		}
 	}
 
+	protected void clearStatusLine() {
+		IStatusLineManager manager = getViewSite().getActionBars().getStatusLineManager(); 
+		manager.setErrorMessage(null);
+		manager.setMessage(null);
+	}	
 }
