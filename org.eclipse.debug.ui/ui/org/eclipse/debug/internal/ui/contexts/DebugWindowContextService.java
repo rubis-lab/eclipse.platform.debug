@@ -179,7 +179,7 @@ public class DebugWindowContextService implements IDebugContextService, IPartLis
 	 */
 	public ISelection getActiveContext() {
 		if (!fProviders.isEmpty()) {
-			((IDebugContextProvider)fProviders.get(0)).getActiveContext();
+			return ((IDebugContextProvider)fProviders.get(0)).getActiveContext();
 		}
 		return null;
 	}
