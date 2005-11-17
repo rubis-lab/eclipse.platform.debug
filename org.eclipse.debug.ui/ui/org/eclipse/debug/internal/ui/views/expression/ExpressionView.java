@@ -15,6 +15,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.internal.ui.IDebugHelpContextIds;
 import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
+import org.eclipse.debug.internal.ui.views.AbstractViewerState;
 import org.eclipse.debug.internal.ui.views.variables.AvailableLogicalStructuresAction;
 import org.eclipse.debug.internal.ui.views.variables.VariablesView;
 import org.eclipse.debug.internal.ui.views.variables.VariablesViewMessages;
@@ -35,6 +36,8 @@ import org.eclipse.ui.IWorkbenchPart;
  * area.
  */
 public class ExpressionView extends VariablesView {
+	
+	private AbstractViewerState fState;
 	
 	/**
 	 * @see AbstractDebugView#getHelpContextId()
@@ -142,10 +145,42 @@ public class ExpressionView extends VariablesView {
      * @see org.eclipse.debug.internal.ui.views.variables.VariablesView#restoreState()
      */
     protected void restoreState() {
+    	if (fState != null) {
+    		fState.restoreState(getVariablesViewer());
+    	}
     }
+    
     /* (non-Javadoc)
      * @see org.eclipse.ui.IViewPart#saveState(org.eclipse.ui.IMemento)
      */
     public void saveState(IMemento memento) {
     }
+    
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.views.variables.VariablesView#dispose()
+	 */
+	public void dispose() {
+		super.dispose();
+		fState = null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.views.variables.VariablesView#becomesHidden()
+	 */
+	protected void becomesHidden() {
+		fState = getViewerState();
+		super.becomesHidden();
+		getViewer().setInput(null);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.views.variables.VariablesView#becomesVisible()
+	 */
+	protected void becomesVisible() {
+		super.becomesVisible();
+		setInitialContent();
+		restoreState();
+	}
+    
+    
 }

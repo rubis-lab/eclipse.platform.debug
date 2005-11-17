@@ -1400,7 +1400,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		return new ViewerState(getVariablesViewer());
 	}
 	
-	private VariablesViewer getVariablesViewer() {
+	protected VariablesViewer getVariablesViewer() {
 		return (VariablesViewer) getViewer();
 	}
 	
