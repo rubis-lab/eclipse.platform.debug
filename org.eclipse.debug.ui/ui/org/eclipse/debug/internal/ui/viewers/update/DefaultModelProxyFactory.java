@@ -49,6 +49,11 @@ public class DefaultModelProxyFactory implements IModelProxyFactory {
 					return new DefaultExpressionModelProxy((IExpression)element);
 				}
 			}
+			if (IDebugUIConstants.ID_REGISTER_VIEW.equals(id)) {
+				if (element instanceof IStackFrame) {
+					return new DefaultVariableViewModelProxy((IStackFrame)element);
+				}
+			}
 		}
 		return null;
 	}
