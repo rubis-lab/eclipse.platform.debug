@@ -11,6 +11,7 @@
 package org.eclipse.debug.internal.ui.elements.adapters;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.model.IErrorReportingExpression;
 import org.eclipse.debug.core.model.IExpression;
 import org.eclipse.debug.core.model.IValue;
 import org.eclipse.debug.internal.ui.viewers.IPresentationContext;
@@ -24,11 +25,21 @@ public class ExpressionTreeContentAdapter extends VariableTreeContentAdapter {
      * @see org.eclipse.debug.ui.viewers.AsynchronousTreeContentAdapter#getChildren(java.lang.Object, org.eclipse.debug.ui.viewers.IPresentationContext)
      */
     protected Object[] getChildren(Object parent, IPresentationContext context) throws CoreException {
-        IExpression expression = (IExpression) parent;
-        IValue value = expression.getValue();
-        if (value != null) {
-            return getValueChildren(expression, value, context);
+        if (parent instanceof IErrorReportingExpression) {
+            IErrorReportingExpression expression = (IErrorReportingExpression) parent;
+            if (expression.hasErrors()) {
+                return expression.getErrorMessages();
+            }
         }
+
+        if (parent instanceof IExpression) {
+            IExpression expression = (IExpression) parent;
+            IValue value = expression.getValue();
+            if (value != null) {
+                return getValueChildren(expression, value, context);
+            }
+        }
+        
         return EMPTY;
     }
     
@@ -36,11 +47,21 @@ public class ExpressionTreeContentAdapter extends VariableTreeContentAdapter {
      * @see org.eclipse.debug.ui.viewers.AsynchronousTreeContentAdapter#hasChildren(java.lang.Object, org.eclipse.debug.ui.viewers.IPresentationContext)
      */
     protected boolean hasChildren(Object element, IPresentationContext context) throws CoreException {
-        IValue value = ((IExpression)element).getValue();
-        if (value == null) {
-        	return false;
+        if (element instanceof IErrorReportingExpression) {
+            IErrorReportingExpression expression = (IErrorReportingExpression) element;
+            if (expression.hasErrors()) {
+                return true;
+            }
         }
-        return value.hasVariables();
+        
+        if (element instanceof IExpression) {
+            IValue value = ((IExpression) element).getValue();
+            if (value != null) {
+                return value.hasVariables();
+            }
+        }
+        
+        return false;
     }	
     
 }
