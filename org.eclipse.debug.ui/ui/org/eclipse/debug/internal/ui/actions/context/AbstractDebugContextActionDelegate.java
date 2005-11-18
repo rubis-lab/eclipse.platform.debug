@@ -63,20 +63,17 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 	 * Used to schedule jobs, or <code>null</code> if none
 	 */
 	private IWorkbenchSiteProgressService fProgressService = null;
-	
-	private String fJobName;
 
+	private UpdateEnablementJob fUpdateJob = null;
+	
 	class UpdateEnablementJob extends Job {
 
-		IAction targetAction = null;
 		ISelection targetSelection = null;
 
-		public UpdateEnablementJob(IAction action, ISelection selection) {
+		public UpdateEnablementJob() {
 			super(ActionMessages.AbstractDebugActionDelegate_1);
 			setPriority(Job.INTERACTIVE);
 			setSystem(true);
-			targetAction = action;
-			targetSelection = selection;
 		}
 
 		/*
@@ -85,10 +82,21 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 		 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 		 */
 		protected IStatus run(IProgressMonitor monitor) {
-			update(targetAction, targetSelection);
+			ISelection context = null;
+			synchronized (this) {
+				context = targetSelection;
+				targetSelection = null;
+			}
+			update(getAction(), context);
 			return Status.OK_STATUS;
 		}
+		
+		protected synchronized void setContext(ISelection context) {
+			targetSelection = context;
+		}
 	}
+	
+	private DebugRequestJob fRequestJob = null;
 
 	class DebugRequestJob extends Job {
 
@@ -97,14 +105,11 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 		/**
 		 * Constructs a new job to perform a debug request (for example, step)
 		 * in the background.
-		 * 
-		 * @param name job name
 		 */
-		public DebugRequestJob(String name, Object[] elements) {
-			super(name);
+		public DebugRequestJob() {
+			super(DebugUIPlugin.removeAccelerators(getAction().getText()));
 			setPriority(Job.INTERACTIVE);
 			setSystem(true);
-			fElements = elements;
 		}
 
 		/*
@@ -114,8 +119,13 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 		 */
 		protected IStatus run(IProgressMonitor monitor) {
 			MultiStatus status = new MultiStatus(DebugUIPlugin.getUniqueIdentifier(), DebugException.REQUEST_FAILED, getStatusMessage(), null);
-			for (int i = 0; i < fElements.length; i++) {
-				Object element = fElements[i];
+			Object[] targets = null;
+			synchronized (this) {
+				targets = fElements;
+				fElements = null;
+			}
+			for (int i = 0; i < targets.length; i++) {
+				Object element = targets[i];
 				Object target = getTarget(element);
 				try {
 					// Action's enablement could have been changed since
@@ -128,6 +138,10 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 				}
 			}
 			return status;
+		}
+		
+		protected synchronized void setElements(Object[] elements) {
+			fElements = elements;
 		}
 
 	}
@@ -180,10 +194,11 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 			// disable the action so it cannot be run again until an event or
 			// selection change updates the enablement
 			action.setEnabled(false);
-			if (fJobName == null) {
-				fJobName = DebugUIPlugin.removeAccelerators(action.getText());
+			if (fRequestJob == null) {
+				fRequestJob = new DebugRequestJob();
 			}
-			schedule(new DebugRequestJob(fJobName, selection.toArray()));
+			fRequestJob.setElements(selection.toArray());
+			schedule(fRequestJob);
 		}
 	}
 
@@ -267,7 +282,11 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 
 	public synchronized void contextActivated(ISelection context, IWorkbenchPart part) {
 		setContext(null);
-		schedule(new UpdateEnablementJob(getAction(), context));		
+		if (fUpdateJob == null) {
+			fUpdateJob = new UpdateEnablementJob();
+		}
+		fUpdateJob.setContext(context);
+		schedule(fUpdateJob);		
 	}
 
 	protected void setAction(IAction action) {
