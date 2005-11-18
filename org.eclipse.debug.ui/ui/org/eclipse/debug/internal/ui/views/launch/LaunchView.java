@@ -375,6 +375,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 					}					
 				}
 				// forces the delegates to update enablement
+				// TODO: would it be better to contribute toolbar/context actions in code?
 				if (launches.length == 0) {
 					Runnable runnable = new Runnable() {
 						public void run() {
@@ -504,11 +505,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 		fProvider.activate(event.getSelection());
 		
 //		clearStatusLine();
-//		updateObjects();
-//		Object element = ((IStructuredSelection) getViewer().getSelection()).getFirstElement();
-//		if (element != null && !element.equals(fStackFrame)) {
-//			showEditorForCurrentSelection();
-//		}
+		updateObjects();
 		
 //		 TODO: replace view conetxt stuff based on debug context
 		if (isActive()) {
