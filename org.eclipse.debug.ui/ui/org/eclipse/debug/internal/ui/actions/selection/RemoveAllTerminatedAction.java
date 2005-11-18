@@ -86,8 +86,11 @@ public class RemoveAllTerminatedAction extends AbstractRemoveAllActionDelegate i
 	 * @see org.eclipse.debug.core.ILaunchesListener#launchesRemoved(org.eclipse.debug.core.ILaunch[])
 	 */
 	public void launchesRemoved(ILaunch[] launches) {
-		if (getAction().isEnabled()) {
-			update();
+		IAction action = getAction();
+		if (action != null) {
+			if (action.isEnabled()) {
+				update();
+			}
 		}
 	}
 
