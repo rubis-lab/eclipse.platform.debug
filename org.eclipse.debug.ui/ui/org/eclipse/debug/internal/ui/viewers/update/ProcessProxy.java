@@ -25,11 +25,7 @@ public class ProcessProxy extends EventHandlerModelProxy {
         }
 
         protected void handleCreate(DebugEvent event) {
-            ModelDelta delta = new ModelDelta();
-            IModelDeltaNode node = delta.addNode(DebugPlugin.getDefault().getLaunchManager(), IModelDelta.NOCHANGE);
-            node = node.addNode(fProcess.getLaunch(), IModelDelta.NOCHANGE);
-            node.addNode(fProcess, IModelDelta.ADDED);
-            fireModelChanged(delta);
+        	// do nothing - Launch change notification handles this
         }
         
     };

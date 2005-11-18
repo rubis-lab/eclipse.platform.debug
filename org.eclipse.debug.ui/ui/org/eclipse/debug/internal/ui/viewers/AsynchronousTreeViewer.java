@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -356,7 +355,9 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 				path.add(0, data);
 				parent = getParentItem(parent);
 			}
-			path.add(0, getInput());
+			if (!path.get(0).equals(getInput())) { 
+				path.add(0, getInput());
+			}
 			paths[i] = new TreePath(path.toArray());
 			if (widget instanceof TreeItem) {
 				paths[i].setTreeItem((TreeItem) widget);
@@ -425,6 +426,31 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 			}
 		}
 		attemptExpansion();
+	}
+	
+	/**
+	 * Adds a child at end of parent.
+	 * 
+	 * @param parent
+	 * @param child
+	 */
+	synchronized void add(Widget parent, Object child) {
+		// refresh vs. add if not expanded
+		boolean expanded = true;
+		if (parent instanceof TreeItem) {
+			expanded = ((TreeItem)parent).getExpanded();
+		}
+		if (expanded) {
+			Object[] objects = filter(new Object[]{child});
+			if (objects.length == 1) {
+				child = objects[0];
+				TreeItem item = newTreeItem(parent);
+				map(child, item);
+				internalRefresh(child, item);
+			}
+		} else {
+			internalRefresh(parent.getData(), parent);
+		}		
 	}
 
 	/**
@@ -524,6 +550,19 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		}
 		return new TreeItem((TreeItem) parent, SWT.NONE, index);
 	}
+	
+	/**
+	 * Creates a new tree item as a child of the given widget as last.
+	 * 
+	 * @param parent parent widget - a Tree or TreeItem
+	 * @return tree item
+	 */
+	protected TreeItem newTreeItem(Widget parent) {
+		if (parent instanceof Tree) {
+			return new TreeItem((Tree) parent, SWT.NONE);
+		}
+		return new TreeItem((TreeItem) parent, SWT.NONE);
+	}	
 
 	/**
 	 * Unmaps the given item, and unmaps and disposes of all children of that
@@ -632,7 +671,7 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	 * @see org.eclipse.debug.ui.viewers.AsynchronousViewer#internalRefresh(java.lang.Object,
 	 *      org.eclipse.swt.widgets.Widget)
 	 */
-	protected void internalRefresh(Object element, Widget item) {
+	protected synchronized void internalRefresh(Object element, Widget item) {
 		super.internalRefresh(element, item);
 		updateHasChildren(element, item);
 	}
@@ -800,97 +839,102 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	protected ISelection getEmptySelection() {
 		return new TreeSelection(new TreePath[0]);
 	}
-
-	public synchronized void add(final TreePath treePath) {
-		WorkbenchJob job = new WorkbenchJob("AsynchronousTreeViewer.add()") { //$NON-NLS-1$
-			public IStatus runInUIThread(IProgressMonitor monitor) {
-				Widget widget = getTree();
-				for (int i = 0; i < treePath.getSegmentCount(); i++) {
-					Object segment = treePath.getSegment(i);
-					if (!segment.equals(getInput())) {
-						Widget child = findChild(widget, segment, true);
-						if (child == null) {
-							return Status.OK_STATUS;
+	
+	/**
+	 * Adds the item specified by the given tree path to this tree.
+	 * Can be called in a non-UI thread.
+	 * 
+	 * @param treePath
+	 */
+	public synchronized void add(TreePath treePath) {
+		int parentIndex = treePath.getSegmentCount() - 2; 
+		if (parentIndex >= 0) {
+			// find the paths to the parent, if it's present
+			Object parent = treePath.getSegment(parentIndex);
+			TreePath[] paths = getTreePaths(parent);
+			if (paths != null) {
+				// find the right path
+				for (int i = 0; i < paths.length; i++) {
+					TreePath path = paths[i];
+					if (treePath.startsWith(path)) {
+						Widget widget = path.getTreeItem();
+						if (widget == null) {
+							widget = getTree();
 						}
-						widget = child;
+						AddRequestMonitor addRequest = new AddRequestMonitor(widget, treePath.getLastSegment(), this);
+						schedule(addRequest);
+						addRequest.done();
+						return;
 					}
 				}
-				return Status.OK_STATUS;
 			}
-		};
-
-		job.setSystem(true);
-		job.schedule();
-	}
-
-	private Widget findChild(Widget widget, Object segment, boolean create) {
-		TreeItem[] items = null;
-		if (widget instanceof Tree) {
-			items = ((Tree) widget).getItems();
-		} else if (widget instanceof TreeItem) {
-			items = ((TreeItem) widget).getItems();
-		}
-
-		if (items != null) {
-			for (int i = 0; i < items.length; i++) {
-				TreeItem item = items[i];
-				if (segment.equals(item.getData())) {
-					return item;
-				}
-			}
-		}
-
-		if (create) {
-            boolean expanded = false;
-            if (widget instanceof Tree) {
-                expanded = true;
-            } else if (widget instanceof TreeItem) {
-                expanded = ((TreeItem) widget).getExpanded();
-            }
-
-            if (expanded) {
-                // child doesn't exist. create it.
-                List datas = new ArrayList();
-                for (int i = 0; i < items.length; i++) {
-                    Object data = items[i].getData();
-                    if (data != null)
-                        datas.add(data);
-                }
-                datas.add(segment);
-                // search for the new child and return it...
-                setChildren(widget, datas);
-                return findChild(widget, segment, false);
-            } else {            
-                updateHasChildren(getElement(widget), widget);
-            }
-        }
-        return null;
-    }
-
-	public synchronized void remove(final TreePath treePath) {
-		WorkbenchJob job = new WorkbenchJob("AsynchronousTreeViewer.remove()") { //$NON-NLS-1$
-			public IStatus runInUIThread(IProgressMonitor monitor) {
-				Object lastSegment = treePath.getLastSegment();
-				TreePath[] treePaths = getTreePaths(lastSegment);
-				if (treePaths != null) {
-					for (int i = 0; i < treePaths.length; i++) {
-						TreePath path = treePaths[i];
-						if (path.equals(treePath)) {
-							TreeItem treeItem = path.getTreeItem();
-							unmap(lastSegment, treeItem);
-							treeItem.dispose();
+			// refresh the leaf parent, if any
+			for (int i = parentIndex -1; i >= 0; i++) {
+				parent = treePath.getSegment(i);
+				paths = getTreePaths(parent);
+				if (paths != null) {
+					for (int j = 0; j < paths.length; j++) {
+						TreePath path = paths[j];
+						if (treePath.startsWith(path)) {
+							Widget widget = path.getTreeItem();
+							if (widget == null) {
+								widget = getTree();
+							}
+							internalRefresh(parent, widget);
+							return;
 						}
 					}
 				}
-				return Status.OK_STATUS;
 			}
-		};
-        
-        job.setSystem(true);
-        job.setPriority(Job.INTERACTIVE);
-        job.schedule();
-
+		}
 	}
+	
+	
+	/**
+	 * Removes the item specified in the given tree path from this tree.
+	 * Can be called in a non-UI thread.
+	 * 
+	 * @param treePath
+	 */	
+	public synchronized void remove(TreePath treePath) {
+		if (treePath.getSegmentCount() > 1) {
+			// find the paths to the element, if it's present
+			Object element = treePath.getLastSegment();
+			TreePath[] paths = getTreePaths(element);
+			if (paths != null) {
+				// find the right path
+				for (int i = 0; i < paths.length; i++) {
+					TreePath path = paths[i];
+					if (treePath.equals(path)) {
+						TreeItem item = path.getTreeItem();
+						RemoveRequestMonitor request = new RemoveRequestMonitor(item, this);
+						schedule(request);
+						request.done();
+						return;
+					}
+				}
+			}
+			// refresh the parent, if present
+			if (treePath.getSegmentCount() >= 2) {
+				element = treePath.getSegment(treePath.getSegmentCount() - 2);
+				paths = getTreePaths(element);
+				if (paths != null) {
+					// find the right path
+					for (int i = 0; i < paths.length; i++) {
+						TreePath path = paths[i];
+						if (treePath.startsWith(path)) {
+							Widget widget = path.getTreeItem();
+							if (widget == null) {
+								widget = getTree();
+							}
+							internalRefresh(element, widget);
+							return;
+						}
+					}
+				}
+			}
+		}
+	}	
 
 	void setLabels(Widget widget, String[] text, ImageDescriptor[] image) {
 		if (widget instanceof TreeItem) {

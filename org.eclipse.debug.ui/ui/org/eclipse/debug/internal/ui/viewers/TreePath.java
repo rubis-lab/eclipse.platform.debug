@@ -155,16 +155,19 @@ public final class TreePath {
      *  path
      */
     public boolean startsWith(TreePath treePath) {
-    		if (treePath == null) {
-    			return false;
-    		}
-    		
-    		if (treePath.equals(this)) {
-    			return true;
-    		}
-    		
+		if (treePath == null) {
+			return false;
+		}
+		int thisLength = getSegmentCount();
+		int otherLength = treePath.getSegmentCount();
+		if (otherLength == thisLength) {
+			return treePath.equals(this);
+		}
+		if (otherLength > thisLength) {
+			return false;
+		}
         int segmentCount = treePath.getSegmentCount();
-        if (segmentCount >= fSegments.length) {
+        if (segmentCount > fSegments.length) {
             return false;
         }
         for (int i = 0; i < segmentCount; i++) {
