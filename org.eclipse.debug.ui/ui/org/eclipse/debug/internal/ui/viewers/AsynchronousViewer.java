@@ -154,7 +154,9 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 		fColorCache.clear();
 		
 		disposeAllModelProxies();
-		fUpdatePolicy.dispose();
+		if (fUpdatePolicy != null) {
+			fUpdatePolicy.dispose();
+		}
 		
 		unmapAllElements();
 		fPendingUpdates.clear();
