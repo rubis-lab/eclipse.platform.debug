@@ -524,8 +524,6 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	 */
 	public void selectionChanged(SelectionChangedEvent event) {
 		fProvider.activate(event.getSelection());
-		
-//		clearStatusLine();
 		updateObjects();
 		
 //		 TODO: replace view conetxt stuff based on debug context
