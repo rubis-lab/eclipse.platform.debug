@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.internal.ui.contexts.actions;
+package org.eclipse.debug.internal.ui.actions.selection;
 
 
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class RemoveBreakpointAction extends AbstractRemoveActionDelegate {
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
 	public void run(IAction action) {
-		IStructuredSelection selection= getContext();
+		IStructuredSelection selection= getSelection();
 		if (selection.isEmpty()) {
 			return;
 		}
@@ -108,13 +108,6 @@ public class RemoveBreakpointAction extends AbstractRemoveActionDelegate {
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.actions.AbstractDebugActionDelegate#doAction(java.lang.Object)
-	 */
-	protected void doAction(Object element) {
-		//not used
-	}
-
 	protected boolean isEnabledFor(Object element) {
 		if (element instanceof BreakpointContainer)
 			return ((BreakpointContainer)element).getChildren().length > 0;

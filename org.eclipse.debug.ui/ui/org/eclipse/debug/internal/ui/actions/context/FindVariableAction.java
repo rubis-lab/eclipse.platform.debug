@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial implementation
  *******************************************************************************/
-package org.eclipse.debug.internal.ui.contexts.actions;
+package org.eclipse.debug.internal.ui.actions.context;
 
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;

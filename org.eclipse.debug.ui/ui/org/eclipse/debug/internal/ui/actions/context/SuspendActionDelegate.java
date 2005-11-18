@@ -8,55 +8,56 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.internal.ui.contexts.actions;
+package org.eclipse.debug.internal.ui.actions.context;
 
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.debug.core.DebugException;
-import org.eclipse.debug.core.model.ITerminate;
+import org.eclipse.debug.core.model.ISuspendResume;
 import org.eclipse.debug.internal.ui.actions.ActionMessages;
-import org.eclipse.debug.internal.ui.views.launch.LaunchView;
 
-public class TerminateAndRemoveActionDelegate extends AbstractDebugContextActionDelegate {
+public class SuspendActionDelegate extends AbstractDebugContextActionDelegate {
 
 	/**
 	 * @see AbstractDebugActionDelegate#doAction(Object)
 	 */
 	protected void doAction(Object element) throws DebugException {
-		LaunchView.terminateAndRemove(element);
+		if (element instanceof ISuspendResume) {
+			 ((ISuspendResume) element).suspend();
+		}
 	}
 	
-	/**
-	 * @see AbstractDebugActionDelegate#isRunInBackground()
-	 */
-	protected boolean isRunInBackground() {
-		return true;
-	}
-
 	/**
 	 * @see AbstractDebugActionDelegate#isEnabledFor(Object)
 	 */
 	protected boolean isEnabledFor(Object element) {
-		if (element instanceof ITerminate) {
-			ITerminate terminate= (ITerminate)element;
-			//do not want to terminate an attach launch that does not
-			//have termination enabled
-			return terminate.canTerminate() || terminate.isTerminated();
-		}
-		return false;
-	}	
+		return element instanceof ISuspendResume && ((ISuspendResume)element).canSuspend();
+	}
 
 	/**
 	 * @see AbstractDebugActionDelegate#getStatusMessage()
 	 */
 	protected String getStatusMessage() {
-		return ActionMessages.TerminateAndRemoveActionDelegate_Exceptions_occurred_attempting_to_terminate_and_remove_2; 
+		return ActionMessages.SuspendActionDelegate_Exceptions_occurred_attempting_to_suspend__2; 
 	}
 
 	/**
 	 * @see AbstractDebugActionDelegate#getErrorDialogMessage()
 	 */
 	protected String getErrorDialogMessage() {
-		return ActionMessages.TerminateAndRemoveActionDelegate_Terminate_and_remove_failed_1; 
+		return ActionMessages.SuspendActionDelegate_Suspend_failed_1; 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.actions.context.AbstractDebugContextActionDelegate#getTarget(java.lang.Object)
+	 */
+	protected Object getTarget(Object selectee) {
+		if (selectee instanceof ISuspendResume) {
+			return selectee;
+		}
+		if (selectee instanceof IAdaptable) {
+			return ((IAdaptable)selectee).getAdapter(ISuspendResume.class);
+		}
+		return null;
+	}	
 }

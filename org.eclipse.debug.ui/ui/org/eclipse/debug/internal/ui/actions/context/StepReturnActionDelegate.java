@@ -8,49 +8,47 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+package org.eclipse.debug.internal.ui.actions.context;
 
-package org.eclipse.debug.internal.ui.contexts.actions;
-
- 
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IStep;
 import org.eclipse.debug.internal.ui.actions.ActionMessages;
 
-public class StepOverActionDelegate extends StepActionDelegate {
+public class StepReturnActionDelegate extends StepActionDelegate {
 
 	/**
 	 * @see StepActionDelegate#checkCapability(IStep)
 	 */
 	protected boolean checkCapability(IStep element) {
-		return element.canStepOver();
+		return element.canStepReturn();
 	}
 
 	/**
 	 * @see StepActionDelegate#stepAction(IStep)
 	 */
 	protected void stepAction(IStep element) throws DebugException {
-		element.stepOver();
+		element.stepReturn();
 	}
 
 	/**
 	 * @see AbstractDebugActionDelegate#getStatusMessage()
 	 */
 	protected String getStatusMessage() {
-		return ActionMessages.StepOverActionDelegate_Exceptions_occurred_attempting_to_step_over_the_frame_2; 
+		return ActionMessages.StepReturnActionDelegate_Exceptions_occurred_attempting_to_run_to_return_of_the_frame__2; 
 	}
 
 	/**
 	 * @see AbstractDebugActionDelegate#getErrorDialogMessage()
 	 */
 	protected String getErrorDialogMessage() {
-		return ActionMessages.StepOverActionDelegate_Step_over_failed_1; 
+		return ActionMessages.StepReturnActionDelegate_Run_to_return_failed__1; 
 	}
 
 	/**
-	 * @see org.eclipse.debug.internal.ui.actions.StepActionDelegate#getActionDefinitionId()
+	 * @see org.eclipse.debug.internal.ui.actions.
+	 * StepActionDelegate#getActionDefinitionId()
 	 */
-	 protected String getActionDefinitionId() {
-		return "org.eclipse.debug.internal.ui.actions.StepOverActionDelegate"; //$NON-NLS-1$
+	protected String getActionDefinitionId() {
+		return "org.eclipse.debug.internal.ui.actions.StepReturnActionDelegate"; //$NON-NLS-1$
 	}
 }
-

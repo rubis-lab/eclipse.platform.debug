@@ -8,10 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.internal.ui.contexts.actions;
+package org.eclipse.debug.internal.ui.actions.context;
 
  
-import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
@@ -38,13 +37,6 @@ public class TerminateAllAction extends AbstractDebugContextActionDelegate {
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.actions.AbstractDebugActionDelegate#isRunInBackground()
-	 */
-	protected boolean isRunInBackground() {
-		return true;
-	}
-	
 	/**
 	 * Update the action enablement based on the launches present in
 	 * the launch manager. selection is unused and can be <code>null</code>.
@@ -68,20 +60,6 @@ public class TerminateAllAction extends AbstractDebugContextActionDelegate {
 	 */
 	public void selectionChanged(IAction action, ISelection selection) {
 		setAction(action);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.actions.AbstractListenerActionDelegate#doHandleDebugEvent(org.eclipse.debug.core.DebugEvent)
-	 */
-	protected void doHandleDebugEvent(DebugEvent event) {
-		switch (event.getKind()) {
-			case DebugEvent.TERMINATE :
-				update(getAction(), null);
-				break;
-			case DebugEvent.CREATE :
-				update(getAction(), null);
-				break;
-		}
 	}
 
 	/* (non-Javadoc)

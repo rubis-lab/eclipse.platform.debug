@@ -8,18 +8,28 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.internal.ui.contexts.actions;
+package org.eclipse.debug.internal.ui.actions.selection;
 
-import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.ui.IDebugView;
 
-public class SelectAllExpressionsAction extends SelectAllAction {
+public class SelectAllVariablesAction extends SelectAllAction {
 
-	protected void update() {
-		getAction().setEnabled(DebugPlugin.getDefault().getExpressionManager().hasExpressions());
-	}
-
+	
 	protected String getActionId() {
 		return IDebugView.SELECT_ALL_ACTION + ".Variables"; //$NON-NLS-1$
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.actions.selection.AbstractRemoveAllActionDelegate#initialize()
+	 */
+	protected void initialize() {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.actions.selection.AbstractRemoveAllActionDelegate#isEnabled()
+	 */
+	protected boolean isEnabled() {
+		// TODO: only enable when stuff present
+		return true;
 	}
 }

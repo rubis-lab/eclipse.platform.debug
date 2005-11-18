@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial implementation
  *******************************************************************************/
-package org.eclipse.debug.internal.ui.contexts.actions;
+package org.eclipse.debug.internal.ui.actions.context;
 
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
@@ -38,13 +38,6 @@ public class TerminateAndRelaunchAction extends AbstractDebugContextActionDelega
                 RelaunchActionDelegate.relaunch(launch.getLaunchConfiguration(), launch.getLaunchMode());        
             }
         });
-    }
-    
-    /**
-     * @see AbstractDebugActionDelegate#isRunInBackground()
-     */
-    protected boolean isRunInBackground() {
-        return true;
     }
 
     /**

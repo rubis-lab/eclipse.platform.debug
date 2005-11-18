@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.internal.ui.contexts.actions;
+package org.eclipse.debug.internal.ui.actions.selection;
 
 
 import java.util.ArrayList;
@@ -18,8 +18,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.ui.IViewPart;
+import org.eclipse.jface.action.IAction;
  
 /**
  * Removes all terminated/detached launches from the
@@ -27,26 +26,19 @@ import org.eclipse.ui.IViewPart;
  */
 public class RemoveAllTerminatedAction extends AbstractRemoveAllActionDelegate implements ILaunchesListener2 {
 
-	/** 
-	 * Updates the enabled state of this action to enabled if at
-	 * least one launch is terminated and relative to the current perspective.
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.actions.selection.AbstractRemoveAllActionDelegate#isEnabled()
 	 */
-	protected void update() {
+	protected boolean isEnabled() {
 		ILaunch[] launches = DebugPlugin.getDefault().getLaunchManager().getLaunches();
 		if (launches != null) {
 			for (int i= 0; i < launches.length; i++) {
 				if (launches[i].isTerminated()) {
-					getAction().setEnabled(true);
-					return;
+					return true;
 				}
 			}
 		}
-		getAction().setEnabled(false);
-	}
-
-	protected void doAction() {
-		ILaunch[] launches = DebugPlugin.getDefault().getLaunchManager().getLaunches();
-		removeTerminatedLaunches(launches);
+		return false;
 	}
 
 	public static void removeTerminatedLaunches(ILaunch[] elements) {
@@ -63,41 +55,55 @@ public class RemoveAllTerminatedAction extends AbstractRemoveAllActionDelegate i
 		}				
 	}
 	
-	/**
-	 * @see IViewActionDelegate#init(IViewPart)
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.actions.selection.AbstractRemoveAllActionDelegate#initialize()
 	 */
-	public void init(IViewPart view) {
-		super.init(view);
+	protected void initialize() {
 		DebugPlugin.getDefault().getLaunchManager().addLaunchListener(this);
 	}
 		
-	/**
-	 * @see IWorkbenchWindowActionDelegate#dispose()
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.actions.selection.AbstractRemoveAllActionDelegate#dispose()
 	 */
 	public void dispose() {
-		//removes as a debug event listener
 		super.dispose();
 		DebugPlugin.getDefault().getLaunchManager().removeLaunchListener(this);
-        IViewPart view = getView();
-        if (view != null) {
-            view.getSite().getSelectionProvider().removeSelectionChangedListener((ISelectionChangedListener) getAction());
-        }
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.core.ILaunchesListener#launchesAdded(org.eclipse.debug.core.ILaunch[])
+	 */
 	public void launchesAdded(ILaunch[] launches) {
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.core.ILaunchesListener#launchesChanged(org.eclipse.debug.core.ILaunch[])
+	 */
 	public void launchesChanged(ILaunch[] launches) {
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.core.ILaunchesListener#launchesRemoved(org.eclipse.debug.core.ILaunch[])
+	 */
 	public void launchesRemoved(ILaunch[] launches) {
 		if (getAction().isEnabled()) {
 			update();
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.core.ILaunchesListener2#launchesTerminated(org.eclipse.debug.core.ILaunch[])
+	 */
 	public void launchesTerminated(ILaunch[] launches) {
 		update();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
+	 */
+	public void run(IAction action) {
+		ILaunch[] launches = DebugPlugin.getDefault().getLaunchManager().getLaunches();
+		removeTerminatedLaunches(launches);
 	}
 }
 

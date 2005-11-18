@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.internal.ui.contexts.actions;
+package org.eclipse.debug.internal.ui.actions.context;
 
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -63,13 +63,6 @@ public class TerminateActionDelegate extends AbstractDebugContextActionDelegate 
     }
 
 	/**
-	 * @see AbstractDebugActionDelegate#isRunInBackground()
-	 */
-	protected boolean isRunInBackground() {
-		return true;
-	}
-
-	/**
 	 * @see AbstractDebugActionDelegate#isEnabledFor(Object)
 	 */
 	protected boolean isEnabledFor(Object element) {
@@ -89,15 +82,6 @@ public class TerminateActionDelegate extends AbstractDebugContextActionDelegate 
 	protected String getErrorDialogMessage() {
 		return ActionMessages.TerminateActionDelegate_Terminate_failed__1; 
 	}
-	
-	/**
-	 * @see ListenerActionDelegate#doHandleDebugEvent(DebugEvent)
-	 */
-	protected void doHandleDebugEvent(DebugEvent event) {	
-		if (event.getKind() == DebugEvent.TERMINATE || event.getKind() == DebugEvent.CREATE) {
-			update(getAction(), getContext());
-		}
-	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.internal.ui.actions.AbstractDebugActionDelegate#update(org.eclipse.jface.action.IAction, org.eclipse.jface.viewers.ISelection)
@@ -110,7 +94,7 @@ public class TerminateActionDelegate extends AbstractDebugContextActionDelegate 
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.contexts.actions.AbstractDebugContextActionDelegate#getTarget(java.lang.Object)
+	 * @see org.eclipse.debug.internal.ui.actions.context.AbstractDebugContextActionDelegate#getTarget(java.lang.Object)
 	 */
 	protected Object getTarget(Object selectee) {
 		if (selectee instanceof ITerminate) {

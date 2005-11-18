@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.internal.ui.contexts.actions;
+package org.eclipse.debug.internal.ui.actions.context;
 
 
 import java.util.Iterator;
@@ -112,7 +112,7 @@ public class ResumeActionDelegate extends AbstractDebugContextActionDelegate {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.contexts.actions.AbstractDebugContextActionDelegate#getTarget(java.lang.Object)
+	 * @see org.eclipse.debug.internal.ui.actions.context.AbstractDebugContextActionDelegate#getTarget(java.lang.Object)
 	 */
 	protected Object getTarget(Object selectee) {
 		if (selectee instanceof ISuspendResume) {

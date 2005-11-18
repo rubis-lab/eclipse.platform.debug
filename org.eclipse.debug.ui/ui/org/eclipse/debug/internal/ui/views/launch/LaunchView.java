@@ -51,20 +51,17 @@ import org.eclipse.debug.internal.ui.actions.EditLaunchConfigurationAction;
 import org.eclipse.debug.internal.ui.contexts.DebugContextManager;
 import org.eclipse.debug.internal.ui.sourcelookup.EditSourceLookupPathAction;
 import org.eclipse.debug.internal.ui.sourcelookup.LookupSourceAction;
-import org.eclipse.debug.internal.ui.sourcelookup.SourceLookupResult;
 import org.eclipse.debug.internal.ui.viewers.AsynchronousTreeViewer;
 import org.eclipse.debug.internal.ui.viewers.PresentationContext;
 import org.eclipse.debug.internal.ui.viewers.TreePath;
 import org.eclipse.debug.internal.ui.viewers.TreeSelection;
 import org.eclipse.debug.internal.ui.views.DebugUIViewsMessages;
 import org.eclipse.debug.ui.AbstractDebugView;
-import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugEditorPresentation;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.contexts.IDebugContextListener;
 import org.eclipse.debug.ui.contexts.IDebugContextProvider;
-import org.eclipse.debug.ui.sourcelookup.ISourceLookupResult;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -84,7 +81,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPageListener;
@@ -104,8 +100,6 @@ import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
-import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
-import org.eclipse.ui.progress.UIJob;
 
 public class LaunchView extends AbstractDebugView implements ISelectionChangedListener, IPerspectiveListener2, IPageListener, IPropertyChangeListener, IResourceChangeListener, IShowInTarget, IShowInSource, IShowInTargetList, IPartListener2 {
 	
@@ -116,12 +110,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	 * for.
 	 */
 	private IStackFrame fStackFrame = null;
-	
-	/**
-	 * Result of last source lookup
-	 */
-	private ISourceLookupResult fResult = null;
-		
+			
 	/**
 	 * Whether this view is in the active page of a perspective.
 	 */
@@ -141,11 +130,6 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	private AddToFavoritesAction fAddToFavoritesAction = null;
 	private EditSourceLookupPathAction fEditSourceAction = null;
 	private LookupSourceAction fLookupAction = null;
-	
-	/**
-	 * Progress service or <code>null</code>
-	 */
-	private IWorkbenchSiteProgressService fProgressService = null;
 
 	class ContextProvider implements IDebugContextProvider {
 		/**
@@ -219,75 +203,6 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	private LaunchViewContextListener fContextListener;
 	
 	/**
-	 * A job to perform source lookup on the currently selected stack frame.
-	 */
-	class SourceLookupJob extends Job {
-
-		/**
-		 * Constructs a new source lookup job.
-		 */
-		public SourceLookupJob() {
-			super(DebugUIViewsMessages.LaunchView_0); 
-			setPriority(Job.INTERACTIVE);
-			setSystem(true);
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
-		 */
-		protected IStatus run(IProgressMonitor monitor) {
-			if (!monitor.isCanceled()) {
-				IStackFrame frame = getStackFrame();
-				ISourceLookupResult result = null;
-				if (frame != null) {
-					result = DebugUITools.lookupSource(frame, null);
-				}
-				setSourceLookupResult(result);
-				scheduleSourceDisplay();
-			}
-			return Status.OK_STATUS;
-		}
-		
-	}
-	
-	/**
-	 * Source lookup job.
-	 */
-	private Job fSourceLookupJob = null;
-	
-	class SourceDisplayJob extends UIJob {
-
-		/**
-		 * Constructs a new source display job
-		 */
-		public SourceDisplayJob() {
-			super(DebugUIViewsMessages.LaunchView_1); 
-			setSystem(true);
-			setPriority(Job.INTERACTIVE);
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.progress.UIJob#runInUIThread(org.eclipse.core.runtime.IProgressMonitor)
-		 */
-		public IStatus runInUIThread(IProgressMonitor monitor) {
-			if (!monitor.isCanceled()) {
-				ISourceLookupResult result = getSourceLookupResult();
-				if (result != null) {
-					DebugUITools.displaySource(result, getSite().getPage());
-				}
-			}
-			return Status.OK_STATUS;
-		}
-		
-	}
-    
-	
-	/**
-	 * Job used for source display.
-	 */
-	private Job fSourceDisplayJob = null;
-	
-	/**
 	 * Creates a launch view and an instruction pointer marker for the view
 	 */
 	public LaunchView() {
@@ -334,8 +249,6 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
         viewer.setInput(DebugPlugin.getDefault().getLaunchManager());
         
         viewer.addSelectionChangedListener(this);
-        // TODO: why post and selection change listener?
-        // viewer.addPostSelectionChangedListener(this);
         viewer.getControl().addKeyListener(new KeyAdapter() {
         	public void keyPressed(KeyEvent event) {
         		if (event.character == SWT.DEL && event.stateMask == 0) {
@@ -461,6 +374,15 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 						asyncExec(runnable);
 					}					
 				}
+				// forces the delegates to update enablement
+				if (launches.length == 0) {
+					Runnable runnable = new Runnable() {
+						public void run() {
+							getViewer().setSelection(new StructuredSelection());
+						}
+					};
+					asyncExec(runnable);
+				}
 				return Status.OK_STATUS;
 			}
 		};
@@ -504,7 +426,6 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 		site.getPage().addPartListener((IPartListener2) this);
 		site.getWorkbenchWindow().addPageListener(this);
 		site.getWorkbenchWindow().addPerspectiveListener(this);
-		fProgressService = (IWorkbenchSiteProgressService) site.getAdapter(IWorkbenchSiteProgressService.class);
 	}
 	
 	/* (non-Javadoc)
@@ -570,18 +491,9 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	 * Disposes of cached information
 	 */
 	protected void cleanup() {
-		setSourceLookupResult(null);
 		setStackFrame(null);
 	}
-	
-	private void setSourceLookupResult(ISourceLookupResult result) {
-	    fResult = result;
-	}
-	
-	private ISourceLookupResult getSourceLookupResult() {
-	    return fResult;
-	}
-	
+		
 	/**
 	 * The selection has changed in the viewer. Show the
 	 * associated source code if it is a stack frame.
@@ -631,7 +543,6 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 				ILaunch launch = launches[i];
 				if (launch.equals(frameLaunch)) {
 					setStackFrame(null);
-					setSourceLookupResult(null);
 				}
 			}
 		}
@@ -660,7 +571,6 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	public void perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
 		setActive(page.findView(getSite().getId()) != null);
 		updateObjects();
-		showEditorForCurrentSelection();
 		fContextListener.clearLastEnabledContexts();
 		if (isActive()) {
 			fContextListener.updateForSelection(((IStructuredSelection) getViewer().getSelection()).getFirstElement());
@@ -693,7 +603,6 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 		if (getSite().getPage().equals(page)) {
 			setActive(true);
 			updateObjects();
-			showEditorForCurrentSelection();
 			if (fContextListener != null) {
 				fContextListener.loadTrackViews();
 			}
@@ -712,102 +621,13 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	public void pageOpened(IWorkbenchPage page) {
 	}
 	
-	/**
-	 * Opens an editor for the current selection if it is a stack frame.
-	 * Otherwise, nothing will happen.
-	 */
-	protected void showEditorForCurrentSelection() {
-		// ensure this view is visible in the active page
-		if (!isActive()) {
-			return;
-		}		
-		ISelection selection= getViewer().getSelection();
-		Object obj= null;
-		if (selection instanceof IStructuredSelection) {
-			obj= ((IStructuredSelection) selection).getFirstElement();
-		}
-		if (!(obj instanceof IStackFrame)) {
-			return;
-		}
-		openEditorForStackFrame((IStackFrame) obj);
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.ui.IDebugView#getPresentation(java.lang.String)
 	 */
 	public IDebugModelPresentation getPresentation(String id) {
 		return ((DelegatingModelPresentation)fEditorPresentation).getPresentation(id);
 	}
-	
-	/**
-	 * Get the active window and open/bring to the front an editor on the stack
-	 * frame. Selection is based on the line number OR the char start and end.
-	 */
-	protected void openEditorForStackFrame(IStackFrame stackFrame) {
-		if (!stackFrame.isSuspended()) {
-			return;
-		}
-		if (!stackFrame.equals(getStackFrame()) || (getEditorInput() == null || getEditorId() == null)) {
-			setStackFrame(stackFrame);
-			scheduleSourceLookup();
-		} else {
-			setStackFrame(stackFrame);
-			SourceLookupResult result = (SourceLookupResult) fResult;
-			if (result != null) {
-				result.updateArtifact(stackFrame);
-			}
-			scheduleSourceDisplay();
-		}
-	}
-	
-	/**
-	 * Schedules a source lookup job.
-	 */
-	private void scheduleSourceLookup() {
-		if (fSourceLookupJob == null) {
-			fSourceLookupJob = new SourceLookupJob();
-		}
-		setSourceLookupResult(null);
-		schedule(fSourceLookupJob);
-	}
-	
-	/**
-	 * Schedules a source display job.
-	 */
-	private void scheduleSourceDisplay() {
-		if (fSourceDisplayJob == null) {
-			fSourceDisplayJob = new SourceDisplayJob();
-		}
-		schedule(fSourceDisplayJob);
-	}	
-	
-	/**
-	 * Schedules a job with this part's progress service, if available.
-	 * 
-	 * @param job job to schedule
-	 */
-	private void schedule(Job job) {
-		if (fProgressService == null) {
-			job.schedule();
-		} else {
-			fProgressService.schedule(job);
-		}
-	}
-
-	private IEditorInput getEditorInput() {
-		if (fResult != null) {
-			return fResult.getEditorInput();
-		}
-		return null;
-	}
-	
-	private String getEditorId() {
-		if (fResult != null) {
-			return fResult.getEditorId();
-		}
-		return null;
-	}
-	
+		
 	/**
 	 * Deselects any source decorations associated with the given thread or
 	 * debug target.
@@ -1059,13 +879,14 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	 * @see org.eclipse.ui.part.IShowInSource#getShowInContext()
 	 */
 	public ShowInContext getShowInContext() {
+		// TODO: fix this
 		if (isActive()) { 
 			IStructuredSelection selection = (IStructuredSelection)getViewer().getSelection();
 			if (!selection.isEmpty()) { 
 				Object sourceElement = null;
-				if (fResult != null) {
-					sourceElement = fResult.getSourceElement();
-				}
+//				if (fResult != null) {
+//					sourceElement = fResult.getSourceElement();
+//				}
 				if (sourceElement instanceof IAdaptable) {
 					if (((IAdaptable)sourceElement).getAdapter(IResource.class) != null) {
 						return new ShowInContext(null, new StructuredSelection(sourceElement));

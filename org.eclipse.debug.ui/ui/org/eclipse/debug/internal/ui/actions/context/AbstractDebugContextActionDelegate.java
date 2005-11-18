@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.debug.internal.ui.contexts.actions;
+package org.eclipse.debug.internal.ui.actions.context;
 
 import java.util.Iterator;
 
@@ -32,7 +32,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.ui.IActionDelegate2;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
@@ -56,39 +55,28 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 	private IStructuredSelection fSelection = StructuredSelection.EMPTY;
 
 	/**
-	 * Whether this delegate has been initialized
-	 */
-	private boolean fInitialized = false;
-
-	/**
 	 * The window associated with this action delegate May be <code>null</code>
 	 */
 	protected IWorkbenchWindow fWindow;
 
 	/**
-	 * Background job for this action, or <code>null</code> if none.
-	 */
-	private DebugRequestJob fBackgroundJob = null;
-
-	/**
-	 * Background job to update enablement.
-	 */
-	private UpdateEnablementJob fUpdateEnablementJob = new UpdateEnablementJob();
-
-	/**
 	 * Used to schedule jobs, or <code>null</code> if none
 	 */
 	private IWorkbenchSiteProgressService fProgressService = null;
+	
+	private String fJobName;
 
 	class UpdateEnablementJob extends Job {
 
 		IAction targetAction = null;
 		ISelection targetSelection = null;
 
-		public UpdateEnablementJob() {
+		public UpdateEnablementJob(IAction action, ISelection selection) {
 			super(ActionMessages.AbstractDebugActionDelegate_1);
 			setPriority(Job.INTERACTIVE);
 			setSystem(true);
+			targetAction = action;
+			targetSelection = selection;
 		}
 
 		/*
@@ -97,19 +85,8 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 		 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 		 */
 		protected IStatus run(IProgressMonitor monitor) {
-			IAction action = null;
-			ISelection selection = null;
-			synchronized (this) {
-				action = targetAction;
-				selection = targetSelection;
-			}
-			update(action, selection);
+			update(targetAction, targetSelection);
 			return Status.OK_STATUS;
-		}
-
-		public synchronized void setTargets(IAction action, ISelection selection) {
-			targetAction = action;
-			targetSelection = selection;
 		}
 	}
 
@@ -123,10 +100,11 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 		 * 
 		 * @param name job name
 		 */
-		public DebugRequestJob(String name) {
+		public DebugRequestJob(String name, Object[] elements) {
 			super(name);
 			setPriority(Job.INTERACTIVE);
 			setSystem(true);
+			fElements = elements;
 		}
 
 		/*
@@ -136,13 +114,8 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 		 */
 		protected IStatus run(IProgressMonitor monitor) {
 			MultiStatus status = new MultiStatus(DebugUIPlugin.getUniqueIdentifier(), DebugException.REQUEST_FAILED, getStatusMessage(), null);
-			Object[] targets = null;
-			synchronized (this) {
-				targets = fElements;
-				fElements = null;
-			}
-			for (int i = 0; i < targets.length; i++) {
-				Object element = targets[i];
+			for (int i = 0; i < fElements.length; i++) {
+				Object element = fElements[i];
 				Object target = getTarget(element);
 				try {
 					// Action's enablement could have been changed since
@@ -155,15 +128,6 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 				}
 			}
 			return status;
-		}
-
-		/**
-		 * Sets the selection to operate on.
-		 * 
-		 * @param elements
-		 */
-		public synchronized void setTargets(Object[] elements) {
-			fElements = elements;
 		}
 
 	}
@@ -192,7 +156,6 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 				DebugContextManager.getDefault().removeDebugContextListener(this, window);
 			}
 		}
-		fBackgroundJob = null;
 		fSelection = null;
 	}
 
@@ -211,58 +174,24 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 	 * 
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
-	public void run(IAction action) {
-		if (action.isEnabled()) {
-			IStructuredSelection selection = getContext();
+	public synchronized void run(IAction action) {
+		IStructuredSelection selection = getContext();
+		if (selection != null && action.isEnabled()) {
 			// disable the action so it cannot be run again until an event or
 			// selection change updates the enablement
 			action.setEnabled(false);
-			runInBackground(action, selection);
-		}
-	}
-
-	/**
-	 * Runs this action in a background job.
-	 */
-	private void runInBackground(IAction action, IStructuredSelection selection) {
-		if (fBackgroundJob == null) {
-			fBackgroundJob = new DebugRequestJob(DebugUIPlugin.removeAccelerators(action.getText()));
-		}
-		fBackgroundJob.setTargets(selection.toArray());
-		schedule(fBackgroundJob);
-	}
-
-	/**
-	 * AbstractDebugActionDelegates come in 2 flavors: IViewActionDelegate,
-	 * IWorkbenchWindowActionDelegate delegates.
-	 * </p>
-	 * <ul>
-	 * <li>IViewActionDelegate delegate: getView() != null</li>
-	 * <li>IWorkbenchWindowActionDelegate: getView == null</li>
-	 * </ul>
-	 * <p>
-	 * Only want to call update(action, selection) for IViewActionDelegates. An
-	 * initialize call to update(action, selection) is made for all flavors to
-	 * set the initial enabled state of the underlying action.
-	 * IWorkbenchWindowActionDelegate's listen to selection changes in the debug
-	 * view only.
-	 * </p>
-	 * 
-	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction,
-	 *      org.eclipse.jface.viewers.ISelection)
-	 */
-	public void selectionChanged(IAction action, ISelection s) {
-		boolean wasInitialized = initialize(action, s);
-		if (!wasInitialized) {
-			if (getView() != null) {
-				fUpdateEnablementJob.setTargets(action, s);
-				schedule(fUpdateEnablementJob);
-
+			if (fJobName == null) {
+				fJobName = DebugUIPlugin.removeAccelerators(action.getText());
 			}
+			schedule(new DebugRequestJob(fJobName, selection.toArray()));
 		}
 	}
 
-	protected void update(IAction action, ISelection s) {
+	public void selectionChanged(IAction action, ISelection s) {
+		// do nothing
+	}
+
+	protected synchronized void update(IAction action, ISelection s) {
 		if (s instanceof IStructuredSelection) {
 			IStructuredSelection ss = (IStructuredSelection) s;
 			action.setEnabled(getEnableStateForContext(ss));
@@ -302,8 +231,10 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 	 * @see org.eclipse.ui.IViewActionDelegate#init(org.eclipse.ui.IViewPart)
 	 */
 	public void init(IViewPart view) {
-		fViewPart = view;
-		fProgressService = (IWorkbenchSiteProgressService) view.getAdapter(IWorkbenchSiteProgressService.class);
+		setView(view);
+		setWindow(view.getSite().getWorkbenchWindow());
+		fProgressService = (IWorkbenchSiteProgressService) view.getSite().getAdapter(IWorkbenchSiteProgressService.class);
+		DebugContextManager.getDefault().addDebugContextListener(this, getWindow(), IDebugUIConstants.ID_DEBUG_VIEW);
 	}
 
 	/**
@@ -314,34 +245,6 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 	 */
 	protected IViewPart getView() {
 		return fViewPart;
-	}
-
-	/**
-	 * Initialize this delegate, updating this delegate's presentation. As well,
-	 * all of the flavors of AbstractDebugActionDelegates need to have the
-	 * initial enabled state set with a call to update(IAction, ISelection).
-	 * 
-	 * @param action the presentation for this action
-	 * @return whether the action was initialized
-	 */
-	protected boolean initialize(IAction action, ISelection selection) {
-		if (!isInitialized()) {
-			setAction(action);
-			if (getView() == null) {
-				// update on the selection in the debug view
-				IWorkbenchWindow window = getWindow();
-				if (window != null && window.getShell() != null && !window.getShell().isDisposed()) {
-					IWorkbenchPage page = window.getActivePage();
-					if (page != null) {
-						selection = page.getSelection(IDebugUIConstants.ID_DEBUG_VIEW);
-					}
-				}
-			}
-			update(action, selection);
-			setInitialized(true);
-			return true;
-		}
-		return false;
 	}
 
 	/**
@@ -362,9 +265,9 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 		fSelection = context;
 	}
 
-	public void contextActivated(ISelection context, IWorkbenchPart part) {
-		fUpdateEnablementJob.setTargets(getAction(), context);
-		schedule(fUpdateEnablementJob);		
+	public synchronized void contextActivated(ISelection context, IWorkbenchPart part) {
+		setContext(null);
+		schedule(new UpdateEnablementJob(getAction(), context));		
 	}
 
 	protected void setAction(IAction action) {
@@ -377,14 +280,6 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 
 	protected void setView(IViewPart viewPart) {
 		fViewPart = viewPart;
-	}
-
-	protected boolean isInitialized() {
-		return fInitialized;
-	}
-
-	protected void setInitialized(boolean initialized) {
-		fInitialized = initialized;
 	}
 
 	protected IWorkbenchWindow getWindow() {
@@ -445,6 +340,7 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 	 * @see org.eclipse.ui.IActionDelegate2#init(org.eclipse.jface.action.IAction)
 	 */
 	public void init(IAction action) {
+		setAction(action);
 	}
 
 	/**
