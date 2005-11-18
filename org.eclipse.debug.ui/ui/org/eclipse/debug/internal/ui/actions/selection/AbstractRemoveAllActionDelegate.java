@@ -84,7 +84,10 @@ public abstract class AbstractRemoveAllActionDelegate implements IViewActionDele
 	 * Update enablement.
 	 */
 	protected void update() {
-		getAction().setEnabled(isEnabled());
+		IAction action = getAction();
+		if (action != null) {
+			action.setEnabled(isEnabled());
+		}
 	}
 	
 	/**
