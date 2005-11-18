@@ -13,6 +13,7 @@ import org.eclipse.debug.internal.ui.viewers.AsynchronousTreeContentAdapter;
 import org.eclipse.debug.internal.ui.viewers.AsynchronousTreeViewer;
 import org.eclipse.debug.internal.ui.viewers.IAsynchronousTreeContentAdapter;
 import org.eclipse.debug.internal.ui.viewers.IPresentationContext;
+import org.eclipse.debug.internal.ui.viewers.IUpdatePolicy;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.model.IWorkbenchAdapter;
@@ -21,9 +22,12 @@ import org.eclipse.ui.progress.IElementCollector;
 import org.osgi.framework.Bundle;
 
 public class LaunchViewer extends AsynchronousTreeViewer {
+	
+	private LaunchView fView;
 
-	public LaunchViewer(Composite parent) {
+	public LaunchViewer(Composite parent, LaunchView view) {
 		super(parent);
+		fView = view;
 	}
 	
 	/* (non-Javadoc)
@@ -185,6 +189,16 @@ public class LaunchViewer extends AsynchronousTreeViewer {
 		// fire activation changes all the time
 		return false;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.viewers.AsynchronousViewer#createUpdatePolicy()
+	 */
+	public IUpdatePolicy createUpdatePolicy() {
+		IUpdatePolicy policy = new LaunchViewUpdatePolicy(fView);
+		policy.init(this);
+		return policy;
+	}
+	
 	
 
 }

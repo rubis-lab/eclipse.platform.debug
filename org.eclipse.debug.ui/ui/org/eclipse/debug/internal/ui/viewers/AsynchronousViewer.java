@@ -125,7 +125,6 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 	 */
 	protected AsynchronousViewer() {
 		setContentProvider(new NullContentProvider());
-		createUpdatePolicy();
 	}
 	
 	/**
@@ -361,6 +360,9 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 	 * @see org.eclipse.jface.viewers.Viewer#inputChanged(java.lang.Object, java.lang.Object)
 	 */
 	protected void inputChanged(Object input, Object oldInput) {
+		if (fUpdatePolicy == null) {
+			fUpdatePolicy = createUpdatePolicy();
+		}
 		cancelPendingUpdates();
 	}
 
@@ -402,9 +404,10 @@ public abstract class AsynchronousViewer extends StructuredViewer {
 		fElementsToWidgets.put(element, widgets);
 	}
 
-	public void createUpdatePolicy() {
-		fUpdatePolicy = new DefaultUpdatePolicy();
-		fUpdatePolicy.init(this);
+	public IUpdatePolicy createUpdatePolicy() {
+		DefaultUpdatePolicy policy = new DefaultUpdatePolicy();
+		policy.init(this);
+		return policy;
 	}
 	
 	/**

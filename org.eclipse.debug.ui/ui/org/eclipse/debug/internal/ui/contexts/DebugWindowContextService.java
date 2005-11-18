@@ -40,6 +40,9 @@ public class DebugWindowContextService implements IDebugContextService, IPartLis
 	
 	private IWorkbenchWindow fWindow;
 	private List fProviders = new ArrayList();
+	
+	private static final int ACTIVATED = 1;
+	private static final int CHANGED = 2;
 
 	public DebugWindowContextService(IWorkbenchWindow window) {
 		fWindow = window;
@@ -65,7 +68,7 @@ public class DebugWindowContextService implements IDebugContextService, IPartLis
 			active = activePage.getActivePart();
 		}
 		if (fProviders.size() == 1 && (part == null || part.equals(active))) {
-			notifyActivated();
+			notify(ACTIVATED);
 		}
 		provider.addDebugContextListener(this);
 	}
@@ -81,7 +84,7 @@ public class DebugWindowContextService implements IDebugContextService, IPartLis
 			fProvidersByPartId.remove(id);
 			fProviders.remove(index);
 			if (index == 0) {
-				notifyActivated();
+				notify(ACTIVATED);
 			}
 		}
 		provider.removeDebugContextListener(this);
@@ -101,29 +104,33 @@ public class DebugWindowContextService implements IDebugContextService, IPartLis
 		removeDebugContextListener(listener, null);
 	}
 	
-	protected void notifyActivated() {
+	protected void notify(int type) {
 		if (fProviders.isEmpty()) {
-			notifyActivated(null, null);
+			notify(type, null, null);
 		} else {
 			IDebugContextProvider provider = (IDebugContextProvider) fProviders.get(0);
-			notifyActivated(provider.getActiveContext(), provider.getPart());
+			notify(type, provider.getActiveContext(), provider.getPart());
 		}
 	}
 	
-	protected void notifyActivated(ISelection context, IWorkbenchPart part) {
-		notifyActivated(getListeners(null), context, part);
+	protected void notify(int type, ISelection context, IWorkbenchPart part) {
+		notify(type, getListeners(null), context, part);
 		if (part != null) {
-			notifyActivated(getListeners(part), context, part);
+			notify(type, getListeners(part), context, part);
 		}
 	}
-	protected void notifyActivated(ListenerList list, final ISelection context, final IWorkbenchPart part) {
+	protected void notify(final int type, ListenerList list, final ISelection context, final IWorkbenchPart part) {
 		if (list != null) {
 			Object[] listeners = list.getListeners();
 			for (int i = 0; i < listeners.length; i++) {
 				final IDebugContextListener listener = (IDebugContextListener) listeners[i];
 				Platform.run(new ISafeRunnable() {
 					public void run() throws Exception {
-						listener.contextActivated(context, part);
+						if (type == ACTIVATED) {
+							listener.contextActivated(context, part);
+						} else {
+							listener.contextChanged(context, part);
+						}
 					}
 					public void handleException(Throwable exception) {
 						DebugUIPlugin.log(exception);
@@ -194,7 +201,7 @@ public class DebugWindowContextService implements IDebugContextService, IPartLis
 			if (index > 0) {
 				fProviders.remove(index);
 				fProviders.add(0, provider);
-				notifyActivated();
+				notify(ACTIVATED);
 			}
 		}
 		
@@ -249,9 +256,22 @@ public class DebugWindowContextService implements IDebugContextService, IPartLis
 		if (!fProviders.isEmpty()) {
 			IDebugContextProvider provider = (IDebugContextProvider) fProviders.get(0);
 			if (provider.getPart() == part) {
-				notifyActivated();
+				notify(ACTIVATED);
 			}
 		}
 	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.contexts.IDebugContextListener#contextChanged(org.eclipse.jface.viewers.ISelection, org.eclipse.ui.IWorkbenchPart)
+	 */
+	public void contextChanged(ISelection selection, IWorkbenchPart part) {	
+		if (!fProviders.isEmpty()) {
+			IDebugContextProvider provider = (IDebugContextProvider) fProviders.get(0);
+			if (provider.getPart() == part) {
+				notify(CHANGED);
+			}
+		}		
+	}
+	
 	
 }

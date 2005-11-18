@@ -280,6 +280,9 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 		fSelection = context;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.contexts.IDebugContextListener#contextActivated(org.eclipse.jface.viewers.ISelection, org.eclipse.ui.IWorkbenchPart)
+	 */
 	public synchronized void contextActivated(ISelection context, IWorkbenchPart part) {
 		setContext(null);
 		if (fUpdateJob == null) {
@@ -288,6 +291,13 @@ public abstract class AbstractDebugContextActionDelegate implements IWorkbenchWi
 		fUpdateJob.setContext(context);
 		schedule(fUpdateJob);		
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.contexts.IDebugContextListener#contextChanged(org.eclipse.jface.viewers.ISelection, org.eclipse.ui.IWorkbenchPart)
+	 */
+	public void contextChanged(ISelection context, IWorkbenchPart part) {		
+		contextActivated(context, part);
+	}	
 
 	protected void setAction(IAction action) {
 		fAction = action;

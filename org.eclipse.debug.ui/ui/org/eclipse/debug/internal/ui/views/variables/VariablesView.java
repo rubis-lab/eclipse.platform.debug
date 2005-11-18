@@ -1275,6 +1275,12 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		updateAction("FindVariable"); //$NON-NLS-1$
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.contexts.IDebugContextListener#contextChanged(org.eclipse.jface.viewers.ISelection, org.eclipse.ui.IWorkbenchPart)
+	 */
+	public void contextChanged(ISelection selection, IWorkbenchPart part) {		
+	}	
+	
 	/**
 	 * Delegate to the <code>DOUBLE_CLICK_ACTION</code>,
 	 * if any.

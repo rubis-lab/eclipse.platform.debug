@@ -189,6 +189,27 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 			}
 		}
 		
+		protected synchronized void possibleContextChange(Object element) {
+			if (fContext instanceof IStructuredSelection) {
+				IStructuredSelection ss = (IStructuredSelection) fContext;
+				if (ss.size() == 1 && ss.getFirstElement().equals(element)) {
+					Object[] listeners = fListeners.getListeners();
+					for (int i = 0; i < listeners.length; i++) {
+						final IDebugContextListener listener = (IDebugContextListener) listeners[i];
+						Platform.run(new ISafeRunnable() {
+							public void run() throws Exception {
+								listener.contextChanged(fContext, ContextProvider.this.getPart());
+							}
+							public void handleException(Throwable exception) {
+								DebugUIPlugin.log(exception);
+							}
+						});
+						
+					}					
+				}
+			}
+		}
+		
 	}
 	
 	/**
@@ -244,7 +265,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	 * @see org.eclipse.debug.ui.AbstractDebugView#createViewer(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Viewer createViewer(Composite parent) {
-		AsynchronousTreeViewer viewer = new LaunchViewer(parent);
+		AsynchronousTreeViewer viewer = new LaunchViewer(parent, this);
 		viewer.setContext(new PresentationContext(this));
         viewer.setInput(DebugPlugin.getDefault().getLaunchManager());
         
@@ -513,6 +534,10 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 		    fContextListener.updateForSelection(element);
 		}
 		
+	}
+	
+	protected void possibleContextChange(Object element) {
+		fProvider.possibleContextChange(element);
 	}
 
 	/**

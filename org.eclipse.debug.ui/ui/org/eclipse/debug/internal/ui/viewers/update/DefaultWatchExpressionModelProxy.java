@@ -71,4 +71,10 @@ public class DefaultWatchExpressionModelProxy extends DefaultExpressionModelProx
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.contexts.IDebugContextListener#contextChanged(org.eclipse.jface.viewers.ISelection, org.eclipse.ui.IWorkbenchPart)
+	 */
+	public void contextChanged(ISelection selection, IWorkbenchPart part) {		
+	}	
+	
 }

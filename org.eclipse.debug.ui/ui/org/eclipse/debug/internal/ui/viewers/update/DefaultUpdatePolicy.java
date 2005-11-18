@@ -21,30 +21,18 @@ import org.eclipse.debug.internal.ui.viewers.TreePath;
 import org.eclipse.debug.internal.ui.viewers.TreeSelection;
 
 /**
- * Update policy for the launch manager.
+ * Default update policy updates a viewer based on model deltas.
  * 
  * @since 3.2
  */
 public class DefaultUpdatePolicy extends AbstractUpdatePolicy implements IModelChangedListener {
-
-	public DefaultUpdatePolicy() {
-		super();
-	}
-
-	public void init(AsynchronousViewer viewer) {
-		super.init(viewer);
-	}
-
-	public synchronized void dispose() {
-		super.dispose();
-	}
 
 	public void modelChanged(IModelDelta delta) {
 		IModelDeltaNode[] nodes = delta.getNodes();
 		updateNodes(nodes);
 	}
 
-	private void updateNodes(IModelDeltaNode[] nodes) {
+	protected void updateNodes(IModelDeltaNode[] nodes) {
 		for (int i = 0; i < nodes.length; i++) {
 			IModelDeltaNode node = nodes[i];
 			int flags = node.getFlags();
@@ -64,7 +52,7 @@ public class DefaultUpdatePolicy extends AbstractUpdatePolicy implements IModelC
 		}
 	}
 
-	private void handleChange(IModelDeltaNode node) {
+	protected void handleChange(IModelDeltaNode node) {
 		int flags = node.getFlags();
 		AsynchronousViewer viewer = getViewer();
 		if (viewer != null) {
@@ -87,7 +75,7 @@ public class DefaultUpdatePolicy extends AbstractUpdatePolicy implements IModelC
 		}
 	}
 
-	private void handleAdd(IModelDeltaNode node) {
+	protected void handleAdd(IModelDeltaNode node) {
 		int flags = node.getFlags();
 		final TreePath treePath = getTreePath(node);
 
@@ -107,12 +95,12 @@ public class DefaultUpdatePolicy extends AbstractUpdatePolicy implements IModelC
 		}
 	}
 
-	private void handleRemove(IModelDeltaNode node) {
+	protected void handleRemove(IModelDeltaNode node) {
 		TreePath treePath = getTreePath(node);
 		((AsynchronousTreeViewer) getViewer()).remove(treePath);
 	}
 
-	private TreePath getTreePath(IModelDeltaNode node) {
+	protected TreePath getTreePath(IModelDeltaNode node) {
 		ArrayList list = new ArrayList();
 		list.add(0, node.getElement());
 		while (node.getParent() != null) {

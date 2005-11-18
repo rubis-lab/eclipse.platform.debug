@@ -48,8 +48,18 @@ public class ThreadEventHandler extends DebugEventHandler {
 	}
 
 	protected void handleSuspend(DebugEvent event) {
-        if (!event.isEvaluation()) {
-        	fireDeltaUpdatingTopFrame((IThread) event.getSource(), IModelDelta.NOCHANGE);
+        IThread thread = (IThread) event.getSource();
+		if (event.isEvaluation()) {
+        	ModelDelta delta = new ModelDelta();
+    		IModelDeltaNode node = buildBaseDelta(delta, thread);
+			try {
+				IStackFrame frame = thread.getTopStackFrame();
+				node.addNode(frame, IModelDelta.CHANGED | IModelDelta.STATE);
+				getModelProxy().fireModelChanged(delta);
+			} catch (DebugException e) {
+			}
+        } else {
+        	fireDeltaUpdatingTopFrame(thread, IModelDelta.NOCHANGE);
         }
 	}
 	

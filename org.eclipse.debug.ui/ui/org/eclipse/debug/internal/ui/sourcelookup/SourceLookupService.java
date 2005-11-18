@@ -30,9 +30,6 @@ public class SourceLookupService implements IDebugContextListener {
 	
 	private IWorkbenchWindow fWindow;
 	
-	private Object fPrevTarget;
-	private ISourceLookupResult fPrevResult;
-	
 	public SourceLookupService(IWorkbenchWindow window) {
 		fWindow = window;
 		DebugContextManager.getDefault().addDebugContextListener(this, window);
@@ -67,4 +64,10 @@ public class SourceLookupService implements IDebugContextListener {
 			}
 		}
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.contexts.IDebugContextListener#contextChanged(org.eclipse.jface.viewers.ISelection, org.eclipse.ui.IWorkbenchPart)
+	 */
+	public void contextChanged(ISelection selection, IWorkbenchPart part) {		
+	}	
 }

@@ -27,5 +27,15 @@ public interface IDebugContextListener {
 	 * @param part workbench part or <code>null</code>
 	 */
 	public void contextActivated(ISelection selection, IWorkbenchPart part);
+	
+	/**
+	 * Notification the context in the given selection has changed state
+	 * in the specified part. Context changes are only sent for contexts
+	 * that are active. 
+	 * 
+	 * @param selection selection containing changed context
+	 * @param part workbench part or <code>null</code>
+	 */
+	public void contextChanged(ISelection selection, IWorkbenchPart part);
 
 }
