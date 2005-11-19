@@ -17,16 +17,17 @@ import org.eclipse.swt.widgets.Widget;
  * 
  * @since 3.2
  */
-class RemoveRequestMonitor extends AsynchronousRequestMonitor {
+class RemoveRequestMonitor extends AbstractAddRemoveRequestMonitor {
 
 	/**
 	 * Removes the given widget from the given tree.
 	 * 
 	 * @param widget
+	 * @param path path to the element to remove
 	 * @param viewer
 	 */
-	RemoveRequestMonitor(Widget widget, AsynchronousTreeViewer viewer) {
-		super(widget, viewer);
+	RemoveRequestMonitor(Widget widget, TreePath path, AsynchronousTreeViewer viewer) {
+		super(widget, path, viewer);
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.internal.ui.viewers.AsynchronousRequestMonitor#performUpdate()
@@ -36,13 +37,6 @@ class RemoveRequestMonitor extends AsynchronousRequestMonitor {
 		Object element = widget.getData(); 
 		getViewer().unmap(element, widget);
 		widget.dispose();
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.viewers.AsynchronousRequestMonitor#contains(org.eclipse.debug.internal.ui.viewers.AsynchronousRequestMonitor)
-	 */
-	protected boolean contains(AsynchronousRequestMonitor update) {
-		return update instanceof AddRequestMonitor && update.contains(getWidget());
 	}
 
 }

@@ -17,33 +17,24 @@ import org.eclipse.swt.widgets.Widget;
  *  
  * @since 3.2
  */
-class AddRequestMonitor extends AsynchronousRequestMonitor {
-	
-	private Object fChild;
+class AddRequestMonitor extends AbstractAddRemoveRequestMonitor {
 
 	/**
 	 * Adds the given child to the specified parent.
 	 * 
 	 * @param parent
-	 * @param child
+	 * @param path path to the child in the tree@param child
 	 * @param viewer
+	 * 
 	 */
-	AddRequestMonitor(Widget parent, Object child, AsynchronousTreeViewer viewer) {
-		super(parent, viewer);
-		fChild = child;
+	AddRequestMonitor(Widget parent, TreePath path, AsynchronousTreeViewer viewer) {
+		super(parent, path, viewer);
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.internal.ui.viewers.AsynchronousRequestMonitor#performUpdate()
 	 */
 	protected void performUpdate() {
-		((AsynchronousTreeViewer)getViewer()).add(getWidget(), fChild);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.viewers.AsynchronousRequestMonitor#contains(org.eclipse.debug.internal.ui.viewers.AsynchronousRequestMonitor)
-	 */
-	protected boolean contains(AsynchronousRequestMonitor update) {
-		return false;
+		((AsynchronousTreeViewer)getViewer()).add(getWidget(), getPath().getLastSegment());
 	}
 
 }

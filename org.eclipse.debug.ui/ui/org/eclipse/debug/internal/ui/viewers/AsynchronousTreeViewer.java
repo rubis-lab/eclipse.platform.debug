@@ -861,7 +861,7 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 						if (widget == null) {
 							widget = getTree();
 						}
-						AddRequestMonitor addRequest = new AddRequestMonitor(widget, treePath.getLastSegment(), this);
+						AddRequestMonitor addRequest = new AddRequestMonitor(widget, treePath, this);
 						schedule(addRequest);
 						addRequest.done();
 						return;
@@ -907,7 +907,7 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 					TreePath path = paths[i];
 					if (treePath.equals(path)) {
 						TreeItem item = path.getTreeItem();
-						RemoveRequestMonitor request = new RemoveRequestMonitor(item, this);
+						RemoveRequestMonitor request = new RemoveRequestMonitor(item, treePath, this);
 						schedule(request);
 						request.done();
 						return;
