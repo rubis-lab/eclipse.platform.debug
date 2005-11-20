@@ -11,7 +11,9 @@
 package org.eclipse.debug.internal.ui.viewers.update;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
@@ -26,6 +28,13 @@ import org.eclipse.debug.internal.ui.viewers.IModelProxy;
  * @since 3.2
  */
 public class ThreadEventHandler extends DebugEventHandler {
+	
+	/**
+	 * Queue of suspended threads to choose from when needing
+	 * to select a thread when another is resumed. Threads
+	 * are added in the order they suspend.
+	 */
+	private Set fThreadQueue = new LinkedHashSet();
 	
 	/** 
 	 * Map of previous TOS per thread
@@ -44,6 +53,9 @@ public class ThreadEventHandler extends DebugEventHandler {
 		synchronized (fLastTopFrame) {
 			fLastTopFrame.clear();
 		}
+		synchronized (fThreadQueue) {
+			fThreadQueue.clear();
+		}
 		super.dispose();
 	}
 
@@ -59,6 +71,7 @@ public class ThreadEventHandler extends DebugEventHandler {
 			} catch (DebugException e) {
 			}
         } else {
+        	queueSuspendedThread(event);
         	fireDeltaUpdatingTopFrame(thread, IModelDelta.NOCHANGE);
         }
 	}
@@ -74,7 +87,12 @@ public class ThreadEventHandler extends DebugEventHandler {
 	}
 
 	protected void handleResume(DebugEvent event) {
-		fireDeltaAndClearTopFrame((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.STATE | IModelDelta.CONTENT);
+		IThread thread = removeSuspendedThread(event);
+		fireDeltaAndClearTopFrame(thread, IModelDelta.CHANGED | IModelDelta.STATE | IModelDelta.CONTENT);
+		thread = getNextSuspendedThread();
+		if (thread != null) {
+			fireDeltaUpdatingTopFrame(thread, IModelDelta.NOCHANGE);
+		}
 	}
 
 	protected void handleCreate(DebugEvent event) {
@@ -90,11 +108,13 @@ public class ThreadEventHandler extends DebugEventHandler {
 	}
 
 	protected void handleLateSuspend(DebugEvent suspend, DebugEvent resume) {
-		fireDeltaUpdatingTopFrame((IThread) suspend.getSource(), IModelDelta.CHANGED | IModelDelta.CONTENT | IModelDelta.EXPAND);
+		IThread thread = queueSuspendedThread(suspend);
+		fireDeltaUpdatingTopFrame(thread, IModelDelta.CHANGED | IModelDelta.CONTENT | IModelDelta.EXPAND);
 	}
 
 	protected void handleSuspendTimeout(DebugEvent event) {
-		fireDeltaAndClearTopFrame((IThread) event.getSource(), IModelDelta.CHANGED | IModelDelta.CONTENT);
+		IThread thread = removeSuspendedThread(event);
+		fireDeltaAndClearTopFrame(thread, IModelDelta.CHANGED | IModelDelta.CONTENT);
 	}
 	
 	private IModelDeltaNode buildBaseDelta(ModelDelta delta, IThread thread) {
@@ -142,6 +162,31 @@ public class ThreadEventHandler extends DebugEventHandler {
 	
 	protected boolean handlesEvent(DebugEvent event) {
 		return event.getSource() instanceof IThread;
+	}
+	
+	protected IThread queueSuspendedThread(DebugEvent event) {
+		IThread thread = (IThread) event.getSource();
+		synchronized (fThreadQueue) {
+			fThreadQueue.add(thread);
+		}
+		return thread;
+	}
+	
+	protected IThread removeSuspendedThread(DebugEvent event) {
+		IThread thread = (IThread)event.getSource();
+		synchronized (fThreadQueue) {
+			fThreadQueue.remove(thread);
+		}
+		return thread;
+	}
+	
+	protected IThread getNextSuspendedThread() {
+		synchronized (fThreadQueue) {
+			if (!fThreadQueue.isEmpty()) {
+				return (IThread) fThreadQueue.iterator().next();
+			}
+		}
+		return null;
 	}
 
 }

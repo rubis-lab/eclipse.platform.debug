@@ -936,6 +936,16 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		}
 	}	
 
+	synchronized void remove(final Widget widget) {
+		preservingSelection(new Runnable() {
+			public void run() {
+				Object element = widget.getData(); 
+				unmap(element, widget);
+				widget.dispose();		
+			}
+		});
+	}
+	
 	void setLabels(Widget widget, String[] text, ImageDescriptor[] image) {
 		if (widget instanceof TreeItem) {
 			TreeItem item = (TreeItem) widget;

@@ -83,7 +83,7 @@ public class DefaultSelectionPolicy implements IModelSelectionPolicy {
 		if (existing instanceof IStackFrame && candidate instanceof IStackFrame) {
 			IStackFrame curr = (IStackFrame) existing;
 			IStackFrame next = (IStackFrame) candidate;
-			return curr.getThread().equals(next.getThread());
+			return curr.getThread().equals(next.getThread()) || !isSticky(existing);
 		}
 		return !isSticky(existing);
 	}

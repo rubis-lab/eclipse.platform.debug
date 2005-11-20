@@ -33,10 +33,7 @@ class RemoveRequestMonitor extends AbstractAddRemoveRequestMonitor {
 	 * @see org.eclipse.debug.internal.ui.viewers.AsynchronousRequestMonitor#performUpdate()
 	 */
 	protected void performUpdate() {
-		Widget widget = getWidget();
-		Object element = widget.getData(); 
-		getViewer().unmap(element, widget);
-		widget.dispose();
+		((AsynchronousTreeViewer)getViewer()).remove(getWidget());
 	}
 
 }
