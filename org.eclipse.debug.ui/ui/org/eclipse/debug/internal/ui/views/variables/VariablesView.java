@@ -16,8 +16,10 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Map.Entry;
 
 import org.eclipse.core.commands.util.ListenerList;
 import org.eclipse.core.runtime.CoreException;
@@ -27,10 +29,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IDebugElement;
-import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IExpression;
-import org.eclipse.debug.core.model.IStackFrame;
-import org.eclipse.debug.core.model.IThread;
 import org.eclipse.debug.core.model.IValue;
 import org.eclipse.debug.core.model.IVariable;
 import org.eclipse.debug.internal.ui.DebugPluginImages;
@@ -67,6 +66,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
@@ -132,7 +132,45 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	 */
 	interface ICursorListener extends MouseListener, KeyListener {
 	}
-																		
+		
+	/**
+	 * Most recently used variant with capped size that only counts
+	 * {@linkplain #put(Object, Object) put} as access. This is implemented by always removing an
+	 * element before it gets put back.
+	 * 
+	 * @since 3.2
+	 */
+	private static final class MRUMap extends LinkedHashMap {
+		private static final long serialVersionUID= 1L;
+		private final int fMaxSize;
+		
+		/**
+		 * Creates a new <code>MRUMap</code> with the given size.
+		 * 
+		 * @param maxSize the maximum size of the cache, must be &gt; 0
+		 */
+		public MRUMap(int maxSize) {
+			Assert.isLegal(maxSize > 0);
+			fMaxSize= maxSize;
+		}
+		
+		/*
+		 * @see java.util.HashMap#put(java.lang.Object, java.lang.Object)
+		 */
+		public Object put(Object key, Object value) {
+			Object object= remove(key);
+			super.put(key, value);
+			return object;
+		}
+		
+		/*
+		 * @see java.util.LinkedHashMap#removeEldestEntry(java.util.Map.Entry)
+		 */
+		protected boolean removeEldestEntry(Entry eldest) {
+			return size() > fMaxSize;
+		}
+	}
+	
 	/**
 	 * The selection provider for the variables view changes depending on whether
 	 * the variables viewer or detail pane source viewer have focus. This "super" 
@@ -251,12 +289,12 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	private List fSelectionActions = new ArrayList(3);
 	
 	/**
-	 * A map of stack frames to <code>ViewerState</code>s.
+	 * An MRU cache of stack frame hash codes to <code>ViewerState</code>s.
 	 * Used to restore the expanded state of the variables view on
-	 * re-selection of the same stack frame. The cache is cleared on
-	 * a frame by frame basis when a thread/target is terminated.
+	 * re-selection of the same stack frame. The cache is limited
+	 * to twenty entries.
 	 */
-	private HashMap fSelectionStates = new HashMap(10);
+	private HashMap fSelectionStates = new MRUMap(20);
 	
 	/**
 	 * The last known viewer state. Used to init the expansion/selection
@@ -339,6 +377,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
         if (action != null && action instanceof FindVariableAction) {
             ((FindVariableAction) action).dispose();
         }
+        fSelectionStates.clear();
 		super.dispose();
 	}
 
@@ -359,7 +398,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		if (current != null) {
 			// save state
 			fLastState = getViewerState();
-			fSelectionStates.put(current, fLastState);
+			cacheViewerState(current, fLastState);
 		}		
 		
 		if (context instanceof IDebugElement) {
@@ -369,13 +408,46 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		getViewer().setInput(context);
 		restoreState();
 	}
+	
+	/**
+	 * Caches the given viewer state for the given viewer input.
+	 * 
+	 * @param input viewer input
+	 * @param state viewer state
+	 */
+	protected void cacheViewerState(Object input, AbstractViewerState state) {
+		// generate a key for the input based on its hashcode, we don't
+		// want to maintain reference real model objects preventing GCs.
+		fSelectionStates.put(generateKey(input), state);
+	}
+	
+	/**
+	 * Generate a key for an input object.
+	 * 
+	 * @param input
+	 * @return key
+	 */
+	protected Object generateKey(Object input) {
+		return new Integer(input.hashCode());
+	}
+	
+	/**
+	 * Returns the cached viewer state for the given viewer input or 
+	 * <code>null</code> if none.
+	 * 
+	 * @param input viewer input
+	 * @return viewer state or <code>null</code>
+	 */
+	protected AbstractViewerState getCachedViewerState(Object input) {
+		return (AbstractViewerState) fSelectionStates.get(generateKey(input));
+	}
     
     protected void restoreState() {
         VariablesViewer viewer = (VariablesViewer) getViewer();
         if (viewer != null) {
             Object context = viewer.getInput();
             if (context != null) {
-                AbstractViewerState state = (AbstractViewerState) fSelectionStates.get(context);
+                AbstractViewerState state = getCachedViewerState(context);
                 if (state == null) {
                     // attempt to restore selection/expansion based on last
                     // frame
