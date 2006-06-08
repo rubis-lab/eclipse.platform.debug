@@ -500,7 +500,7 @@ public class PerspectivePreferencePage extends PreferencePage implements IWorkbe
 		Label lbl = new Label(composite, SWT.LEFT + SWT.WRAP);
 		lbl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		((GridData)lbl.getLayoutData()).widthHint = LABEL_WIDTH_HINT;
-		lbl.setText(MessageFormat.format(DebugPreferencesMessages.PerspectivePreferencePage_5, null));
+		lbl.setText(DebugPreferencesMessages.PerspectivePreferencePage_5);
 		
 		Composite comp = new Composite(composite, SWT.FILL);
 		comp.setLayout(new GridLayout(2, false));
