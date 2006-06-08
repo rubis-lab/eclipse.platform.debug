@@ -914,9 +914,15 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 
     	if (widget instanceof TreeItem && !widget.isDisposed()) {
 			TreeItem item = (TreeItem) widget;
-			item.clearAll(true);
+			int itemCount = item.getItemCount();
+			for (int i = 0; i < itemCount; i++) {
+				item.clear(i, false);
+			}
 		} else {
-			fTree.clearAll(true);
+			int itemCount = fTree.getItemCount();
+			for (int i = 0; i < itemCount; i++) {
+				fTree.clear(i, false);
+			}
 		}
     }
     
@@ -930,9 +936,9 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
   
        	if (parent instanceof TreeItem && !parent.isDisposed()) {
     		TreeItem item = (TreeItem) parent;
-    		item.clear(childIndex, true);
+    		item.clear(childIndex, false);
     	} else {
-    		fTree.clear(childIndex, true);
+    		fTree.clear(childIndex, false);
     	}
 	}
 
@@ -1380,7 +1386,7 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	}
 	
 	/**
-	 * Initializes veiwer state from the memento
+	 * Initializes viewer state from the memento
 	 * 
 	 * @param memento
 	 */
@@ -1561,7 +1567,7 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	/**
 	 * Toggles columns on/off for the current column presentation, if any.
 	 * 
-	 * @param show whether to show columns if the current input suppports
+	 * @param show whether to show columns if the current input supports
 	 * 	columns
 	 */
 	public void setShowColumns(boolean show) {
@@ -1614,6 +1620,8 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	protected void nodeContainerChanged(ModelNode node) {
 		Widget widget = findItem(node);
 		if (widget != null && !widget.isDisposed()) {
+			int childCount = node.getChildCount();
+			setItemCount(widget, childCount);
 			if (node.isContainer()) {
 				if (widget instanceof TreeItem) {
 					if (((TreeItem)widget).getExpanded()) {
@@ -1628,11 +1636,45 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	}
 	
 	/**
+	 * Notification a node's children have changed.
+	 * Updates the child count for the parent's widget
+	 * and clears children to be updated.
+	 * 
+	 * @param parentNode
+	 */
+	protected void nodeChildrenChanged(ModelNode parentNode) {
+		Widget widget = findItem(parentNode);
+		if (widget != null && !widget.isDisposed()) {
+			int childCount = parentNode.getChildCount();
+			setItemCount(widget, childCount);
+			TreeItem[] items = null;
+			if (widget instanceof TreeItem) {
+				TreeItem treeItem = (TreeItem) widget;
+				if (treeItem.getExpanded()) {
+					items = treeItem.getItems();
+				}
+			} else {
+				items = ((Tree)widget).getItems();
+			}
+			if (items != null) {
+				for (int i = 0; i < items.length; i++) {
+					if (items[i].getExpanded()) {
+						update(items[i], i);
+					} else {
+						clearChild(widget, i);
+					}
+				}
+			}
+			attemptPendingUpdates();
+		}		
+	}	
+	
+	/**
 	 * Collects label results.
 	 * 
 	 * @param monitor progress monitor
 	 * @param element element to start collecting at, including all children
-	 * @param taskName label for prorgress monitor main task
+	 * @param taskName label for progress monitor main task
 	 * 
 	 * @return results or <code>null</code> if cancelled
 	 */
