@@ -120,6 +120,12 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
     private Map fColumnSizes = new HashMap();
     
     /**
+     * Map of column presentation ids to an array of integers representing the column order
+     * for that presentation, or <code>null</code> if default.
+     */
+    private Map fColumnOrder = new HashMap();
+    
+    /**
      * Map of column presentation id to whether columns should be displayed
      * for that presentation (the user can toggle columns on/off when a 
      * presentation is optional.
@@ -130,6 +136,11 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	 * Memento type for column sizes. Sizes are keyed by colunm presentation id 
 	 */
 	private static final String COLUMN_SIZES = "COLUMN_SIZES"; //$NON-NLS-1$
+	/**
+	 * Memento type for the column order for a presentation context.
+	 * A memento is created for each colunm presentation
+	 */
+	private static final String COLUMN_ORDER = "COLUMN_ORDER";     //$NON-NLS-1$	
 	/**
 	 * Memento type for the visible columns for a presentation context.
 	 * A memento is created for each colunm presentation keyed by column number
@@ -160,6 +171,7 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 		 * @see org.eclipse.swt.events.ControlListener#controlMoved(org.eclipse.swt.events.ControlEvent)
 		 */
 		public void controlMoved(ControlEvent e) {
+			persistColumnOrder();
 		}
 
 		/* (non-Javadoc)
@@ -616,6 +628,10 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 				}
 				column.setData(id);
 			}
+	    	int[] order = (int[]) fColumnOrder.get(presentation.getId());
+	    	if (order != null) {
+	    		tree.setColumnOrder(order);
+	    	}
 	    	tree.setHeaderVisible(true);
 	    	tree.setLinesVisible(true);
 	    	presentationContext.setColumns(getVisibleColumns());
@@ -670,6 +686,28 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 			Object id = treeColumn.getData();
 			fColumnSizes.put(id, new Integer(treeColumn.getWidth()));
 		}
+    }
+    
+    /**
+     * Persists column ordering
+     */
+    protected void persistColumnOrder() {
+    	IColumnPresentation presentation = getColumnPresentation();
+    	if (presentation != null) {
+	    	Tree tree = getTree();
+	    	int[] order = tree.getColumnOrder();
+	    	if (order.length > 0) {
+	    		for (int i = 0; i < order.length; i++) {
+					if (i != order[i]) {
+						// non default order
+						fColumnOrder.put(presentation.getId(), order);
+						return;
+					}
+				}
+	    	}
+	    	// default order
+	    	fColumnOrder.remove(presentation.getId());
+    	}
     }
     
     /**
@@ -1260,6 +1298,7 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 	public void setVisibleColumns(String[] ids) {
 		IColumnPresentation presentation = getColumnPresentation();
 		if (presentation != null) {
+			fColumnOrder.remove(presentation.getId());
 			fVisibleColumns.remove(presentation.getId());
 			if (ids != null) {
 				// put back in table if not default
@@ -1316,6 +1355,19 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 				}
 			}
 		}
+		if (!fColumnOrder.isEmpty()) {
+			Iterator iterator = fColumnOrder.entrySet().iterator();
+			while (iterator.hasNext()) {
+				Map.Entry entry = (Entry) iterator.next();
+				String id = (String) entry.getKey();
+				IMemento orderMemento = memento.createChild(COLUMN_ORDER, id);
+				int[] order = (int[]) entry.getValue();
+				orderMemento.putInteger(SIZE, order.length);
+				for (int i = 0; i < order.length; i++) {
+					orderMemento.putInteger(COLUMN+Integer.toString(i), order[i]);
+				}
+			}
+		}
 	}
 	
 	/**
@@ -1365,7 +1417,20 @@ public class AsynchronousTreeViewer extends AsynchronousViewer {
 				fVisibleColumns.put(id, columns);
 			}
 		}
-		
+		mementos = memento.getChildren(COLUMN_ORDER);
+		for (int i = 0; i < mementos.length; i++) {
+			IMemento child = mementos[i];
+			String id = child.getID();
+			Integer integer = child.getInteger(SIZE);
+			if (integer != null) {
+				int length = integer.intValue();
+				int[] order = new int[length];
+				for (int j = 0; j < length; j++) {
+					order[j] = child.getInteger(COLUMN+Integer.toString(j)).intValue();
+				}
+				fColumnOrder.put(id, order);
+			}
+		}
 	}
 
 	/**
