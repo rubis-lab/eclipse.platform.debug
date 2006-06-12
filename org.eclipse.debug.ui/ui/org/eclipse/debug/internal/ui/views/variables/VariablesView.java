@@ -444,6 +444,9 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	protected void setViewerInput(Object context) {
 		
 		getDetailViewer().setEditable(context != null);
+		if (context == null) {
+			setDetails(""); //$NON-NLS-1$
+		}
 		
 		Object current= getViewer().getInput();
 		
@@ -1152,15 +1155,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	 * detail pane.
 	 */
 	protected void populateDetailPaneFromSelection(final IStructuredSelection selection) {
-        WorkbenchJob wJob = new WorkbenchJob("Populate Details Pane") { //$NON-NLS-1$
-			public IStatus runInUIThread(IProgressMonitor monitor) {
-                getDetailDocument().set(""); //$NON-NLS-1$        
-				return Status.OK_STATUS;
-			}
-        };
-        wJob.setSystem(true);
-        wJob.schedule();
-        
+        setDetails(""); //$NON-NLS-1$
 		try {
 			if (!selection.isEmpty()) {
 				IValue val = null;
@@ -1185,7 +1180,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 				
                 final IValue finalVal = val;
                 
-                wJob = new WorkbenchJob("Populate Details Pane"){ //$NON-NLS-1$
+                WorkbenchJob wJob = new WorkbenchJob("Populate Details Pane"){ //$NON-NLS-1$
 					public IStatus runInUIThread(IProgressMonitor monitor) {
                         getDetailDocument().set(""); //$NON-NLS-1$
                         setDebugModel(finalVal.getModelIdentifier());
@@ -1201,16 +1196,22 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 				wJob.schedule();
 			} 
 		} catch (DebugException de) {
-			wJob = new WorkbenchJob("Populate Details Pane") { //$NON-NLS-1$
-				public IStatus runInUIThread(IProgressMonitor monitor) {
-					getDetailDocument().set(VariablesViewMessages.VariablesView__error_occurred_retrieving_value__18);
-					return Status.OK_STATUS;
-				}
-				
-			};
-			wJob.setSystem(true);
-			wJob.schedule();
+			setDetails(VariablesViewMessages.VariablesView__error_occurred_retrieving_value__18);
 		}				
+	}
+
+	/**
+	 * Clears the detail pane
+	 */
+	private void setDetails(final String value) {
+		WorkbenchJob wJob = new WorkbenchJob("Populate Details Pane") { //$NON-NLS-1$
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+                getDetailDocument().set(value);        
+				return Status.OK_STATUS;
+			}
+        };
+        wJob.setSystem(true);
+        wJob.schedule();
 	}
 	
 	/**
