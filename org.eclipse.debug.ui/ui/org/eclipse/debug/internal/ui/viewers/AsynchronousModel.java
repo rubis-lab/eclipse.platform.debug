@@ -190,7 +190,7 @@ public abstract class AsynchronousModel {
 							if (!monitor.isCanceled()) {
 								proxy.init(getPresentationContext());
 								getViewer().modelProxyAdded(proxy);
-								proxy.installed();
+								proxy.installed(fViewer);
 							}
 							return Status.OK_STATUS;
 						} 

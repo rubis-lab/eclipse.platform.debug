@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers.provisional;
 
+import org.eclipse.jface.viewers.Viewer;
+
 /**
  * A model proxy represents a model for a specific presentation context and
  * fires deltas to notify listeners of changes in the model. A model proxy
@@ -46,15 +48,17 @@ public interface IModelProxy {
 	public void init(IPresentationContext context);
 	
 	/** 
-	 * Notification this model proxy has been installed in its presentation 
-	 * context. This indicates that the model proxy has been created and registered
+	 * Notification this model proxy has been installed in the specified 
+	 * viewer. This indicates that the model proxy has been created and registered
 	 * model change listeners are ready to process deltas.
 	 * <p>
 	 * This method is called by the asynchronous viewer framework and should not
 	 * be called by clients.
 	 * </p>
+	 * @param viewer viewer
+	 * @since 3.3
 	 */
-	public void installed();
+	public void installed(Viewer viewer);
 	
 	/**
 	 * Disposes this model proxy.

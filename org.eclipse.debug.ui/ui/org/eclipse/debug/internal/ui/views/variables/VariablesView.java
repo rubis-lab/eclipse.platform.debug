@@ -423,6 +423,13 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	public static final String LOGICAL_STRUCTURE_TYPE_PREFIX = "VAR_LS_"; //$NON-NLS-1$
 	
 	/**
+	 * Presentation context property.
+	 * TODO: make API
+	 * @since 3.3
+	 */
+	public static final String PRESENTATION_SHOW_LOGICAL_STRUCTURES = "PRESENTATION_SHOW_LOGICAL_STRUCTURES"; //$NON-NLS-1$
+	
+	/**
 	 * the preference name for the view part of the sash form
 	 * @since 3.2 
 	 */
@@ -459,9 +466,6 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	private final PositionLabelValue fColumnLabel= new PositionLabelValue();
 	/** The arguments for the position label pattern. */
 	private final Object[] fPositionLabelPatternArguments= new Object[] { fLineLabel, fColumnLabel };
-	/** Whether logical structures are showing */
-    private boolean fShowLogical;
-
 
     /**
      * Visits deltas to determine if details should be displayed
@@ -1496,18 +1500,23 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		return isAvailable();
 	}
 	
+	protected IPresentationContext getPresentationContext() {
+		return getVariablesViewer().getPresentationContext();
+	}
+	
 	/** 
 	 * Sets whether logical structures are being displayed
 	 */
 	public void setShowLogicalStructure(boolean flag) {
-	    fShowLogical = flag;
+	    getPresentationContext().setProperty(PRESENTATION_SHOW_LOGICAL_STRUCTURES, Boolean.TRUE);
 	}	
 	
 	/** 
 	 * Returns whether logical structures are being displayed 
 	 */
 	public boolean isShowLogicalStructure() {
-	    return fShowLogical;
+		Boolean show = (Boolean) getPresentationContext().getProperty(PRESENTATION_SHOW_LOGICAL_STRUCTURES);
+		return show != null && show.booleanValue();
 	}	
 
 	/**
@@ -1645,6 +1654,10 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	 * @see org.eclipse.debug.internal.ui.model.viewers.IViewerUpdateListener#updateComplete(org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousRequestMonitor)
 	 */
 	public void updateComplete(IAsynchronousRequestMonitor update) {
+		IStatus status = update.getStatus();
+		if (status != null && !(status.getCode() == IStatus.OK || status.getCode() == IStatus.CANCEL)) {
+			showMessage(status.getMessage());
+		}
 	}
 
 	/* (non-Javadoc)

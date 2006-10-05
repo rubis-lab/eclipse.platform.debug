@@ -10,15 +10,23 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers.update;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.core.model.IWatchExpression;
+import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.contexts.DebugContextManager;
 import org.eclipse.debug.internal.ui.contexts.provisional.IDebugContextListener;
+import org.eclipse.debug.internal.ui.contexts.provisional.IDebugContextManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.UIJob;
 
 /**
  * @since 3.2
@@ -28,24 +36,40 @@ public class DefaultWatchExpressionModelProxy extends DefaultExpressionModelProx
 	
 	private IWorkbenchWindow fWindow;
 	
-	public DefaultWatchExpressionModelProxy(IWatchExpression expression, IWorkbenchWindow window) {
+	public DefaultWatchExpressionModelProxy(IWatchExpression expression) {
 		super(expression);
-		fWindow = window;
-		DebugContextManager.getDefault().addDebugContextListener(this, window);
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.viewers.provisional.AbstractModelProxy#installed()
+	 * @see org.eclipse.debug.internal.ui.viewers.provisional.AbstractModelProxy#installed(org.eclipse.jface.viewers.Viewer)
 	 */
-	public void installed() {
-		super.installed();
-		IWorkbenchPart part = getPresentationContext().getPart();
-		if (part != null) {
-			ISelection activeContext = DebugContextManager.getDefault().getActiveContext(part.getSite().getWorkbenchWindow());
-			if (activeContext != null) {
-				contextActivated(activeContext, null);
+	public void installed(final Viewer viewer) {
+		super.installed(viewer);
+		UIJob job = new UIJob("install watch expression model proxy") { //$NON-NLS-1$
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
+				for (int i = 0; i < workbenchWindows.length; i++) {
+					IWorkbenchWindow window = workbenchWindows[i];
+					if (viewer.getControl().getShell().equals(window.getShell())) {
+						fWindow = window;
+						break;
+					}
+				}
+				if (fWindow == null) {
+					fWindow = DebugUIPlugin.getActiveWorkbenchWindow();
+				}
+				IDebugContextManager contextManager = DebugContextManager.getDefault();
+				contextManager.addDebugContextListener(DefaultWatchExpressionModelProxy.this, fWindow);
+				ISelection activeContext = contextManager.getActiveContext(fWindow);
+				if (activeContext != null) {
+					contextActivated(activeContext, null);
+				}
+				return Status.OK_STATUS;
 			}
-		}
+		
+		};
+		job.setSystem(true);
+		job.schedule();
 	}
 
 	/* (non-Javadoc)

@@ -14,12 +14,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.internal.ui.model.IChildrenCountUpdate;
 import org.eclipse.debug.internal.ui.model.IChildrenUpdate;
 import org.eclipse.debug.internal.ui.model.IElementContentProvider;
-import org.eclipse.debug.internal.ui.viewers.AsynchronousSchedulingRuleFactory;
 import org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext;
 
 /**
@@ -42,7 +40,7 @@ public abstract class ElementContentProvider implements IElementContentProvider 
 			}
 		};
 		job.setSystem(true);
-		job.setRule(getRetrieveChildRule(update.getParent(), update.getPresentationContext())); // TODO:
+		// TODO: rule
 		job.schedule();
 	}
 
@@ -62,29 +60,7 @@ public abstract class ElementContentProvider implements IElementContentProvider 
 		// TODO: rule
 		job.schedule();
 	}
-	
-	/**
-     * Returns the scheduling rule for jobs retrieving children.
-     * 
-     * @param parent
-     * @param context
-     * @return scheduling rule or <code>null</code>
-     */
-    protected ISchedulingRule getRetrieveChildRule(Object parent, IPresentationContext context) {
-    	return AsynchronousSchedulingRuleFactory.getDefault().newSerialPerPartRule(context);
-    }
-    
-    /**
-     * Returns the scheduling rule for jobs determining an element's child count.
-     * 
-     * @param parent
-     * @param context
-     * @return scheduling rule or <code>null</code>
-     */
-    protected ISchedulingRule getRetrieveChildCountRule(Object parent, IPresentationContext context) {
-    	return AsynchronousSchedulingRuleFactory.getDefault().newSerialPerPartRule(context);
-    }
-    
+	    
     /**
      * Computes the children for the given parent in the specified context.
      * 

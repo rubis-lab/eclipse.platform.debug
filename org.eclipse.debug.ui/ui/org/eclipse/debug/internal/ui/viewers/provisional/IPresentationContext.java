@@ -35,6 +35,7 @@ public interface IPresentationContext {
      * 
      * @return the part for which a request is being made
      * or <code>null</code>
+     * @deprecated to be removed in 3.3
      */
     public IWorkbenchPart getPart();
     
@@ -72,5 +73,22 @@ public interface IPresentationContext {
      * @since 3.3
      */
     public String getId();
+    
+    /**
+     * Sets the specified property and notifies listeners of changes.
+     * 
+     * @param property property name
+     * @param value property value
+     */
+    public void setProperty(String property, Object value);
+    
+    /**
+     * Returns the property with the specified name or <code>null</code>
+     * if none.
+     * 
+     * @param property property name
+     * @return property value or <code>null</code>
+     */
+    public Object getProperty(String property);
     
 }

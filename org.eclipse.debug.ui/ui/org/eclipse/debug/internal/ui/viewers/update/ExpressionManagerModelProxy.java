@@ -19,6 +19,7 @@ import org.eclipse.debug.internal.ui.viewers.provisional.AbstractModelProxy;
 import org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta;
 import org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.provisional.ModelDelta;
+import org.eclipse.jface.viewers.Viewer;
 
 
 public class ExpressionManagerModelProxy extends AbstractModelProxy implements IExpressionsListener {
@@ -32,9 +33,9 @@ public class ExpressionManagerModelProxy extends AbstractModelProxy implements I
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.viewers.provisional.AbstractModelProxy#installed()
+	 * @see org.eclipse.debug.internal.ui.viewers.provisional.AbstractModelProxy#installed(org.eclipse.jface.viewers.Viewer)
 	 */
-	public void installed() {
+	public void installed(Viewer viewer) {
 		updateExpressions(getExpressionManager().getExpressions(), IModelDelta.INSTALL);
 	}
 

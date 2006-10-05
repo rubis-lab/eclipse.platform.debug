@@ -38,9 +38,7 @@ abstract class ViewerUpdateMonitor extends AbstractRequestMonitor implements IPr
         	try {
 	            if (!isCanceled() && !getContentProvider().isDisposed()) {
 	            	IStatus status = getStatus();
-	                if (status != null && !status.isOK()) {
-	                	getContentProvider().handlePresentationFailure(ViewerUpdateMonitor.this, status);
-	                } else {
+	                if (status == null || status.isOK()) {
 	                	performUpdate();
 	                }
 	            }

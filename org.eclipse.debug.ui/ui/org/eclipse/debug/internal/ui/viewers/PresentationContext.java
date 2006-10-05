@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext;
@@ -31,6 +34,7 @@ public class PresentationContext implements IPresentationContext {
     private String fId;
     private String[] fColumns;
     private ListenerList fListeners = new ListenerList();
+    private Map fProperties = new HashMap();
     
     /**
      * Constructs a presentation context for the given part.
@@ -128,5 +132,35 @@ public class PresentationContext implements IPresentationContext {
 	public String getId() {
 		return fId;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext#getProperty(java.lang.String)
+	 */
+	public Object getProperty(String property) {
+		synchronized (fProperties) {
+			return fProperties.get(property);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext#setProperty(java.lang.String, java.lang.Object)
+	 */
+	public void setProperty(String property, Object value) {
+		synchronized (fProperties) {
+			Object oldValue = fProperties.get(property);
+			if (!isEqual(oldValue, value)) {
+				fProperties.put(property, value);
+				firePropertyChange(property, oldValue, value);
+			}
+		}
+	}
+	
+	private boolean isEqual(Object a, Object b) {
+		if (a == null) {
+			return b == null;
+		}
+		return a.equals(b);
+	}
+	
 
 }

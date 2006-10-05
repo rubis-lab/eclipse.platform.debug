@@ -25,6 +25,8 @@ import org.eclipse.debug.ui.memory.IMemoryRendering;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.Viewer;
 
 public class MemoryRetrievalProxy extends AbstractModelProxy implements IMemoryBlockListener {
 	private IMemoryBlockRetrieval fRetrieval;
@@ -103,18 +105,14 @@ public class MemoryRetrievalProxy extends AbstractModelProxy implements IMemoryB
 		}
 	}
 	
-	private IStructuredSelection getCurrentSelection()
-	{
-		if (getPresentationContext() == null)
-		{
-			return StructuredSelection.EMPTY;
+	private IStructuredSelection getCurrentSelection() {
+		Viewer viewer = getViewer();
+		if (viewer instanceof StructuredViewer) {
+			StructuredViewer sv = (StructuredViewer) viewer;
+			ISelection selection = sv.getSelection();
+			if (selection instanceof IStructuredSelection)
+				return (IStructuredSelection)selection;			
 		}
-		
-		ISelection selection = getPresentationContext().getPart().getSite().getSelectionProvider().getSelection();
-		
-		if (selection instanceof IStructuredSelection)
-			return (IStructuredSelection)selection;
-		
 		return StructuredSelection.EMPTY;
 	}
 	

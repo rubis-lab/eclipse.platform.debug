@@ -56,7 +56,7 @@ public abstract class AsynchronousContentAdapter implements IAsynchronousContent
      * @return scheduling rule or <code>null</code>
      */
     protected ISchedulingRule getRetrieveChildrenRule(Object parent, IPresentationContext context) {
-    	return AsynchronousSchedulingRuleFactory.getDefault().newSerialPerPartRule(context);
+    	return AsynchronousSchedulingRuleFactory.getDefault().newSerialPerObjectRule(context);
     }
     
 
@@ -86,7 +86,7 @@ public abstract class AsynchronousContentAdapter implements IAsynchronousContent
      * @return scheduling rule or <code>null</code>
      */
     protected ISchedulingRule getIsContainerRule(Object parent, IPresentationContext context) {
-    	return AsynchronousSchedulingRuleFactory.getDefault().newSerialPerPartRule(context);
+    	return AsynchronousSchedulingRuleFactory.getDefault().newSerialPerObjectRule(context);
     }
     
     /**

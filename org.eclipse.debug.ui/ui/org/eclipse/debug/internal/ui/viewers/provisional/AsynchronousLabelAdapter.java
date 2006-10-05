@@ -66,7 +66,7 @@ public abstract class AsynchronousLabelAdapter implements IAsynchronousLabelAdap
      * @return scheduling rule or <code>null</code>
      */
     protected ISchedulingRule getLabelRule(Object element, IPresentationContext context) {
-    	return AsynchronousSchedulingRuleFactory.getDefault().newSerialPerPartRule(context);
+    	return AsynchronousSchedulingRuleFactory.getDefault().newSerialPerObjectRule(context);
     }
 	
 	/**

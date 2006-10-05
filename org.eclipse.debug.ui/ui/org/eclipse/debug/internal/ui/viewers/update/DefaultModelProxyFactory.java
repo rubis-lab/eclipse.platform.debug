@@ -24,7 +24,6 @@ import org.eclipse.debug.internal.ui.viewers.provisional.IModelProxy;
 import org.eclipse.debug.internal.ui.viewers.provisional.IModelProxyFactoryAdapter;
 import org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext;
 import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.ui.IWorkbenchPart;
 
 public class DefaultModelProxyFactory implements IModelProxyFactoryAdapter {
 
@@ -51,12 +50,7 @@ public class DefaultModelProxyFactory implements IModelProxyFactoryAdapter {
 				return new ExpressionManagerModelProxy();
 			} 
 			if (element instanceof IWatchExpression) {
-				IWorkbenchPart part = context.getPart();
-				if (part == null) {
-					return null;
-				} else {
-					return new DefaultWatchExpressionModelProxy((IWatchExpression)element, part.getSite().getWorkbenchWindow());
-				}
+				return new DefaultWatchExpressionModelProxy((IWatchExpression)element);
 			}
 			if (element instanceof IExpression) {
 				return new DefaultExpressionModelProxy((IExpression)element);

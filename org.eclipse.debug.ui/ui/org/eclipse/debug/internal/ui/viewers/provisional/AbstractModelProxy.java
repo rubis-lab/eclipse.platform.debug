@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
+import org.eclipse.jface.viewers.Viewer;
 
 /**
  * Common function for a model proxy.
@@ -26,6 +27,7 @@ import org.eclipse.debug.internal.ui.DebugUIPlugin;
 public abstract class AbstractModelProxy implements IModelProxy {
 	
 	private IPresentationContext fContext;
+	private Viewer fViewer;
 
 	private ListenerList fListeners = new ListenerList();
 	
@@ -92,6 +94,7 @@ public abstract class AbstractModelProxy implements IModelProxy {
 	 */
 	public synchronized void dispose() {
 		fContext = null;
+		fViewer = null;
 	}
 
 	/* (non-Javadoc)
@@ -112,11 +115,22 @@ public abstract class AbstractModelProxy implements IModelProxy {
 	}
 
 	/* (non-Javadoc)
+	 * 
 	 * Subclasses should override as required.
 	 * 
-	 * @see org.eclipse.debug.internal.ui.viewers.IModelProxy#installed()
+	 * @see org.eclipse.debug.internal.ui.viewers.provisional.IModelProxy#installed(org.eclipse.jface.viewers.Viewer)
 	 */
-	public void installed() {	
+	public void installed(Viewer viewer) {	
+		fViewer = viewer;
+	}
+	
+	/**
+	 * Returns the viewer this proxy is installed in.
+	 * 
+	 * @return viewer or <code>null</code> if not installed
+	 */
+	protected Viewer getViewer() {
+		return fViewer;
 	}
 
 }

@@ -17,6 +17,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta;
 import org.eclipse.debug.internal.ui.viewers.provisional.ModelDelta;
+import org.eclipse.jface.viewers.Viewer;
 
 public class ProcessProxy extends EventHandlerModelProxy {
 
@@ -79,7 +80,8 @@ public class ProcessProxy extends EventHandlerModelProxy {
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.internal.ui.viewers.AbstractModelProxy#installed()
 	 */
-	public void installed() {
+	public void installed(Viewer viewer) {
+		super.installed(viewer);
 		// select process if in run mode
 		IProcess process = fProcess;
 		if (process != null) {

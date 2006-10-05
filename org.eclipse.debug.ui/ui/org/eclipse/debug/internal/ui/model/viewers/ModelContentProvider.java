@@ -41,7 +41,6 @@ import org.eclipse.debug.internal.ui.viewers.provisional.IModelProxy;
 import org.eclipse.debug.internal.ui.viewers.provisional.IModelProxyFactoryAdapter;
 import org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.provisional.ModelDelta;
-import org.eclipse.debug.ui.AbstractDebugView;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreePath;
@@ -49,7 +48,6 @@ import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.progress.WorkbenchJob;
@@ -445,7 +443,7 @@ abstract class ModelContentProvider implements IContentProvider,
 								}
 								proxy
 										.addModelChangedListener(ModelContentProvider.this);
-								proxy.installed();
+								proxy.installed(getViewer());
 							}
 							return Status.OK_STATUS;
 						}
@@ -627,15 +625,6 @@ abstract class ModelContentProvider implements IContentProvider,
 	protected Viewer getViewer() {
 		return fViewer;
 	}
-	
-	protected void handlePresentationFailure(IAsynchronousRequestMonitor request, IStatus status) {
-		IWorkbenchPart part = getPresentationContext().getPart();
-		if (part instanceof AbstractDebugView) {
-			AbstractDebugView view = (AbstractDebugView) part;
-			view.showMessage(status.getMessage());
-		}
-	}
-	
 	
 	/**
 	 * Translates and returns the given child index from the viewer coordinate

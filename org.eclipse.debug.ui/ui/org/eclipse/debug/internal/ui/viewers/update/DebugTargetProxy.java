@@ -19,6 +19,7 @@ import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IThread;
 import org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta;
 import org.eclipse.debug.internal.ui.viewers.provisional.ModelDelta;
+import org.eclipse.jface.viewers.Viewer;
 
 /**
  * Default model proxy for a debug target.
@@ -66,9 +67,9 @@ public class DebugTargetProxy extends EventHandlerModelProxy {
     }
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.viewers.AbstractModelProxy#installed()
+	 * @see org.eclipse.debug.internal.ui.viewers.provisional.IModelProxy#installed(org.eclipse.jface.viewers.Viewer)
 	 */
-	public void installed() {
+	public void installed(Viewer viewer) {
 		// select any thread that is already suspended after installation
 		IDebugTarget target = fDebugTarget;
 		if (target != null) {
