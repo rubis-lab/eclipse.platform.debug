@@ -75,7 +75,7 @@ public class TableUpdatePolicy extends org.eclipse.debug.internal.ui.viewers.Abs
                 handleInsert(node);
             }
 
-            IModelDelta[] childNodes = node.getNodes();
+            IModelDelta[] childNodes = node.getChildDeltas();
             updateNodes(childNodes);
         }
     }

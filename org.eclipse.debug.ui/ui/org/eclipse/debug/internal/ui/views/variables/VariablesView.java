@@ -18,15 +18,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import org.eclipse.core.commands.operations.IUndoContext;
-
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -47,18 +43,21 @@ import org.eclipse.debug.internal.ui.LazyModelPresentation;
 import org.eclipse.debug.internal.ui.VariablesViewModelPresentation;
 import org.eclipse.debug.internal.ui.actions.CollapseAllAction;
 import org.eclipse.debug.internal.ui.actions.ConfigureColumnsAction;
-import org.eclipse.debug.internal.ui.actions.FindElementAction;
 import org.eclipse.debug.internal.ui.actions.variables.AssignValueAction;
 import org.eclipse.debug.internal.ui.actions.variables.ChangeVariableValueAction;
 import org.eclipse.debug.internal.ui.actions.variables.ShowTypesAction;
 import org.eclipse.debug.internal.ui.actions.variables.ToggleDetailPaneAction;
 import org.eclipse.debug.internal.ui.contexts.DebugContextManager;
 import org.eclipse.debug.internal.ui.contexts.provisional.IDebugContextListener;
+import org.eclipse.debug.internal.ui.model.viewers.IViewerUpdateListener;
+import org.eclipse.debug.internal.ui.model.viewers.TreeModelViewer;
 import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
-import org.eclipse.debug.internal.ui.viewers.AsynchronousTreeViewer;
 import org.eclipse.debug.internal.ui.viewers.PresentationContext;
+import org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousRequestMonitor;
+import org.eclipse.debug.internal.ui.viewers.provisional.IModelChangedListener;
+import org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta;
+import org.eclipse.debug.internal.ui.viewers.provisional.IModelDeltaVisitor;
 import org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext;
-import org.eclipse.debug.internal.ui.views.AbstractViewerState;
 import org.eclipse.debug.internal.ui.views.IDebugExceptionHandler;
 import org.eclipse.debug.ui.AbstractDebugView;
 import org.eclipse.debug.ui.IDebugModelPresentation;
@@ -100,6 +99,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -132,6 +132,7 @@ import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.operations.OperationHistoryActionHandler;
 import org.eclipse.ui.operations.RedoActionHandler;
 import org.eclipse.ui.operations.UndoActionHandler;
+import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.progress.WorkbenchJob;
 import org.eclipse.ui.texteditor.FindReplaceAction;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
@@ -146,9 +147,9 @@ import com.ibm.icu.text.MessageFormat;
  * This view shows variables and their values for a particular stack frame
  */
 public class VariablesView extends AbstractDebugView implements IDebugContextListener,
-																	IPropertyChangeListener,
-																	IDebugExceptionHandler,
-																	IPerspectiveListener {
+	IPropertyChangeListener, IDebugExceptionHandler,
+	IPerspectiveListener, IModelChangedListener,
+	IViewerUpdateListener {
 
 	/**
 	 * Internal interface for a cursor listener. I.e. aggregation 
@@ -156,44 +157,6 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	 * @since 3.0
 	 */
 	interface ICursorListener extends MouseListener, KeyListener {
-	}
-		
-	/**
-	 * Most recently used variant with capped size that only counts
-	 * {@linkplain #put(Object, Object) put} as access. This is implemented by always removing an
-	 * element before it gets put back.
-	 * 
-	 * @since 3.2
-	 */
-	private static final class MRUMap extends LinkedHashMap {
-		private static final long serialVersionUID= 1L;
-		private final int fMaxSize;
-		
-		/**
-		 * Creates a new <code>MRUMap</code> with the given size.
-		 * 
-		 * @param maxSize the maximum size of the cache, must be &gt; 0
-		 */
-		public MRUMap(int maxSize) {
-			Assert.isLegal(maxSize > 0);
-			fMaxSize= maxSize;
-		}
-		
-		/*
-		 * @see java.util.HashMap#put(java.lang.Object, java.lang.Object)
-		 */
-		public Object put(Object key, Object value) {
-			Object object= remove(key);
-			super.put(key, value);
-			return object;
-		}
-		
-		/*
-		 * @see java.util.LinkedHashMap#removeEldestEntry(java.util.Map.Entry)
-		 */
-		protected boolean removeEldestEntry(java.util.Map.Entry eldest) {
-			return size() > fMaxSize;
-		}
 	}
 	
 	/**
@@ -263,14 +226,22 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 				}
 			}
 			public void run() {
-				getFindAction().run();
+				IAction findAction = getFindAction();
+				if (findAction != null) {
+					findAction.run();
+				}
 			}
 
 			/* (non-Javadoc)
 			 * @see org.eclipse.ui.texteditor.IUpdate#update()
 			 */
 			public void update() {
-				setEnabled(getFindAction().isEnabled());
+				IAction findAction = getFindAction();
+				if (findAction != null) {
+					setEnabled(findAction.isEnabled());
+				} else {
+					setEnabled(false);
+				}
 			}
 	}
 	
@@ -426,21 +397,6 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	private List fSelectionActions = new ArrayList(3);
 	
 	/**
-	 * An MRU cache of stack frame hash codes to <code>ViewerState</code>s.
-	 * Used to restore the expanded state of the variables view on
-	 * re-selection of the same stack frame. The cache is limited
-	 * to twenty entries.
-	 */
-	private HashMap fSelectionStates = new MRUMap(20);
-	
-	/**
-	 * The last known viewer state. Used to initialize the expansion/selection
-	 * in the variables view when there is no state to go on for the
-	 * current stack frame being displayed.
-	 */
-	private AbstractViewerState fLastState = null;
-	
-	/**
 	 * Remembers which viewer (tree viewer or details viewer) had focus, so we
 	 * can reset the focus properly when re-activated.
 	 */
@@ -506,6 +462,54 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	/** Whether logical structures are showing */
     private boolean fShowLogical;
 
+
+    /**
+     * Visits deltas to determine if details should be displayed
+     */
+    class Visitor implements IModelDeltaVisitor {
+        /**
+         * Whether to trigger details display.
+         * 
+         * @since 3.3
+         */
+        private boolean fTriggerDetails = false;
+		/* (non-Javadoc)
+		 * @see org.eclipse.debug.internal.ui.viewers.provisional.IModelDeltaVisitor#visit(org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta, int)
+		 */
+		public boolean visit(IModelDelta delta, int depth) {
+			if ((delta.getFlags() & IModelDelta.CONTENT) > 0) {
+				fTriggerDetails = true;
+				return false;
+			}
+			return true;
+		}
+		
+		public void reset() {
+			fTriggerDetails = false;
+		}
+		
+		public boolean isTriggerDetails() {
+			return fTriggerDetails;
+		}
+    	
+    }
+    /**
+     * Delta visitor
+     */
+    private Visitor fVisitor = new Visitor();
+    
+    /**
+     * Job to update details in the UI thread.
+     */
+    private Job fTriggerDetailsJob = new UIJob("trigger details") { //$NON-NLS-1$
+	
+		public IStatus runInUIThread(IProgressMonitor monitor) {
+			populateDetailPane();
+			return Status.OK_STATUS;
+		}
+	
+	};
+    
 	/**
 	 * Remove myself as a selection listener
 	 * and preference change listener.
@@ -518,15 +522,12 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		getSite().getWorkbenchWindow().removePerspectiveListener(this);
 		DebugUIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 		JFaceResources.getFontRegistry().removeListener(this);
-		Viewer viewer = getViewer();
+		TreeModelViewer viewer = getVariablesViewer();
 		if (viewer != null) {
 			getDetailDocument().removeDocumentListener(getDetailDocumentListener());
-			if (viewer instanceof AsynchronousTreeViewer) {
-				AsynchronousTreeViewer asyncTreeViewer = (AsynchronousTreeViewer) viewer;
-				asyncTreeViewer.dispose();
-			}
+			viewer.removeModelChangedListener(this);
+			viewer.removeViewerUpdateListener(this);
 		}
-        fSelectionStates.clear();
 		super.dispose();
 	}
 
@@ -549,79 +550,15 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 
 		if (current != null && current.equals(context)) {
 			return;
-		}
-		
-		if (current != null) {
-			// save state
-			AbstractViewerState state = getViewerState();
-			cacheViewerState(current, state);
-			fLastState = (AbstractViewerState) state.clone();
-		}		
+		}	
 		
 		if (context instanceof IDebugElement) {
 			setDebugModel(((IDebugElement)context).getModelIdentifier());
 		}
 		showViewer();
 		getViewer().setInput(context);
-		restoreState();
 	}
-	
-	/**
-	 * Caches the given viewer state for the given viewer input.
-	 * 
-	 * @param input viewer input
-	 * @param state viewer state
-	 */
-	protected void cacheViewerState(Object input, AbstractViewerState state) {
-		// generate a key for the input based on its hash code, we don't
-		// want to maintain reference real model objects preventing GCs.
-		fSelectionStates.put(generateKey(input), state);
-	}
-	
-	/**
-	 * Generate a key for an input object.
-	 * 
-	 * @param input
-	 * @return key
-	 */
-	protected Object generateKey(Object input) {
-		return new Integer(input.hashCode());
-	}
-	
-	/**
-	 * Returns the cached viewer state for the given viewer input or 
-	 * <code>null</code> if none.
-	 * 
-	 * @param input viewer input
-	 * @return viewer state or <code>null</code>
-	 */
-	protected AbstractViewerState getCachedViewerState(Object input) {
-		return (AbstractViewerState) fSelectionStates.get(generateKey(input));
-	}
-    
-    /**
-     * Restores the state of the viewer
-     */
-    protected void restoreState() {
-        VariablesViewer viewer = (VariablesViewer) getViewer();
-        if (viewer != null) {
-            Object context = viewer.getInput();
-            if (context != null) {
-                AbstractViewerState state = getCachedViewerState(context);
-                if (state == null) {
-                    // attempt to restore selection/expansion based on last
-                    // frame
-                	if (fLastState != null) {
-                		state = fLastState;
-                	}
-                }
-                if (state != null) {
-                    state.restoreState(viewer);
-                }
-            }
-        }
-    }
-	
+		
 	/**
 	 * Configures the details viewer for the debug model
 	 * currently being displayed
@@ -671,8 +608,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	 * @see org.eclipse.debug.ui.AbstractDebugView#createViewer(Composite)
 	 */
 	public Viewer createViewer(Composite parent) {
-		VariablesViewer variablesViewer = (VariablesViewer) createTreeViewer(parent);
-		variablesViewer.setContext(new PresentationContext(this));
+		TreeModelViewer variablesViewer = createTreeViewer(parent);
 		variablesViewer.getPresentationContext().addPropertyChangeListener(
 				new IPropertyChangeListener() {
 					public void propertyChange(PropertyChangeEvent event) {
@@ -699,6 +635,8 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		if (memento != null) {
 			variablesViewer.initState(memento);
 		}
+		variablesViewer.addModelChangedListener(this);
+		variablesViewer.addViewerUpdateListener(this);
 		return variablesViewer;
 	}
 	
@@ -796,7 +734,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	/**
 	 * Create and return the main tree viewer that displays variable.
 	 */
-	protected Viewer createTreeViewer(Composite parent) {
+	protected TreeModelViewer createTreeViewer(Composite parent) {
 		fModelPresentation = new VariablesViewModelPresentation();
 		DebugUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		JFaceResources.getFontRegistry().addListener(this);
@@ -805,7 +743,8 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		fSashForm = new SashForm(parent, SWT.NONE);
 
 		// add tree viewer
-		final VariablesViewer variablesViewer = createVariablesViewer(fSashForm);
+		int style = getViewerStyle();
+		final TreeModelViewer variablesViewer = new TreeModelViewer(fSashForm, style, new PresentationContext(this));
 		variablesViewer.getControl().addFocusListener(new FocusAdapter() {
 			/* (non-Javadoc)
 			 * @see org.eclipse.swt.events.FocusListener#focusGained(FocusEvent)
@@ -828,13 +767,12 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	}
 	
 	/**
-	 * Creates and returns a variables viewer in the given composite.
+	 * Returns the style bits for the viewer.
 	 * 
-	 * @param parent
-	 * @return variables viewer
+	 * @return SWT style
 	 */
-	protected VariablesViewer createVariablesViewer(Composite parent) {
-		return new VariablesViewer(parent, SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.VIRTUAL | SWT.FULL_SELECTION, this);
+	protected int getViewerStyle() {
+		return SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.VIRTUAL | SWT.FULL_SELECTION;
 	}
 	
 	/**
@@ -1006,7 +944,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		action = new ToggleLogicalStructureAction(this);
 		setAction("ToggleContentProviders", action); //$NON-NLS-1$
 		
-		action = new CollapseAllAction((AsynchronousTreeViewer)getViewer());
+		action = new CollapseAllAction((TreeViewer)getViewer());
 		setAction("CollapseAll", action); //$NON-NLS-1$
 
 		action = new ChangeVariableValueAction(this);
@@ -1045,8 +983,9 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		textAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.PASTE);
 		setAction(ActionFactory.PASTE.getId(), textAction);
 		
-		action= new FindElementAction(this, getVariablesViewer());
-		setAction(FIND_ELEMENT, action);
+		//TODO:
+		//action= new FindElementAction(this, getVariablesViewer());
+		//setAction(FIND_ELEMENT, action);
 		
 		// TODO: Still using "old" resource access
 		ResourceBundle bundle= ResourceBundle.getBundle("org.eclipse.debug.internal.ui.views.variables.VariablesViewResourceBundleMessages"); //$NON-NLS-1$
@@ -1119,7 +1058,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		return null;
 	}		
 	
-	private void createOrientationActions(VariablesViewer viewer) {
+	private void createOrientationActions(TreeModelViewer viewer) {
 		IActionBars actionBars = getViewSite().getActionBars();
 		IMenuManager viewMenu = actionBars.getMenuManager();
 		
@@ -1184,7 +1123,8 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 
 		menu.add(new Separator(IDebugUIConstants.EMPTY_VARIABLE_GROUP));
 		menu.add(new Separator(IDebugUIConstants.VARIABLE_GROUP));
-		menu.add(getAction(FIND_ELEMENT));
+		// TODO:
+		//menu.add(getAction(FIND_ELEMENT));
 		menu.add(getAction("ChangeVariableValue")); //$NON-NLS-1$
 		IAction action = new AvailableLogicalStructuresAction(this);
 		if (action.isEnabled()) {
@@ -1270,9 +1210,12 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
         	if (fDetailsJob != null) {
         		fDetailsJob.cancel();
         	}
-            fDetailsJob = new DetailJob(selection);
-            setDetails(""); //$NON-NLS-1$
-            fDetailsJob.schedule();
+        	if (selection.isEmpty()) {
+        		setDetails(""); //$NON-NLS-1$
+        	} else {
+	            fDetailsJob = new DetailJob(selection);
+	            fDetailsJob.schedule();
+        	}
         }
 	}
 
@@ -1595,18 +1538,9 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		ISelection selection = DebugContextManager.getDefault().getActiveContext(getSite().getWorkbenchWindow());
 		contextActivated(selection, null);
 	}
-
-	/**
-	 * Returns the memento of the expanded and selected items in the viewer.
-	 * 
-	 * @return the memento of the expanded and selected items in the viewer
-	 */
-	protected AbstractViewerState getViewerState() {
-		return new ViewerState(getVariablesViewer());
-	}
 	
-	protected VariablesViewer getVariablesViewer() {
-		return (VariablesViewer) getViewer();
+	protected TreeModelViewer getVariablesViewer() {
+		return (TreeModelViewer) getViewer();
 	}
 	
 	/**
@@ -1696,6 +1630,41 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		if(changeId.equals(IWorkbenchPage.CHANGE_RESET)) {
 			setLastSashWeights(DEFAULT_SASH_WEIGHTS);
 			fSashForm.setWeights(DEFAULT_SASH_WEIGHTS);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.viewers.provisional.IModelChangedListener#modelChanged(org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta)
+	 */
+	public void modelChanged(IModelDelta delta) {
+		fVisitor.reset();
+		delta.accept(fVisitor);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.model.viewers.IViewerUpdateListener#updateComplete(org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousRequestMonitor)
+	 */
+	public void updateComplete(IAsynchronousRequestMonitor update) {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.model.viewers.IViewerUpdateListener#updateStarted(org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousRequestMonitor)
+	 */
+	public void updateStarted(IAsynchronousRequestMonitor update) {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.model.viewers.IViewerUpdateListener#viewerUpdatesBegin()
+	 */
+	public void viewerUpdatesBegin() {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.model.viewers.IViewerUpdateListener#viewerUpdatesComplete()
+	 */
+	public void viewerUpdatesComplete() {
+		if (fVisitor.isTriggerDetails()) {
+			fTriggerDetailsJob.schedule();
 		}
 	}	
 }

@@ -173,4 +173,14 @@ public abstract class DebugEventHandler {
 	protected synchronized boolean isDisposed() {
 		return fModelProxy == null;
 	}
+	
+	protected int indexOf(Object[] list, Object element) {
+		for (int i = 0; i < list.length; i++) {
+			if (element.equals(list[i])) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
 }

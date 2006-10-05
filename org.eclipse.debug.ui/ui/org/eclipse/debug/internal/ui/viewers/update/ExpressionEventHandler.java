@@ -48,7 +48,14 @@ public class ExpressionEventHandler extends DebugEventHandler {
 			}
 		}
     	if (expression != null) {
-	    	delta.addNode(expression, IModelDelta.CONTENT | IModelDelta.STATE);
+    		int flags = IModelDelta.NO_CHANGE;
+    		if ((event.getDetail() & DebugEvent.STATE) != 0) {
+    			flags = flags | IModelDelta.STATE;
+    		}
+    		if ((event.getDetail() & DebugEvent.CONTENT) != 0) {
+    			flags = flags | IModelDelta.CONTENT;
+    		} 
+	    	delta.addNode(expression, flags);
 			fireDelta(delta);
     	}
     }

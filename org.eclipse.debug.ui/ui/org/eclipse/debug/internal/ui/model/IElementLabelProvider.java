@@ -1,0 +1,28 @@
+/*******************************************************************************
+ * Copyright (c) 2006 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.debug.internal.ui.model;
+
+/**
+ * Provides context sensitive labels. Can be registered as an adapter for an element,
+ * or implemented directly.
+ * 
+ * @since 3.3
+ */
+public interface IElementLabelProvider {
+	
+	/**
+	 * Updates the specified label.
+	 * 
+	 * @param update specifies the element and context for which a label is requested and
+	 *  stores updated label attributes
+	 */
+	public void update(ILabelUpdate update);
+}

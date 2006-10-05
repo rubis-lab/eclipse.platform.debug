@@ -97,7 +97,7 @@ public class MemoryViewTreeViewer extends AsynchronousTreeViewer {
 	            if ((flags & IModelDelta.REPLACED) != 0) {
 	            }
 
-	            updateNodes(node.getNodes());
+	            updateNodes(node.getChildDeltas());
 	        }
 		}
 	}

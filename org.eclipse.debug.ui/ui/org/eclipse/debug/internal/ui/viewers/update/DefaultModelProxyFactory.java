@@ -49,7 +49,8 @@ public class DefaultModelProxyFactory implements IModelProxyFactoryAdapter {
 		if (IDebugUIConstants.ID_EXPRESSION_VIEW.equals(id)) {
 			if (element instanceof IExpressionManager) {
 				return new ExpressionManagerModelProxy();
-			} if (element instanceof IWatchExpression) {
+			} 
+			if (element instanceof IWatchExpression) {
 				IWorkbenchPart part = context.getPart();
 				if (part == null) {
 					return null;

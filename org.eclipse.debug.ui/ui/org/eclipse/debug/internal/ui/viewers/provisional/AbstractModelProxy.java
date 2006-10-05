@@ -118,8 +118,5 @@ public abstract class AbstractModelProxy implements IModelProxy {
 	 */
 	public void installed() {	
 	}
-	
-	
-	
 
 }

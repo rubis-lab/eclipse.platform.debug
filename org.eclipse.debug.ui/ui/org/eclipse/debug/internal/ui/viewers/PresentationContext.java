@@ -94,7 +94,7 @@ public class PresentationContext implements IPresentationContext {
 	 * 
 	 * @param ids column identifiers
 	 */
-	protected void setColumns(String[] ids) {
+	public void setColumns(String[] ids) {
 		String[] oldValue = fColumns;
 		fColumns = ids;
 		firePropertyChange(IPresentationContext.PROPERTY_COLUMNS, oldValue, ids);

@@ -69,7 +69,7 @@ public class TreeUpdatePolicy extends AbstractUpdatePolicy implements IModelChan
                 // TODO
             }
 
-            updateNodes(node.getNodes());
+            updateNodes(node.getChildDeltas());
         }
     }
 
@@ -101,8 +101,8 @@ public class TreeUpdatePolicy extends AbstractUpdatePolicy implements IModelChan
     	if (node != fNode) {
             ArrayList list = new ArrayList();
             list.add(0, node.getElement());
-            while (node.getParent() != null) {
-                node = node.getParent();
+            while (node.getParentDelta() != null) {
+                node = node.getParentDelta();
                 list.add(0, node.getElement());
             }
 

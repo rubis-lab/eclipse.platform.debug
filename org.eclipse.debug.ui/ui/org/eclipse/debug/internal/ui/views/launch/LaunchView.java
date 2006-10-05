@@ -32,7 +32,6 @@ import org.eclipse.debug.internal.ui.DelegatingModelPresentation;
 import org.eclipse.debug.internal.ui.IDebugHelpContextIds;
 import org.eclipse.debug.internal.ui.actions.AddToFavoritesAction;
 import org.eclipse.debug.internal.ui.actions.EditLaunchConfigurationAction;
-import org.eclipse.debug.internal.ui.actions.FindElementAction;
 import org.eclipse.debug.internal.ui.actions.context.AbstractDebugContextAction;
 import org.eclipse.debug.internal.ui.actions.context.DisconnectAction;
 import org.eclipse.debug.internal.ui.actions.context.DropToFrameAction;
@@ -48,6 +47,7 @@ import org.eclipse.debug.internal.ui.actions.context.TerminateAndRemoveAction;
 import org.eclipse.debug.internal.ui.contexts.DebugContextManager;
 import org.eclipse.debug.internal.ui.contexts.provisional.IDebugContextListener;
 import org.eclipse.debug.internal.ui.contexts.provisional.IDebugContextProvider;
+import org.eclipse.debug.internal.ui.model.viewers.TreeModelViewer;
 import org.eclipse.debug.internal.ui.sourcelookup.EditSourceLookupPathAction;
 import org.eclipse.debug.internal.ui.sourcelookup.LookupSourceAction;
 import org.eclipse.debug.internal.ui.viewers.AsynchronousTreeViewer;
@@ -244,7 +244,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 		fAddToFavoritesAction = new AddToFavoritesAction();
 		fEditSourceAction = new EditSourceLookupPathAction(this);
 		fLookupAction = new LookupSourceAction(this);
-		setAction(FIND_ACTION, new FindElementAction(this, (AsynchronousTreeViewer) getViewer()));
+		//setAction(FIND_ACTION, new FindElementAction(this, (AsynchronousTreeViewer) getViewer()));
         
         
         IWorkbenchWindow window = getSite().getWorkbenchWindow();
@@ -287,8 +287,9 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	 * @see org.eclipse.debug.ui.AbstractDebugView#createViewer(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Viewer createViewer(Composite parent) {
-		AsynchronousTreeViewer viewer = new LaunchViewer(parent, this);
-		viewer.setContext(new PresentationContext(this));
+		TreeModelViewer viewer = new TreeModelViewer(parent,
+				SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.VIRTUAL,
+				new PresentationContext(this));
         
         viewer.addSelectionChangedListener(this);
         viewer.getControl().addKeyListener(new KeyAdapter() {

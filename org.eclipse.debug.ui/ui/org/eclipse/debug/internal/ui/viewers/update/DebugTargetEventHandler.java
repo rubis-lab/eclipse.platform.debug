@@ -60,7 +60,7 @@ public class DebugTargetEventHandler extends DebugEventHandler {
 	}
 
 	protected void handleTerminate(DebugEvent event) {
-		fireDelta((IDebugTarget) event.getSource(), IModelDelta.STATE);
+		fireDelta((IDebugTarget) event.getSource(), IModelDelta.STATE | IModelDelta.UNINSTALL);
 	}
 
 	private void fireDelta(IDebugTarget target, int flags) {
