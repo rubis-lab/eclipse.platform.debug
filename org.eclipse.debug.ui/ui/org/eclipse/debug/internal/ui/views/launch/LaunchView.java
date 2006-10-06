@@ -51,10 +51,9 @@ import org.eclipse.debug.internal.ui.model.viewers.TreeModelViewer;
 import org.eclipse.debug.internal.ui.sourcelookup.EditSourceLookupPathAction;
 import org.eclipse.debug.internal.ui.sourcelookup.LookupSourceAction;
 import org.eclipse.debug.internal.ui.viewers.AsynchronousTreeViewer;
-import org.eclipse.debug.internal.ui.viewers.PresentationContext;
+import org.eclipse.debug.internal.ui.views.DebugModelPresentationContext;
 import org.eclipse.debug.internal.ui.views.DebugUIViewsMessages;
 import org.eclipse.debug.ui.AbstractDebugView;
-import org.eclipse.debug.ui.IDebugEditorPresentation;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.action.GroupMarker;
@@ -127,7 +126,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	/**
 	 * Editor presentation or <code>null</code> if none
 	 */
-	private IDebugEditorPresentation fEditorPresentation = null;
+	private IDebugModelPresentation fPresentation = null;
 	
 	private EditLaunchConfigurationAction fEditConfigAction = null;
 	private AddToFavoritesAction fAddToFavoritesAction = null;
@@ -287,9 +286,10 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	 * @see org.eclipse.debug.ui.AbstractDebugView#createViewer(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Viewer createViewer(Composite parent) {
+		fPresentation = new DelegatingModelPresentation();
 		TreeModelViewer viewer = new TreeModelViewer(parent,
 				SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.VIRTUAL,
-				new PresentationContext(this));
+				new DebugModelPresentationContext(IDebugUIConstants.ID_DEBUG_VIEW, fPresentation));
         
         viewer.addSelectionChangedListener(this);
         viewer.getControl().addKeyListener(new KeyAdapter() {
@@ -299,8 +299,6 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
         		}
         	}
         });
-        final DelegatingModelPresentation presentation = new DelegatingModelPresentation();
-        fEditorPresentation = presentation;
         // add my viewer as a selection provider, so selective re-launch works
 		getSite().setSelectionProvider(viewer);
 		viewer.setInput(DebugPlugin.getDefault().getLaunchManager());
@@ -565,7 +563,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	 * @see org.eclipse.debug.ui.IDebugView#getPresentation(java.lang.String)
 	 */
 	public IDebugModelPresentation getPresentation(String id) {
-		return ((DelegatingModelPresentation)fEditorPresentation).getPresentation(id);
+		return ((DelegatingModelPresentation)fPresentation).getPresentation(id);
 	}
 	
 	/* (non-Javadoc)

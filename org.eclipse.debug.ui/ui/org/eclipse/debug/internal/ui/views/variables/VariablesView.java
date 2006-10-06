@@ -52,12 +52,12 @@ import org.eclipse.debug.internal.ui.contexts.provisional.IDebugContextListener;
 import org.eclipse.debug.internal.ui.model.viewers.IViewerUpdateListener;
 import org.eclipse.debug.internal.ui.model.viewers.TreeModelViewer;
 import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
-import org.eclipse.debug.internal.ui.viewers.PresentationContext;
 import org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousRequestMonitor;
 import org.eclipse.debug.internal.ui.viewers.provisional.IModelChangedListener;
 import org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta;
 import org.eclipse.debug.internal.ui.viewers.provisional.IModelDeltaVisitor;
 import org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext;
+import org.eclipse.debug.internal.ui.views.DebugModelPresentationContext;
 import org.eclipse.debug.internal.ui.views.IDebugExceptionHandler;
 import org.eclipse.debug.ui.AbstractDebugView;
 import org.eclipse.debug.ui.IDebugModelPresentation;
@@ -748,7 +748,8 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 
 		// add tree viewer
 		int style = getViewerStyle();
-		final TreeModelViewer variablesViewer = new TreeModelViewer(fSashForm, style, new PresentationContext(this));
+		final TreeModelViewer variablesViewer = new TreeModelViewer(fSashForm, style,
+				new DebugModelPresentationContext(IDebugUIConstants.ID_VARIABLE_VIEW, fModelPresentation));
 		variablesViewer.getControl().addFocusListener(new FocusAdapter() {
 			/* (non-Javadoc)
 			 * @see org.eclipse.swt.events.FocusListener#focusGained(FocusEvent)
@@ -1508,7 +1509,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	 * Sets whether logical structures are being displayed
 	 */
 	public void setShowLogicalStructure(boolean flag) {
-	    getPresentationContext().setProperty(PRESENTATION_SHOW_LOGICAL_STRUCTURES, Boolean.TRUE);
+	    getPresentationContext().setProperty(PRESENTATION_SHOW_LOGICAL_STRUCTURES, Boolean.valueOf(flag));
 	}	
 	
 	/** 
