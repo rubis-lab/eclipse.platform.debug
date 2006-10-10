@@ -32,6 +32,7 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.progress.UIJob;
 
 /**
@@ -173,7 +174,7 @@ class TreeModelLabelProvider extends ColumnLabelProvider {
 		}
 		IElementLabelProvider presentation = getLabelAdapter(element);
 		if (presentation != null) {
-			presentation.update(new LabelUpdate(element, this, columnId, cell.getColumnIndex()));
+			presentation.update(new LabelUpdate(element, (TreeItem) cell.getItem(), this, columnId, cell.getColumnIndex()));
 		} else if (element instanceof String) {
 			// for example, expression error messages
 			cell.setText((String)element);
@@ -224,7 +225,9 @@ class TreeModelLabelProvider extends ColumnLabelProvider {
 						fComplete = null;
 					}
 					//System.out.println("Changed Labels: " + updates.length);
-					fViewer.apply(updates);
+					for (int i = 0; i < updates.length; i++) {
+						updates[i].update();
+					}
 					return Status.OK_STATUS;
 				}
 			};

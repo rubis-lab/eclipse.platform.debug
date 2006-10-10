@@ -14,9 +14,10 @@ import org.eclipse.debug.internal.ui.actions.context.AbstractRequestMonitor;
 import org.eclipse.debug.internal.ui.model.ILabelUpdate;
 import org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ViewerRow;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.TreeItem;
 
 /**
  * @since 3.3
@@ -32,17 +33,25 @@ class LabelUpdate extends AbstractRequestMonitor implements ILabelUpdate {
 	private FontData fFontData;
 	private TreeModelLabelProvider fProvider;
 	private int fColumnIndex;
+	private TreeItem fItem;
+	
+	/**
+	 * Label/Image cache keys
+	 */
+	static String PREV_LABEL_KEY = "PREV_LABEL_KEY"; //$NON-NLS-1$
+	static String PREV_IAMGE_KEY = "PREV_IMAGE_KEY"; //$NON-NLS-1$
 	
 	/**
 	 * @param element element the label is for
 	 * @param provider label provider to callback to 
 	 * @param columnId column identifier or <code>null</code>
 	 */
-	public LabelUpdate(Object element, TreeModelLabelProvider provider, String columnId, int columnIndex) {
+	public LabelUpdate(Object element, TreeItem item, TreeModelLabelProvider provider, String columnId, int columnIndex) {
 		fElement = element;
 		fProvider = provider;
 		fColumnId = columnId;
 		fColumnIndex = columnIndex;
+		fItem = item;
 	}
 
 	/* (non-Javadoc)
@@ -111,12 +120,33 @@ class LabelUpdate extends AbstractRequestMonitor implements ILabelUpdate {
 	/**
 	 * Applies settings to viewer cell
 	 */
-	public void update(ViewerRow row) {
-		row.setText(fColumnIndex, fLabel);
-		row.setImage(fColumnIndex, fProvider.getImage(fImageDescriptor));
-		row.setForeground(fColumnIndex, fProvider.getColor(fForeground));
-		row.setBackground(fColumnIndex, fProvider.getColor(fBackground));
-		row.setFont(fColumnIndex, fProvider.getFont(fFontData));
+	public void update() {
+		if (!fItem.isDisposed()) {
+			fItem.setText(fColumnIndex, fLabel);
+			setPrevious(PREV_LABEL_KEY, fLabel, fColumnIndex);
+			Image image = fProvider.getImage(fImageDescriptor);
+			fItem.setImage(fColumnIndex, image);
+			setPrevious(PREV_IAMGE_KEY, image, fColumnIndex);
+			fItem.setForeground(fColumnIndex, fProvider.getColor(fForeground));
+			fItem.setBackground(fColumnIndex, fProvider.getColor(fBackground));
+			fItem.setFont(fColumnIndex, fProvider.getFont(fFontData));
+			
+		}
 	}
+	
+	private void setPrevious(String key, Object current, int index) {
+		Object[] previous = (Object[]) fItem.getData(key);
+		if (previous == null) {
+			int columnCount = fItem.getParent().getColumnCount();
+			if (columnCount == 0) {
+				columnCount++;
+			}
+			previous = new Object[columnCount];
+			fItem.setData(key, previous);
+		}
+		if (index < previous.length) {
+			previous[index] = current;
+		}
+	}	
 	
 }

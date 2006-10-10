@@ -33,15 +33,18 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.ViewerRow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Item;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
@@ -296,6 +299,33 @@ public class TreeModelViewer extends TreeViewer {
 		setLabelProvider(new TreeModelLabelProvider(this));
 	}
 	
+
+	
+	protected void hookControl(Control control) {
+		Tree treeControl = (Tree) control;
+		treeControl.addListener(SWT.SetData, new Listener() {
+			public void handleEvent(Event event) {
+				// to avoid flash, reset previous labels/image
+				TreeItem item = (TreeItem) event.item;
+				Object[] labels = (Object[]) item.getData(LabelUpdate.PREV_LABEL_KEY);
+				if (labels != null) {
+					for (int i = 0; i < labels.length; i++) {
+						item.setText(i, (String)labels[i]);
+					}
+				}
+				Object[] images = (Object[]) item.getData(LabelUpdate.PREV_IAMGE_KEY);
+				if (images != null) {
+					for (int i = 0; i < images.length; i++) {
+						item.setImage(i, (Image) images[i]);
+					}
+				}
+			}
+		});
+		super.hookControl(control);
+	}
+
+
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ContentViewer#handleDispose(org.eclipse.swt.events.DisposeEvent)
 	 */
@@ -875,30 +905,6 @@ public class TreeModelViewer extends TreeViewer {
 			}
 		}
 	}
-
-	/**
-	 * @param updates
-	 */
-	protected void apply(LabelUpdate[] updates) {
-		Object prevElement = null;
-		Widget[] widgets = null;
-		for (int i = 0; i < updates.length; i++) {
-			LabelUpdate update = updates[i];
-			Object element = update.getElement();
-			if (!element.equals(prevElement)) {
-				prevElement = element;
-				widgets = findItems(element);
-			}
-			for (int j = 0; j < widgets.length; j++) {
-				Widget widget = widgets[j];
-				if (widget instanceof TreeItem) {
-					TreeItem item = (TreeItem) widget;
-					ViewerRow row = getRowPartFromItem(item);
-					update.update(row);
-				}
-			}			
-		}
-	}	
 	
 	/**
 	 * Returns whether the candidate selection should override the current
