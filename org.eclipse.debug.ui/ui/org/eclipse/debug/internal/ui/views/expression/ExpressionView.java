@@ -136,6 +136,14 @@ public class ExpressionView extends VariablesView {
 	 */
 	protected int getViewerStyle() {
 		return SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.VIRTUAL;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.views.variables.VariablesView#getPresentationContextId()
+	 */
+	protected String getPresentationContextId() {
+		return IDebugUIConstants.ID_EXPRESSION_VIEW;
 	}	
     
+	
 }

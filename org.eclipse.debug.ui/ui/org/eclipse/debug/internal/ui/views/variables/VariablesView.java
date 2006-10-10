@@ -749,7 +749,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		// add tree viewer
 		int style = getViewerStyle();
 		final TreeModelViewer variablesViewer = new TreeModelViewer(fSashForm, style,
-				new DebugModelPresentationContext(IDebugUIConstants.ID_VARIABLE_VIEW, fModelPresentation));
+				new DebugModelPresentationContext(getPresentationContextId(), fModelPresentation));
 		variablesViewer.getControl().addFocusListener(new FocusAdapter() {
 			/* (non-Javadoc)
 			 * @see org.eclipse.swt.events.FocusListener#focusGained(FocusEvent)
@@ -769,6 +769,15 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		// listen to debug context
 		DebugContextManager.getDefault().addDebugContextListener(this, getSite().getWorkbenchWindow());
 		return variablesViewer;
+	}
+
+	/**
+	 * Returns the presentation context id for this view.
+	 * 
+	 * @return context id
+	 */
+	protected String getPresentationContextId() {
+		return IDebugUIConstants.ID_VARIABLE_VIEW;
 	}
 	
 	/**
