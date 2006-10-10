@@ -299,8 +299,12 @@ public class TreeModelViewer extends TreeViewer {
 		setLabelProvider(new TreeModelLabelProvider(this));
 	}
 	
-
-	
+	/* (non-Javadoc)
+	 * 
+	 * TODO: workaround for bug 159461
+	 * 
+	 * @see org.eclipse.jface.viewers.TreeViewer#hookControl(org.eclipse.swt.widgets.Control)
+	 */
 	protected void hookControl(Control control) {
 		Tree treeControl = (Tree) control;
 		treeControl.addListener(SWT.SetData, new Listener() {

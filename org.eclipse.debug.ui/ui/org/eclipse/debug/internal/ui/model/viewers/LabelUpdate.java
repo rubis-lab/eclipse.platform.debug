@@ -37,6 +37,7 @@ class LabelUpdate extends AbstractRequestMonitor implements ILabelUpdate {
 	
 	/**
 	 * Label/Image cache keys
+	 * TODO: workaround for bug 159461
 	 */
 	static String PREV_LABEL_KEY = "PREV_LABEL_KEY"; //$NON-NLS-1$
 	static String PREV_IAMGE_KEY = "PREV_IMAGE_KEY"; //$NON-NLS-1$
@@ -134,6 +135,13 @@ class LabelUpdate extends AbstractRequestMonitor implements ILabelUpdate {
 		}
 	}
 	
+	/**
+	 * TODO: workaround for bug 159461
+	 * 
+	 * @param key
+	 * @param current
+	 * @param index
+	 */
 	private void setPrevious(String key, Object current, int index) {
 		Object[] previous = (Object[]) fItem.getData(key);
 		if (previous == null) {
