@@ -14,6 +14,8 @@ import org.eclipse.debug.internal.ui.actions.context.AbstractRequestMonitor;
 import org.eclipse.debug.internal.ui.model.ILabelUpdate;
 import org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
@@ -25,41 +27,45 @@ import org.eclipse.swt.widgets.TreeItem;
 class LabelUpdate extends AbstractRequestMonitor implements ILabelUpdate {
 	
 	private Object fElement;
-	private String fColumnId;
-	private RGB fBackground;
-	private RGB fForeground;
-	private ImageDescriptor fImageDescriptor;
-	private String fLabel;
-	private FontData fFontData;
+	private String[] fColumnIds;
+	private RGB[] fBackgrounds;
+	private RGB[] fForegrounds;
+	private ImageDescriptor[] fImageDescriptors;
+	private String[] fLabels;
+	private FontData[] fFontDatas;
 	private TreeModelLabelProvider fProvider;
-	private int fColumnIndex;
 	private TreeItem fItem;
+	private int fNumColumns; 
 	
 	/**
 	 * Label/Image cache keys
 	 * TODO: workaround for bug 159461
 	 */
 	static String PREV_LABEL_KEY = "PREV_LABEL_KEY"; //$NON-NLS-1$
-	static String PREV_IAMGE_KEY = "PREV_IMAGE_KEY"; //$NON-NLS-1$
+	static String PREV_IMAGE_KEY = "PREV_IMAGE_KEY"; //$NON-NLS-1$
 	
 	/**
 	 * @param element element the label is for
 	 * @param provider label provider to callback to 
 	 * @param columnId column identifier or <code>null</code>
 	 */
-	public LabelUpdate(Object element, TreeItem item, TreeModelLabelProvider provider, String columnId, int columnIndex) {
+	public LabelUpdate(Object element, TreeItem item, TreeModelLabelProvider provider, String[] columnIds) {
 		fElement = element;
 		fProvider = provider;
-		fColumnId = columnId;
-		fColumnIndex = columnIndex;
+		fColumnIds = columnIds;
 		fItem = item;
+		fNumColumns = 1;
+		if (columnIds != null) {
+			fNumColumns = columnIds.length;
+		}
+		fLabels = new String[fNumColumns];
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.ILabelUpdate#getColumnId()
+	 * @see org.eclipse.debug.internal.ui.model.ILabelUpdate#getColumnIds()
 	 */
-	public String getColumnId() {
-		return fColumnId;
+	public String[] getColumnIds() {
+		return fColumnIds;
 	}
 
 	/* (non-Javadoc)
@@ -70,38 +76,62 @@ class LabelUpdate extends AbstractRequestMonitor implements ILabelUpdate {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.ILabelUpdate#setBackground(org.eclipse.swt.graphics.RGB)
+	 * @see org.eclipse.debug.internal.ui.model.ILabelUpdate#setBackground(org.eclipse.swt.graphics.RGB, int)
 	 */
-	public void setBackground(RGB background) {
-		fBackground = background;
+	public void setBackground(RGB background, int columnIndex) {
+		if (background == null) {
+			return;
+		}
+		if (fBackgrounds == null) {
+			fBackgrounds = new RGB[fNumColumns];
+		}
+		fBackgrounds[columnIndex] = background;
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.ILabelUpdate#setFontData(org.eclipse.swt.graphics.FontData)
+	 * @see org.eclipse.debug.internal.ui.model.ILabelUpdate#setFontData(org.eclipse.swt.graphics.FontData, int)
 	 */
-	public void setFontData(FontData fontData) {
-		fFontData = fontData;
+	public void setFontData(FontData fontData, int columnIndex) {
+		if (fontData == null) {
+			return;
+		}
+		if (fFontDatas == null) {
+			fFontDatas = new FontData[fNumColumns];
+		}
+		fFontDatas[columnIndex] = fontData;
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.ILabelUpdate#setForeground(org.eclipse.swt.graphics.RGB)
+	 * @see org.eclipse.debug.internal.ui.model.ILabelUpdate#setForeground(org.eclipse.swt.graphics.RGB, int)
 	 */
-	public void setForeground(RGB foreground) {
-		fForeground = foreground;
+	public void setForeground(RGB foreground, int columnIndex) {
+		if (foreground == null) {
+			return;
+		}
+		if (fForegrounds == null) {
+			fForegrounds = new RGB[fNumColumns];
+		}
+		fForegrounds[columnIndex] = foreground;
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.ILabelUpdate#setImageDescriptor(org.eclipse.jface.resource.ImageDescriptor)
+	 * @see org.eclipse.debug.internal.ui.model.ILabelUpdate#setImageDescriptor(org.eclipse.jface.resource.ImageDescriptor, int)
 	 */
-	public void setImageDescriptor(ImageDescriptor image) {
-		fImageDescriptor = image;
+	public void setImageDescriptor(ImageDescriptor image, int columnIndex) {
+		if (image == null) {
+			return;
+		}
+		if (fImageDescriptors == null) {
+			fImageDescriptors = new ImageDescriptor[fNumColumns];
+		}
+		fImageDescriptors[columnIndex] = image;
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.ILabelUpdate#setLabel(java.lang.String)
+	 * @see org.eclipse.debug.internal.ui.model.ILabelUpdate#setLabel(java.lang.String, int)
 	 */
-	public void setLabel(String text) {
-		fLabel = text;
+	public void setLabel(String text, int columnIndex) {
+		fLabels[columnIndex] = text;
 	}
 
 	/* (non-Javadoc)
@@ -123,38 +153,66 @@ class LabelUpdate extends AbstractRequestMonitor implements ILabelUpdate {
 	 */
 	public void update() {
 		if (!fItem.isDisposed()) {
-			fItem.setText(fColumnIndex, fLabel);
-			setPrevious(PREV_LABEL_KEY, fLabel, fColumnIndex);
-			Image image = fProvider.getImage(fImageDescriptor);
-			fItem.setImage(fColumnIndex, image);
-			setPrevious(PREV_IAMGE_KEY, image, fColumnIndex);
-			fItem.setForeground(fColumnIndex, fProvider.getColor(fForeground));
-			fItem.setBackground(fColumnIndex, fProvider.getColor(fBackground));
-			fItem.setFont(fColumnIndex, fProvider.getFont(fFontData));
-			
+			if (fColumnIds == null) {
+				fItem.setText(fLabels[0]);
+			} else {
+				fItem.setText(fLabels);
+			}
+			fItem.setData(PREV_LABEL_KEY, fLabels);
+			if (fImageDescriptors == null) {
+				fItem.setImage((Image)null);
+				fItem.setData(PREV_IMAGE_KEY, null); // TODO: bug 159461
+			} else {
+				if (fImageDescriptors == null) {
+					fItem.setImage((Image)null);
+					fItem.setData(PREV_IMAGE_KEY, null);
+				} else {
+					Image[] images = new Image[fImageDescriptors.length];
+					for (int i = 0; i < fImageDescriptors.length; i++) {
+						images[i] = fProvider.getImage(fImageDescriptors[i]);
+					}
+					if (fColumnIds == null) {
+						fItem.setImage(images[0]);
+					} else {
+						fItem.setImage(images);
+					}
+					fItem.setData(PREV_IMAGE_KEY, images); // TODO: bug 159461
+				}
+			}
+			if (fForegrounds == null) {
+				fItem.setForeground((Color)null);
+			} else {
+				if (fColumnIds == null) {
+					fItem.setForeground(fProvider.getColor(fForegrounds[0]));
+				} else {
+					for (int i = 0; i< fForegrounds.length; i++) {
+						fItem.setForeground(i, fProvider.getColor(fForegrounds[i]));
+					}
+				}
+			}
+			if (fBackgrounds == null) {
+				fItem.setBackground((Color)null);
+			} else {
+				if (fColumnIds == null) {
+					fItem.setBackground(fProvider.getColor(fBackgrounds[0]));
+				} else {
+					for (int i = 0; i< fBackgrounds.length; i++) {
+						fItem.setBackground(i, fProvider.getColor(fBackgrounds[i]));
+					}
+				}
+			}
+			if (fFontDatas == null) {
+				fItem.setFont((Font)null);
+			} else {
+				if (fColumnIds == null) {
+					fItem.setFont(fProvider.getFont(fFontDatas[0]));
+				} else {
+					for (int i = 0; i < fFontDatas.length; i++) {
+						fItem.setFont(i, fProvider.getFont(fFontDatas[i]));
+					}
+				}
+			}
 		}
 	}
-	
-	/**
-	 * TODO: workaround for bug 159461
-	 * 
-	 * @param key
-	 * @param current
-	 * @param index
-	 */
-	private void setPrevious(String key, Object current, int index) {
-		Object[] previous = (Object[]) fItem.getData(key);
-		if (previous == null) {
-			int columnCount = fItem.getParent().getColumnCount();
-			if (columnCount == 0) {
-				columnCount++;
-			}
-			previous = new Object[columnCount];
-			fItem.setData(key, previous);
-		}
-		if (index < previous.length) {
-			previous[index] = current;
-		}
-	}	
 	
 }

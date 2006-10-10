@@ -164,14 +164,24 @@ public abstract class ElementLabelProvider implements IElementLabelProvider {
 	 * @param update
 	 */
 	protected void retrieveLabel(ILabelUpdate update) throws CoreException {
-		String columnId = update.getColumnId();
+		String[] columnIds = update.getColumnIds();
 		IPresentationContext presentationContext = update.getPresentationContext();
 		Object element = update.getElement();
-		update.setLabel(getLabel(element, presentationContext, columnId));
-		update.setImageDescriptor(getImageDescriptor(element, presentationContext, columnId));
-		update.setBackground(getBackground(element, presentationContext, columnId));
-		update.setForeground(getForeground(element, presentationContext, columnId));
-		update.setFontData(getFontData(element, presentationContext, columnId));
+		int numColumns = 1;
+		if (columnIds != null) {
+			numColumns = columnIds.length;
+		}
+		for (int i = 0; i < numColumns; i++) {
+			String columnId = null;
+			if (columnIds != null) {
+				columnId = columnIds[i];
+			}
+			update.setLabel(getLabel(element, presentationContext, columnId), i);
+			update.setImageDescriptor(getImageDescriptor(element, presentationContext, columnId), i);
+			update.setBackground(getBackground(element, presentationContext, columnId), i);
+			update.setForeground(getForeground(element, presentationContext, columnId), i);
+			update.setFontData(getFontData(element, presentationContext, columnId), i);
+		}
 	}
 
 	/**

@@ -317,7 +317,7 @@ public class TreeModelViewer extends TreeViewer {
 						item.setText(i, (String)labels[i]);
 					}
 				}
-				Object[] images = (Object[]) item.getData(LabelUpdate.PREV_IAMGE_KEY);
+				Object[] images = (Object[]) item.getData(LabelUpdate.PREV_IMAGE_KEY);
 				if (images != null) {
 					for (int i = 0; i < images.length; i++) {
 						item.setImage(i, (Image) images[i]);
@@ -1005,4 +1005,27 @@ public class TreeModelViewer extends TreeViewer {
 			cp.removeModelChangedListener(listener);
 		}
 	}
+	
+	/*
+	 * (non-Javadoc) Method declared in AbstractTreeViewer.
+	 */
+	protected void doUpdateItem(final Item item, Object element) {
+		if (!(item instanceof TreeItem)) {
+			return;
+		}
+		TreeItem treeItem = (TreeItem) item;
+		if (treeItem.isDisposed()) {
+			unmapElement(element, treeItem);
+			return;
+		}
+
+		((TreeModelLabelProvider)getLabelProvider()).update(element, getRowPartFromItem(treeItem));
+
+		// As it is possible for user code to run the event
+		// loop check here.
+		if (item.isDisposed()) {
+			unmapElement(element, item);
+		}
+	}
+	
 }

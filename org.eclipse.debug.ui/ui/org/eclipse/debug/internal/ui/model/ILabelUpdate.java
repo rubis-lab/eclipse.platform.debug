@@ -29,44 +29,50 @@ public interface ILabelUpdate extends IPresentationUpdate {
 	public Object getElement();
 	
 	/**
-	 * Returns the column the label is for, or <code>null</code> if no columns.
+	 * Returns the id's of the visible columns in presentation order,
+	 * or <code>null</code> if none.
 	 * 
-	 * @return column id or <code>null</code>
+	 * @return column id's or <code>null</code>
 	 */
-	public String getColumnId();
+	public String[] getColumnIds();
 
 	/**
-	 * Sets the text of the label. Cannot be <code>null</code>.
+	 * Sets the text of the label of the specified column. Cannot be <code>null</code>.
 	 * 
 	 * @param text
+	 * @param columnIndex column index (0 when no columns)
 	 */
-    public void setLabel(String text);
+    public void setLabel(String text, int columnIndex);
     
     /**
      * Sets the font of the label.
      * 
      * @param fontData
+     * @param columnIndex column index (0 when no columns)
      */
-    public void setFontData(FontData fontData);
+    public void setFontData(FontData fontData, int columnIndex);
     
     /**
      * Sets the image of the label.
      * 
      * @param image
+     * @param columnIndex column index (0 when no columns)
      */
-    public void setImageDescriptor(ImageDescriptor image);
+    public void setImageDescriptor(ImageDescriptor image, int columnIndex);
     
     /**
      * Sets the foreground color of the label.
      * 
      * @param foreground
+     * @param columnIndex column index (0 when no columns)
      */
-    public void setForeground(RGB foreground);
+    public void setForeground(RGB foreground, int columnIndex);
     
     /**
      * Sets the background color of the label.
      * 
      * @param background
+     * @param columnIndex column index (0 when no columns)
      */
-    public void setBackground(RGB background);
+    public void setBackground(RGB background, int columnIndex);
 }
