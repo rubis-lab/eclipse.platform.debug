@@ -19,7 +19,6 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationCont
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.util.SafeRunnable;
-import org.eclipse.ui.IWorkbenchPart;
 
 /**
  * Presentation context.
@@ -30,23 +29,10 @@ import org.eclipse.ui.IWorkbenchPart;
  */
 public class PresentationContext implements IPresentationContext {
     
-    private IWorkbenchPart fPart;
     private String fId;
     private String[] fColumns;
     private ListenerList fListeners = new ListenerList();
     private Map fProperties = new HashMap();
-    
-    /**
-     * Constructs a presentation context for the given part.
-     * 
-     * @param part workbench part
-     */
-    public PresentationContext(IWorkbenchPart part) {
-        fPart = part;
-        if (part != null) {
-        	fId = part.getSite().getId();
-        }
-    }
     
     /**
      * Constructs a presentation context for the given id.
@@ -55,13 +41,6 @@ public class PresentationContext implements IPresentationContext {
      */
     public PresentationContext(String id) {
     	fId = id;
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.debug.ui.viewers.IPresentationContext#getPart()
-     */
-    public IWorkbenchPart getPart() {
-        return fPart;
     }
 
 	/* (non-Javadoc)
@@ -109,7 +88,6 @@ public class PresentationContext implements IPresentationContext {
 	 */
 	protected void dispose() {
 		fListeners.clear();
-		fPart = null;
 	}
 
 	/* (non-Javadoc)

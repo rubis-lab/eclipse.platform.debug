@@ -11,7 +11,6 @@
 package org.eclipse.debug.internal.ui.viewers.model.provisional;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.ui.IWorkbenchPart;
 
 /**
  * Context in which an asynchronous request has been made.
@@ -28,16 +27,6 @@ public interface IPresentationContext {
 	 * in a presentation context change.
 	 */
 	public static final String PROPERTY_COLUMNS = "PROPERTY_COLUMNS"; //$NON-NLS-1$
-    
-    /**
-     * Returns the part for which a request is being made
-     * or <code>null</code> if none. 
-     * 
-     * @return the part for which a request is being made
-     * or <code>null</code>
-     * @deprecated to be removed in 3.3
-     */
-    public IWorkbenchPart getPart();
     
     /**
      * Returns identifiers of the visible columns in the order
