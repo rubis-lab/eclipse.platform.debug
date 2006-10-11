@@ -23,9 +23,9 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IThread;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.ModelDelta;
 import org.eclipse.debug.internal.ui.viewers.provisional.AbstractModelProxy;
-import org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta;
-import org.eclipse.debug.internal.ui.viewers.provisional.ModelDelta;
 
 /**
  * @since 3.2

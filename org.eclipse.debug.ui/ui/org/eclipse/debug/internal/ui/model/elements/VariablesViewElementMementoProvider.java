@@ -26,7 +26,7 @@ public class VariablesViewElementMementoProvider extends ElementMementoProvider 
 	private static final String ELEMENT_NAME = "ELEMENT_NAME"; //$NON-NLS-1$
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.elements.ElementMementoProvider#encodeElement(java.lang.Object, org.eclipse.ui.IMemento)
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.elements.ElementMementoProvider#encodeElement(java.lang.Object, org.eclipse.ui.IMemento)
 	 */
 	protected boolean encodeElement(Object element, IMemento memento) throws CoreException {
 		if (element instanceof IStackFrame) {
@@ -42,7 +42,7 @@ public class VariablesViewElementMementoProvider extends ElementMementoProvider 
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.elements.ElementMementoProvider#isEqual(java.lang.Object, org.eclipse.ui.IMemento)
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.elements.ElementMementoProvider#isEqual(java.lang.Object, org.eclipse.ui.IMemento)
 	 */
 	protected boolean isEqual(Object element, IMemento memento) throws CoreException {
 		String mementoName = memento.getString(ELEMENT_NAME);

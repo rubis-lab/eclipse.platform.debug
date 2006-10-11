@@ -21,8 +21,8 @@ import org.eclipse.debug.core.model.IMemoryBlockExtension;
 import org.eclipse.debug.internal.ui.memory.provisional.AbstractAsyncTableRendering;
 import org.eclipse.debug.internal.ui.memory.provisional.MemoryViewPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.TableUpdatePolicy;
-import org.eclipse.debug.internal.ui.viewers.provisional.IModelChangedListener;
-import org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedListener;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
 import org.eclipse.debug.ui.memory.IMemoryRendering;
 import org.eclipse.ui.progress.UIJob;
 

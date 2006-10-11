@@ -15,10 +15,10 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IExpressionManager;
 import org.eclipse.debug.core.IExpressionsListener;
 import org.eclipse.debug.core.model.IExpression;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.ModelDelta;
 import org.eclipse.debug.internal.ui.viewers.provisional.AbstractModelProxy;
-import org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta;
-import org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext;
-import org.eclipse.debug.internal.ui.viewers.provisional.ModelDelta;
 import org.eclipse.jface.viewers.Viewer;
 
 

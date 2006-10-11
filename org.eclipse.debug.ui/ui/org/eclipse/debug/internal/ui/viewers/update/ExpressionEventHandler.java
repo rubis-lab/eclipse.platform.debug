@@ -14,10 +14,10 @@ package org.eclipse.debug.internal.ui.viewers.update;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IExpression;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxy;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.ModelDelta;
 import org.eclipse.debug.internal.ui.viewers.provisional.AbstractModelProxy;
-import org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta;
-import org.eclipse.debug.internal.ui.viewers.provisional.IModelProxy;
-import org.eclipse.debug.internal.ui.viewers.provisional.ModelDelta;
 
 /**
  * Event handler for an expression.

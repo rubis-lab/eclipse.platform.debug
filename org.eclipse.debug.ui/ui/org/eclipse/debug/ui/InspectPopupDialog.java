@@ -22,9 +22,9 @@ import org.eclipse.debug.core.model.IVariable;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.VariablesViewModelPresentation;
 import org.eclipse.debug.internal.ui.model.elements.ElementContentProvider;
-import org.eclipse.debug.internal.ui.model.viewers.TreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.PresentationContext;
-import org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.TreeModelViewer;
 import org.eclipse.debug.internal.ui.views.DebugUIViewsMessages;
 import org.eclipse.debug.internal.ui.views.variables.IndexedVariablePartition;
 import org.eclipse.debug.internal.ui.views.variables.VariablesView;
@@ -177,20 +177,20 @@ public class InspectPopupDialog extends DebugPopup {
 
     private class TreeRoot extends ElementContentProvider {
 		/* (non-Javadoc)
-		 * @see org.eclipse.debug.internal.ui.model.elements.ElementContentProvider#getChildCount(java.lang.Object, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext)
+		 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.elements.ElementContentProvider#getChildCount(java.lang.Object, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext)
 		 */
 		protected int getChildCount(Object element, IPresentationContext context) throws CoreException {
 			return 1;
 		}
 		/* (non-Javadoc)
-		 * @see org.eclipse.debug.internal.ui.model.elements.ElementContentProvider#getChildren(java.lang.Object, int, int, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext)
+		 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.elements.ElementContentProvider#getChildren(java.lang.Object, int, int, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext)
 		 */
 		protected Object[] getChildren(Object parent, int index, int length, IPresentationContext context) throws CoreException {
 			return new Object[] { fExpression };
 		}
 		
 		/* (non-Javadoc)
-		 * @see org.eclipse.debug.internal.ui.model.elements.ElementContentProvider#supportsContextId(java.lang.String)
+		 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.elements.ElementContentProvider#supportsContextId(java.lang.String)
 		 */
 		protected boolean supportsContextId(String id) {
 			return true;

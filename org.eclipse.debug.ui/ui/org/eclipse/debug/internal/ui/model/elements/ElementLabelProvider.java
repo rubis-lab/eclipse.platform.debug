@@ -18,9 +18,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.internal.ui.model.IElementLabelProvider;
-import org.eclipse.debug.internal.ui.model.ILabelUpdate;
-import org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementLabelProvider;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.ILabelUpdate;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;
@@ -61,7 +61,7 @@ public abstract class ElementLabelProvider implements IElementLabelProvider {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.eclipse.debug.internal.ui.model.elements.ElementContentProvider.ILabelJob#queue(org.eclipse.debug.internal.ui.model.ILabelUpdate)
+		 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.elements.ElementContentProvider.ILabelJob#queue(org.eclipse.debug.internal.ui.viewers.model.provisional.ILabelUpdate)
 		 */
 		public boolean queue(ILabelUpdate update) {
 			return fUpdater.queue(update);
@@ -94,7 +94,7 @@ public abstract class ElementLabelProvider implements IElementLabelProvider {
 		}
 		
 		/* (non-Javadoc)
-		 * @see org.eclipse.debug.internal.ui.model.elements.ElementContentProvider.ILabelJob#queue(org.eclipse.debug.internal.ui.model.ILabelUpdate)
+		 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.elements.ElementContentProvider.ILabelJob#queue(org.eclipse.debug.internal.ui.viewers.model.provisional.ILabelUpdate)
 		 */
 		public boolean queue(ILabelUpdate update) {
 			return fUpdater.queue(update);
@@ -233,7 +233,7 @@ public abstract class ElementLabelProvider implements IElementLabelProvider {
 	protected abstract String getLabel(Object element, IPresentationContext presentationContext, String columnId) throws CoreException;	
 
     /* (non-Javadoc)
-     * @see org.eclipse.debug.internal.ui.model.IElementLabelProvider#updateLabel(org.eclipse.debug.internal.ui.model.ILabelUpdate)
+     * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IElementLabelProvider#updateLabel(org.eclipse.debug.internal.ui.viewers.model.provisional.ILabelUpdate)
      */
     public synchronized void update(ILabelUpdate update) {
 		if (fLabelJob == null) {

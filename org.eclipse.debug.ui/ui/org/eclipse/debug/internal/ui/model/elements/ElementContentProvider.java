@@ -15,10 +15,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.internal.ui.model.IChildrenCountUpdate;
-import org.eclipse.debug.internal.ui.model.IChildrenUpdate;
-import org.eclipse.debug.internal.ui.model.IElementContentProvider;
-import org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IChildrenCountUpdate;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IChildrenUpdate;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementContentProvider;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 
 /**
  * @since 3.3
@@ -28,7 +28,7 @@ public abstract class ElementContentProvider implements IElementContentProvider 
 	protected static final Object[] EMPTY = new Object[0];
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.IElementContentProvider#updateChildren(java.lang.Object, int, int, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext, org.eclipse.debug.internal.ui.model.IElementRequestMonitor)
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IElementContentProvider#updateChildren(java.lang.Object, int, int, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext, org.eclipse.debug.internal.ui.viewers.model.provisional.IElementRequestMonitor)
 	 */
 	public void update(final IChildrenUpdate update) {
 		Job job = new Job("Retrieving Children") { //$NON-NLS-1$
@@ -45,7 +45,7 @@ public abstract class ElementContentProvider implements IElementContentProvider 
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.IElementContentProvider#update(org.eclipse.debug.internal.ui.model.IChildrenCountUpdate)
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IElementContentProvider#update(org.eclipse.debug.internal.ui.viewers.model.provisional.IChildrenCountUpdate)
 	 */
 	public void update(final IChildrenCountUpdate update) {
 		Job job = new Job("Computing hasChildren") { //$NON-NLS-1$

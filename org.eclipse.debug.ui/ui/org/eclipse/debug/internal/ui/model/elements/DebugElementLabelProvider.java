@@ -11,7 +11,7 @@
 package org.eclipse.debug.internal.ui.model.elements;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.views.DebugModelPresentationContext;
 import org.eclipse.debug.internal.ui.views.launch.DebugElementHelper;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -24,7 +24,7 @@ import org.eclipse.swt.graphics.RGB;
 public class DebugElementLabelProvider extends ElementLabelProvider {
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.elements.ElementContentProvider#getLabel(java.lang.Object, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext, java.lang.String)
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.elements.ElementContentProvider#getLabel(java.lang.Object, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext, java.lang.String)
 	 */
 	protected String getLabel(Object element, IPresentationContext presentationContext, String columnId) throws CoreException {
 		if (presentationContext instanceof DebugModelPresentationContext) {
@@ -35,7 +35,7 @@ public class DebugElementLabelProvider extends ElementLabelProvider {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.elements.ElementContentProvider#getBackground(java.lang.Object, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext, java.lang.String)
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.elements.ElementContentProvider#getBackground(java.lang.Object, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext, java.lang.String)
 	 */
 	protected RGB getBackground(Object element, IPresentationContext presentationContext, String columnId) throws CoreException {
 		if (presentationContext instanceof DebugModelPresentationContext) {
@@ -46,7 +46,7 @@ public class DebugElementLabelProvider extends ElementLabelProvider {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.elements.ElementContentProvider#getFontDatas(java.lang.Object, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext, java.lang.String)
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.elements.ElementContentProvider#getFontDatas(java.lang.Object, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext, java.lang.String)
 	 */
 	protected FontData getFontData(Object element, IPresentationContext presentationContext, String columnId) throws CoreException {
 		if (presentationContext instanceof DebugModelPresentationContext) {
@@ -58,7 +58,7 @@ public class DebugElementLabelProvider extends ElementLabelProvider {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.elements.ElementContentProvider#getForeground(java.lang.Object, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext, java.lang.String)
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.elements.ElementContentProvider#getForeground(java.lang.Object, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext, java.lang.String)
 	 */
 	protected RGB getForeground(Object element, IPresentationContext presentationContext, String columnId) throws CoreException {
 		if (presentationContext instanceof DebugModelPresentationContext) {
@@ -69,7 +69,7 @@ public class DebugElementLabelProvider extends ElementLabelProvider {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.elements.ElementContentProvider#getImageDescriptor(java.lang.Object, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext, java.lang.String)
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.elements.ElementContentProvider#getImageDescriptor(java.lang.Object, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext, java.lang.String)
 	 */
 	protected ImageDescriptor getImageDescriptor(Object element, IPresentationContext presentationContext, String columnId) throws CoreException {
 		if (presentationContext instanceof DebugModelPresentationContext) {

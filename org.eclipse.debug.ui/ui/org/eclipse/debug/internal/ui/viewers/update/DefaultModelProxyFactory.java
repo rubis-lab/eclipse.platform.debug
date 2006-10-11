@@ -20,9 +20,9 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IWatchExpression;
 import org.eclipse.debug.internal.ui.memory.provisional.MemoryViewPresentationContext;
-import org.eclipse.debug.internal.ui.viewers.provisional.IModelProxy;
-import org.eclipse.debug.internal.ui.viewers.provisional.IModelProxyFactoryAdapter;
-import org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxy;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxyFactoryAdapter;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.ui.IDebugUIConstants;
 
 public class DefaultModelProxyFactory implements IModelProxyFactoryAdapter {

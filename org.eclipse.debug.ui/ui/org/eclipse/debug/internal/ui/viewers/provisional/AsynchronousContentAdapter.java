@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.internal.ui.viewers.AsynchronousSchedulingRuleFactory;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 
 /**
  * Abstract implementation of an asynchronous content adapter.

@@ -15,9 +15,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.internal.ui.model.IElementCompareRequest;
-import org.eclipse.debug.internal.ui.model.IElementMementoProvider;
-import org.eclipse.debug.internal.ui.model.IElementMementoRequest;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementCompareRequest;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementMementoProvider;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementMementoRequest;
 import org.eclipse.ui.IMemento;
 
 /**
@@ -26,7 +26,7 @@ import org.eclipse.ui.IMemento;
 public abstract class ElementMementoProvider implements IElementMementoProvider {
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.IElementMementoProvider#compareElement(org.eclipse.debug.internal.ui.model.IElementCompareRequest)
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IElementMementoProvider#compareElement(org.eclipse.debug.internal.ui.viewers.model.provisional.IElementCompareRequest)
 	 */
 	public void compareElement(final IElementCompareRequest request) {
 		Job job = new Job("compare element") { //$NON-NLS-1$
@@ -57,7 +57,7 @@ public abstract class ElementMementoProvider implements IElementMementoProvider 
 	protected abstract boolean isEqual(Object element, IMemento memento) throws CoreException;
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.IElementMementoProvider#encodeElement(org.eclipse.debug.internal.ui.model.IElementMementoRequest)
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IElementMementoProvider#encodeElement(org.eclipse.debug.internal.ui.viewers.model.provisional.IElementMementoRequest)
 	 */
 	public void encodeElement(final IElementMementoRequest request) {
 		Job job = new Job("encode element") { //$NON-NLS-1$

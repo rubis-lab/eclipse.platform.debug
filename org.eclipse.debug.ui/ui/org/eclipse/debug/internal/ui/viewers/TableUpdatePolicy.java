@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers;
 
-import org.eclipse.debug.internal.ui.viewers.provisional.IModelChangedListener;
-import org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedListener;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 /**

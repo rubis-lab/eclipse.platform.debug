@@ -18,8 +18,8 @@ import java.util.Map;
 
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.IDebugHelpContextIds;
-import org.eclipse.debug.internal.ui.model.viewers.TreeModelViewer;
-import org.eclipse.debug.internal.ui.viewers.provisional.IColumnPresentation;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnPresentation;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.TreeModelViewer;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredContentProvider;

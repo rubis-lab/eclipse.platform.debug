@@ -49,14 +49,14 @@ import org.eclipse.debug.internal.ui.actions.variables.ShowTypesAction;
 import org.eclipse.debug.internal.ui.actions.variables.ToggleDetailPaneAction;
 import org.eclipse.debug.internal.ui.contexts.DebugContextManager;
 import org.eclipse.debug.internal.ui.contexts.provisional.IDebugContextListener;
-import org.eclipse.debug.internal.ui.model.viewers.IViewerUpdateListener;
-import org.eclipse.debug.internal.ui.model.viewers.TreeModelViewer;
 import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedListener;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDeltaVisitor;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdateListener;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.TreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousRequestMonitor;
-import org.eclipse.debug.internal.ui.viewers.provisional.IModelChangedListener;
-import org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta;
-import org.eclipse.debug.internal.ui.viewers.provisional.IModelDeltaVisitor;
-import org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.views.DebugModelPresentationContext;
 import org.eclipse.debug.internal.ui.views.IDebugExceptionHandler;
 import org.eclipse.debug.ui.AbstractDebugView;
@@ -1661,7 +1661,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.viewers.IViewerUpdateListener#updateComplete(org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousRequestMonitor)
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.IViewerUpdateListener#updateComplete(org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousRequestMonitor)
 	 */
 	public void updateComplete(IAsynchronousRequestMonitor update) {
 		IStatus status = update.getStatus();
@@ -1671,19 +1671,19 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.viewers.IViewerUpdateListener#updateStarted(org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousRequestMonitor)
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.IViewerUpdateListener#updateStarted(org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousRequestMonitor)
 	 */
 	public void updateStarted(IAsynchronousRequestMonitor update) {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.viewers.IViewerUpdateListener#viewerUpdatesBegin()
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.IViewerUpdateListener#viewerUpdatesBegin()
 	 */
 	public void viewerUpdatesBegin() {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.model.viewers.IViewerUpdateListener#viewerUpdatesComplete()
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.IViewerUpdateListener#viewerUpdatesComplete()
 	 */
 	public void viewerUpdatesComplete() {
 		if (fVisitor.isTriggerDetails()) {
