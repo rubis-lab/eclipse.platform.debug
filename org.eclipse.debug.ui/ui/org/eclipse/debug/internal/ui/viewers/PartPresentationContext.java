@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers;
 
+import org.eclipse.debug.internal.ui.viewers.model.provisional.PresentationContext;
 import org.eclipse.ui.IWorkbenchPart;
 
 /**

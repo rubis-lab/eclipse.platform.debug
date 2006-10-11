@@ -80,4 +80,10 @@ public interface IPresentationContext {
      */
     public Object getProperty(String property);
     
+    /**
+     * Disposes this presentation context. Called by the framework
+     * when the associated viewer is disposed.
+     */
+    public void dispose();
+    
 }

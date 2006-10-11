@@ -26,6 +26,7 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnEditor;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnEditorFactoryAdapter;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnPresentation;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnPresentationFactoryAdapter;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.PresentationContext;
 import org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousLabelAdapter;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;

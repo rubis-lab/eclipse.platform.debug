@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.debug.internal.ui.viewers.PresentationContext;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnEditor;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnEditorFactoryAdapter;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnPresentation;
@@ -26,6 +25,7 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelSelectionPo
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelSelectionPolicyFactoryAdapter;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdateListener;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.PresentationContext;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
@@ -339,6 +339,7 @@ public class InternalTreeModelViewer extends TreeViewer {
 			fColumnPresentation.dispose();
 		}
 		fCellModifier.dispose();
+		fContext.dispose();
 		super.handleDispose(event);
 	}
 	

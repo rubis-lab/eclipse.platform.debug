@@ -8,14 +8,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.internal.ui.viewers;
+package org.eclipse.debug.internal.ui.viewers.model.provisional;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.SafeRunner;
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.util.SafeRunnable;
@@ -30,7 +29,6 @@ import org.eclipse.jface.util.SafeRunnable;
 public class PresentationContext implements IPresentationContext {
     
     private String fId;
-    private String[] fColumns;
     private ListenerList fListeners = new ListenerList();
     private Map fProperties = new HashMap();
     
@@ -47,7 +45,7 @@ public class PresentationContext implements IPresentationContext {
 	 * @see org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext#getColumns()
 	 */
 	public String[] getColumns() {
-		return fColumns;
+		return (String[]) getProperty(IPresentationContext.PROPERTY_COLUMNS);
 	}
 	
 	/**
@@ -78,16 +76,16 @@ public class PresentationContext implements IPresentationContext {
 	 * @param ids column identifiers
 	 */
 	public void setColumns(String[] ids) {
-		String[] oldValue = fColumns;
-		fColumns = ids;
-		firePropertyChange(IPresentationContext.PROPERTY_COLUMNS, oldValue, ids);
+		setProperty(IPresentationContext.PROPERTY_COLUMNS, ids);
 	}
 	
-	/**
-	 * Disposes this presentation context.
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext#dispose()
 	 */
-	protected void dispose() {
+	public void dispose() {
 		fListeners.clear();
+		fProperties.clear();
 	}
 
 	/* (non-Javadoc)
