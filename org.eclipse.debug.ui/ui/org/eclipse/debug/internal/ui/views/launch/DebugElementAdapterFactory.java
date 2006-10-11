@@ -52,19 +52,21 @@ import org.eclipse.debug.internal.ui.model.elements.ExpressionManagerContentProv
 import org.eclipse.debug.internal.ui.model.elements.LaunchContentProvider;
 import org.eclipse.debug.internal.ui.model.elements.LaunchManagerContentProvider;
 import org.eclipse.debug.internal.ui.model.elements.StackFrameContentProvider;
-import org.eclipse.debug.internal.ui.model.elements.VariablesViewElementMementoProvider;
 import org.eclipse.debug.internal.ui.model.elements.ThreadContentProvider;
 import org.eclipse.debug.internal.ui.model.elements.VariableContentProvider;
+import org.eclipse.debug.internal.ui.model.elements.VariableEditor;
 import org.eclipse.debug.internal.ui.model.elements.VariableLabelProvider;
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnEditorFactoryAdapter;
+import org.eclipse.debug.internal.ui.model.elements.VariablesViewElementMementoProvider;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnPresentationFactoryAdapter;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementContentProvider;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementEditor;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementLabelProvider;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementMementoProvider;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxyFactoryAdapter;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelSelectionPolicyFactoryAdapter;
 import org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousContentAdapter;
 import org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousLabelAdapter;
+import org.eclipse.debug.internal.ui.viewers.provisional.IColumnEditorFactoryAdapter;
 import org.eclipse.debug.internal.ui.viewers.update.DefaultModelProxyFactory;
 import org.eclipse.debug.internal.ui.viewers.update.DefaultModelSelectionPolicyFactory;
 import org.eclipse.debug.internal.ui.views.memory.renderings.MemorySegment;
@@ -90,6 +92,8 @@ public class DebugElementAdapterFactory implements IAdapterFactory {
     private static IElementLabelProvider fgLPDebugElement = new DebugElementLabelProvider();
     private static IElementLabelProvider fgLPVariable = new VariableLabelProvider();
     private static IElementLabelProvider fgLPExpression = new ExpressionLabelProvider();
+    
+    private static IElementEditor fgEEVariable = new VariableEditor();
     
     private static IAsynchronousContentAdapter fgAsyncLaunchManager = new LauchManagerContentAdapter();
     private static IAsynchronousContentAdapter fgAsyncLaunch = new LaunchContentAdapter();
@@ -258,6 +262,13 @@ public class DebugElementAdapterFactory implements IAdapterFactory {
         		return fgMPFrame;
         	}
         }
+        
+        if (adapterType.equals(IElementEditor.class)) {
+        	if (adaptableObject instanceof IVariable) {
+        		return fgEEVariable;
+        	}
+        }
+        
         return null;
     }
 
@@ -267,7 +278,7 @@ public class DebugElementAdapterFactory implements IAdapterFactory {
     public Class[] getAdapterList() {
         return new Class[] {IWorkbenchAdapter.class, IWorkbenchAdapter2.class, IDeferredWorkbenchAdapter.class, IAsynchronousLabelAdapter.class, IAsynchronousContentAdapter.class,
         		IModelProxyFactoryAdapter.class, ISourceDisplayAdapter.class, IModelSelectionPolicyFactoryAdapter.class, IColumnPresentationFactoryAdapter.class, IColumnEditorFactoryAdapter.class,
-        		IElementContentProvider.class, IElementLabelProvider.class, IElementMementoProvider.class};
+        		IElementContentProvider.class, IElementLabelProvider.class, IElementMementoProvider.class, IElementEditor.class};
     }
 
 }

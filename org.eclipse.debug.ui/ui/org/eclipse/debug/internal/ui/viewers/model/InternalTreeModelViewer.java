@@ -16,10 +16,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnEditor;
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnEditorFactoryAdapter;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnPresentation;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnPresentationFactoryAdapter;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementEditor;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedListener;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelSelectionPolicy;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelSelectionPolicyFactoryAdapter;
@@ -157,30 +156,30 @@ public class InternalTreeModelViewer extends TreeViewer {
 	 */
 	class CellModifierProxy implements ICellModifier {
 		
-		private IColumnEditor fColumnEditor = null;
+		private ICellModifier fModifier;
 
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.ICellModifier#canModify(java.lang.Object, java.lang.String)
 		 */
 		public boolean canModify(Object element, String property) {
-			updateColumnEditor(element);
-			if (fColumnEditor != null) {
-				boolean canModify = fColumnEditor.getCellModifier().canModify(element, property);
-				if (canModify) {
-					// install cell editor
-	                CellEditor cellEditor = fColumnEditor.getCellEditor(property, element, (Composite)getControl());
-	                if (cellEditor == null) {
-	                	// contradiction, oh well
-	                	return false;
-	                }
-	                disposeCellEditors();
-	                CellEditor[] newEditors = new CellEditor[getVisibleColumns().length];
-	                for (int i = 0; i < newEditors.length; i++) {
-						newEditors[i] = cellEditor;
+			IElementEditor editor = getElementEditorAdapter(element);
+			if (editor != null) {
+				fModifier = editor.getCellModifier(getPresentationContext(), element);
+				if (fModifier != null) {
+					if (fModifier.canModify(element, property)) {
+						// install cell editor
+						CellEditor cellEditor = editor.getCellEditor(getPresentationContext(), property, element, (Composite)getControl());
+		                if (cellEditor != null) {
+			                disposeCellEditors();
+			                CellEditor[] newEditors = new CellEditor[getVisibleColumns().length];
+			                for (int i = 0; i < newEditors.length; i++) {
+								newEditors[i] = cellEditor;
+							}
+			                setCellEditors(newEditors);
+			                return true;
+		                }
 					}
-	                setCellEditors(newEditors);				
 				}
-				return canModify;
 			}
 			return false;
 		}
@@ -189,8 +188,8 @@ public class InternalTreeModelViewer extends TreeViewer {
 		 * @see org.eclipse.jface.viewers.ICellModifier#getValue(java.lang.Object, java.lang.String)
 		 */
 		public Object getValue(Object element, String property) {
-			if (fColumnEditor != null) {
-				return fColumnEditor.getCellModifier().getValue(element, property);
+			if (fModifier != null) {
+				return fModifier.getValue(element, property);
 			}
 			return null;
 		}
@@ -199,11 +198,11 @@ public class InternalTreeModelViewer extends TreeViewer {
 		 * @see org.eclipse.jface.viewers.ICellModifier#modify(java.lang.Object, java.lang.String, java.lang.Object)
 		 */
 		public void modify(Object element, String property, Object value) {
-			if (fColumnEditor != null) {
+			if (fModifier != null) {
 				if (element instanceof Item) {
 					element = ((Item)element).getData();
 				}
-				fColumnEditor.getCellModifier().modify(element, property, value);
+				fModifier.modify(element, property, value);
 			}
 		}
 		
@@ -211,11 +210,9 @@ public class InternalTreeModelViewer extends TreeViewer {
 		 * Disposes client's column editor and cell editors
 		 */
 		protected void dispose() {
+			fModifier = null;
 			disposeCellEditors();
 			setCellEditors(null);
-			if (fColumnEditor != null) {
-				fColumnEditor.dispose();
-			}
 		}
 
 		/**
@@ -234,49 +231,18 @@ public class InternalTreeModelViewer extends TreeViewer {
 		}
 		
 	    /**
-	     * Sets the column editor for the given element
-	     * 
-	     * @param element
-	     */
-	    protected void updateColumnEditor(Object element) {
-	    	IColumnEditorFactoryAdapter factoryAdapter = getColumnEditorFactoryAdapter(element);
-	    	if (factoryAdapter != null) {    		
-	    		if (fColumnEditor != null) {
-	    			if (fColumnEditor.getId().equals(factoryAdapter.getColumnEditorId(getPresentationContext(), element))) {
-	    				// no change
-	    				return;
-	    			} else {
-	    				// dispose current
-	    				fColumnEditor.dispose();
-	    			}
-	    		}
-	   			// create new one
-				fColumnEditor = factoryAdapter.createColumnEditor(getPresentationContext(), element);
-				if (fColumnEditor != null) {
-					fColumnEditor.init(getPresentationContext());
-				}
-	    	} else {
-	    		// no editor - dispose current
-		    	if (fColumnEditor != null) {
-		    		fColumnEditor.dispose();
-		    		fColumnEditor = null;
-		    	}
-	    	}
-	    }		
-		
-	    /**
-	     * Returns the column editor factory for the given element or <code>null</code>.
+	     * Returns the element editor for the given element or <code>null</code>.
 	     * 
 	     * @param input
-	     * @return column editor factory of <code>null</code>
+	     * @return element editor or <code>null</code>
 	     */
-	    protected IColumnEditorFactoryAdapter getColumnEditorFactoryAdapter(Object input) {
-	    	if (input instanceof IColumnEditorFactoryAdapter) {
-				return (IColumnEditorFactoryAdapter) input;
+	    protected IElementEditor getElementEditorAdapter(Object input) {
+	    	if (input instanceof IElementEditor) {
+				return (IElementEditor) input;
 			}
 	    	if (input instanceof IAdaptable) {
 				IAdaptable adaptable = (IAdaptable) input;
-				return (IColumnEditorFactoryAdapter) adaptable.getAdapter(IColumnEditorFactoryAdapter.class);
+				return (IElementEditor) adaptable.getAdapter(IElementEditor.class);
 			}
 	    	return null;
 	    } 

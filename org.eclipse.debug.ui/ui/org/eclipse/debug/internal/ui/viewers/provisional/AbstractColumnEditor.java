@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers.provisional;
 
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IColumnEditor;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 
 

@@ -15,50 +15,30 @@ import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * Creates cell modifiers and editors. Used in conjunction with a column presentation.
+ * Creates context specific cell modifiers and editors for an elements.
  *  
- * @since 3.2
+ * @since 3.3
  */
-public interface IColumnEditor {
-	
-	/**
-	 * Initializes this column editor to be used in the
-	 * given context.
-	 * 
-	 * @param context
-	 */
-	public void init(IPresentationContext context);
-	
-	/**
-	 * Disposes this column presentation
-	 */
-	public void dispose();	
+public interface IElementEditor {
 	
 	/**
 	 * Returns a cell editor to use for the specified column and object or <code>null</code>
 	 * if none.
 	 * 
+	 * @param context presentation context
 	 * @param id column id
 	 * @param element object to be edited
 	 * @param parent parent control to create the cell editor in
 	 * @return cell editor or <code>null</code>
 	 */
-	public CellEditor getCellEditor(String id, Object element, Composite parent);
+	public CellEditor getCellEditor(IPresentationContext context, String columnId, Object element, Composite parent);
 	
 	/**
-	 * Returns the cell modifier for this set of columns.
+	 * Returns a cell modifier for the specified element in the given context
+	 * or <code>null</code> if none.
 	 * 
-	 * @return cell modifier
+	 * @return cell modifier or <code>null</code>
 	 */
-	public ICellModifier getCellModifier();	
+	public ICellModifier getCellModifier(IPresentationContext context, Object element);	
 
-	/**
-	 * Returns an identifier for this column editor.
-	 * The identifier should be unique per kind of column editor 
-	 * (for example, the column editor for Java variables
-	 * in the variables view).
-	 * 
-	 * @return identifier
-	 */
-	public String getId();	
 }

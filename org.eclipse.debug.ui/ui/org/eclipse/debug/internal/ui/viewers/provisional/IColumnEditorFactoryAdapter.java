@@ -8,7 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.internal.ui.viewers.model.provisional;
+package org.eclipse.debug.internal.ui.viewers.provisional;
+
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 
 /**
  * An adapter used to column editors. Used in conjunction with a column presentation.
