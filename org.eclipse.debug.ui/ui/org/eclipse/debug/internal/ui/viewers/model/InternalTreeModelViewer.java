@@ -129,6 +129,11 @@ public class InternalTreeModelViewer extends TreeViewer {
 	private boolean fInserting = false;
 	
 	/**
+	 * Whether to notify the content provider of an un-map operation
+	 */
+	private boolean fNotifyUnmap = true;
+	
+	/**
 	 * Persist column sizes when they change.
 	 * 
 	 * @since 3.2
@@ -340,13 +345,32 @@ public class InternalTreeModelViewer extends TreeViewer {
 	}
 	
 	protected void unmapElement(Object element, Widget widget) {
-		IContentProvider provider = getContentProvider();
-		if (provider instanceof ModelContentProvider) {
-			((ModelContentProvider) provider).unmapPath((TreePath) widget.getData(TREE_PATH_KEY));
+		if (fNotifyUnmap) {
+			IContentProvider provider = getContentProvider();
+			if (provider instanceof ModelContentProvider) {
+				((ModelContentProvider) provider).unmapPath((TreePath) widget.getData(TREE_PATH_KEY));
+			}
 		}
 		super.unmapElement(element, widget);
 	}
 	
+	protected void associate(Object element, Item item) {
+		// see AbstractTreeViewer.associate(...)
+		Object data = item.getData();
+		if (data != null && data != element && equals(data, element)) {
+			// elements are equal but not identical
+			// -> being removed from map, but should not change filters
+			try {
+				fNotifyUnmap = false;
+				super.associate(element, item);
+			} finally {
+				fNotifyUnmap = true;
+			}
+		} else {
+			super.associate(element, item);
+		}
+	}
+
 	/* (non-Javadoc)
 	 * 
 	 * We need tree paths when disposed/unmapped in any order so cache the tree path.

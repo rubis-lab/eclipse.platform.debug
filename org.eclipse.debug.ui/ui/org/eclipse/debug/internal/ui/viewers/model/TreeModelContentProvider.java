@@ -76,7 +76,7 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 	 * @see org.eclipse.jface.viewers.ILazyTreeContentProvider#updateChildCount(java.lang.Object, int)
 	 */
 	public synchronized void updateChildCount(Object element, int currentChildCount) {
-		//System.out.println("updateChildCount(" + element + ")");
+		//System.out.println("updateChildCount(" + element + ", " + currentChildCount + ")");
 		TreePath[] treePaths = getTreePaths(element);
 		for (int i = 0; i < treePaths.length; i++) {
 			// re-filter children when asked to update the child count for an element (i.e.
