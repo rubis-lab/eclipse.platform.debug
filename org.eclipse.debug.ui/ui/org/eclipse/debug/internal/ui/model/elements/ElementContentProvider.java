@@ -73,8 +73,8 @@ public abstract class ElementContentProvider implements IElementContentProvider 
 				IPresentationContext context = update.getPresentationContext();
 				if (supportsContext(context)) {
 					int offset = update.getOffset();
-					Object[] children = getChildren(update.getParent(), offset, update.getLength(), context);
-					if (children != null) {
+					Object[] children = getChildren(update.getParent(), offset, update.getLength(), context, update);
+					if (!update.isCanceled() && children != null) {
 						for (int i = 0; i < children.length; i++) {
 							update.setChild(children[i], offset + i);
 						}
@@ -104,7 +104,10 @@ public abstract class ElementContentProvider implements IElementContentProvider 
 				if (supportsContext(context)) {
 					for (int i = 0; i < parents.length; i++) {
 						Object parent = parents[i];
-						update.setChildCount(parent, getChildCount(parent, context));
+						int childCount = getChildCount(parent, context, update);
+						if (!update.isCanceled()) {
+							update.setChildCount(parent, childCount);
+						}
 					}
 				} else {
 					for (int i = 0; i < parents.length; i++) {
@@ -131,7 +134,7 @@ public abstract class ElementContentProvider implements IElementContentProvider 
      * @return child or <code>null</code>
      * @throws CoreException if an exception occurs retrieving child
      */
-    protected abstract Object[] getChildren(Object parent, int index, int length, IPresentationContext context) throws CoreException;
+    protected abstract Object[] getChildren(Object parent, int index, int length, IPresentationContext context, IProgressMonitor monitor) throws CoreException;
     
     /**
      * Returns the number of children for the given element.
@@ -141,7 +144,7 @@ public abstract class ElementContentProvider implements IElementContentProvider 
      * @return number of children
      * @throws CoreException if an exception occurs determining child count
      */
-    protected abstract int getChildCount(Object element, IPresentationContext context) throws CoreException;    
+    protected abstract int getChildCount(Object element, IPresentationContext context, IProgressMonitor monitor) throws CoreException;    
 
     /**
      * Returns whether this adapter supports the given context.

@@ -1667,6 +1667,8 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		IStatus status = update.getStatus();
 		if (status != null && !(status.getCode() == IStatus.OK || status.getCode() == IStatus.CANCEL)) {
 			showMessage(status.getMessage());
+		} else {
+			showViewer();
 		}
 	}
 
