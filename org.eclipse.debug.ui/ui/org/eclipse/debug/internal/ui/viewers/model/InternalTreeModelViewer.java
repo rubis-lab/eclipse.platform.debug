@@ -346,6 +346,7 @@ public class InternalTreeModelViewer extends TreeViewer {
 	
 	protected void unmapElement(Object element, Widget widget) {
 		if (fNotifyUnmap) {
+			// TODO: should we update the filter with the "new non-identical element"?
 			IContentProvider provider = getContentProvider();
 			if (provider instanceof ModelContentProvider) {
 				((ModelContentProvider) provider).unmapPath((TreePath) widget.getData(TREE_PATH_KEY));
