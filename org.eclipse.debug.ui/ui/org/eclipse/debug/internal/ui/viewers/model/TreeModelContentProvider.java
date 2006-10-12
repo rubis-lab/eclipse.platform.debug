@@ -218,7 +218,8 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.ModelContentProvider#handleRemove(org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta)
 	 */
 	protected void handleRemove(IModelDelta delta) {
-		// refresh the parent to properly update for non-visible children
+		getTreeViewer().remove(getTreePath(delta));
+		// refresh the parent to properly update for non-visible/unmapped children
 		getTreeViewer().refresh(delta.getParentDelta().getElement());
 	}
 
