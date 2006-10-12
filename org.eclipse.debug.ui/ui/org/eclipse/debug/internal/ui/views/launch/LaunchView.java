@@ -573,7 +573,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 		
 		menu.add(new Separator(IDebugUIConstants.EMPTY_EDIT_GROUP));
 		menu.add(new Separator(IDebugUIConstants.EDIT_GROUP));
-		menu.add(getAction(FIND_ACTION));
+		//menu.add(getAction(FIND_ACTION)); TODO:
 		menu.add(new Separator(IDebugUIConstants.EMPTY_STEP_GROUP));
 		menu.add(new Separator(IDebugUIConstants.STEP_GROUP));
 		menu.add(new GroupMarker(IDebugUIConstants.STEP_INTO_GROUP));
