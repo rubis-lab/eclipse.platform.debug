@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -108,6 +109,13 @@ public class LaunchConfigurationsDialog extends TitleAreaDialog implements ILaun
 	 * Id for 'Cancel' button.
 	 */
 	protected static final int ID_CANCEL_BUTTON = IDialogConstants.CLIENT_ID + 3;
+	
+	/**
+	 * The id for the 'No' button on the discard changes message box
+	 * @since 3.3
+	 */
+	private static final int ID_DISCARD_BUTTON = IDialogConstants.CLIENT_ID + 4;
+	
 	/**
 	 * Constant specifying how wide this dialog is allowed to get (as a percentage of
 	 * total available screen width) as a result of tab labels in the edit area.
@@ -852,10 +860,12 @@ public class LaunchConfigurationsDialog extends TitleAreaDialog implements ILaun
 	protected void handleClosePressed() {
 		int status = shouldSaveCurrentConfig();
 		if(status != IDialogConstants.CANCEL_ID) {
-			if(status == IDialogConstants.YES_ID) {
-				getTabViewer().handleApplyPressed();
+			if(status != ID_DISCARD_BUTTON) {
+				if(status == IDialogConstants.YES_ID) {
+					getTabViewer().handleApplyPressed();
+				}
+				cancelPressed();
 			}
-			cancelPressed();
 		}
 	}
 	
@@ -944,7 +954,7 @@ public class LaunchConfigurationsDialog extends TitleAreaDialog implements ILaun
 	 */
 	protected void handleLaunchPressed() {
 		ILaunchConfiguration config = getTabViewer().getOriginal(); 
-		if (getTabViewer().isDirty()) {
+		if (getTabViewer().isDirty() & getTabViewer().canSave()) {
 			getTabViewer().handleApplyPressed();
 			config = getTabViewer().getOriginal();
 		}
@@ -1210,18 +1220,16 @@ public class LaunchConfigurationsDialog extends TitleAreaDialog implements ILaun
 	 */
 	public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable) throws InvocationTargetException, InterruptedException {
 		if (getShell() != null && getShell().isVisible()) {
-			if (getShell() != null) {
-				// Save focus control
-				fLastControl = getShell().getDisplay().getFocusControl();
-				if (fLastControl != null && fLastControl.getShell() != getShell()) {
-					fLastControl = null;
-				}
-				fProgressMonitorCancelButton.setEnabled(true);
-				// Attach the progress monitor part to the cancel button
-				fProgressMonitorPart.attachToCancelComponent(fProgressMonitorCancelButton);
-				fProgressMonitorPart.getParent().setVisible(true);
-				fProgressMonitorCancelButton.setFocus();
+			// Save focus control
+			fLastControl = getShell().getDisplay().getFocusControl();
+			if (fLastControl != null && fLastControl.getShell() != getShell()) {
+				fLastControl = null;
 			}
+			fProgressMonitorCancelButton.setEnabled(true);
+			// Attach the progress monitor part to the cancel button
+			fProgressMonitorPart.attachToCancelComponent(fProgressMonitorCancelButton);
+			fProgressMonitorPart.getParent().setVisible(true);
+			fProgressMonitorCancelButton.setFocus();
 			fActiveRunningOperations++;
 			try {
 				ModalContext.run(runnable, fork, fProgressMonitorPart, getShell().getDisplay());
@@ -1361,6 +1369,9 @@ public class LaunchConfigurationsDialog extends TitleAreaDialog implements ILaun
 				fLaunchConfigurationView.setAutoSelect(true);
 			}
 		}
+		if(val == IDialogConstants.NO_ID) {
+			val = ID_DISCARD_BUTTON;
+		}
 		return val;
 	}
 
@@ -1454,7 +1465,7 @@ public class LaunchConfigurationsDialog extends TitleAreaDialog implements ILaun
 					path = sel.getPaths()[0];
 					pidx = findIndexOfParent(path.getFirstSegment());
 					if(path.getSegmentCount() == 2) {
-						cidx = findIndexOfChild(path.getFirstSegment(), path.getLastSegment());
+						cidx = findIndexOfChild(pidx, path.getLastSegment());
 					}
 				}
 				boolean newvalue = Boolean.valueOf(event.getNewValue().toString()).booleanValue();
@@ -1476,8 +1487,10 @@ public class LaunchConfigurationsDialog extends TitleAreaDialog implements ILaun
 						viewer.addFilter(fLCTFilter);
 					}
 				}
-				updateSelection(path, pidx, cidx);
-				return null;
+				if(viewer.getSelection().isEmpty()) {
+					updateSelection(path, pidx, cidx);
+				}
+				return Status.OK_STATUS;
 			}
 		};
 		
@@ -1537,7 +1550,7 @@ public class LaunchConfigurationsDialog extends TitleAreaDialog implements ILaun
 					sel = (pidx == 0 ? tree.getItem(pidx).getData() : tree.getItem(pidx-1).getData());
 				}
 				else {
-					int cidex = findIndexOfChild(path.getFirstSegment(), path.getLastSegment());
+					int cidex = findIndexOfChild(findIndexOfParent(path.getFirstSegment()), path.getLastSegment());
 					TreeItem parent = tree.getItem(pidex);
 					int ccount = parent.getItemCount();
 					if(cidex == -1) {
@@ -1592,9 +1605,8 @@ public class LaunchConfigurationsDialog extends TitleAreaDialog implements ILaun
 	 * @return the index of the child or -1 if not found
 	 * @since 3.2
 	 */
-	private int findIndexOfChild(Object parent, Object child) {
+	private int findIndexOfChild(int pidx, Object child) {
 		Tree tree = fLaunchConfigurationView.getTreeViewer().getTree();
-		int pidx = findIndexOfParent(parent);
 		if(pidx != -1) {
 			TreeItem root = tree.getItem(pidx);
 			TreeItem[] children = root.getItems();

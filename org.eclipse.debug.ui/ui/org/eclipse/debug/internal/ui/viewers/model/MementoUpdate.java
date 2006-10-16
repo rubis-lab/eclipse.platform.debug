@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers.model;
 
-import org.eclipse.debug.internal.ui.actions.context.AbstractRequestMonitor;
+import org.eclipse.debug.internal.ui.commands.actions.AbstractRequestMonitor;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdate;
 import org.eclipse.ui.IMemento;
