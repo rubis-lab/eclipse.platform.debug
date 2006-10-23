@@ -198,25 +198,6 @@ public class LaunchConfigurationWorkingCopy extends LaunchConfiguration implemen
 		writeNewFile();
 		fDirty = false;
 	}
-
-	/**
-	 * @see org.eclipse.debug.core.ILaunchConfigurationWorkingCopy#isReadOnly()
-	 */
-	public boolean isReadOnly() {
-		if(!isLocal()) {
-			IFile file = getFile();
-			if(file != null) {
-				return file.isReadOnly();
-			}
-		}
-		else {
-			File file = getLocation().toFile();
-			if(file != null) {
-				return file.exists() && !file.canWrite();
-			}
-		}
-		return false;
-	}
 	
 	/**
 	 * Writes the new configuration information to a file.
@@ -424,11 +405,17 @@ public class LaunchConfigurationWorkingCopy extends LaunchConfiguration implemen
 		}	
 	}
 		
+	/**
+	 * @see org.eclipse.debug.core.ILaunchConfigurationWorkingCopy#setModes(java.util.Set)
+	 */
 	public void setModes(Set options) {
 		getInfo().setAttribute(ATTR_LAUNCH_MODES, (options.size() > 0 ? options : null));
 		setDirty();
 	}
 
+	/**
+	 * @see org.eclipse.debug.core.ILaunchConfigurationWorkingCopy#addModes(java.util.Set)
+	 */
 	public void addModes(Set options) {
 		try {
 			Set opts = getModes();
@@ -442,11 +429,14 @@ public class LaunchConfigurationWorkingCopy extends LaunchConfiguration implemen
 		}
 	}
 	
+	/**
+	 * @see org.eclipse.debug.core.ILaunchConfigurationWorkingCopy#removeModes(java.util.Set)
+	 */
 	public void removeModes(Set options) {
 		try {
 			Set opts = getModes();
 			if(opts.removeAll(options)) {
-				getInfo().setAttribute(ATTR_LAUNCH_MODES, opts);
+				getInfo().setAttribute(ATTR_LAUNCH_MODES, (opts.size() < 1 ? null : opts));
 				setDirty();
 			}
 		} 

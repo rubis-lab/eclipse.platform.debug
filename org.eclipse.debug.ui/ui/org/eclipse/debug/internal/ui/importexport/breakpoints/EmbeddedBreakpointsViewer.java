@@ -14,17 +14,17 @@ package org.eclipse.debug.internal.ui.importexport.breakpoints;
 import java.util.ArrayList;
 import java.util.Vector;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointContainer;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsContentProvider;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsLabelProvider;
-import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsSorter;
+import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsComparator;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsView;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsViewer;
 import org.eclipse.debug.internal.ui.views.breakpoints.IBreakpointOrganizer;
 import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -134,7 +134,7 @@ public class EmbeddedBreakpointsViewer {
 		} else {
 			labelProvider = fView.getCheckboxViewer().getLabelProvider();
 		}
-		fViewer.setSorter(new BreakpointsSorter());
+		fViewer.setComparator(new BreakpointsComparator());
 		fViewer.setLabelProvider(labelProvider);
 		fViewer.addCheckStateListener(fCheckListener);
 		IBreakpointOrganizer[] orgs = null;

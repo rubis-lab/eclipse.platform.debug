@@ -550,24 +550,12 @@ public class LaunchManager extends PlatformObject implements ILaunchManager, IRe
 	 * Keys are mode identifiers, values are <code>ILaunchMode</code>s.
 	 */
 	private Map fLaunchModes = null;
-	
-	/**
-	 * Registered launch options, or <code>null</code> if not initialized
-	 * Map is of the form <code>Map<id, option></code>
-	 * @since 3.3
-	 */
-	private HashMap fLaunchOptions = null;
-	
+		
 	/**
 	 * A map of LaunchDelegate objects stored by id of delegate, or launch config type
 	 */
 	private HashMap fLaunchDelegates = null;
 	
-	/**
-	 * A map of duplicate delegates arranged by config type id
-	 */
-	private HashMap fDuplicateDelegates = null;
-
 	/**
 	 * Collection of launches
 	 */
@@ -1352,7 +1340,7 @@ public class LaunchManager extends PlatformObject implements ILaunchManager, IRe
 		LaunchDelegate ld = null;
 		for(Iterator iter = fLaunchDelegates.keySet().iterator(); iter.hasNext();) {
 			ld = (LaunchDelegate) fLaunchDelegates.get(iter.next());
-			if(ld.getLaunchConfigurationType().equals(typeid)) {
+			if(ld.getLaunchConfigurationTypeId().equals(typeid)) {
 				list.add(ld);
 			}
 		}
@@ -1379,7 +1367,7 @@ public class LaunchManager extends PlatformObject implements ILaunchManager, IRe
 			LaunchDelegate delegate = null;
 			for(int i = 0; i < infos.length; i++) {
 				delegate = new LaunchDelegate(infos[i]);
-				fLaunchDelegates.put(delegate.getIdentifier(), delegate);
+				fLaunchDelegates.put(delegate.getId(), delegate);
 			}
 			//get all delegates from launch configuration type contributions
 			extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(DebugPlugin.getUniqueIdentifier(), DebugPlugin.EXTENSION_POINT_LAUNCH_CONFIGURATION_TYPES);
@@ -1388,7 +1376,7 @@ public class LaunchManager extends PlatformObject implements ILaunchManager, IRe
 				//must check to see if delegate is provided in contribution
 				if(infos[i].getAttribute(IConfigurationElementConstants.DELEGATE) != null) {
 					delegate = new LaunchDelegate(infos[i]);
-					fLaunchDelegates.put(delegate.getIdentifier(), delegate);
+					fLaunchDelegates.put(delegate.getId(), delegate);
 				}
 			}
 		}
