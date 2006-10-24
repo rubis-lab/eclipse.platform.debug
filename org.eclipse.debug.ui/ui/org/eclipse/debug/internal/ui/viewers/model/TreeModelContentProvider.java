@@ -17,31 +17,48 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IChildrenUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementContentProvider;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.ModelDelta;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.TreeModelViewer;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
-import org.eclipse.jface.viewers.ILazyTreeContentProvider;
+import org.eclipse.jface.viewers.ILazyTreePathContentProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.ui.progress.UIJob;
 
 /**
  * Content provider for a virtual tree.
  * 
  * @since 3.3
  */
-class TreeModelContentProvider extends ModelContentProvider implements ILazyTreeContentProvider {
+class TreeModelContentProvider extends ModelContentProvider implements ILazyTreePathContentProvider {
 	
 	protected static final String[] STATE_PROPERTIES = new String[]{IBasicPropertyConstants.P_TEXT, IBasicPropertyConstants.P_IMAGE};
 	
+	/**
+	 * Map of parent paths to requests
+	 */
 	private Map fPendingChildRequests = new HashMap();
+	
+	/**
+	 * Map of content adapters to requests
+	 */
 	private Map fPendingCountRequests = new HashMap();
+	
+	/**
+	 * Map of content adapters to requests
+	 */
+	private Map fPendingHasChildrenRequests = new HashMap();	
 	
 	private Timer fTimer = new Timer();
 		
@@ -61,44 +78,27 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 		if (getViewer() != null) {
 			int[] filteredChildren = getFilteredChildren(path);
 			if (filteredChildren != null) {
-				Object parent = getViewer().getInput();
-				if (path.getSegmentCount() > 0) {
-					parent = path.getLastSegment();
-				}
 				for (int i = 0; i < filteredChildren.length; i++) {
-					doUpdateElement(parent, path, filteredChildren[i]);
+					doUpdateElement(path, filteredChildren[i]);
 				}
 			}
 		}
 	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ILazyTreeContentProvider#updateChildCount(java.lang.Object, int)
-	 */
-	public synchronized void updateChildCount(Object element, int currentChildCount) {
-		//System.out.println("updateChildCount(" + element + ", " + currentChildCount + ")");
-		TreePath[] treePaths = getTreePaths(element);
-		for (int i = 0; i < treePaths.length; i++) {
-			// re-filter children when asked to update the child count for an element (i.e.
-			// when refreshing, see if filtered children are still filtered)
-			refilterChildren(treePaths[i]);
-		}
-		doUpdateChildCount(element, currentChildCount);
-	}
 	
-	protected synchronized void doUpdateChildCount(Object element, int currentChildCount) {
+	protected synchronized void doUpdateChildCount(TreePath path) {
+		Object element = getElement(path);
 		IElementContentProvider contentAdapter = getContentAdapter(element);
 		if (contentAdapter != null) {
 			ChildrenCountUpdate request = (ChildrenCountUpdate) fPendingCountRequests.get(contentAdapter);
 			if (request != null) {
-				if (request.coalesce(element)) {
+				if (request.coalesce(path)) {
 					return;
 				} else {
 					request.start();
 				}
 			}
 			final ChildrenCountUpdate newRequest = new ChildrenCountUpdate(this, contentAdapter);
-			newRequest.coalesce(element);
+			newRequest.coalesce(path);
 			fPendingCountRequests.put(contentAdapter, newRequest);
 			fTimer.schedule(new TimerTask() {
 				public void run() {
@@ -107,23 +107,9 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 			}, 10L);
 		}
 	}	
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ILazyTreeContentProvider#updateElement(java.lang.Object, int)
-	 */
-	public synchronized void updateElement(Object parent, int viewIndex) {
-		//System.out.println("updateElement(" + parent + ", " + viewIndex + ")");
-		TreePath[] paths = getTreePaths(parent);
-		if (paths.length > 0) {
-			TreePath path = paths[0]; // all children filter the same, per parent occurrence
-			int modelIndex = viewToModelIndex(path, viewIndex);
-			//System.out.println("updateElement("+ parent + ", " + viewIndex + ") > modelIndex = " + modelIndex);
-			doUpdateElement(parent, path, modelIndex);
-		}
-	}
 	
-	protected synchronized void doUpdateElement(Object parent, TreePath parentPath, int modelIndex) {
-		ChildrenUpdate request = (ChildrenUpdate) fPendingChildRequests.get(parent);
+	protected synchronized void doUpdateElement(TreePath parentPath, int modelIndex) {
+		ChildrenUpdate request = (ChildrenUpdate) fPendingChildRequests.get(parentPath);
 		if (request != null) {
 			if (request.coalesce(modelIndex)) {
 				return;
@@ -131,10 +117,11 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 				request.start();
 			}
 		} 
+		Object parent = getElement(parentPath);
 		IElementContentProvider contentAdapter = getContentAdapter(parent);
 		if (contentAdapter != null) {
-			final ChildrenUpdate newRequest = new ChildrenUpdate(this, parent, parentPath, modelIndex, contentAdapter);
-			fPendingChildRequests.put(parent, newRequest);
+			final ChildrenUpdate newRequest = new ChildrenUpdate(this, parentPath, modelIndex, contentAdapter);
+			fPendingChildRequests.put(parentPath, newRequest);
 			fTimer.schedule(new TimerTask() {
 				public void run() {
 					newRequest.start();
@@ -143,12 +130,39 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 		}			
 	}	
 	
+	protected synchronized void doUpdateHasChildren(TreePath path) {
+		Object element = getElement(path);
+		IElementContentProvider contentAdapter = getContentAdapter(element);
+		if (contentAdapter != null) {
+			HasChildrenUpdate request = (HasChildrenUpdate) fPendingHasChildrenRequests.get(contentAdapter);
+			if (request != null) {
+				if (request.coalesce(path)) {
+					return;
+				} else {
+					request.start();
+				}
+			}
+			final HasChildrenUpdate newRequest = new HasChildrenUpdate(this, contentAdapter);
+			newRequest.coalesce(path);
+			fPendingHasChildrenRequests.put(contentAdapter, newRequest);
+			fTimer.schedule(new TimerTask() {
+				public void run() {
+					newRequest.start();
+				}
+			}, 10L);
+		}
+	}		
+	
 	protected synchronized void childRequestStarted(IChildrenUpdate update) {
 		fPendingChildRequests.remove(update.getParent());
 	}
 	
 	protected synchronized void countRequestStarted(Object key) {
 		fPendingCountRequests.remove(key);
+	}
+	
+	protected synchronized void hasChildrenRequestStarted(Object key) {
+		fPendingHasChildrenRequests.remove(key);
 	}
 
 	/* (non-Javadoc)
@@ -171,13 +185,14 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.ModelContentProvider#handleAdd(org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta)
 	 */
 	protected void handleAdd(IModelDelta delta) {
-		doUpdateChildCount(delta.getParentDelta().getElement(), 0);
+		doUpdateChildCount(getTreePath(delta.getParentDelta()));
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.ModelContentProvider#handleContent(org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta)
 	 */
 	protected void handleContent(IModelDelta delta) {
+		cancelSubtreeUpdates(getTreePath(delta));
 		getTreeViewer().refresh(delta.getElement());
 	}
 
@@ -201,8 +216,15 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 			treeViewer.replace(delta.getParentDelta().getElement(), index, delta.getElement());
 		}
 		if (childCount > 0) {
-			treeViewer.setChildCount(delta.getElement(), childCount);
-			treeViewer.expandToLevel(getTreePath(delta), 1);
+			TreePath elementPath = getTreePath(delta);
+			int viewCount = modelToViewChildCount(elementPath, childCount);
+			if (DEBUG_CONTENT_PROVIDER) {
+				System.out.println("[expand] setChildCount(" + delta.getElement() + ", (model) " + childCount + " (view) " + viewCount); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+			treeViewer.setChildCount(delta.getElement(), viewCount);
+			if (!treeViewer.getExpandedState(elementPath)) {
+				treeViewer.expandToLevel(elementPath, 1);
+			}
 		}
 	}
 
@@ -316,4 +338,70 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ILazyTreePathContentProvider#getParents(java.lang.Object)
+	 */
+	public TreePath[] getParents(Object element) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ILazyTreePathContentProvider#updateChildCount(org.eclipse.jface.viewers.TreePath, int)
+	 */
+	public synchronized void updateChildCount(TreePath treePath, int currentChildCount) {
+		if (DEBUG_CONTENT_PROVIDER) {
+			System.out.println("updateChildCount(" + getElement(treePath) + ", " + currentChildCount + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+		refilterChildren(treePath);
+		//re-filter children when asked to update the child count for an element (i.e.
+		// when refreshing, see if filtered children are still filtered)
+		doUpdateChildCount(treePath);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ILazyTreePathContentProvider#updateElement(org.eclipse.jface.viewers.TreePath, int)
+	 */
+	public synchronized void updateElement(TreePath parentPath, int viewIndex) {
+		int modelIndex = viewToModelIndex(parentPath, viewIndex);
+		if (DEBUG_CONTENT_PROVIDER) {
+			System.out.println("updateElement("+ getElement(parentPath) + ", " + viewIndex + ") > modelIndex = " + modelIndex); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+		doUpdateElement(parentPath, modelIndex);		
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ILazyTreePathContentProvider#updateHasChildren(org.eclipse.jface.viewers.TreePath)
+	 */
+	public synchronized void updateHasChildren(TreePath path) {
+		if (DEBUG_CONTENT_PROVIDER) {
+			System.out.println("updateHasChildren(" + getElement(path)); //$NON-NLS-1$
+		}
+		doUpdateHasChildren(path);
+	}
+
+	/**
+	 * @param delta
+	 */
+	void doRestore(final ModelDelta delta) {
+		if (delta.getFlags() != IModelDelta.NO_CHANGE) {
+			UIJob job = new UIJob("restore delta") { //$NON-NLS-1$
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					TreePath treePath = getTreePath(delta);
+					AbstractTreeViewer viewer = (AbstractTreeViewer)getViewer();
+					if ((delta.getFlags() & IModelDelta.EXPAND) != 0) {
+						viewer.expandToLevel(treePath, 1);
+					}
+					if ((delta.getFlags() & IModelDelta.SELECT) != 0) {
+						viewer.setSelection(new TreeSelection(treePath));
+					}
+					delta.setFlags(IModelDelta.NO_CHANGE);
+					checkIfRestoreComplete();
+					return Status.OK_STATUS;
+				}
+			};
+			job.setSystem(true);
+			job.schedule();
+		}
+	}
 }

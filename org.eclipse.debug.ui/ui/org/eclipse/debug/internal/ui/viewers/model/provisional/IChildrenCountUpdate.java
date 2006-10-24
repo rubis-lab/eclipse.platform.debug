@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers.model.provisional;
 
+import org.eclipse.jface.viewers.TreePath;
+
 
 /**
  * Request monitor used to collect the number of children for an element in a viewer.
@@ -19,17 +21,18 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
 public interface IChildrenCountUpdate extends IViewerUpdate {
 	
 	/**
-	 * Returns the parent elements that children counts have been requested for.
+	 * Returns the parent elements that children counts have been requested for
+	 * as tree paths. An empty path identifies the root element.
 	 * 
-	 * @return parent elements
+	 * @return parent elements as tree paths
 	 */
-	public Object[] getParents();
+	public TreePath[] getParents();
 
 	/**
 	 * Sets the number of children for the given parent.
 	 * 
-	 * @param parent parent element
+	 * @param parent parent element or empty path for root element
 	 * @param numChildren number of children
 	 */
-	public void setChildCount(Object parent, int numChildren);
+	public void setChildCount(TreePath parentPath, int numChildren);
 }

@@ -17,25 +17,25 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IChildrenCountUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementContentProvider;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IHasChildrenUpdate;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 
 /**
  * @since 3.3
  */
-class ChildrenCountUpdate extends ViewerUpdateMonitor implements IChildrenCountUpdate {
+class HasChildrenUpdate extends ViewerUpdateMonitor implements IHasChildrenUpdate {
 
 	/**
-	 * Map of <code>TreePath</code>s to <code>Integer</code>s.
+	 * Map of <code>TreePath</code>s to <code>Boolean</code>s.
 	 */
-	private Map fCounts = new HashMap();
+	private Map fBooleans = new HashMap();
 	
 	/**
 	 * Set of <code>TreePath</code>s.
 	 */
-	private Set fParents = new HashSet();
+	private Set fElements = new HashSet();
 	
 	private boolean fStarted = false;
 	private IElementContentProvider fContentProvider;
@@ -43,7 +43,7 @@ class ChildrenCountUpdate extends ViewerUpdateMonitor implements IChildrenCountU
 	/**
 	 * @param contentProvider
 	 */
-	public ChildrenCountUpdate(ModelContentProvider contentProvider, IElementContentProvider elementContentProvider) {
+	public HasChildrenUpdate(ModelContentProvider contentProvider, IElementContentProvider elementContentProvider) {
 		super(contentProvider);
 		fContentProvider = elementContentProvider;
 	}
@@ -52,26 +52,26 @@ class ChildrenCountUpdate extends ViewerUpdateMonitor implements IChildrenCountU
 	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.ViewerUpdateMonitor#performUpdate()
 	 */
 	protected void performUpdate() {
-		Iterator iterator = fCounts.entrySet().iterator();
+		Iterator iterator = fBooleans.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Entry entry = (Entry) iterator.next();
-			int count = ((Integer)(entry.getValue())).intValue();
-			TreePath parentPath = (TreePath) entry.getKey();
-			int viewCount = count;
-			if (count == 0) {
-				getContentProvider().clearFilters(parentPath);
-			} else {
-				viewCount = getContentProvider().modelToViewChildCount(parentPath, count);
+			boolean hasChildren = ((Boolean)(entry.getValue())).booleanValue();
+			TreePath elementPath = (TreePath) entry.getKey();
+			ModelContentProvider contentProvider = getContentProvider();
+			if (!hasChildren) {
+				contentProvider.clearFilters(elementPath);
 			}
 			if (ModelContentProvider.DEBUG_CONTENT_PROVIDER) {
-				System.out.println("setChildCount(" + getElement(parentPath) + ", modelCount: " + count + " viewCount: " + viewCount + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				System.out.println("setHasChildren(" + getElement(elementPath) + " >> " + hasChildren); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			((TreeViewer)(getContentProvider().getViewer())).setChildCount(parentPath, viewCount);
+			if (elementPath.getSegmentCount() > 0) {
+				((TreeViewer)(contentProvider.getViewer())).setHasChildren(elementPath, hasChildren);
+				contentProvider.doRestore(elementPath);
+			} else {
+				((TreeViewer)(contentProvider.getViewer())).setHasChildren(getElement(elementPath), hasChildren);
+			}
+			
 		}
-	}
-
-	public void setChildCount(TreePath parentPath, int numChildren) {
-		fCounts.put(parentPath, new Integer(numChildren));
 	}
 
 	/**
@@ -79,7 +79,7 @@ class ChildrenCountUpdate extends ViewerUpdateMonitor implements IChildrenCountU
 	 * @return
 	 */
 	protected boolean coalesce(TreePath treePath) {
-		fParents.add(treePath);
+		fElements.add(treePath);
 		return true;
 	}
 
@@ -94,7 +94,7 @@ class ChildrenCountUpdate extends ViewerUpdateMonitor implements IChildrenCountU
 			fStarted = true;
 		}
 		TreeModelContentProvider contentProvider = (TreeModelContentProvider)getContentProvider();
-		contentProvider.countRequestStarted(fContentProvider);
+		contentProvider.hasChildrenRequestStarted(fContentProvider);
 		if (!isCanceled()) {
 			fContentProvider.update(this);
 		} else {
@@ -102,15 +102,20 @@ class ChildrenCountUpdate extends ViewerUpdateMonitor implements IChildrenCountU
 		}
 	}
 
-	public TreePath[] getParents() {
-		return (TreePath[]) fParents.toArray(new TreePath[fParents.size()]);
+	public TreePath[] getElements() {
+		return (TreePath[]) fElements.toArray(new TreePath[fElements.size()]);
+	}
+
+	public void setHasChilren(TreePath element, boolean hasChildren) {
+		fBooleans.put(element, Boolean.valueOf(hasChildren));
+		
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.internal.ui.viewers.model.ViewerUpdateMonitor#isContained(org.eclipse.jface.viewers.TreePath)
 	 */
 	boolean isContained(TreePath path) {
-		return ((TreePath)fParents.iterator().next()).startsWith(path, null);
+		return ((TreePath)fElements.iterator().next()).startsWith(path, null);
 	}
 
 }

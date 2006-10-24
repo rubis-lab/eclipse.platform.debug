@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -26,6 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -42,11 +44,9 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationCont
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdateListener;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.ModelDelta;
 import org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousRequestMonitor;
-import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreePath;
-import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.IMemento;
@@ -59,8 +59,7 @@ import org.eclipse.ui.progress.WorkbenchJob;
  * 
  * @since 3.3
  */
-abstract class ModelContentProvider implements IContentProvider,
-		IModelChangedListener {
+abstract class ModelContentProvider implements IContentProvider, IModelChangedListener {
 
 	private Viewer fViewer;
 
@@ -82,9 +81,9 @@ abstract class ModelContentProvider implements IContentProvider,
 	private ListenerList fUpdateListeners = new ListenerList();
 	
 	/**
-	 * Nesting count of updates
+	 * List of updates in progress
 	 */
-	private int fUpdateNestingCount = 0;
+	private List fUpdatesInProgress = new ArrayList(); 
 	
 	/**
 	 * Map of viewer states keyed by viewer input mementos
@@ -144,6 +143,14 @@ abstract class ModelContentProvider implements IContentProvider,
 	 * Constant for an empty tree path.
 	 */
 	protected static final TreePath EMPTY_TREE_PATH = new TreePath(new Object[]{});
+	
+	// debug flag
+	public static boolean DEBUG_CONTENT_PROVIDER = false;
+	
+	static {
+		DEBUG_CONTENT_PROVIDER = DebugUIPlugin.DEBUG && "true".equals( //$NON-NLS-1$
+		 Platform.getDebugOption("org.eclipse.debug.ui/debug/viewers/contentProvider")); //$NON-NLS-1$
+	} 	
 
 	/*
 	 * (non-Javadoc)
@@ -209,10 +216,12 @@ abstract class ModelContentProvider implements IContentProvider,
 							keyMemento.save(writer);
 							final ModelDelta stateDelta = (ModelDelta) fViewerStates.remove(writer.toString());
 							if (stateDelta != null) {
-								//System.out.println("RESTORE: " + stateDelta.toString());
+								if (DEBUG_CONTENT_PROVIDER) {
+									System.out.println("RESTORE: " + stateDelta.toString()); //$NON-NLS-1$
+								}
 								stateDelta.setElement(input);
 								// begin restoration
-								UIJob job = new UIJob("restore state") {
+								UIJob job = new UIJob("restore state") { //$NON-NLS-1$
 									public IStatus runInUIThread(IProgressMonitor monitor) {
 										if (input.equals(getViewer().getInput())) {
 											fPendingState = stateDelta;
@@ -246,16 +255,21 @@ abstract class ModelContentProvider implements IContentProvider,
 				}
 			
 			};
-			manager.addRequest(new ElementMementoRequest(manager, getPresentationContext(),
+			manager.addRequest(new ElementMementoRequest(ModelContentProvider.this, manager, getPresentationContext(),
 									delta.getElement(), inputMemento, delta));
 			manager.processReqeusts();
 		}
 	}
 	
 	/**
-	 * Restore selection/expansion based on items already in the tree
+	 * Restore selection/expansion based on items already in the viewer
 	 */
 	abstract protected void doInitialRestore();
+	
+	/**
+	 * @param delta
+	 */
+	abstract void doRestore(final ModelDelta delta);
 	
 	/**
 	 * Perform any restoration required for the given tree path.
@@ -283,7 +297,7 @@ abstract class ModelContentProvider implements IContentProvider,
 				} else {
 					if (element.equals(potentialMatch)) {
 						// already processed - visit children
-						return true;
+						return path.getSegmentCount() > depth;
 					}
 				}
 				return false;
@@ -375,11 +389,11 @@ abstract class ModelContentProvider implements IContentProvider,
 			public boolean visit(IModelDelta delta, int depth) {
 				if (delta.getParentDelta() == null) {
 					manager.addRequest(
-						new ElementMementoRequest(manager, getPresentationContext(),
+						new ElementMementoRequest(ModelContentProvider.this, manager, getPresentationContext(),
 								delta.getElement(), inputMemento, (ModelDelta)delta));
 				} else {
 					manager.addRequest(
-						new ElementMementoRequest(manager, getPresentationContext(),
+						new ElementMementoRequest(ModelContentProvider.this, manager, getPresentationContext(),
 								delta.getElement(), childrenMemento.createChild("CHILD_ELEMENT"), (ModelDelta)delta)); //$NON-NLS-1$
 				}
 				return true;
@@ -722,14 +736,6 @@ abstract class ModelContentProvider implements IContentProvider,
 	}
 	
 	/**
-	 * Notification that a structural refresh is occurring at the specified path
-	 * 
-	 * @param path
-	 */
-	protected void refreshingStructure(TreePath path) {
-	}
-	
-	/**
 	 * Notification the given element is being unmapped.
 	 * 
 	 * @param path
@@ -737,20 +743,6 @@ abstract class ModelContentProvider implements IContentProvider,
 	protected void unmapPath(TreePath path) {
 		//System.out.println("Unmap " + path.getLastSegment());
 		fTransform.clear(path);
-	}
-	
-	/**
-	 * Return tree paths to the given element in the viewer or <code>null</code>
-	 * 
-	 * @param element
-	 * @return tree paths or <code>null</code>
-	 */
-	protected TreePath[] getTreePaths(Object element) {
-		if (fViewer instanceof InternalTreeModelViewer) {
-			InternalTreeModelViewer tmv = (InternalTreeModelViewer) fViewer;
-			return tmv.getTreePaths(element);
-		}
-		return null;
 	}
 
 	/**
@@ -770,37 +762,16 @@ abstract class ModelContentProvider implements IContentProvider,
 		fTransform.clear(parent);
 	}
 
-	/**
-	 * @param delta
-	 */
-	void doRestore(final ModelDelta delta) {
-		if (delta.getFlags() != IModelDelta.NO_CHANGE) {
-			UIJob job = new UIJob("restore delta") { //$NON-NLS-1$
-				public IStatus runInUIThread(IProgressMonitor monitor) {
-					TreePath treePath = getTreePath(delta);
-					AbstractTreeViewer viewer = (AbstractTreeViewer)getViewer();
-					if ((delta.getFlags() & IModelDelta.EXPAND) != 0) {
-						viewer.expandToLevel(treePath, 1);
-					}
-					if ((delta.getFlags() & IModelDelta.SELECT) != 0) {
-						viewer.setSelection(new TreeSelection(treePath));
-					}
-					delta.setFlags(IModelDelta.NO_CHANGE);
-					checkIfRestoreComplete();
-					return Status.OK_STATUS;
-				}
-			};
-			job.setSystem(true);
-			job.schedule();
-		}
-	}
+
 	
 	protected void checkIfRestoreComplete() {
 		CheckState state = new CheckState();
 		fPendingState.accept(state);
 		if (state.isComplete()) {
 			fPendingState = null;
-			//System.out.println("RESTORE COMPELTE");
+			if (DEBUG_CONTENT_PROVIDER) {
+				System.out.println("RESTORE COMPELTE"); //$NON-NLS-1$
+			}
 		}
 	}
 	
@@ -819,9 +790,9 @@ abstract class ModelContentProvider implements IContentProvider,
 	 */
 	void updateStarted(IAsynchronousRequestMonitor update) {
 		boolean begin = false;
-		synchronized (this) {
-			begin = fUpdateNestingCount == 0;
-			fUpdateNestingCount++;
+		synchronized (fUpdatesInProgress) {
+			begin = fUpdatesInProgress.isEmpty();
+			fUpdatesInProgress.add(update);
 		}
 		if (begin) {
 			notifyUpdate(UPDATE_SEQUENCE_BEGINS, null);
@@ -836,9 +807,9 @@ abstract class ModelContentProvider implements IContentProvider,
 	 */
 	void updateComplete(IAsynchronousRequestMonitor update) {
 		boolean end = false;
-		synchronized (this) {
-			fUpdateNestingCount--;
-			end = fUpdateNestingCount == 0;
+		synchronized (fUpdatesInProgress) {
+			fUpdatesInProgress.remove(update);
+			end = fUpdatesInProgress.isEmpty();
 		}
 		notifyUpdate(UPDATE_COMPLETE, update);
 		if (end) {
@@ -876,6 +847,17 @@ abstract class ModelContentProvider implements IContentProvider,
 		}
 	}	
 	
+	protected void cancelSubtreeUpdates(TreePath path) {
+		synchronized (fUpdatesInProgress) {
+			for (int i = 0; i < fUpdatesInProgress.size(); i++) {
+				ViewerUpdateMonitor update = (ViewerUpdateMonitor) fUpdatesInProgress.get(i);
+				if (update.isContained(path)) {
+					update.setCanceled(true);
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Registers the given listener for model delta notification.
 	 * 
@@ -902,5 +884,18 @@ abstract class ModelContentProvider implements IContentProvider,
 			IModelProxy proxy = (IModelProxy) proxies.next();
 			proxy.removeModelChangedListener(listener);
 		}
-	}	
+	}
+	
+	/**
+	 * Returns the element corresponding to the given tree path.
+	 * 
+	 * @param path tree path
+	 * @return model element
+	 */
+	protected Object getElement(TreePath path) {
+		if (path.getSegmentCount() > 0) {
+			return path.getLastSegment();
+		}
+		return getViewer().getInput();
+	}
 }

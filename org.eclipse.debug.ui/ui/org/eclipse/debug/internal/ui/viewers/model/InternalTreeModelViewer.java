@@ -322,27 +322,6 @@ public class InternalTreeModelViewer extends TreeViewer {
 	public IPresentationContext getPresentationContext() {
 		return fContext;
 	}
-
-	/* (non-Javadoc)
-	 * 
-	 * Clear filters when refreshing an element structurally.
-	 * 
-	 * @see org.eclipse.jface.viewers.AbstractTreeViewer#internalRefresh(org.eclipse.swt.widgets.Widget, java.lang.Object, boolean, boolean)
-	 */
-	protected void internalRefresh(Widget widget, Object element, boolean doStruct, boolean updateLabels) {
-		if (doStruct) {
-			IContentProvider provider = getContentProvider();
-			if (provider instanceof ModelContentProvider) {
-				ModelContentProvider mcp = (ModelContentProvider) provider;
-				if (widget instanceof TreeItem) {
-					mcp.refreshingStructure(getTreePathFromItem((TreeItem)widget));
-				} else {
-					mcp.refreshingStructure(ModelContentProvider.EMPTY_TREE_PATH);
-				}
-			}
-		}
-		super.internalRefresh(widget, element, doStruct, updateLabels);
-	}
 	
 	protected void unmapElement(Object element, Widget widget) {
 		if (fNotifyUnmap) {
@@ -387,23 +366,6 @@ public class InternalTreeModelViewer extends TreeViewer {
 		}
 	}
 	
-	protected TreePath[] getTreePaths(Object element) {
-		Widget[] widgets = findItems(element);
-		TreePath[] paths = new TreePath[widgets.length];
-		for (int i = 0; i < widgets.length; i++) {
-			TreePath path = (TreePath) widgets[i].getData(TREE_PATH_KEY);
-			if (path == null) {
-				if (widgets[i] instanceof Item) {
-					path = getTreePathFromItem((Item)widgets[i]);
-				} else {
-					path = ModelContentProvider.EMPTY_TREE_PATH;
-				}
-			}
-			paths[i] = path;
-		}
-		return paths;
-	}
-	
 	/* (non-Javadoc)
 	 * 
 	 * Override because we allow inserting with filters present.
@@ -431,43 +393,6 @@ public class InternalTreeModelViewer extends TreeViewer {
 		}
 		return super.hasFilters();
 	}
-
-	/**
-	 * Removes the element at the specified index of the parent.
-	 * 
-	 * @param parent parent element
-	 * @param index child index
-	 */
-	public void remove(final Object parent, final int index) {
-		preservingSelection(new Runnable() {
-			public void run() {
-				if (parent.equals(getInput())) {
-					Tree tree = (Tree) getControl();
-					if (index < tree.getItemCount()) {
-						TreeItem item = tree.getItem(index);
-						Object element = item.getData();
-						if (element != null) {
-							unmapElement(element, item);
-						}
-						item.dispose();
-					}
-				} else {
-					Widget[] parentItems = findItems(parent);
-					for (int i = 0; i < parentItems.length; i++) {
-						TreeItem parentItem = (TreeItem) parentItems[i];
-						if (index < parentItem.getItemCount()) {
-							TreeItem item = parentItem.getItem(index);
-							Object element = item.getData();
-							if (element != null) {
-								unmapElement(element, item);
-							}
-							item.dispose();
-						}
-					}
-				}
-			}
-		});
-	}	
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.AbstractTreeViewer#inputChanged(java.lang.Object, java.lang.Object)

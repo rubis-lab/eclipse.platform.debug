@@ -285,6 +285,9 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 					val = null;
 				}
 				if (val != null && !monitor.isCanceled()) {
+					if (monitor.isCanceled()) {
+						break;
+					}
 					getModelPresentation().computeDetail(val, this);
 					synchronized (this) {
 						try {
@@ -508,6 +511,9 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
     private Job fTriggerDetailsJob = new UIJob("trigger details") { //$NON-NLS-1$
 	
 		public IStatus runInUIThread(IProgressMonitor monitor) {
+			if (monitor.isCanceled()) {
+				return Status.CANCEL_STATUS;
+			} 
 			populateDetailPane();
 			return Status.OK_STATUS;
 		}
@@ -612,6 +618,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	 * @see org.eclipse.debug.ui.AbstractDebugView#createViewer(Composite)
 	 */
 	public Viewer createViewer(Composite parent) {
+		fTriggerDetailsJob.setSystem(true);
 		TreeModelViewer variablesViewer = createTreeViewer(parent);
 		variablesViewer.getPresentationContext().addPropertyChangeListener(
 				new IPropertyChangeListener() {
@@ -1681,13 +1688,17 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.IViewerUpdateListener#viewerUpdatesBegin()
 	 */
-	public void viewerUpdatesBegin() {
+	public synchronized void viewerUpdatesBegin() {
+		fTriggerDetailsJob.cancel();
+		if (fDetailsJob != null) {
+			fDetailsJob.cancel();
+		}
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.IViewerUpdateListener#viewerUpdatesComplete()
 	 */
-	public void viewerUpdatesComplete() {
+	public synchronized void viewerUpdatesComplete() {
 		if (fVisitor.isTriggerDetails()) {
 			fTriggerDetailsJob.schedule();
 		}

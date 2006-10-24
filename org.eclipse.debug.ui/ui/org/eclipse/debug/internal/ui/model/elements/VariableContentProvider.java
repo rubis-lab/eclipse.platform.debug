@@ -206,5 +206,11 @@ public class VariableContentProvider extends ElementContentProvider {
             }
         }
         return value;
-    }    
+    }
+
+	protected boolean hasChildren(Object element, IPresentationContext context, IProgressMonitor monitor) throws CoreException {
+		return ((IVariable)element).getValue().hasVariables();
+	}
+    
+    
 }

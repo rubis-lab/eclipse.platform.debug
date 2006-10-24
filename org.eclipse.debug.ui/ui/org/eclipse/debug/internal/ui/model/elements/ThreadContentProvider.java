@@ -42,4 +42,8 @@ public class ThreadContentProvider extends ElementContentProvider {
 		return getElements(((IThread)parent).getStackFrames(), index, length);
 	}
 
+	protected boolean hasChildren(Object element, IPresentationContext context, IProgressMonitor monitor) throws CoreException {
+		return ((IThread)element).hasStackFrames();
+	}
+
 }

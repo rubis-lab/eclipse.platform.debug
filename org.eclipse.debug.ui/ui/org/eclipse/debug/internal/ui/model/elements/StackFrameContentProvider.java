@@ -53,4 +53,17 @@ public class StackFrameContentProvider extends ElementContentProvider {
 		return id.equals(IDebugUIConstants.ID_VARIABLE_VIEW) || id.equals(IDebugUIConstants.ID_REGISTER_VIEW);
 	}
 
+	protected boolean hasChildren(Object element, IPresentationContext context, IProgressMonitor monitor) throws CoreException {
+		 String id = context.getId();
+        IStackFrame frame = (IStackFrame) element;
+        if (id.equals(IDebugUIConstants.ID_VARIABLE_VIEW)) {
+            return frame.hasVariables();
+        } else if (id.equals(IDebugUIConstants.ID_REGISTER_VIEW)) {
+            return frame.hasRegisterGroups();
+        }
+        return false;
+	}
+	
+	
+
 }

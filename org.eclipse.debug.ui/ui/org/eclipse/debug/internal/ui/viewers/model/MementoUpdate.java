@@ -13,6 +13,7 @@ package org.eclipse.debug.internal.ui.viewers.model;
 import org.eclipse.debug.internal.ui.commands.actions.AbstractRequestMonitor;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdate;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.ui.IMemento;
 
 /**
@@ -23,6 +24,7 @@ abstract class MementoUpdate extends AbstractRequestMonitor implements IViewerUp
 	private IPresentationContext fContext;
 	private Object fElement;
 	private IMemento fMemento;
+	protected ModelContentProvider fProvider;
 	
 	/**
 	 * Constructs a viewer state request.
@@ -31,10 +33,11 @@ abstract class MementoUpdate extends AbstractRequestMonitor implements IViewerUp
 	 * @param element element
 	 * @param memento memento
 	 */
-	public MementoUpdate(IPresentationContext context, Object element, IMemento memento) {
+	public MementoUpdate(ModelContentProvider provider, IPresentationContext context, Object element, IMemento memento) {
 		fContext = context;
 		fElement = element;
 		fMemento = memento;
+		fProvider = provider;
 	}
 
 	/* (non-Javadoc)
@@ -50,6 +53,14 @@ abstract class MementoUpdate extends AbstractRequestMonitor implements IViewerUp
 	
 	public IMemento getMemento() {
 		return fMemento;
+	}
+	
+	public ModelContentProvider getContentProvider() {
+		return fProvider;
+	}
+
+	public Object getElement(TreePath path) {
+		return fProvider.getElement(path);
 	}
 	
 }

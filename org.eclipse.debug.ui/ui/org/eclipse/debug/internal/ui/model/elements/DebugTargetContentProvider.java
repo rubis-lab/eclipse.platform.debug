@@ -42,4 +42,9 @@ public class DebugTargetContentProvider extends ElementContentProvider {
 		return getElements(((IDebugTarget)parent).getThreads(), index, length);
 	}
 
+	protected boolean hasChildren(Object element, IPresentationContext context, IProgressMonitor monitor) throws CoreException {
+		return ((IDebugTarget)element).hasThreads();
+	}
+
+	
 }

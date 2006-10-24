@@ -42,4 +42,9 @@ public class LaunchContentProvider extends ElementContentProvider {
 		return getElements(((ILaunch)parent).getChildren(), index, length);
 	}
 
+	protected boolean hasChildren(Object element, IPresentationContext context, IProgressMonitor monitor) throws CoreException {
+		return ((ILaunch)element).hasChildren();
+	}
+
+	
 }

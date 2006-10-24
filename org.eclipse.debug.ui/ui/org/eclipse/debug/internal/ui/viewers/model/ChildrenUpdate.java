@@ -19,7 +19,6 @@ import org.eclipse.jface.viewers.TreePath;
  */
 class ChildrenUpdate extends ViewerUpdateMonitor implements IChildrenUpdate {
 	
-	private Object fParent;
 	private TreePath fParentPath;
 	private Object[] fElements;
 	private int fIndex;
@@ -33,13 +32,12 @@ class ChildrenUpdate extends ViewerUpdateMonitor implements IChildrenUpdate {
 	 * @param node node to update
 	 * @param model model containing the node
 	 */
-	public ChildrenUpdate(ModelContentProvider provider, Object parent, TreePath parentPath, int index, IElementContentProvider presentation) {
+	public ChildrenUpdate(ModelContentProvider provider, TreePath parentPath, int index, IElementContentProvider presentation) {
 		super(provider);
 		fParentPath = parentPath;
 		fIndex = index;
 		fLength = 1;
 		fContentProvider = presentation;
-		fParent = parent;
 	}
 
 	/*
@@ -58,29 +56,41 @@ class ChildrenUpdate extends ViewerUpdateMonitor implements IChildrenUpdate {
 					int viewIndex = provider.modelToViewIndex(fParentPath, modelIndex);
 					if (provider.shouldFilter(fParentPath, element)) {
 						if (provider.addFilteredIndex(fParentPath, modelIndex)) {
-							//System.out.println("REMOVE(" + fParent + ", modelIndex: " + modelIndex + " viewIndex: " + viewIndex + ", " + element + ")");
-							viewer.remove(fParent, viewIndex);
+							if (ModelContentProvider.DEBUG_CONTENT_PROVIDER) {
+								System.out.println("REMOVE(" + getElement(fParentPath) + ", modelIndex: " + modelIndex + " viewIndex: " + viewIndex + ", " + element + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+							}
+							viewer.remove(fParentPath, viewIndex);
 						}
 					} else {
 						if (provider.isFiltered(fParentPath, modelIndex)) {
 							provider.clearFilteredChild(fParentPath, modelIndex);
 							int insertIndex = provider.modelToViewIndex(fParentPath, modelIndex);
-							//System.out.println("insert(" + fParentPath.getLastSegment() + ", modelIndex: " + modelIndex + " insertIndex: " + insertIndex + ", " + element + ")");
+							if (ModelContentProvider.DEBUG_CONTENT_PROVIDER) {
+								System.out.println("insert(" + fParentPath.getLastSegment() + ", modelIndex: " + modelIndex + " insertIndex: " + insertIndex + ", " + element + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+							}
 							if (fParentPath.getSegmentCount() == 0) {
-								viewer.insert(fParent, element, insertIndex);
+								// TODO: does empty path work in viewer?
+								viewer.insert(getElement(fParentPath), element, insertIndex);
 							} else {
 								viewer.insert(fParentPath, element, insertIndex);
 							}
 						} else {
-							//System.out.println("replace(" + fParent + ", modelIndex: " + modelIndex + " viewIndex: " + viewIndex + ", " + element + ")");
-							viewer.replace(fParent, viewIndex, element);
+							if (ModelContentProvider.DEBUG_CONTENT_PROVIDER) {
+								System.out.println("replace(" + getElement(fParentPath) + ", modelIndex: " + modelIndex + " viewIndex: " + viewIndex + ", " + element + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+							}
+							if (fParentPath.getSegmentCount() > 0) {
+								viewer.replace(fParentPath, viewIndex, element);
+							} else {
+								viewer.replace(getElement(fParentPath), viewIndex, element);
+							}
 						}
-						provider.updateChildCount(element, 0);
+						TreePath childPath = fParentPath.createChildPath(element);
+						provider.updateHasChildren(childPath);
 					}
 				}
 			}
 		} else {
-			provider.updateChildCount(fParent, 0);
+			provider.updateHasChildren(fParentPath);
 		}
 	}
 	
@@ -119,7 +129,11 @@ class ChildrenUpdate extends ViewerUpdateMonitor implements IChildrenUpdate {
 		//System.out.println("\tRequest (" + fParent + "): " + fIndex + " length: " + fLength);
 		TreeModelContentProvider contentProvider = (TreeModelContentProvider)getContentProvider();
 		contentProvider.childRequestStarted(this);
-		fContentProvider.update(this);
+		if (!isCanceled()) {
+			fContentProvider.update(this);
+		} else {
+			done();
+		}
 	}
 
 	/* (non-Javadoc)
@@ -136,11 +150,15 @@ class ChildrenUpdate extends ViewerUpdateMonitor implements IChildrenUpdate {
 		return fIndex;
 	}
 
+	public TreePath getParent() {
+		return fParentPath;
+	}
+
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IChildrenUpdate#getParent()
+	 * @see org.eclipse.debug.internal.ui.viewers.model.ViewerUpdateMonitor#isContained(org.eclipse.jface.viewers.TreePath)
 	 */
-	public Object getParent() {
-		return fParent;
+	boolean isContained(TreePath path) {
+		return fParentPath.startsWith(path, null);
 	}
 	
 }

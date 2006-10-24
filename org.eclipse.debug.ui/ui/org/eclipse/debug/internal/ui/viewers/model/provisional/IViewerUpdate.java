@@ -12,6 +12,7 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.viewers.TreePath;
 
 /**
  * A context sensitive viewer update request.
@@ -42,4 +43,13 @@ public interface IViewerUpdate extends IProgressMonitor {
      * @return request status or <code>null</code>
      */
     public IStatus getStatus();	
+    
+    /**
+     * Returns the model element corresponding to the given tree path.
+     * Returns the root element for the empty path.
+     * 
+     * @param path viewer tree path
+     * @return corresponding model element
+     */
+    public Object getElement(TreePath path);
 }

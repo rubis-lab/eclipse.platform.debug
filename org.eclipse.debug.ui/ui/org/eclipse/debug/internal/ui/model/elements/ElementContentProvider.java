@@ -18,7 +18,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IChildrenCountUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IChildrenUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementContentProvider;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IHasChildrenUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
+import org.eclipse.jface.viewers.TreePath;
 
 /**
  * @since 3.3
@@ -31,11 +33,12 @@ public abstract class ElementContentProvider implements IElementContentProvider 
 	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IElementContentProvider#updateChildren(java.lang.Object, int, int, org.eclipse.debug.internal.ui.viewers.provisional.IPresentationContext, org.eclipse.debug.internal.ui.viewers.model.provisional.IElementRequestMonitor)
 	 */
 	public void update(final IChildrenUpdate update) {
-		Job job = new Job("Retrieving Children") { //$NON-NLS-1$
+		Job job = new Job("children update") { //$NON-NLS-1$
 			protected IStatus run(IProgressMonitor monitor) {
-				if (!monitor.isCanceled()) {
+				if (!update.isCanceled()) {
 					retrieveChildren(update);
 				}
+				update.done();
 				return Status.OK_STATUS;
 			}
 		};
@@ -48,11 +51,12 @@ public abstract class ElementContentProvider implements IElementContentProvider 
 	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IElementContentProvider#update(org.eclipse.debug.internal.ui.viewers.model.provisional.IChildrenCountUpdate)
 	 */
 	public void update(final IChildrenCountUpdate update) {
-		Job job = new Job("Computing hasChildren") { //$NON-NLS-1$
+		Job job = new Job("child count update") { //$NON-NLS-1$
 			protected IStatus run(IProgressMonitor monitor) {
-				if (!monitor.isCanceled()) {
+				if (!update.isCanceled()) {
 					retrieveChildCount(update);
 				}
+				update.done();
 				return Status.OK_STATUS;
 			}
 		};
@@ -73,10 +77,15 @@ public abstract class ElementContentProvider implements IElementContentProvider 
 				IPresentationContext context = update.getPresentationContext();
 				if (supportsContext(context)) {
 					int offset = update.getOffset();
-					Object[] children = getChildren(update.getParent(), offset, update.getLength(), context, update);
-					if (!update.isCanceled() && children != null) {
-						for (int i = 0; i < children.length; i++) {
-							update.setChild(children[i], offset + i);
+					Object parent = update.getElement(update.getParent());
+					if (parent == null) {
+						update.setCanceled(true);
+					} else {
+						Object[] children = getChildren(parent, offset, update.getLength(), context, update);
+						if (!update.isCanceled() && children != null) {
+							for (int i = 0; i < children.length; i++) {
+								update.setChild(children[i], offset + i);
+							}
 						}
 					}
 				}
@@ -84,7 +93,6 @@ public abstract class ElementContentProvider implements IElementContentProvider 
 				status = e.getStatus();
 			}
 			update.setStatus(status);
-			update.done();
 		}    	
     }
     
@@ -100,26 +108,31 @@ public abstract class ElementContentProvider implements IElementContentProvider 
 			IStatus status = Status.OK_STATUS;
 			try {
 				IPresentationContext context = update.getPresentationContext();
-				Object[] parents = update.getParents();
+				TreePath[] parents = update.getParents();
 				if (supportsContext(context)) {
 					for (int i = 0; i < parents.length; i++) {
-						Object parent = parents[i];
+						Object parent = update.getElement(parents[i]);
+						if (parent == null) {
+							// viewer input changed to null
+							update.setCanceled(true);
+							break;
+						}
 						int childCount = getChildCount(parent, context, update);
-						if (!update.isCanceled()) {
-							update.setChildCount(parent, childCount);
+						if (update.isCanceled()) {
+							break;
+						} else {
+							update.setChildCount(parents[i], childCount);
 						}
 					}
 				} else {
 					for (int i = 0; i < parents.length; i++) {
-						Object parent = parents[i];
-						update.setChildCount(parent, 0);
+						update.setChildCount(parents[i], 0);
 					}
 				}
 			} catch (CoreException e) {
 				status = e.getStatus();
 			}
 			update.setStatus(status);
-			update.done();
 		}    	
     }    
         
@@ -183,4 +196,66 @@ public abstract class ElementContentProvider implements IElementContentProvider 
     	}
     	return null;
     }
+
+	public void update(final IHasChildrenUpdate update) {
+		Job job = new Job("has children update") { //$NON-NLS-1$
+			protected IStatus run(IProgressMonitor monitor) {
+				if (!monitor.isCanceled()) {
+					updateHasChildren(update);
+				}
+				update.done();
+				return Status.OK_STATUS;
+			}
+		};
+		job.setSystem(true);
+		// TODO: rule
+		job.schedule();	
+	}
+
+	/**
+	 * Updates whether the given elements have children.
+	 * 
+	 * @param update specifies element and progress monitor
+	 */
+	protected void updateHasChildren(IHasChildrenUpdate update) {
+		if (!update.isCanceled()) {
+			IStatus status = Status.OK_STATUS;
+			try {
+				IPresentationContext context = update.getPresentationContext();
+				TreePath[] elements = update.getElements();
+				if (supportsContext(context)) {
+					for (int i = 0; i < elements.length; i++) {
+						Object element = update.getElement(elements[i]);
+						boolean hasChildren = hasChildren(element, context, update);
+						if (!update.isCanceled()) {
+							update.setHasChilren(elements[i], hasChildren);
+						}
+					}
+				} else {
+					for (int i = 0; i < elements.length; i++) {
+						update.setHasChilren(elements[i], false);
+					}
+				}
+			} catch (CoreException e) {
+				status = e.getStatus();
+			}
+			update.setStatus(status);
+			update.done();
+		}    	
+		
+	}
+
+	/**
+	 * Returns whether the given element has children in the specified context.
+	 * Subclasses can override to be more efficient.
+	 * 
+	 * @param element
+	 * @param context
+	 * @param monitor
+	 * @return
+	 */
+	protected boolean hasChildren(Object element, IPresentationContext context, IProgressMonitor monitor) throws CoreException {
+		return getChildCount(element, context, monitor) > 0;
+	}
+    
 }

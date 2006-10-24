@@ -14,6 +14,7 @@ import org.eclipse.debug.internal.ui.commands.actions.AbstractRequestMonitor;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.ILabelUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
@@ -213,6 +214,14 @@ class LabelUpdate extends AbstractRequestMonitor implements ILabelUpdate {
 				}
 			}
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdate#getElement(org.eclipse.jface.viewers.TreePath)
+	 */
+	public Object getElement(TreePath path) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

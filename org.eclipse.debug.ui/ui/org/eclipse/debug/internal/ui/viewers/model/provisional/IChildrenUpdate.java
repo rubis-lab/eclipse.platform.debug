@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers.model.provisional;
 
+import org.eclipse.jface.viewers.TreePath;
+
 /**
  * Context sensitive children update request for a parent and subrange of its
  * children.
@@ -19,11 +21,12 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
 public interface IChildrenUpdate extends IViewerUpdate {
 
 	/**
-	 * Returns the parent element that children are being requested for.
+	 * Returns the parent element that children are being requested for
+	 * as a tree path. An empty path identifies the root element.
 	 * 
-	 * @return parent element
+	 * @return parent element as a tree path
 	 */
-	public Object getParent();
+	public TreePath getParent();
 	
 	/**
 	 * Returns the offset at which children have been requested for. This is

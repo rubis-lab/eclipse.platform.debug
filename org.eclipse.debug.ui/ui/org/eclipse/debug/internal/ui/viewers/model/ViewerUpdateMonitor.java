@@ -18,6 +18,7 @@ import org.eclipse.debug.internal.ui.commands.actions.AbstractRequestMonitor;
 import org.eclipse.debug.internal.ui.viewers.AsynchronousSchedulingRuleFactory;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdate;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.ui.progress.WorkbenchJob;
 
 /**
@@ -119,4 +120,17 @@ abstract class ViewerUpdateMonitor extends AbstractRequestMonitor implements IVi
 	public IPresentationContext getPresentationContext() {
 		return fContentProvider.getPresentationContext();
 	}
+
+	public Object getElement(TreePath path) {
+		return fContentProvider.getElement(path);
+	}
+	
+	/**
+	 * Whether this update is rooted at or below the given path.
+	 * 
+	 * @param path
+	 * @return whether this update is rooted at or below the given path
+	 */
+	abstract boolean isContained(TreePath path);
+	
 }
