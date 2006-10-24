@@ -473,7 +473,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 		updateObjects();
 	}
 	
-	protected void possibleContextChange(Object element) {
+	protected void possibleContextChange(Object element, int type) {
 		// TODO: remove
 	}
 
