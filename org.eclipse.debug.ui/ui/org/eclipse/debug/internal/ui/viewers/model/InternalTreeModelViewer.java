@@ -936,7 +936,7 @@ public class InternalTreeModelViewer extends TreeViewer {
 			return;
 		}
 
-		((TreeModelLabelProvider)getLabelProvider()).update(element, getRowPartFromItem(treeItem));
+		((TreeModelLabelProvider)getLabelProvider()).update(element, getViewerRowFromItem(treeItem));
 
 		// As it is possible for user code to run the event
 		// loop check here.
