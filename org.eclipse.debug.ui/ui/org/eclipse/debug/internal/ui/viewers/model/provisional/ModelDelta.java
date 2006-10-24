@@ -264,9 +264,9 @@ public class ModelDelta implements IModelDelta {
 		}
 		buf.append('\n');
 		buf.append("\t\tIndex: "); //$NON-NLS-1$
-		buf.append(fIndex);
+		buf.append(delta.fIndex);
 		buf.append(" Child Count: "); //$NON-NLS-1$
-		buf.append(fChildCount);
+		buf.append(delta.fChildCount);
 		buf.append('\n');
 		ModelDelta[] nodes = delta.getChildDeltas();
 		for (int i = 0; i < nodes.length; i++) {

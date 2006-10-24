@@ -210,10 +210,14 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 	
 	protected void expand(IModelDelta delta) {
 		int childCount = delta.getChildCount();
-		int index = delta.getIndex();
+		int modelIndex = delta.getIndex();
 		TreeViewer treeViewer = getTreeViewer();
-		if (index >= 0) {
-			treeViewer.replace(delta.getParentDelta().getElement(), index, delta.getElement());
+		if (modelIndex >= 0) {
+			int viewIndex = modelToViewIndex(getTreePath(delta.getParentDelta()), modelIndex);
+			if (DEBUG_CONTENT_PROVIDER) {
+				System.out.println("[expand] replace(" + delta.getParentDelta().getElement() + ", (model) " + modelIndex + " (view) " + viewIndex + ", " + delta.getElement()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			}
+			treeViewer.replace(delta.getParentDelta().getElement(), viewIndex, delta.getElement());
 		}
 		if (childCount > 0) {
 			TreePath elementPath = getTreePath(delta);
@@ -256,10 +260,14 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.ModelContentProvider#handleSelect(org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta)
 	 */
 	protected void handleSelect(IModelDelta delta) {
-		int index = delta.getIndex();
+		int modelIndex = delta.getIndex();
 		TreeViewer treeViewer = getTreeViewer();
-		if (index >= 0) {
-			treeViewer.replace(delta.getParentDelta().getElement(), index, delta.getElement());
+		if (modelIndex >= 0) {
+			int viewIndex = modelToViewIndex(getTreePath(delta.getParentDelta()), modelIndex);
+			if (DEBUG_CONTENT_PROVIDER) {
+				System.out.println("[select] replace(" + delta.getParentDelta().getElement() + ", (model) " + modelIndex + " (view) " + viewIndex + ", " + delta.getElement()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			}
+			treeViewer.replace(delta.getParentDelta().getElement(), viewIndex, delta.getElement());
 		}
 		treeViewer.setSelection(new TreeSelection(getTreePath(delta)));
 	}
