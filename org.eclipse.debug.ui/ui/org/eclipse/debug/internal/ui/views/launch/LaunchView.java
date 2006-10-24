@@ -48,6 +48,9 @@ import org.eclipse.debug.internal.ui.contexts.provisional.DebugContextEvent;
 import org.eclipse.debug.internal.ui.sourcelookup.EditSourceLookupPathAction;
 import org.eclipse.debug.internal.ui.sourcelookup.LookupSourceAction;
 import org.eclipse.debug.internal.ui.viewers.AsynchronousTreeViewer;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedListener;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDeltaVisitor;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.TreeModelViewer;
 import org.eclipse.debug.internal.ui.views.DebugModelPresentationContext;
 import org.eclipse.debug.internal.ui.views.DebugUIViewsMessages;
@@ -132,17 +135,39 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	private EditSourceLookupPathAction fEditSourceAction = null;
 	private LookupSourceAction fLookupAction = null;
 
-	class ContextProvider extends AbstractDebugContextProvider {
+	class ContextProvider extends AbstractDebugContextProvider implements IModelChangedListener {
 		
-		public ContextProvider() {
-			super(LaunchView.this);
-			// TODO Auto-generated constructor stub
-		}
-
 		private ISelection fContext = null;
+		private TreeModelViewer fViewer = null;
+		private Visitor fVisitor = new Visitor();
+		
+		class Visitor implements IModelDeltaVisitor {
+			public boolean visit(IModelDelta delta, int depth) {
+				Object element = delta.getElement();
+				if ((delta.getFlags() & IModelDelta.STATE) > 0) {
+					if ((delta.getFlags() & (IModelDelta.CONTENT | IModelDelta.SELECT)) == 0) {
+						// state change without content/select - possible state change of active context
+						possibleChange(element, DebugContextEvent.CHANGED);
+					}
+				} else if ((delta.getFlags() & IModelDelta.CONTENT) > 0) {
+					if ((delta.getFlags() & IModelDelta.SELECT) == 0) {
+						// content change without select > possible activation
+						possibleChange(element, DebugContextEvent.ACTIVATED);
+					}
+				}
+				return true;
+			}	
+		}
+		
+		public ContextProvider(TreeModelViewer viewer) {
+			super(LaunchView.this);
+			fViewer = viewer;
+			fViewer.addModelChangedListener(this);
+		}
 		
 		protected void dispose() { 
 			fContext = null;
+			fViewer.removeModelChangedListener(this);
 		}
 		
 		/* (non-Javadoc)
@@ -159,7 +184,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 			fire(new DebugContextEvent(this, selection, DebugContextEvent.ACTIVATED));
 		}
 		
-		protected void possibleContextChange(Object element) {
+		protected void possibleChange(Object element, int type) {
 			synchronized (this) {
 				if (fContext instanceof IStructuredSelection) {
 					IStructuredSelection ss = (IStructuredSelection) fContext;
@@ -170,7 +195,14 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 					return;
 				}
 			}
-			fire(new DebugContextEvent(this, fContext, DebugContextEvent.CHANGED));					
+			fire(new DebugContextEvent(this, fContext, type));					
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedListener#modelChanged(org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta)
+		 */
+		public void modelChanged(IModelDelta delta) {
+			delta.accept(fVisitor);
 		}
 		
 	}
@@ -178,7 +210,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	/**
 	 * Context provider
 	 */
-	private ContextProvider fProvider = new ContextProvider();
+	private ContextProvider fProvider;
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.ui.AbstractDebugView#getHelpContextId()
@@ -257,6 +289,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 		getSite().setSelectionProvider(viewer);
 		viewer.setInput(DebugPlugin.getDefault().getLaunchManager());
 		//setEventHandler(new LaunchViewEventHandler(this));
+		fProvider = new ContextProvider(viewer);
 		DebugContextManager.getDefault().addDebugContextProvider(fProvider);
 		return viewer;
 	}
@@ -441,7 +474,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	}
 	
 	protected void possibleContextChange(Object element) {
-		fProvider.possibleContextChange(element);
+		// TODO: remove
 	}
 
 	/* (non-Javadoc)
