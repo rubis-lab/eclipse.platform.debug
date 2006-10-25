@@ -19,7 +19,7 @@ import org.eclipse.debug.core.model.IWatchExpression;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.contexts.DebugContextManager;
 import org.eclipse.debug.internal.ui.contexts.provisional.IDebugContextListener;
-import org.eclipse.debug.internal.ui.contexts.provisional.IDebugContextManager;
+import org.eclipse.debug.internal.ui.contexts.provisional.IDebugContextService;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
@@ -58,9 +58,9 @@ public class DefaultWatchExpressionModelProxy extends DefaultExpressionModelProx
 				if (fWindow == null) {
 					fWindow = DebugUIPlugin.getActiveWorkbenchWindow();
 				}
-				IDebugContextManager contextManager = DebugContextManager.getDefault();
-				contextManager.addDebugContextListener(DefaultWatchExpressionModelProxy.this, fWindow);
-				ISelection activeContext = contextManager.getActiveContext(fWindow);
+				IDebugContextService contextService = DebugContextManager.getDefault().getContextService(fWindow);
+				contextService.addDebugContextListener(DefaultWatchExpressionModelProxy.this);
+				ISelection activeContext = contextService.getActiveContext();
 				if (activeContext != null) {
 					contextActivated(activeContext, null);
 				}
@@ -77,7 +77,7 @@ public class DefaultWatchExpressionModelProxy extends DefaultExpressionModelProx
 	 */
 	public synchronized void dispose() {
 		super.dispose();
-		DebugContextManager.getDefault().removeDebugContextListener(this, fWindow);
+		DebugContextManager.getDefault().getContextService(fWindow).removeDebugContextListener(this);
 		fWindow = null;
 	}
 

@@ -11,6 +11,7 @@
 package org.eclipse.debug.internal.ui.model.elements;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.model.IErrorReportingExpression;
 import org.eclipse.debug.core.model.IExpression;
 import org.eclipse.debug.core.model.IValue;
@@ -37,4 +38,14 @@ public class ExpressionContentProvider extends VariableContentProvider {
         }
         return EMPTY;	
 	}
+	
+	protected boolean hasChildren(Object element, IPresentationContext context, IProgressMonitor monitor) throws CoreException {
+		if (element instanceof IErrorReportingExpression) {
+			IErrorReportingExpression expression = (IErrorReportingExpression) element;
+			if (expression.hasErrors()) {
+				return true;
+			}
+		}
+		return ((IExpression)element).getValue().hasVariables();
+	}	
 }
