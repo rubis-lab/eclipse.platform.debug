@@ -28,7 +28,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.IWorkbenchPart;
  
 /**
  * Displays expressions and their values with a detail
@@ -81,8 +80,8 @@ public class ExpressionView extends VariablesView {
 		menu.add(new Separator(IDebugUIConstants.EMPTY_RENDER_GROUP));
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
-	
-	public void contextActivated(ISelection selection, IWorkbenchPart part) {
+
+	protected void contextActivated(ISelection selection) {
 		if (!isVisible()) {
 			return;
 		}

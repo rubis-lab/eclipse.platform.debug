@@ -46,9 +46,6 @@ import org.eclipse.debug.internal.ui.commands.actions.TerminateAndRelaunchAction
 import org.eclipse.debug.internal.ui.commands.actions.TerminateAndRemoveAction;
 import org.eclipse.debug.internal.ui.commands.actions.TerminateCommandAction;
 import org.eclipse.debug.internal.ui.commands.actions.ToggleStepFiltersAction;
-import org.eclipse.debug.internal.ui.contexts.DebugContextManager;
-import org.eclipse.debug.internal.ui.contexts.provisional.AbstractDebugContextProvider;
-import org.eclipse.debug.internal.ui.contexts.provisional.DebugContextEvent;
 import org.eclipse.debug.internal.ui.sourcelookup.EditSourceLookupPathAction;
 import org.eclipse.debug.internal.ui.sourcelookup.LookupSourceAction;
 import org.eclipse.debug.internal.ui.viewers.AsynchronousTreeViewer;
@@ -59,8 +56,11 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.TreeModelViewer;
 import org.eclipse.debug.internal.ui.views.DebugModelPresentationContext;
 import org.eclipse.debug.internal.ui.views.DebugUIViewsMessages;
 import org.eclipse.debug.ui.AbstractDebugView;
+import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.contexts.AbstractDebugContextProvider;
+import org.eclipse.debug.ui.contexts.DebugContextEvent;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -152,7 +152,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 				if ((delta.getFlags() & IModelDelta.STATE) > 0) {
 					if ((delta.getFlags() & (IModelDelta.CONTENT | IModelDelta.SELECT)) == 0) {
 						// state change without content/select - possible state change of active context
-						possibleChange(element, DebugContextEvent.CHANGED);
+						possibleChange(element, DebugContextEvent.STATE);
 					}
 				} else if ((delta.getFlags() & IModelDelta.CONTENT) > 0) {
 					if ((delta.getFlags() & IModelDelta.SELECT) == 0) {
@@ -308,7 +308,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 		viewer.setInput(DebugPlugin.getDefault().getLaunchManager());
 		//setEventHandler(new LaunchViewEventHandler(this));
 		fProvider = new ContextProvider(viewer);
-		DebugContextManager.getDefault().addDebugContextProvider(fProvider);
+		DebugUITools.getDebugContextManager().getContextService(getSite().getWorkbenchWindow()).addDebugContextProvider(fProvider);
 		return viewer;
 	}
 		
@@ -443,7 +443,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 	 * @see org.eclipse.ui.IWorkbenchPart#dispose()
 	 */
 	public void dispose() {
-		DebugContextManager.getDefault().removeDebugContextProvider(fProvider);
+		DebugUITools.getDebugContextManager().getContextService(getSite().getWorkbenchWindow()).removeDebugContextProvider(fProvider);
         disposeActions();
 		fProvider.dispose();
 	    Viewer viewer = getViewer();

@@ -17,13 +17,13 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.core.model.IWatchExpression;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
-import org.eclipse.debug.internal.ui.contexts.DebugContextManager;
-import org.eclipse.debug.internal.ui.contexts.provisional.IDebugContextListener;
-import org.eclipse.debug.internal.ui.contexts.provisional.IDebugContextService;
+import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.contexts.DebugContextEvent;
+import org.eclipse.debug.ui.contexts.IDebugContextListener;
+import org.eclipse.debug.ui.contexts.IDebugContextService;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.UIJob;
@@ -58,11 +58,11 @@ public class DefaultWatchExpressionModelProxy extends DefaultExpressionModelProx
 				if (fWindow == null) {
 					fWindow = DebugUIPlugin.getActiveWorkbenchWindow();
 				}
-				IDebugContextService contextService = DebugContextManager.getDefault().getContextService(fWindow);
+				IDebugContextService contextService = DebugUITools.getDebugContextManager().getContextService(fWindow);
 				contextService.addDebugContextListener(DefaultWatchExpressionModelProxy.this);
 				ISelection activeContext = contextService.getActiveContext();
 				if (activeContext != null) {
-					contextActivated(activeContext, null);
+					contextActivated(activeContext);
 				}
 				return Status.OK_STATUS;
 			}
@@ -77,7 +77,7 @@ public class DefaultWatchExpressionModelProxy extends DefaultExpressionModelProx
 	 */
 	public synchronized void dispose() {
 		super.dispose();
-		DebugContextManager.getDefault().getContextService(fWindow).removeDebugContextListener(this);
+		DebugUITools.getDebugContextManager().getContextService(fWindow).removeDebugContextListener(this);
 		fWindow = null;
 	}
 
@@ -88,10 +88,7 @@ public class DefaultWatchExpressionModelProxy extends DefaultExpressionModelProx
 		return new DebugEventHandler[]{new ExpressionEventHandler(this)};
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.contexts.IDebugContextListener#contextActivated(org.eclipse.jface.viewers.ISelection, org.eclipse.ui.IWorkbenchPart)
-	 */
-	public void contextActivated(ISelection selection, IWorkbenchPart part) {
+	protected void contextActivated(ISelection selection) {
 		if (fWindow != null) {
 			if (selection instanceof IStructuredSelection) {
 				IDebugElement context = null;
@@ -108,11 +105,11 @@ public class DefaultWatchExpressionModelProxy extends DefaultExpressionModelProx
 			}
 		}
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.contexts.IDebugContextListener#contextChanged(org.eclipse.jface.viewers.ISelection, org.eclipse.ui.IWorkbenchPart)
-	 */
-	public void contextChanged(ISelection selection, IWorkbenchPart part) {		
-	}	
+
+	public void debugContextChanged(DebugContextEvent event) {
+		if ((event.getFlags() & DebugContextEvent.ACTIVATED) > 0) {
+			contextActivated(event.getContext());
+		}
+	}
 	
 }

@@ -46,6 +46,10 @@ public class ExpressionContentProvider extends VariableContentProvider {
 				return true;
 			}
 		}
-		return ((IExpression)element).getValue().hasVariables();
+		IValue value = ((IExpression)element).getValue();
+		if (value == null) {
+			return false;
+		}
+		return value.hasVariables();
 	}	
 }

@@ -42,4 +42,10 @@ public class ExpressionManagerContentProvider extends ElementContentProvider {
 		return id.equals(IDebugUIConstants.ID_EXPRESSION_VIEW);
 	}
 
+	protected boolean hasChildren(Object element, IPresentationContext context, IProgressMonitor monitor) throws CoreException {
+		return ((IExpressionManager)element).hasExpressions();
+	}
+	
+	
+
 }
