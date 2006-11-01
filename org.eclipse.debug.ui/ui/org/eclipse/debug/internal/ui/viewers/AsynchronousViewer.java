@@ -28,7 +28,7 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelSelectionPo
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelSelectionPolicyFactoryAdapter;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.PresentationContext;
-import org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousRequestMonitor;
+import org.eclipse.debug.ui.commands.IStatusMonitor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -704,7 +704,7 @@ public abstract class AsynchronousViewer extends StructuredViewer implements Lis
 	 * @param monitor monitor for the presentation request that failed
 	 * @param status status of update
 	 */
-	protected void handlePresentationFailure(IAsynchronousRequestMonitor monitor, IStatus status) {
+	protected void handlePresentationFailure(IStatusMonitor monitor, IStatus status) {
 	}
 
 	/* (non-Javadoc)
@@ -890,7 +890,7 @@ public abstract class AsynchronousViewer extends StructuredViewer implements Lis
 	 * 
 	 * @param monitor
 	 */
-	protected void updateComplete(IAsynchronousRequestMonitor monitor) {
+	protected void updateComplete(IStatusMonitor monitor) {
 	}
 
 	/**

@@ -12,6 +12,7 @@ package org.eclipse.debug.internal.ui.launchConfigurations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -68,29 +69,32 @@ public class SelectLaunchModesDialog extends SelectionDialog {
 		public void removeListener(ILabelProviderListener listener) {}
 	}
 	
-	private static final String SETTINGS_ID = IDebugUIConstants.PLUGIN_ID + ".SELECT_LAUNCH_OPTIONS_DIALOG"; //$NON-NLS-1$
+	private static final String SETTINGS_ID = IDebugUIConstants.PLUGIN_ID + ".SELECT_LAUNCH_MODES_DIALOG"; //$NON-NLS-1$
 	
 	private CheckboxTableViewer fTableViewer = null;
 	private Table fTable  = null;
-	private List fValidCombinations;
+	private List fValidModes = null;
 	
 	/**
 	 * Constructor
 	 * @param parentShell the parent shell
-	 * @param message the message for the dialog
-	 * @param options the listing of arrays of options (each entry in the list must be an <code>Set</code> of options)
+	 * @param mode the current mode context
+	 * @param configuration the current launch configuration context
+	 * 
+	 * @throws CoreException
 	 */
 	public SelectLaunchModesDialog(Shell parentShell, String mode, ILaunchConfiguration configuration) throws CoreException {
 		super(parentShell);
 		super.setMessage(LaunchConfigurationsMessages.SelectLaunchOptionsDialog_2);
 		super.setTitle(LaunchConfigurationsMessages.SelectLaunchOptionsDialog_3);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
-		Set[] combinations = configuration.getType().getSupportedModeCombinations();
-		fValidCombinations = new ArrayList();
-		for (int i = 0; i < combinations.length; i++) {
-			Set set = combinations[i];
-			if (set.contains(mode)) {
-				fValidCombinations.add(set);
+		fValidModes = new ArrayList();
+		Set modes = configuration.getType().getSupportedModeCombinations();
+		Set modeset = null;
+		for(Iterator iter = modes.iterator(); iter.hasNext();) {
+			modeset = (Set) iter.next();
+			if(modeset.contains(mode)) {
+				fValidModes.add(modeset);
 			}
 		}
 	}
@@ -107,7 +111,7 @@ public class SelectLaunchModesDialog extends SelectionDialog {
 		fTableViewer = new CheckboxTableViewer(fTable);
 		fTableViewer.setLabelProvider(new OptionsLabelProvider());
 		fTableViewer.setContentProvider(new ArrayContentProvider());
-		fTableViewer.setInput(fValidCombinations.toArray());
+		fTableViewer.setInput(fValidModes.toArray());
 		fTableViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				fTableViewer.setAllChecked(false);
@@ -115,7 +119,7 @@ public class SelectLaunchModesDialog extends SelectionDialog {
 			}
 		});
 		Dialog.applyDialogFont(comp);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(comp, IDebugHelpContextIds.SELECT_LAUNCH_OPTIONS_DIALOG);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(comp, IDebugHelpContextIds.SELECT_LAUNCH_MODES_DIALOG);
 		return comp;
 	}
 

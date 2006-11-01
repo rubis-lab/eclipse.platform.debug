@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers.model.provisional;
 
-import org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousRequestMonitor;
+import org.eclipse.debug.ui.commands.IStatusMonitor;
 
 /**
  * Notified of viewer updates.
@@ -36,7 +36,7 @@ public interface IViewerUpdateListener {
 	 * 
 	 * @param update update
 	 */
-	public void updateStarted(IAsynchronousRequestMonitor update);
+	public void updateStarted(IStatusMonitor update);
 	
 	/**
 	 * Notification that a specific update has completed within a
@@ -44,5 +44,5 @@ public interface IViewerUpdateListener {
 	 * 
 	 * @param update update
 	 */
-	public void updateComplete(IAsynchronousRequestMonitor update);
+	public void updateComplete(IStatusMonitor update);
 }

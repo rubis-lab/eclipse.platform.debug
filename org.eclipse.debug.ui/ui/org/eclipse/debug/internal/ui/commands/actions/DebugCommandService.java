@@ -16,9 +16,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.debug.internal.ui.commands.provisional.IBooleanRequestMonitor;
-import org.eclipse.debug.internal.ui.commands.provisional.IDebugCommand;
 import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.commands.IBooleanStatusMonitor;
+import org.eclipse.debug.ui.commands.IDebugCommand;
 import org.eclipse.debug.ui.contexts.DebugContextEvent;
 import org.eclipse.debug.ui.contexts.IDebugContextListener;
 import org.eclipse.debug.ui.contexts.IDebugContextService;
@@ -76,19 +76,19 @@ public class DebugCommandService implements IDebugContextListener {
 		fContextService.addPostDebugContextListener(this);
 		PlatformUI.getWorkbench().addWindowListener(new IWindowListener() {
 		
-			public void windowOpened(IWorkbenchWindow window) {
+			public void windowOpened(IWorkbenchWindow w) {
 			}
 		
-			public void windowDeactivated(IWorkbenchWindow window) {
+			public void windowDeactivated(IWorkbenchWindow w) {
 			}
 		
-			public void windowClosed(IWorkbenchWindow window) {
-				if (fWindow == window) {
+			public void windowClosed(IWorkbenchWindow w) {
+				if (fWindow == w) {
 					dispose();
 				}
 			}
 		
-			public void windowActivated(IWorkbenchWindow window) {
+			public void windowActivated(IWorkbenchWindow w) {
 			}
 		
 		});
@@ -107,13 +107,15 @@ public class DebugCommandService implements IDebugContextListener {
 	 * @param commandType
 	 * @param monitor
 	 */
-	public void postUpdateCommand(Class commandType, IBooleanRequestMonitor monitor) {
-		ProxyBooleanRequestMonitor proxy = (ProxyBooleanRequestMonitor) fCommandUpdates.get(commandType);
-		if (proxy == null) {
-			proxy = new ProxyBooleanRequestMonitor();
-			fCommandUpdates.put(commandType, proxy);
+	public void postUpdateCommand(Class commandType, IBooleanStatusMonitor monitor) {
+		synchronized (fCommandUpdates) {
+			ProxyBooleanRequestMonitor proxy = (ProxyBooleanRequestMonitor) fCommandUpdates.get(commandType);
+			if (proxy == null) {
+				proxy = new ProxyBooleanRequestMonitor();
+				fCommandUpdates.put(commandType, proxy);
+			}
+			proxy.addMonitor(monitor);					
 		}
-		proxy.addMonitor(monitor);		
 	}
 	
 	/**
@@ -122,7 +124,7 @@ public class DebugCommandService implements IDebugContextListener {
 	 * @param commandType
 	 * @param requestMonitor
 	 */
-	public void updateCommand(Class commandType, IBooleanRequestMonitor requestMonitor) {
+	public void updateCommand(Class commandType, IBooleanStatusMonitor requestMonitor) {
 		ISelection context = fContextService.getActiveContext();
 		if (context instanceof IStructuredSelection && !context.isEmpty()) {
 			Object[] elements = ((IStructuredSelection)context).toArray();
@@ -136,9 +138,14 @@ public class DebugCommandService implements IDebugContextListener {
 	}	
 	
 	private void postUpdate(ISelection context) {
+		Map commands = null;
+		synchronized (fCommandUpdates) {
+			commands = fCommandUpdates;
+			fCommandUpdates = new HashMap(commands.size());
+		}
 		if (context instanceof IStructuredSelection && !context.isEmpty()) {
 			Object[] elements = ((IStructuredSelection)context).toArray();
-			Iterator iterator = fCommandUpdates.entrySet().iterator();
+			Iterator iterator = commands.entrySet().iterator();
 			while (iterator.hasNext()) {
 				Entry entry = (Entry) iterator.next();
 				Class commandType = (Class)entry.getKey();
@@ -146,14 +153,14 @@ public class DebugCommandService implements IDebugContextListener {
 				updateCommand(commandType, elements, monitor);
 			}
 		} else {
-			Iterator iterator = fCommandUpdates.values().iterator();
+			Iterator iterator = commands.values().iterator();
 			while (iterator.hasNext()) {
 				ProxyBooleanRequestMonitor monitor = (ProxyBooleanRequestMonitor) iterator.next();
 				monitor.setCanceled(true);
 				monitor.done();
 			}
 		}
-		fCommandUpdates.clear();		
+		commands.clear();		
 	}
 	
 	/**

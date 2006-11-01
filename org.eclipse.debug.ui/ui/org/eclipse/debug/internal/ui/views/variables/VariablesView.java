@@ -54,7 +54,6 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDeltaVisito
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdateListener;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.TreeModelViewer;
-import org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousRequestMonitor;
 import org.eclipse.debug.internal.ui.views.DebugModelPresentationContext;
 import org.eclipse.debug.internal.ui.views.IDebugExceptionHandler;
 import org.eclipse.debug.ui.AbstractDebugView;
@@ -63,6 +62,7 @@ import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.IDebugView;
 import org.eclipse.debug.ui.IValueDetailListener;
+import org.eclipse.debug.ui.commands.IStatusMonitor;
 import org.eclipse.debug.ui.contexts.DebugContextEvent;
 import org.eclipse.debug.ui.contexts.IDebugContextListener;
 import org.eclipse.jface.action.Action;
@@ -1668,7 +1668,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.IViewerUpdateListener#updateComplete(org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousRequestMonitor)
 	 */
-	public void updateComplete(IAsynchronousRequestMonitor update) {
+	public void updateComplete(IStatusMonitor update) {
 		IStatus status = update.getStatus();
 		if (status != null && !(status.getCode() == IStatus.OK || status.getCode() == IStatus.CANCEL)) {
 			showMessage(status.getMessage());
@@ -1680,7 +1680,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.IViewerUpdateListener#updateStarted(org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousRequestMonitor)
 	 */
-	public void updateStarted(IAsynchronousRequestMonitor update) {
+	public void updateStarted(IStatusMonitor update) {
 	}
 
 	/* (non-Javadoc)
