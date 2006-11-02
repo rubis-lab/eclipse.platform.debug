@@ -192,8 +192,11 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.ModelContentProvider#handleContent(org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta)
 	 */
 	protected void handleContent(IModelDelta delta) {
-		cancelSubtreeUpdates(getTreePath(delta));
-		getTreeViewer().refresh(delta.getElement());
+		// get the element from the path rather than from the delta - ensure's synchronization
+		// between viewer input and delta 
+		TreePath treePath = getTreePath(delta);
+		cancelSubtreeUpdates(treePath);
+		getTreeViewer().refresh(getElement(treePath));
 	}
 
 	/* (non-Javadoc)

@@ -1670,10 +1670,12 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	 */
 	public void updateComplete(IStatusMonitor update) {
 		IStatus status = update.getStatus();
-		if (status != null && !(status.getCode() == IStatus.OK || status.getCode() == IStatus.CANCEL)) {
-			showMessage(status.getMessage());
-		} else {
-			showViewer();
+		if (!update.isCanceled()) {
+			if (status != null && status.getCode() != IStatus.OK) {
+				showMessage(status.getMessage());
+			} else {
+				showViewer();
+			}
 		}
 	}
 
