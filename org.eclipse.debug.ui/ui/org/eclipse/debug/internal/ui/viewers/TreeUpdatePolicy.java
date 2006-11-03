@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedListener;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxy;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 
@@ -28,7 +29,7 @@ public class TreeUpdatePolicy extends AbstractUpdatePolicy implements IModelChan
 	private TreePath fTreePath;
 	private IModelDelta fNode;
 
-    public void modelChanged(IModelDelta delta) {
+    public void modelChanged(IModelDelta delta, IModelProxy proxy) {
         updateNodes(new IModelDelta[] { delta });
         fTreePath = null;
         fNode = null;

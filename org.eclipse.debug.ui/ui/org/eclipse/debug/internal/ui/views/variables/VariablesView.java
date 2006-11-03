@@ -51,6 +51,7 @@ import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedListener;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDeltaVisitor;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxy;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdateListener;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.TreeModelViewer;
@@ -1660,7 +1661,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.internal.ui.viewers.provisional.IModelChangedListener#modelChanged(org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta)
 	 */
-	public void modelChanged(IModelDelta delta) {
+	public void modelChanged(IModelDelta delta, IModelProxy proxy) {
 		fVisitor.reset();
 		delta.accept(fVisitor);
 	}

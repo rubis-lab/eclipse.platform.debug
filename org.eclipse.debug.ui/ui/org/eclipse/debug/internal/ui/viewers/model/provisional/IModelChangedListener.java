@@ -24,7 +24,8 @@ public interface IModelChangedListener {
 	 * Notification a model has changed as described by the given delta.
 	 * 
 	 * @param delta model delta
+	 * @param proxy proxy that created the delta
 	 */
-	public void modelChanged(IModelDelta delta);
+	public void modelChanged(IModelDelta delta, IModelProxy proxy);
 
 }

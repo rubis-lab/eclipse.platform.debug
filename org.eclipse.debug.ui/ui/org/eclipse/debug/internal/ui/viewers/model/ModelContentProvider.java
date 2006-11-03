@@ -521,10 +521,12 @@ abstract class ModelContentProvider implements IContentProvider, IModelChangedLi
 	 * 
 	 * @see org.eclipse.debug.internal.ui.viewers.provisional.IModelChangedListener#modelChanged(org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta)
 	 */
-	public void modelChanged(final IModelDelta delta) {
+	public void modelChanged(final IModelDelta delta, final IModelProxy proxy) {
 		WorkbenchJob job = new WorkbenchJob("process model delta") { //$NON-NLS-1$
 			public IStatus runInUIThread(IProgressMonitor monitor) {
-				updateNodes(new IModelDelta[] { delta });
+				if (!proxy.isDisposed()) {
+					updateNodes(new IModelDelta[] { delta });
+				}
 				return Status.OK_STATUS;
 			}
 		};
@@ -622,7 +624,7 @@ abstract class ModelContentProvider implements IContentProvider, IModelChangedLi
 	 *            model delta
 	 * @return corresponding tree path
 	 */
-	protected TreePath getTreePath(IModelDelta node) {
+	protected TreePath getViewerTreePath(IModelDelta node) {
 		ArrayList list = new ArrayList();
 		IModelDelta parentDelta = node.getParentDelta();
 		while (parentDelta != null) {

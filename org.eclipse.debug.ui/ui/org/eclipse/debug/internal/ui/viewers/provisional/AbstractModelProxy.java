@@ -32,6 +32,7 @@ public abstract class AbstractModelProxy implements IModelProxy {
 	
 	private IPresentationContext fContext;
 	private Viewer fViewer;
+	private boolean fDisposed = false;
 
 	private ListenerList fListeners = new ListenerList();
 	
@@ -85,7 +86,7 @@ public abstract class AbstractModelProxy implements IModelProxy {
 				}
 
 				public void run() throws Exception {
-					listener.modelChanged(delta);
+					listener.modelChanged(delta, AbstractModelProxy.this);
 				}
 
 			};
@@ -97,6 +98,7 @@ public abstract class AbstractModelProxy implements IModelProxy {
 	 * @see org.eclipse.debug.internal.ui.viewers.IModelProxy#dispose()
 	 */
 	public synchronized void dispose() {
+		fDisposed = true;
 		fContext = null;
 		fViewer = null;
 	}
@@ -136,5 +138,12 @@ public abstract class AbstractModelProxy implements IModelProxy {
 	protected Viewer getViewer() {
 		return fViewer;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxy#isDisposed()
+	 */
+	public synchronized boolean isDisposed() {
+		return fDisposed;
+	}	
 
 }

@@ -52,6 +52,7 @@ import org.eclipse.debug.internal.ui.viewers.AsynchronousTreeViewer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedListener;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDeltaVisitor;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxy;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.TreeModelViewer;
 import org.eclipse.debug.internal.ui.views.DebugModelPresentationContext;
 import org.eclipse.debug.internal.ui.views.DebugUIViewsMessages;
@@ -219,7 +220,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 		/* (non-Javadoc)
 		 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedListener#modelChanged(org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta)
 		 */
-		public void modelChanged(IModelDelta delta) {
+		public void modelChanged(IModelDelta delta, IModelProxy proxy) {
 			delta.accept(fVisitor);
 		}
 		

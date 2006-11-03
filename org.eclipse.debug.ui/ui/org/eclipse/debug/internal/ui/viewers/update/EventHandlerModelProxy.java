@@ -47,8 +47,6 @@ public abstract class EventHandlerModelProxy extends AbstractModelProxy implemen
      */
     private DebugEventHandler[] fHandlers = new DebugEventHandler[0];
 
-    private boolean fDisposed = false;
-
     /**
      * Task used to update an element that resumed for a step or evaluation that
      * took too long to suspend.
@@ -93,7 +91,6 @@ public abstract class EventHandlerModelProxy extends AbstractModelProxy implemen
 
     public synchronized void dispose() {
     	super.dispose();
-        fDisposed = true;
         fTimer.cancel();
         fTimerTasks.clear();
         DebugPlugin.getDefault().removeDebugEventListener(this);
@@ -155,10 +152,6 @@ public abstract class EventHandlerModelProxy extends AbstractModelProxy implemen
 
     protected boolean containsEvent(DebugEvent event) {
         return true;
-    }
-
-    protected synchronized boolean isDisposed() {
-        return fDisposed;
     }
 
     /**

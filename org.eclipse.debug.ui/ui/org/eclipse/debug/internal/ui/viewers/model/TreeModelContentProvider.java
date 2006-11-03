@@ -61,13 +61,6 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 	private Map fPendingHasChildrenRequests = new HashMap();	
 	
 	private Timer fTimer = new Timer();
-		
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ILazyTreeContentProvider#getParent(java.lang.Object)
-	 */
-	public Object getParent(Object element) {
-		return null;
-	}
 	
 	/**
 	 * Re-filters any filtered children of the given parent element.
@@ -185,16 +178,20 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.ModelContentProvider#handleAdd(org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta)
 	 */
 	protected void handleAdd(IModelDelta delta) {
-		doUpdateChildCount(getTreePath(delta.getParentDelta()));
+		doUpdateChildCount(getViewerTreePath(delta.getParentDelta()));
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.ModelContentProvider#handleContent(org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta)
 	 */
 	protected void handleContent(IModelDelta delta) {
-		// get the element from the path rather than from the delta - ensure's synchronization
-		// between viewer input and delta 
-		TreePath treePath = getTreePath(delta);
+		if (delta.getChildCount() == 0) {
+			// if the delta is for the root, ensure the root still matches viewer input
+			if (!delta.getElement().equals(getViewer().getInput())) {
+				return;
+			}
+		}
+		TreePath treePath = getViewerTreePath(delta);
 		cancelSubtreeUpdates(treePath);
 		getTreeViewer().refresh(getElement(treePath));
 	}
@@ -216,14 +213,14 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 		int modelIndex = delta.getIndex();
 		TreeViewer treeViewer = getTreeViewer();
 		if (modelIndex >= 0) {
-			int viewIndex = modelToViewIndex(getTreePath(delta.getParentDelta()), modelIndex);
+			int viewIndex = modelToViewIndex(getViewerTreePath(delta.getParentDelta()), modelIndex);
 			if (DEBUG_CONTENT_PROVIDER) {
 				System.out.println("[expand] replace(" + delta.getParentDelta().getElement() + ", (model) " + modelIndex + " (view) " + viewIndex + ", " + delta.getElement()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 			treeViewer.replace(delta.getParentDelta().getElement(), viewIndex, delta.getElement());
 		}
 		if (childCount > 0) {
-			TreePath elementPath = getTreePath(delta);
+			TreePath elementPath = getViewerTreePath(delta);
 			int viewCount = modelToViewChildCount(elementPath, childCount);
 			if (DEBUG_CONTENT_PROVIDER) {
 				System.out.println("[expand] setChildCount(" + delta.getElement() + ", (model) " + childCount + " (view) " + viewCount); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -240,14 +237,14 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 	 */
 	protected void handleInsert(IModelDelta delta) {
 		// TODO: filters
-		getTreeViewer().insert(getTreePath(delta.getParentDelta()), delta.getElement(), delta.getIndex());
+		getTreeViewer().insert(getViewerTreePath(delta.getParentDelta()), delta.getElement(), delta.getIndex());
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.ModelContentProvider#handleRemove(org.eclipse.debug.internal.ui.viewers.provisional.IModelDelta)
 	 */
 	protected void handleRemove(IModelDelta delta) {
-		getTreeViewer().remove(getTreePath(delta));
+		getTreeViewer().remove(getViewerTreePath(delta));
 		// refresh the parent to properly update for non-visible/unmapped children
 		getTreeViewer().refresh(delta.getParentDelta().getElement());
 	}
@@ -266,13 +263,13 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 		int modelIndex = delta.getIndex();
 		TreeViewer treeViewer = getTreeViewer();
 		if (modelIndex >= 0) {
-			int viewIndex = modelToViewIndex(getTreePath(delta.getParentDelta()), modelIndex);
+			int viewIndex = modelToViewIndex(getViewerTreePath(delta.getParentDelta()), modelIndex);
 			if (DEBUG_CONTENT_PROVIDER) {
 				System.out.println("[select] replace(" + delta.getParentDelta().getElement() + ", (model) " + modelIndex + " (view) " + viewIndex + ", " + delta.getElement()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 			treeViewer.replace(delta.getParentDelta().getElement(), viewIndex, delta.getElement());
 		}
-		treeViewer.setSelection(new TreeSelection(getTreePath(delta)));
+		treeViewer.setSelection(new TreeSelection(getViewerTreePath(delta)));
 	}
 
 	/* (non-Javadoc)
@@ -353,7 +350,6 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 	 * @see org.eclipse.jface.viewers.ILazyTreePathContentProvider#getParents(java.lang.Object)
 	 */
 	public TreePath[] getParents(Object element) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -398,7 +394,7 @@ class TreeModelContentProvider extends ModelContentProvider implements ILazyTree
 		if (delta.getFlags() != IModelDelta.NO_CHANGE) {
 			UIJob job = new UIJob("restore delta") { //$NON-NLS-1$
 				public IStatus runInUIThread(IProgressMonitor monitor) {
-					TreePath treePath = getTreePath(delta);
+					TreePath treePath = getViewerTreePath(delta);
 					AbstractTreeViewer viewer = (AbstractTreeViewer)getViewer();
 					if ((delta.getFlags() & IModelDelta.EXPAND) != 0) {
 						viewer.expandToLevel(treePath, 1);

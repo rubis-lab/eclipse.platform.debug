@@ -83,4 +83,12 @@ public interface IModelProxy {
 	 */
 	public void removeModelChangedListener(IModelChangedListener listener);
 	
+	/**
+	 * Returns whether this proxy has been disposed.
+	 * 
+	 * @return whether this proxy has been disposed
+	 * @since 3.3
+	 */
+	public boolean isDisposed();
+	
 }
