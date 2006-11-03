@@ -302,8 +302,6 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
         		}
         	}
         });
-        final DelegatingModelPresentation presentation = new DelegatingModelPresentation();
-        fPresentation = presentation;
         // add my viewer as a selection provider, so selective re-launch works
 		getSite().setSelectionProvider(viewer);
 		viewer.setInput(DebugPlugin.getDefault().getLaunchManager());
