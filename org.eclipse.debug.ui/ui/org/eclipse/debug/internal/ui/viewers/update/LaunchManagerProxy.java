@@ -108,23 +108,33 @@ public class LaunchManagerProxy extends AbstractModelProxy implements ILaunchesL
 	 */
 	protected void installModelProxies(ILaunch[] launches) {
 		boolean changes = false;
-		ModelDelta root = new ModelDelta(fLaunchManager, IModelDelta.NO_CHANGE);
+		ILaunch[] allLaunches = fLaunchManager.getLaunches();
+		ModelDelta root = new ModelDelta(fLaunchManager, 0, IModelDelta.NO_CHANGE, allLaunches.length);
 		for (int i = 0; i < launches.length; i++) {
 			ILaunch launch = launches[i];
-			ModelDelta launchDelta = root.addNode(launch, IModelDelta.NO_CHANGE);
 			Object[] children = launch.getChildren();
+			ModelDelta launchDelta = root.addNode(launch, indexOf(launch, allLaunches), IModelDelta.EXPAND | IModelDelta.NO_CHANGE, children.length);
 			Set set = (Set) fPrevChildren.get(launch);
 			for (int j = 0; j < children.length; j++) {
 				Object child = children[j];
 				if (set.add(child)) {
 					changes = true;
-					launchDelta.addNode(child, IModelDelta.INSTALL);
+					launchDelta.addNode(child, indexOf(child, children), IModelDelta.INSTALL, -1);
 				}
 			}
 		}
 		if (changes) {
 			fireModelChanged(root);
 		}
+	}
+	
+	protected int indexOf(Object element, Object[] list) {
+		for (int i = 0; i < list.length; i++) {
+			if (element == list[i]) {
+				return i;
+			}
+		}
+		return -1;
 	}
 	
 	protected void fireDelta(ILaunch[] launches, int launchFlags) {
