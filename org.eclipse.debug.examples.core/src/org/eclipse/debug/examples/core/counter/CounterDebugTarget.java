@@ -116,7 +116,6 @@ public class CounterDebugTarget extends CounterDebugElement implements IDebugTar
 	 */
 	public void terminate() throws DebugException {
 		fThread.terminate();
-		fireTerminateEvent();
 	}
 
 	/* (non-Javadoc)

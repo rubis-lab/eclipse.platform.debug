@@ -264,10 +264,12 @@ public class CounterThread extends CounterDebugElement implements IThread {
 	 */
 	public void terminate() throws DebugException {
 		synchronized (this) {
-			fExecThread.interrupt();
+			if (!isSuspended()) {
+				fExecThread.interrupt();
+			}
 			fTerminated = true;
 		}
-		fireTerminateEvent();
+		((CounterDebugTarget)getDebugTarget()).fireTerminateEvent();
 	}
 
 }
