@@ -14,7 +14,12 @@
             class="org.eclipse.debug.examples.ui.midi.launcher.MidiTabGroup"
             description="Play a MIDI file"
             id="midi.tabGroup"
-            type="midi.launchType"/>            
+            type="midi.launchType"/>
+      <launchConfigurationTabGroup
+            class="org.eclipse.debug.examples.ui.ping.PingTabGroup"
+            id="ping.tabGroup"
+            type="ping.launchType">
+      </launchConfigurationTabGroup>            
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
@@ -25,7 +30,12 @@
       <launchConfigurationTypeImage
             icon="icons/full/obj16/note.gif"
             configTypeID="midi.launchType"
-            id="midi.typeImage"/>            
+            id="midi.typeImage"/>
+      <launchConfigurationTypeImage
+            configTypeID="ping.launchType"
+            icon="icons/full/obj16/ping.gif"
+            id="ping.typeImage">
+      </launchConfigurationTypeImage>            
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchShortcuts">

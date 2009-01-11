@@ -29,6 +29,12 @@
             name="MIDI Sequence"
             id="midi.launchType"
             modes="run, debug"/>
+      <launchConfigurationType
+            delegate="org.eclipse.debug.examples.core.ping.PingLaunchDelegate"
+            id="ping.launchType"
+            modes="run"
+            name="Ping Example">
+      </launchConfigurationType>
    </extension>
 
 <!--#ifdef ex4-->
