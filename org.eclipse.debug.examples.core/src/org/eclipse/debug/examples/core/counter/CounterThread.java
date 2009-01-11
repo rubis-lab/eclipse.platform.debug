@@ -143,7 +143,7 @@ public class CounterThread extends CounterDebugElement implements IThread {
 	 * @see org.eclipse.debug.core.model.IThread#hasStackFrames()
 	 */
 	public boolean hasStackFrames() throws DebugException {
-		return isSuspended();
+		return isSuspended() && !isTerminated();
 	}
 
 	/* (non-Javadoc)
