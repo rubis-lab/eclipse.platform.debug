@@ -17,8 +17,15 @@
             type="midi.launchType"/>
       <launchConfigurationTabGroup
             class="org.eclipse.debug.examples.ui.ping.PingTabGroup"
+            description="Ping an IP address or domain name"
             id="ping.tabGroup"
             type="ping.launchType">
+      </launchConfigurationTabGroup>
+      <launchConfigurationTabGroup
+            class="org.eclipse.debug.examples.ui.counter.CounterTabGroup"
+            description="Count forever"
+            id="counter.tabGroup"
+            type="counter.launchType">
       </launchConfigurationTabGroup>            
    </extension>
    <extension

@@ -35,6 +35,12 @@
             modes="run"
             name="Ping Example">
       </launchConfigurationType>
+      <launchConfigurationType
+            delegate="org.eclipse.debug.examples.core.counter.CounterLaunchDelegate"
+            id="counter.launchType"
+            modes="run, debug"
+            name="Counter Example">
+      </launchConfigurationType>
    </extension>
 
 <!--#ifdef ex4-->
