@@ -17,5 +17,6 @@ Export-Package: org.eclipse.debug.examples.core.midi.launcher,
  org.eclipse.debug.examples.core.pda.model,
  org.eclipse.debug.examples.core.pda.sourcelookup,
  org.eclipse.debug.examples.core.ping
+ org.eclipse.debug.examples.core.protocol
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
 Bundle-ActivationPolicy: lazy
