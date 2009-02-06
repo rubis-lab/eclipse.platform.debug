@@ -23,7 +23,7 @@
       </launchConfigurationTabGroup>
       <launchConfigurationTabGroup
             class="org.eclipse.debug.examples.ui.counter.CounterTabGroup"
-            description="Count forever"
+            description="Count in a loop"
             id="counter.tabGroup"
             type="counter.launchType">
       </launchConfigurationTabGroup>            
