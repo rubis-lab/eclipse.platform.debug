@@ -15,7 +15,6 @@
       <launchConfigurationType
             sourceLocatorId="pda.sourceLocator"
             delegate="org.eclipse.debug.examples.core.pda.launcher.PDALaunchDelegate"
-            sourcePathComputerId="pda.sourcePathComputer"
             name="PDA Application"
             id="pda.launchType"
             modes="run, debug"/>
@@ -43,20 +42,20 @@
       </launchConfigurationType>
    </extension>
 
-<!--#ifdef ex4-->
+<!--#ifdef ex_ec2009-->
+   <!--
+   TODO Exercise 3
+   
+   Use the org.eclipse.debug.core.sourceLocators extension point to register 
+   a source locator for the PDA debugger.
+   -->
 <!--#else-->
    <extension
          point="org.eclipse.debug.core.sourceLocators">
       <sourceLocator
-            class="org.eclipse.debug.examples.core.pda.sourcelookup.PDASourceLookupDirector"
+            class="org.eclipse.debug.examples.core.pda.sourcelookup.PDASourceLocator"
             name="PDA Source Locator"
             id="pda.sourceLocator"/>
-   </extension>
-   <extension
-         point="org.eclipse.debug.core.sourcePathComputers">
-      <sourcePathComputer
-            class="org.eclipse.debug.examples.core.pda.sourcelookup.PDASourcePathComputerDelegate"
-            id="pda.sourcePathComputer"/>
    </extension>
 <!--#endif-->
     
@@ -90,16 +89,4 @@
       <persistent value="true"/>
    </extension>
 <!--#endif-->   
-
-<!--#ifdef ex6-->
-<!--#else--> 
-   <extension
-         point="org.eclipse.debug.core.logicalStructureTypes">
-      <logicalStructureType
-            class="org.eclipse.debug.examples.core.pda.model.WordStructureDelegate"
-            description="Words"
-            id="pda.wordStructure"
-            modelIdentifier="pda.debugModel"/>
-   </extension>
-<!--#endif-->
 </plugin>

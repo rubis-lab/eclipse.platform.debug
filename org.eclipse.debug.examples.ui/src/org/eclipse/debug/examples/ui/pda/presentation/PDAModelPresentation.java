@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IBreakpoint;
-import org.eclipse.debug.core.model.ILineBreakpoint;
 import org.eclipse.debug.core.model.IValue;
 import org.eclipse.debug.examples.core.pda.DebugCorePlugin;
 import org.eclipse.debug.examples.core.pda.breakpoints.PDALineBreakpoint;
@@ -29,8 +28,10 @@ import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IValueDetailListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.ui.IEditorInput;
+//#ifdef ex_ec2009
+//#else
 import org.eclipse.ui.part.FileEditorInput;
-
+//#endif
 
 /**
  * Renders PDA debug elements
@@ -168,25 +169,41 @@ public class PDAModelPresentation extends LabelProvider implements IDebugModelPr
 		}
 		listener.detailComputed(value, detail);
 	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.ui.ISourcePresentation#getEditorInput(java.lang.Object)
 	 */
 	public IEditorInput getEditorInput(Object element) {
+        //#ifdef ex_ec2009
+        // TODO Exercise 3
+        //
+        // Source presentation needs to convert the source object returned by 
+	    // the source locator into another object which can be consumed by the
+	    // source editor, i.e. IEditorInput.  Use the type hierarchy view to 
+	    // see what editor input can be created to encapsulate an IFile.
+        //#else 
 		if (element instanceof IFile) {
 			return new FileEditorInput((IFile)element);
 		}
-		if (element instanceof ILineBreakpoint) {
-			return new FileEditorInput((IFile)((ILineBreakpoint)element).getMarker().getResource());
-		}
+		//#endif
 		return null;
 	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.ui.ISourcePresentation#getEditorId(org.eclipse.ui.IEditorInput, java.lang.Object)
 	 */
 	public String getEditorId(IEditorInput input, Object element) {
-		if (element instanceof IFile || element instanceof ILineBreakpoint) {
+        //#ifdef ex_ec2009
+        // TODO Exercise 3
+        //
+        // Source presentation needs to tell the debugger what editor to use 
+	    // for displaying the source.  Look at the org.eclipse.ui.editors 
+	    // extension declaration for the PDA editor to find the PDA Editor ID.
+        //#else 
+		if (element instanceof IFile) {
 			return "pda.editor";
 		}
+		//#endif
 		return null;
 	}
 }

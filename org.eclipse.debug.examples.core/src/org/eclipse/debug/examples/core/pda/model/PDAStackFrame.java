@@ -12,12 +12,13 @@
  *******************************************************************************/
 package org.eclipse.debug.examples.core.pda.model;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IRegisterGroup;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IThread;
 import org.eclipse.debug.core.model.IVariable;
-import org.eclipse.debug.examples.core.protocol.PDAFrameData;
+import org.eclipse.debug.examples.core.pda.protocol.PDAFrameData;
 
 /**
  * PDA stack frame.
@@ -27,7 +28,7 @@ public class PDAStackFrame extends PDADebugElement implements IStackFrame {
 	private PDAThread fThread;
 	private String fName;
 	private int fPC;
-	private String fFileName;
+	private IPath fFilePath;
 	private int fId;
 	
 	/**
@@ -51,7 +52,7 @@ public class PDAStackFrame extends PDADebugElement implements IStackFrame {
 	 * @param data
 	 */
 	private void init(PDAFrameData data) {
-		fFileName = data.fFilePath.lastSegment();
+		fFilePath = data.fFilePath;
 		fPC = data.fPC + 1;
 		fName = data.fFunction;
 		IVariable[] vars = new IVariable[data.fVariables.length];
@@ -206,16 +207,17 @@ public class PDAStackFrame extends PDADebugElement implements IStackFrame {
 		getThread().terminate();
 	}
 	
-	/**
-	 * Returns the name of the source file this stack frame is associated
-	 * with.
-	 * 
-	 * @return the name of the source file this stack frame is associated
-	 * with
-	 */
-	public String getSourceName() {
-		return fFileName;
+    /**
+     * Returns the path of the source file this stack frame is associated
+     * with.
+     * 
+     * @return the path of the source file this stack frame is associated
+     * with
+     */
+	public IPath getSourcePath() {
+	    return fFilePath;
 	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -223,7 +225,7 @@ public class PDAStackFrame extends PDADebugElement implements IStackFrame {
 		if (obj instanceof PDAStackFrame) {
 			PDAStackFrame sf = (PDAStackFrame)obj;
 			return sf.getThread().equals(getThread()) && 
-				sf.getSourceName().equals(getSourceName()) &&
+				sf.getSourcePath().equals(getSourcePath()) &&
 				sf.fId == fId;
 		}
 		return false;
@@ -232,7 +234,7 @@ public class PDAStackFrame extends PDADebugElement implements IStackFrame {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-		return getSourceName().hashCode() + fId;
+		return getSourcePath().hashCode() + fId;
 	}
 	
 	/**

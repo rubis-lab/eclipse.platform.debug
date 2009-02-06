@@ -15,8 +15,8 @@ package org.eclipse.debug.examples.core.pda.model;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IValue;
 import org.eclipse.debug.core.model.IVariable;
-import org.eclipse.debug.examples.core.protocol.PDAChildrenCommand;
-import org.eclipse.debug.examples.core.protocol.PDAListResult;
+import org.eclipse.debug.examples.core.pda.protocol.PDAChildrenCommand;
+import org.eclipse.debug.examples.core.pda.protocol.PDAListResult;
 
 /**
  * Value of a PDA variable.
@@ -59,6 +59,17 @@ public class PDAValue extends PDADebugElement implements IValue {
 	 * @see org.eclipse.debug.core.model.IValue#getVariables()
 	 */
 	public IVariable[] getVariables() throws DebugException {
+        //#ifdef ex_ec2009
+	    // TODO Excercise 4
+	    // Calculate and create the variable objects representing the children
+	    // of this value.  
+	    // 
+	    // The PDA debugger has a dedicated command for retrieving variable 
+	    // children: PDAChildrenCommand.  Send this command to the debugger
+	    // engine using PDADebugElement.sendCommand(), and based on the results
+	    // create an array of child PDAVariable objects.
+//#	    return new IVariable[0];
+	    //#else
 	    PDAStackFrame frame = fVariable.getStackFrame();
 	    PDAListResult result =  (PDAListResult) sendCommand(
 	        new PDAChildrenCommand(frame.getThreadIdentifier(), frame.getIdentifier(), fVariable.getName()) );
@@ -68,18 +79,13 @@ public class PDAValue extends PDADebugElement implements IValue {
 	        children[i] = new PDAVariable(frame, result.fValues[i]);
 	    }
 		return children;
+		//#endif
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.core.model.IValue#hasVariables()
 	 */
 	public boolean hasVariables() throws DebugException {
-	    if (getVariables().length != 0) {
-	        return true;
-	    }
-	    // Value with multiple words can be show as an array using logical 
-	    // structures. If the value has multiple words, it needs to indicate 
-	    // that it has children even if logical structures are not turned on.
-		return fValue.split("\\W+").length > 1;
+	    return getVariables().length != 0;
 	}
 	/*
 	 *  (non-Javadoc)
