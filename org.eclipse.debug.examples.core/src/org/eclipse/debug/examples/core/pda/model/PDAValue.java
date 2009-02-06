@@ -60,7 +60,7 @@ public class PDAValue extends PDADebugElement implements IValue {
 	 */
 	public IVariable[] getVariables() throws DebugException {
         //#ifdef ex_ec2009
-	    // TODO Excercise 4
+	    // TODO Exercise 4
 	    // Calculate and create the variable objects representing the children
 	    // of this value.  
 	    // 
