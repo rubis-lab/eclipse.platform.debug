@@ -23,14 +23,18 @@ public class CounterStackFrame extends CounterDebugElement implements IStackFram
 
 	private CounterThread fThread;
 	
+	private int fCount = 0;
+	
 	/**
 	 * Constructs a stack frame for the counter example for the given thread.
 	 * 
 	 * @param target
+	 * @param count this frame's counter value
 	 */
-	public CounterStackFrame(CounterThread thread) {
+	public CounterStackFrame(CounterThread thread, int count) {
 		super(thread.getDebugTarget());
 		fThread = thread;
+		fCount = count;
 	}
 
 	/* (non-Javadoc)
@@ -51,7 +55,7 @@ public class CounterStackFrame extends CounterDebugElement implements IStackFram
 	 * @see org.eclipse.debug.core.model.IStackFrame#getLineNumber()
 	 */
 	public int getLineNumber() throws DebugException {
-		return fThread.fCount;
+		return fCount;
 	}
 
 	/* (non-Javadoc)
@@ -207,7 +211,7 @@ public class CounterStackFrame extends CounterDebugElement implements IStackFram
 	public boolean equals(Object obj) {
 		if (obj instanceof CounterStackFrame) {
 			CounterStackFrame frame = (CounterStackFrame) obj;
-			return fThread.equals(frame.fThread);
+			return fThread.equals(frame.fThread) && fCount == (frame.fCount);
 		}
 		return false;
 	}
@@ -216,6 +220,6 @@ public class CounterStackFrame extends CounterDebugElement implements IStackFram
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-		return getClass().hashCode() + fThread.hashCode();
+		return getClass().hashCode() + fThread.hashCode() + fCount;
 	}
 }

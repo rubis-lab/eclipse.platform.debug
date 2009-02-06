@@ -10,8 +10,13 @@
  *******************************************************************************/
 package org.eclipse.debug.examples.core.counter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IBreakpointManager;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.core.model.IDebugTarget;
@@ -33,6 +38,11 @@ public class CounterDebugTarget extends CounterDebugElement implements IDebugTar
 	 * The launch this target is part of;
 	 */
 	private ILaunch fLaunch;
+	
+	/**
+	 * List of installed breakpoints
+	 */
+	private List fBreakpoints = new ArrayList();
 
 	/**
 	 * Constructs the counting target with a single thread.
@@ -41,7 +51,13 @@ public class CounterDebugTarget extends CounterDebugElement implements IDebugTar
 		super(null);
 		fLaunch = launch;
 		fThread = new CounterThread(this);
+		IBreakpointManager manager = DebugPlugin.getDefault().getBreakpointManager();
+		manager.addBreakpointListener(this);
 		fireCreationEvent();
+		IBreakpoint[] breakpoints = manager.getBreakpoints(getModelIdentifier());
+		for (int i = 0; i < breakpoints.length; i++) {
+			breakpointAdded(breakpoints[i]);
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -93,8 +109,7 @@ public class CounterDebugTarget extends CounterDebugElement implements IDebugTar
 	 * @see org.eclipse.debug.core.model.IDebugTarget#supportsBreakpoint(org.eclipse.debug.core.model.IBreakpoint)
 	 */
 	public boolean supportsBreakpoint(IBreakpoint breakpoint) {
-		// TODO Auto-generated method stub
-		return false;
+		return breakpoint instanceof LimitBreakpoint;
 	}
 
 	/* (non-Javadoc)
@@ -157,24 +172,24 @@ public class CounterDebugTarget extends CounterDebugElement implements IDebugTar
 	 * @see org.eclipse.debug.core.IBreakpointListener#breakpointAdded(org.eclipse.debug.core.model.IBreakpoint)
 	 */
 	public void breakpointAdded(IBreakpoint breakpoint) {
-		// TODO Auto-generated method stub
-
+		if (breakpoint instanceof LimitBreakpoint) {
+			fBreakpoints.add(breakpoint);
+		}
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.core.IBreakpointListener#breakpointChanged(org.eclipse.debug.core.model.IBreakpoint, org.eclipse.core.resources.IMarkerDelta)
 	 */
 	public void breakpointChanged(IBreakpoint breakpoint, IMarkerDelta delta) {
-		// TODO Auto-generated method stub
-
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.core.IBreakpointListener#breakpointRemoved(org.eclipse.debug.core.model.IBreakpoint, org.eclipse.core.resources.IMarkerDelta)
 	 */
 	public void breakpointRemoved(IBreakpoint breakpoint, IMarkerDelta delta) {
-		// TODO Auto-generated method stub
-
+		if (breakpoint instanceof LimitBreakpoint) {
+			fBreakpoints.remove(breakpoint);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -212,4 +227,20 @@ public class CounterDebugTarget extends CounterDebugElement implements IDebugTar
 		return false;
 	}
 
+	/**
+	 * Returns a collection of all breakpoints currently installed.
+	 * 
+	 * @return installed breakpoints
+	 */
+	LimitBreakpoint[] getInstalledBreakpoints() {
+		return (LimitBreakpoint[]) fBreakpoints.toArray(new LimitBreakpoint[fBreakpoints.size()]);
+	}
+	
+	/**
+	 * Clean up on termination.
+	 */
+	void terminated() {
+		DebugPlugin.getDefault().getBreakpointManager().removeBreakpointListener(this);
+		fBreakpoints.clear();
+	}
 }

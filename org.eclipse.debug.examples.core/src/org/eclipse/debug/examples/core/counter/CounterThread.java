@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.debug.examples.core.counter;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IBreakpoint;
@@ -22,13 +23,17 @@ import org.eclipse.debug.core.model.IThread;
  */
 public class CounterThread extends CounterDebugElement implements IThread {
 	
+	public static final int MIN_COUNTER = 1;
+	public static final int MAX_COUNTER = 100;
+	
 	// Thread state
 	private boolean fTerminated = false;
 	private boolean fSuspended = false;
 	private boolean fStepping = false;
+	private IBreakpoint fBreakpoint = null;
 	
 	// Counter
-	int fCount = 0;
+	int fCount = MIN_COUNTER - 1;
 	
 	// simulates an executing thread
 	class Execution implements Runnable {
@@ -36,14 +41,18 @@ public class CounterThread extends CounterDebugElement implements IThread {
 		 * @see java.lang.Runnable#run()
 		 */
 		public void run() {
-			while (true) {
+			boolean breakpointHit = false;
+			while (!breakpointHit) {
 				try {
-					Thread.sleep(1000);
+					breakpointHit = executeNextInstruction();
 				} catch (InterruptedException e) {
 					return;
 				}
-				fCount++;
 			}
+			synchronized (CounterThread.this) {
+				fSuspended = true;
+			}
+			fireSuspendEvent(DebugEvent.BREAKPOINT);
 		}
 		
 	}
@@ -61,7 +70,7 @@ public class CounterThread extends CounterDebugElement implements IThread {
 		public void run() {
 			fireResumeEvent(DebugEvent.STEP_OVER);
 			try {
-				Thread.sleep(1000);
+				executeNextInstruction();
 			} catch (InterruptedException e) {
 				synchronized (CounterThread.this) {
 					fStepping = false;
@@ -70,7 +79,6 @@ public class CounterThread extends CounterDebugElement implements IThread {
 				fireSuspendEvent(DebugEvent.CLIENT_REQUEST);
 				return;
 			}
-			fCount++;
 			synchronized (CounterThread.this) {
 				fStepping = false;
 				fSuspended = true;
@@ -97,8 +105,10 @@ public class CounterThread extends CounterDebugElement implements IThread {
 	 * @see org.eclipse.debug.core.model.IThread#getBreakpoints()
 	 */
 	public IBreakpoint[] getBreakpoints() {
-		// TODO:
-		return new IBreakpoint[0];
+		if (fBreakpoint == null) {
+			return new IBreakpoint[0];
+		}
+		return new IBreakpoint[]{fBreakpoint};
 	}
 
 	/* (non-Javadoc)
@@ -121,7 +131,12 @@ public class CounterThread extends CounterDebugElement implements IThread {
 	public IStackFrame[] getStackFrames() throws DebugException {
 		synchronized (this) {
 			if (isSuspended()) {
-				return new IStackFrame[]{new CounterStackFrame(this)};
+				IStackFrame[] frames = new IStackFrame[fCount];
+				for (int i = 0; i < frames.length; i++) {
+					frames[i] = new CounterStackFrame(this, fCount - i);
+					
+				}
+				return frames;
 			}
 		}
 		return new IStackFrame[0];
@@ -133,7 +148,7 @@ public class CounterThread extends CounterDebugElement implements IThread {
 	public IStackFrame getTopStackFrame() throws DebugException {
 		synchronized (this) {
 			if (isSuspended()) {
-				return new CounterStackFrame(this);
+				return new CounterStackFrame(this, fCount);
 			}
 		}
 		return null;
@@ -269,7 +284,38 @@ public class CounterThread extends CounterDebugElement implements IThread {
 			}
 			fTerminated = true;
 		}
-		((CounterDebugTarget)getDebugTarget()).fireTerminateEvent();
+		CounterDebugTarget target = (CounterDebugTarget)getDebugTarget();
+		target.fireTerminateEvent();
+		target.terminated();
+	}
+	
+	/**
+	 * Executes the next instruction and returns whether a breakpoint has been
+	 * hit.
+	 *  
+	 * @return whether a breakpoint has been hit
+	 * @throws InterruptedException
+	 */
+	private boolean executeNextInstruction() throws InterruptedException {
+		fBreakpoint = null;
+		Thread.sleep(100);
+		fCount++;
+		if (fCount > MAX_COUNTER) {
+			fCount = MIN_COUNTER;
+		}
+		// Check for breakpoints
+		LimitBreakpoint[] breakpoints = ((CounterDebugTarget)getDebugTarget()).getInstalledBreakpoints();
+		for (int i = 0; i < breakpoints.length; i++) {
+			LimitBreakpoint breakpoint = breakpoints[i];
+			try {
+				if (fCount == breakpoint.getLimit()) {
+					fBreakpoint = breakpoint;
+					return true;
+				}
+			} catch (CoreException e) {
+			}
+		}
+		return false;
 	}
 
 }

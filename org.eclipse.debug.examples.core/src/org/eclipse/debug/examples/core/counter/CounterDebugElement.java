@@ -27,6 +27,9 @@ public abstract class CounterDebugElement extends DebugElement {
 		super(target);
 	}
 
+	/**
+	 * Debug model identifier for the counter debug model example
+	 */
 	public static final String COUNTER_MODEL_ID = "counter.debugModel";
 
 	/* (non-Javadoc)

@@ -100,6 +100,10 @@
       <debugModelPresentation
             class="org.eclipse.debug.examples.ui.pda.presentation.PDAModelPresentation"
             id="pda.debugModel"/>
+      <debugModelPresentation
+            class="org.eclipse.debug.examples.ui.counter.CounterModelPresentation"
+            id="counter.debugModel">
+      </debugModelPresentation>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
@@ -434,5 +438,15 @@
                style="push">
          </command>
       </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.eclipse.debug.examples.core.counter.CounterDebugElement"
+            class="org.eclipse.debug.examples.ui.counter.CounterAdapterFactory">
+         <adapter
+               type="org.eclipse.debug.ui.actions.IToggleBreakpointsTarget">
+         </adapter>
+      </factory>
    </extension>
 </plugin>
