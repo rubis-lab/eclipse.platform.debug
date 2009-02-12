@@ -28,18 +28,6 @@
             name="MIDI Sequence"
             id="midi.launchType"
             modes="run, debug"/>
-      <launchConfigurationType
-            delegate="org.eclipse.debug.examples.core.ping.PingLaunchDelegate"
-            id="ping.launchType"
-            modes="run"
-            name="Ping Example">
-      </launchConfigurationType>
-      <launchConfigurationType
-            delegate="org.eclipse.debug.examples.core.counter.CounterLaunchDelegate"
-            id="counter.launchType"
-            modes="run, debug"
-            name="Counter Example">
-      </launchConfigurationType>
    </extension>
 
 <!--#ifdef ex_ec2009-->
@@ -73,11 +61,6 @@
             name="PDA Watchpoints"
             markerType="org.eclipse.debug.examples.core.pda.markerType.watchpoint"
             id="pda.watchpoint"/>
-      <breakpoint
-            class="org.eclipse.debug.examples.core.counter.LimitBreakpoint"
-            id="counter.limitBreakpoint"
-            markerType="org.eclipse.debug.examples.core.counter.markerType.limit">
-      </breakpoint>
    </extension>
    <extension
          id="pda.markerType.lineBreakpoint"
@@ -95,19 +78,6 @@
    </extension>
 <!--#endif--> 
 
-   <extension
-         id="counter.markerType.limit"
-         point="org.eclipse.core.resources.markers">
-      <super
-            type="org.eclipse.debug.core.breakpointMarker">
-      </super>
-      <persistent
-            value="true">
-      </persistent>
-      <attribute
-            name="limit">
-      </attribute>
-   </extension>
      
 
 </plugin>

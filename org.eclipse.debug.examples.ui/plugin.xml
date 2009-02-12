@@ -15,18 +15,6 @@
             description="Play a MIDI file"
             id="midi.tabGroup"
             type="midi.launchType"/>
-      <launchConfigurationTabGroup
-            class="org.eclipse.debug.examples.ui.ping.PingTabGroup"
-            description="Ping an IP address or domain name"
-            id="ping.tabGroup"
-            type="ping.launchType">
-      </launchConfigurationTabGroup>
-      <launchConfigurationTabGroup
-            class="org.eclipse.debug.examples.ui.counter.CounterTabGroup"
-            description="Count in a loop"
-            id="counter.tabGroup"
-            type="counter.launchType">
-      </launchConfigurationTabGroup>            
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
@@ -38,11 +26,6 @@
             icon="icons/full/obj16/note.gif"
             configTypeID="midi.launchType"
             id="midi.typeImage"/>
-      <launchConfigurationTypeImage
-            configTypeID="ping.launchType"
-            icon="icons/full/obj16/ping.gif"
-            id="ping.typeImage">
-      </launchConfigurationTypeImage>            
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchShortcuts">
@@ -100,10 +83,6 @@
       <debugModelPresentation
             class="org.eclipse.debug.examples.ui.pda.presentation.PDAModelPresentation"
             id="pda.debugModel"/>
-      <debugModelPresentation
-            class="org.eclipse.debug.examples.ui.counter.CounterModelPresentation"
-            id="counter.debugModel">
-      </debugModelPresentation>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
@@ -438,15 +417,5 @@
                style="push">
          </command>
       </menuContribution>
-   </extension>
-   <extension
-         point="org.eclipse.core.runtime.adapters">
-      <factory
-            adaptableType="org.eclipse.debug.examples.core.counter.CounterDebugElement"
-            class="org.eclipse.debug.examples.ui.counter.CounterAdapterFactory">
-         <adapter
-               type="org.eclipse.debug.ui.actions.IToggleBreakpointsTarget">
-         </adapter>
-      </factory>
    </extension>
 </plugin>
