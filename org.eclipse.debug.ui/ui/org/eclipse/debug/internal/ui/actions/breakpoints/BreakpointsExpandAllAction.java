@@ -7,34 +7,36 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Patrick Chuong (Texas Instruments) - Improve usability of the breakpoint view (Bug 238956)
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.actions.breakpoints;
 
-import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsView;
+import org.eclipse.debug.ui.AbstractDebugView;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
 
 /**
  * Action which fully expands the tree in the breakpoints view.
  */
-public class BreakpointsExpandAllAction implements IViewActionDelegate {
+public class BreakpointsExpandAllAction implements IViewActionDelegate {	
 	
-	private BreakpointsView fView;
-
+	private AbstractDebugView fView;
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IViewActionDelegate#init(org.eclipse.ui.IViewPart)
 	 */
 	public void init(IViewPart view) {
-		fView= (BreakpointsView) view;
+		fView = (AbstractDebugView) view;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
 	public void run(IAction action) {
-		fView.getCheckboxViewer().expandAll();
+		((TreeViewer) fView.getViewer()).expandAll();
 	}
 
 	/* (non-Javadoc)

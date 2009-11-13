@@ -1263,4 +1263,51 @@ public interface IDebugUIConstants {
 	 * @since 3.5
 	 */
 	public static final String DEBUG_CONTEXT_SOURCE_NAME = "debugContext"; //$NON-NLS-1$
+
+	/** 
+	 * Breakpoints presentation context property used to retrieve the array of 
+	 * breakpoint organizers.  The expected property type is 
+	 * <code>IBreakpointOrganizer[]</code>.  If property value is <code>null</code>, 
+	 * the breakpoint categories should not be shown.
+	 * 
+	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext#getProperty(String)
+     * @since 3.6
+	 */
+    public static final String PROP_BREAKPOINTS_ORGANIZERS 		= "BreakpointOrganizers"; 	//$NON-NLS-1$
+
+    /** 
+     * Breakpoints presentation context property used to retrieve the debug 
+     * context selection which should be used to filter the visible 
+     * breakpoints.  The returned property value should be of type  
+     * <code>org.eclipse.jface.viewers.ISelection</code>.  If property value 
+     * is <code>null</code>, the breakpoints should not be filtered.
+     * 
+     * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext#getProperty(String)
+     * @since 3.6
+     */
+    public static final String PROP_BREAKPOINTS_FILTER_SELECTION = "FilterSelection";		//$NON-NLS-1$
+
+    /** 
+     * Breakpoints presentation context property used to retrieve a flag 
+     * indicating whether breakpoints view selection should be updated  
+     * upon a breakpoint event in debug model.  The returned property value 
+     * should be of type <code>java.lang.Boolean</code>.  If property value is 
+     * <code>null</code>, then value should be treated the same as 
+     * <code>Boolean.FALSE</code>.
+     * 
+     * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext#getProperty(String)
+     * @since 3.6
+     */
+    public static final String PROP_BREAKPOINTS_TRACK_SELECTION = "TrackSelection";			//$NON-NLS-1$ 
+
+    /** 
+     * Breakpoints presentation context property used to retrieve a
+     * comparator for sorting breakpoints.  The returned property value should 
+     * be of type <code>java.util.Comparator</code>.  If property value is 
+     * <code>null</code>, the breakpoints should not be sorted.
+     * 
+     * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext#getProperty(String)
+     * @since 3.6
+     */
+    public static final String PROP_BREAKPOINTS_ELEMENT_COMPARATOR = "ElementComparator";	//$NON-NLS-1$
 }

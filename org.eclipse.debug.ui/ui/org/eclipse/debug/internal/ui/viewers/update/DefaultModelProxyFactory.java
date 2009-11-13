@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Patrick Chuong (Texas Instruments) - Improve usability of the breakpoint view (Bug 238956)
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers.update;
 
@@ -20,6 +21,7 @@ import org.eclipse.debug.core.model.IMemoryBlockRetrieval;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IWatchExpression;
+import org.eclipse.debug.internal.ui.elements.adapters.DefaultBreakpointManagerInput;
 import org.eclipse.debug.internal.ui.memory.provisional.AbstractAsyncTableRendering;
 import org.eclipse.debug.internal.ui.memory.provisional.MemoryViewPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxy;
@@ -69,6 +71,11 @@ public class DefaultModelProxyFactory implements IModelProxyFactory {
 		if (IDebugUIConstants.ID_MEMORY_VIEW.equals(id)) {
 			if (element instanceof IMemoryBlockRetrieval)
 				return new MemoryRetrievalProxy((IMemoryBlockRetrieval)element);
+		}
+		if (IDebugUIConstants.ID_BREAKPOINT_VIEW.equals(id)) {
+			if (element instanceof DefaultBreakpointManagerInput)
+				return new BreakpointManagerProxy(element, context);
+
 		}
 		
 		if (context instanceof MemoryViewPresentationContext)

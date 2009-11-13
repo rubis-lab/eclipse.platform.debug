@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial implementation
+ *     Patrick Chuong (Texas Instruments) - Improve usability of the breakpoint view (Bug 238956)
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.actions.breakpointGroups;
 
@@ -14,11 +15,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.debug.internal.ui.DebugPluginImages;
 import org.eclipse.debug.internal.ui.IInternalDebugUIConstants;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointOrganizerManager;
-import org.eclipse.debug.internal.ui.views.breakpoints.IBreakpointOrganizer;
+import org.eclipse.debug.internal.ui.views.breakpoints.IBreakpointOrganizerInputProvider;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.breakpoints.IBreakpointOrganizer;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
@@ -76,13 +80,36 @@ public class GroupBreakpointsByAction extends AbstractBreakpointsViewAction impl
 		});		
 		return menu;
     }
-    
+
+    /**
+     * Get the breakpoint organizer input provider from the view input.
+     * 
+     * @param input the view input.
+     * @return the breakpoint organizer input provider, can be <code>null</code>.
+     */
+    private IBreakpointOrganizerInputProvider getOrganizerProvider(Object input) {
+    	if (input instanceof IAdaptable) {
+    		return (IBreakpointOrganizerInputProvider) ((IAdaptable) input).getAdapter(IBreakpointOrganizerInputProvider.class);
+    	}
+    	return null;
+    }
 	/**
 	 * Fill pull down menu with the "group by" options
 	 */
 	private void fillMenu(Menu menu) {
+		// allow the organizer provider to populate the menu first
+		Object input = fView.getTeeModelViewer().getInput();
+		IBreakpointOrganizerInputProvider provider = getOrganizerProvider(input);
+		if (provider != null) {				
+			IPresentationContext context = fView.getTeeModelViewer().getPresentationContext();
+			provider.fillMenu(input, context, menu);
+			fAction.setEnabled(menu.getItemCount() > 0);
+			return;
+		}
+				
 		// determine which item should be checked
-		IBreakpointOrganizer[] organizers = fView.getBreakpointOrganizers();
+		IBreakpointOrganizer[] organizers = fView.getBreakpointOrganizers();					
+		
 		boolean none = false;
 		boolean advanced = false;
 		IBreakpointOrganizer organizer = null;

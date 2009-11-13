@@ -33,6 +33,7 @@ public class DebugUIViewsMessages extends NLS {
 	public static String BreakpointsView_0;
 	public static String BreakpointsView_10;
 	public static String BreakpointsView_11;
+	public static String BreakpointsView_12;
 	public static String BreakpointsView_1;
 	public static String BreakpointWorkingSetPage_0;
 	public static String BreakpointWorkingSetPage_1;

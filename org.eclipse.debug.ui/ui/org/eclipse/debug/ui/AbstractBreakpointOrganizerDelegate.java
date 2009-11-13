@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
-import org.eclipse.debug.internal.ui.views.breakpoints.OtherBreakpointCategory;
+import org.eclipse.debug.ui.breakpoints.OtherBreakpointCategory;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 

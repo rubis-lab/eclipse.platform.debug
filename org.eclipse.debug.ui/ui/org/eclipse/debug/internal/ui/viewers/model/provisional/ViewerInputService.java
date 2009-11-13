@@ -24,6 +24,18 @@ import org.eclipse.debug.internal.ui.viewers.model.ViewerInputUpdate;
  */
 public class ViewerInputService {
 	
+    /**
+     * An input object which will yield a null input element. 
+     * 
+     * @since 3.6
+     */
+    public final static Object NULL_INPUT = new IViewerInputProvider() {
+        public void update(IViewerInputUpdate update) {
+            update.setInputElement(null);
+            update.done();
+        }
+    };
+    
 	// previous update request, cancelled when a new request comes in
 	private IViewerInputUpdate fPendingUpdate = null;
 	

@@ -1099,6 +1099,14 @@ public class InternalTreeModelViewer extends TreeViewer
 				item.setBackground(i, (Color) backgrounds[i]);
 			}
 		}
+        Boolean checked = (Boolean) item.getData(PREV_CHECKED_KEY);
+        if (checked != null) {
+            item.setChecked(checked.booleanValue());
+        }
+        Boolean grayed = (Boolean) item.getData(PREV_GRAYED_KEY);
+        if (grayed != null) {
+            item.setGrayed(grayed.booleanValue());
+        }
 	}
 
     /* (non-Javadoc)
@@ -2074,6 +2082,8 @@ public class InternalTreeModelViewer extends TreeViewer
     static String PREV_FONT_KEY = "PREV_FONT_KEY"; //$NON-NLS-1$
     static String PREV_FOREGROUND_KEY = "PREV_FOREGROUND_KEY"; //$NON-NLS-1$
     static String PREV_BACKGROUND_KEY = "PREV_BACKGROUND_KEY"; //$NON-NLS-1$
+    static String PREV_CHECKED_KEY = "PREV_CHECKED_KEY"; //$NON-NLS-1$
+    static String PREV_GRAYED_KEY = "PREV_GRAYED_KEY"; //$NON-NLS-1$
 
     public void setElementData(TreePath path, int numColumns, String[] labels, ImageDescriptor[] imageDescriptors,
         FontData[] fontDatas, RGB[] _foregrounds, RGB[] _backgrounds) 
@@ -2353,7 +2363,9 @@ public class InternalTreeModelViewer extends TreeViewer
 	         TreeItem item = (TreeItem)widget;
 	         
 	         item.setChecked(checked);
+	         item.setData(PREV_CHECKED_KEY, new Boolean(checked));
 	         item.setGrayed(grayed);
+             item.setData(PREV_GRAYED_KEY, new Boolean(grayed));
 		 }
 	}
 	
@@ -2429,8 +2441,11 @@ public class InternalTreeModelViewer extends TreeViewer
 	            	} 
 
             	    // if the listen rejects the change or there is not ICheckboxModelProxy, than revert the check state
-	            	if (!accepted)
-	            		item.setChecked(!checked);	            	
+	            	if (!accepted) {
+	            		item.setChecked(!checked);
+	            	} else {
+	            	    item.setData(PREV_CHECKED_KEY, new Boolean(checked));
+	            	}
 	            }
 	        } else {
 				super.handleSelect(event);

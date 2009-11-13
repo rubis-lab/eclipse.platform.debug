@@ -1169,7 +1169,8 @@ abstract class ModelContentProvider implements IContentProvider, IModelChangedLi
                 return proxy;
             }
 
-            proxy = (IModelProxy) fModelProxies.get(path.getLastSegment());
+            Object element = path.getSegmentCount() == 0 ? getViewer().getInput() : path.getLastSegment();
+            proxy = (IModelProxy) fModelProxies.get(element);
             if (proxy != null) {
                 return proxy;
             }

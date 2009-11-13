@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Patrick Chuong (Texas Instruments) - Improve usability of the breakpoint view (Bug 238956)
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.actions.breakpoints;
 
@@ -30,6 +31,7 @@ import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointContainer;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsView;
 import org.eclipse.debug.internal.ui.views.breakpoints.WorkingSetCategory;
+import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -63,9 +65,9 @@ public class RemoveBreakpointAction extends AbstractRemoveActionDelegate {
 					Object next= itr.next();
 					if (next instanceof IBreakpoint) {
 						breakpointsToDelete.add(next);
-					} else if (next instanceof BreakpointContainer) {
+					} else if (next instanceof IBreakpointContainer) {
 						//the the container is a workingset, ask if they want to delete it as well
-						BreakpointContainer bpc = (BreakpointContainer) next;
+						IBreakpointContainer bpc = (IBreakpointContainer) next;
 						if(bpc.getCategory() instanceof WorkingSetCategory) {
 							IWorkingSet set = ((WorkingSetCategory)bpc.getCategory()).getWorkingSet();
 							if(!prompted) {
@@ -93,12 +95,12 @@ public class RemoveBreakpointAction extends AbstractRemoveActionDelegate {
 								if(prompted) {
 									MessageDialogWithToggle mdwt = MessageDialogWithToggle.openYesNoQuestion(getView().getSite().getShell(), ActionMessages.RemoveBreakpointAction_0, 
 											ActionMessages.RemoveBreakpointAction_1, ActionMessages.RemoveAllBreakpointsAction_3, !prompted, null, null);
-									if(mdwt.getReturnCode() == IDialogConstants.YES_ID) {
-										store.setValue(IDebugPreferenceConstants.PREF_PROMPT_REMOVE_BREAKPOINTS_FROM_CONTAINER, !mdwt.getToggleState());
-										deleteAll = true;
+									if(mdwt.getReturnCode() == IDialogConstants.NO_ID) {
+										deleteAll = false;
 									}
 									else {
-										deleteAll = false;
+										store.setValue(IDebugPreferenceConstants.PREF_PROMPT_REMOVE_BREAKPOINTS_FROM_CONTAINER, !mdwt.getToggleState());
+										deleteAll = true;
 									}
 								}
 								else {
@@ -117,7 +119,7 @@ public class RemoveBreakpointAction extends AbstractRemoveActionDelegate {
 				final IBreakpoint[] breakpoints = (IBreakpoint[]) breakpointsToDelete.toArray(new IBreakpoint[0]);
 				final IWorkingSet[] sets = (IWorkingSet[])groupsToDelete.toArray(new IWorkingSet[groupsToDelete.size()]);
 				if(breakpoints.length > 0) {
-					((BreakpointsView)getView()).preserveSelection(getSelection());
+					((BreakpointsView)getView()).preserveSelection(getSelection());					
 				}
 				new Job(ActionMessages.RemoveBreakpointAction_2) { 
                     protected IStatus run(IProgressMonitor pmonitor) {

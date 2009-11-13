@@ -18,6 +18,7 @@ import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.views.DebugUIViewsMessages;
 import org.eclipse.debug.ui.IBreakpointOrganizerDelegate;
 import org.eclipse.debug.ui.IBreakpointOrganizerDelegateExtension;
+import org.eclipse.debug.ui.breakpoints.IBreakpointOrganizer;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 

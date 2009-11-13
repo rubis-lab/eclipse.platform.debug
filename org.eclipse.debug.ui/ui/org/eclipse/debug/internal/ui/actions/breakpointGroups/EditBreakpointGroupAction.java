@@ -7,13 +7,14 @@
  * 
  * Contributors:
  *     IBM Corporation - initial implementation
+ *     Patrick Chuong (Texas Instruments) - Improve usability of the breakpoint view (Bug 238956)
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.actions.breakpointGroups;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
-import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointContainer;
 import org.eclipse.debug.internal.ui.views.breakpoints.WorkingSetCategory;
+import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -45,19 +46,22 @@ public class EditBreakpointGroupAction extends AbstractBreakpointsViewAction {
 	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction, org.eclipse.jface.viewers.ISelection)
 	 */
 	public void selectionChanged(IAction action, ISelection sel) {
-		IStructuredSelection selection= (IStructuredSelection) sel;
-        fSet = null;
-        if (selection.size() == 1) {
-            Object element = selection.getFirstElement();
-			if (element instanceof BreakpointContainer) {
-                BreakpointContainer container = (BreakpointContainer)element;
-                IAdaptable category = container.getCategory();
-                if (category instanceof WorkingSetCategory) {
-                    IWorkingSet set = ((WorkingSetCategory)category).getWorkingSet();
-                    action.setEnabled(true);
-                    fSet = set;
-                    return;
-                }
+		fSet = null;		
+		if (sel instanceof IStructuredSelection) {
+			IStructuredSelection selection= (IStructuredSelection) sel;
+	        
+	        if (selection.size() == 1) {
+	            Object element = selection.getFirstElement();
+				if (element instanceof IBreakpointContainer) {
+	                IBreakpointContainer container = (IBreakpointContainer)element;
+	                IAdaptable category = container.getCategory();
+	                if (category instanceof WorkingSetCategory) {
+	                    IWorkingSet set = ((WorkingSetCategory)category).getWorkingSet();
+	                    action.setEnabled(true);
+	                    fSet = set;
+	                    return;
+	                }
+				}
 			}
 		}
 		action.setEnabled(false);

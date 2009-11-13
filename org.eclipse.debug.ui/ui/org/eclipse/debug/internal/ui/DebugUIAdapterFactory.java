@@ -13,9 +13,9 @@ package org.eclipse.debug.internal.ui;
  
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.debug.core.model.IBreakpoint;
-import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointContainer;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointContainerWorkbenchAdapter;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointPersistableElementAdapter;
+import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.model.IWorkbenchAdapter2;
@@ -37,13 +37,13 @@ public class DebugUIAdapterFactory implements IAdapterFactory {
 		}
         
         if (adapterType == IWorkbenchAdapter.class) {
-            if (obj instanceof BreakpointContainer) {
+            if (obj instanceof IBreakpointContainer) {
                 return new BreakpointContainerWorkbenchAdapter();
             }
         }
 		
         if (adapterType == IWorkbenchAdapter2.class) {
-            if (obj instanceof BreakpointContainer) {
+            if (obj instanceof IBreakpointContainer) {
                 return new BreakpointContainerWorkbenchAdapter();
             }
         }

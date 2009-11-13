@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Patrick Chuong (Texas Instruments) - Improve usability of the breakpoint view (Bug 238956)
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.views.breakpoints;
 
@@ -19,6 +20,8 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.ui.IBreakpointOrganizerDelegate;
+import org.eclipse.debug.ui.breakpoints.IBreakpointOrganizer;
+import org.eclipse.debug.ui.breakpoints.OtherBreakpointCategory;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.AbstractTreeViewer;

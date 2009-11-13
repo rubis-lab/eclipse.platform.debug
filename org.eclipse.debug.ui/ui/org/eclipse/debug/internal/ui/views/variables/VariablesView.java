@@ -13,6 +13,7 @@
  * 	   Wind River - Pawel Piech - NPE when closing the Variables view (Bug 213719)
  *     Wind River - Pawel Piech - Fix viewer input race condition (Bug 234908)
  *     Wind River - Anton Leherbauer - Fix selection provider (Bug 254442)
+ *     Patrick Chuong (Texas Instruments) - Improve usability of the breakpoint view (Bug 238956)
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.views.variables;
 
@@ -204,7 +205,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	 * The model presentation used as the label provider for the tree viewer,
 	 * and also as the detail information provider for the detail pane.
 	 */
-	private VariablesViewModelPresentation fModelPresentation;
+	protected VariablesViewModelPresentation fModelPresentation;
 	
 	/**
 	 * The UI construct that provides a sliding sash between the variables tree
@@ -438,7 +439,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		// create the sash form that will contain the tree viewer & text viewer
 		fSashForm = new SashForm(parent, SWT.NONE);
 		
-		fModelPresentation = new VariablesViewModelPresentation();
+		getModelPresentation();
 		DebugUIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		JFaceResources.getFontRegistry().addListener(this);
 
@@ -581,7 +582,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		
 		int style = getViewerStyle();
 		final TreeModelViewer variablesViewer = new TreeModelViewer(parent, style,
-				new DebugModelPresentationContext(getPresentationContextId(), fModelPresentation));
+				new DebugModelPresentationContext(getPresentationContextId(), getModelPresentation()));
 		
 		variablesViewer.getControl().addFocusListener(new FocusAdapter() {
 			public void focusGained(FocusEvent e) {
@@ -1084,7 +1085,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	 * @see org.eclipse.debug.ui.AbstractDebugView#becomesHidden()
 	 */
 	protected void becomesHidden() {
-        fInputService.resolveViewerInput(null);
+        fInputService.resolveViewerInput(ViewerInputService.NULL_INPUT);
 		super.becomesHidden();
 	}
 

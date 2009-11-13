@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.breakpoints.IBreakpointOrganizer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 

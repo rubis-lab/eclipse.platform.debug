@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Patrick Chuong (Texas Instruments) - Improve usability of the breakpoint view (Bug 238956)
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.actions.breakpointGroups;
 
@@ -17,9 +18,9 @@ import java.util.List;
 
 import org.eclipse.debug.internal.ui.IDebugHelpContextIds;
 import org.eclipse.debug.internal.ui.SWTFactory;
-import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointOrganizerManager;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsView;
-import org.eclipse.debug.internal.ui.views.breakpoints.IBreakpointOrganizer;
+import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointOrganizerManager;
+import org.eclipse.debug.ui.breakpoints.IBreakpointOrganizer;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.TrayDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -57,7 +58,7 @@ import org.eclipse.ui.PlatformUI;
  */
 public class GroupBreakpointsByDialog extends TrayDialog {
 	
-	private BreakpointsView fView;
+    private BreakpointsView fView; 
 	
 	// Table viewer that presents available containers
 	private TableViewer fAvailableViewer;
@@ -99,6 +100,7 @@ public class GroupBreakpointsByDialog extends TrayDialog {
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
@@ -149,8 +151,9 @@ public class GroupBreakpointsByDialog extends TrayDialog {
 		IBreakpointOrganizer[] organizers= BreakpointOrganizerManager.getDefault().getOrganizers();
 		for (int i = 0; i < organizers.length; i++) {
 			fAvailableOrganizersProvider.addAvailable(organizers[i]);
-		}
+		}		
 		organizers = fView.getBreakpointOrganizers();
+		
         if (organizers != null) {
     		for (int i = 0; i < organizers.length; i++) {
                 fSelectedOrganizersProvider.addSelected(organizers[i]);

@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.actions.breakpointGroups;
 
-import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointContainer;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointSetOrganizer;
 import org.eclipse.debug.internal.ui.views.breakpoints.WorkingSetCategory;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -47,8 +47,8 @@ public class ToggleDefaultGroupAction extends AbstractBreakpointsViewAction {
             IStructuredSelection selection = (IStructuredSelection) sel;
             if (selection.size() == 1) {
 	            Object firstElement = selection.getFirstElement();
-	            if (firstElement instanceof BreakpointContainer) {
-	                BreakpointContainer container = (BreakpointContainer) firstElement;
+	            if (firstElement instanceof IBreakpointContainer) {
+	                IBreakpointContainer container = (IBreakpointContainer) firstElement;
 	                if (container.getCategory() instanceof WorkingSetCategory) {
 	                    WorkingSetCategory category = (WorkingSetCategory)container.getCategory();
 	                    if (IDebugUIConstants.BREAKPOINT_WORKINGSET_ID.equals(category.getWorkingSet().getId())) {
