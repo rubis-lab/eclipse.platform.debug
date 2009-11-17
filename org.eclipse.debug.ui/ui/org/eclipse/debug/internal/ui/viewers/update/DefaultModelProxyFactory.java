@@ -14,6 +14,7 @@ package org.eclipse.debug.internal.ui.viewers.update;
 import org.eclipse.debug.core.IExpressionManager;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IExpression;
 import org.eclipse.debug.core.model.IMemoryBlock;
@@ -28,6 +29,7 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxy;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxyFactory;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
 
 public class DefaultModelProxyFactory implements IModelProxyFactory {
 
@@ -73,9 +75,13 @@ public class DefaultModelProxyFactory implements IModelProxyFactory {
 				return new MemoryRetrievalProxy((IMemoryBlockRetrieval)element);
 		}
 		if (IDebugUIConstants.ID_BREAKPOINT_VIEW.equals(id)) {
-			if (element instanceof DefaultBreakpointManagerInput)
+			if (element instanceof DefaultBreakpointManagerInput) {
 				return new BreakpointManagerProxy(element, context);
-
+			} else if (element instanceof IBreakpoint) {
+				return new BreakpointProxy((IBreakpoint)element);
+			} else if (element instanceof IBreakpointContainer) {
+				return new BreakpointContainerProxy((IBreakpointContainer)element);
+			}
 		}
 		
 		if (context instanceof MemoryViewPresentationContext)

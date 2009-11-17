@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     Wind River Systems - initial API and implementation
+ *     Patrick Chuong (Texas Instruments) - Improve usability of the breakpoint view (Bug 238956)
  *******************************************************************************/
 package org.eclipse.debug.ui.breakpoints;
 
@@ -44,4 +45,9 @@ public interface IBreakpointContainer {
      * Returns the array of breakpoints in this container.
      */
     public IBreakpoint[] getBreakpoints();
+    
+    /**
+     * Returns an array of children in this container.
+     */
+    public Object[] getChildren();
 }

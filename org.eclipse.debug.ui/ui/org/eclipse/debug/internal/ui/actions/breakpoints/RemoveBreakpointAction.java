@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,10 +28,9 @@ import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.actions.AbstractRemoveActionDelegate;
 import org.eclipse.debug.internal.ui.actions.ActionMessages;
 import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
-import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointContainer;
+import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsView;
 import org.eclipse.debug.internal.ui.views.breakpoints.WorkingSetCategory;
-import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -119,7 +118,7 @@ public class RemoveBreakpointAction extends AbstractRemoveActionDelegate {
 				final IBreakpoint[] breakpoints = (IBreakpoint[]) breakpointsToDelete.toArray(new IBreakpoint[0]);
 				final IWorkingSet[] sets = (IWorkingSet[])groupsToDelete.toArray(new IWorkingSet[groupsToDelete.size()]);
 				if(breakpoints.length > 0) {
-					((BreakpointsView)getView()).preserveSelection(getSelection());					
+					((BreakpointsView)getView()).preserveSelection(getSelection());
 				}
 				new Job(ActionMessages.RemoveBreakpointAction_2) { 
                     protected IStatus run(IProgressMonitor pmonitor) {
@@ -156,12 +155,12 @@ public class RemoveBreakpointAction extends AbstractRemoveActionDelegate {
 	 * @see org.eclipse.debug.internal.ui.actions.AbstractSelectionActionDelegate#isEnabledFor(java.lang.Object)
 	 */
 	protected boolean isEnabledFor(Object element) {
-		if (element instanceof BreakpointContainer) {
-			if(((BreakpointContainer)element).getCategory() instanceof WorkingSetCategory) {
+		if (element instanceof IBreakpointContainer) {
+			if(((IBreakpointContainer)element).getCategory() instanceof WorkingSetCategory) {
 				return true;
 			}
-			return ((BreakpointContainer)element).getChildren().length > 0;
+			return ((IBreakpointContainer)element).getBreakpoints().length > 0;
 		}
-		return super.isEnabledFor(element);
+		return element instanceof IBreakpoint;
 	}
 }

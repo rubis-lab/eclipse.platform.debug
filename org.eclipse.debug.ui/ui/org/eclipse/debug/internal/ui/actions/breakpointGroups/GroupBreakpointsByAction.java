@@ -98,10 +98,10 @@ public class GroupBreakpointsByAction extends AbstractBreakpointsViewAction impl
 	 */
 	private void fillMenu(Menu menu) {
 		// allow the organizer provider to populate the menu first
-		Object input = fView.getTeeModelViewer().getInput();
+		Object input = fView.getTreeModelViewer().getInput();
 		IBreakpointOrganizerInputProvider provider = getOrganizerProvider(input);
 		if (provider != null) {				
-			IPresentationContext context = fView.getTeeModelViewer().getPresentationContext();
+			IPresentationContext context = fView.getTreeModelViewer().getPresentationContext();
 			provider.fillMenu(input, context, menu);
 			fAction.setEnabled(menu.getItemCount() > 0);
 			return;

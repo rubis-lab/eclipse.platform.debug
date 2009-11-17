@@ -16,10 +16,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.internal.runtime.AdapterManager;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.internal.ui.model.elements.ElementContentProvider;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
@@ -596,6 +596,6 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
 	public Object getAdapter(Class adapter) {
-		return AdapterManager.getDefault().getAdapter(this, adapter);
+		return Platform.getAdapterManager().getAdapter(this, adapter);
 	}
 }

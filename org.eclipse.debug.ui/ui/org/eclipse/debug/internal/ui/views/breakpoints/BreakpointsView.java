@@ -158,7 +158,7 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 	 * Returns the tree model viewer.
 	 * @return
 	 */
-	public TreeModelViewer getTeeModelViewer() {
+	public TreeModelViewer getTreeModelViewer() {
 		return (TreeModelViewer) getViewer();
 	}
 	
@@ -246,7 +246,7 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 	 */
 	protected void contextActivated(ISelection selection) {
 		if (selection == null || selection.isEmpty()) {
-			setViewerInput(new DefaultBreakpointManagerInput(null, getTeeModelViewer().getPresentationContext()));
+			setViewerInput(new DefaultBreakpointManagerInput(getTreeModelViewer().getPresentationContext()));
 		} else {
 			super.contextActivated(selection);
 		}
@@ -270,7 +270,7 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 			return;
 		}
 		
-		final TreeModelViewer viewer = getTeeModelViewer();
+		final TreeModelViewer viewer = getTreeModelViewer();
 		final IPresentationContext presentationContext = viewer.getPresentationContext();		
 		
 		// set the view organizer - if there is an organizer override per input, than set the organizer to null
@@ -299,7 +299,7 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
         if (update.getElement() != null) {
             setViewerInput(update.getInputElement());
         } else {
-            setViewerInput(new DefaultBreakpointManagerInput(null, getTeeModelViewer().getPresentationContext()));
+            setViewerInput(new DefaultBreakpointManagerInput(getTreeModelViewer().getPresentationContext()));
         }
 	}
 	
@@ -327,7 +327,7 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 		}
 		
 		// set the track selection property for non-standard model to track the debug context
-		final TreeModelViewer viewer = getTeeModelViewer();
+		final TreeModelViewer viewer = getTreeModelViewer();
 		if (viewer != null) {
 			viewer.getPresentationContext().setProperty(IDebugUIConstants.PROP_BREAKPOINTS_TRACK_SELECTION, new Boolean(fIsTrackingSelection));
 		}
@@ -523,7 +523,7 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 		for (int i = 0; fOrganizers != null && i < fOrganizers.length; i++)
 			fOrganizers[i].addPropertyChangeListener(this);
 				
-		TreeModelViewer viewer = getTeeModelViewer();
+		TreeModelViewer viewer = getTreeModelViewer();
 		if (viewer != null) {
 			// update the presentation context organizer
 			viewer.getPresentationContext().setProperty(IDebugUIConstants.PROP_BREAKPOINTS_ORGANIZERS, fOrganizers);			
@@ -545,7 +545,7 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 	public void setFilterSelection(IStructuredSelection ss) {
 		fFilterSelection = ss;
 		
-		TreeModelViewer viewer = getTeeModelViewer();
+		TreeModelViewer viewer = getTreeModelViewer();
 		if (viewer != null) {
 			// update the presentation context filter
 			viewer.getPresentationContext().setProperty(IDebugUIConstants.PROP_BREAKPOINTS_FILTER_SELECTION, fFilterSelection);
@@ -852,7 +852,7 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
     	super.propertyChange(event);
     	
     	if (event.getProperty().equals(IBreakpointOrganizerDelegate.P_CATEGORY_CHANGED)) {
-    		final TreeModelViewer viewer = getTeeModelViewer();
+    		final TreeModelViewer viewer = getTreeModelViewer();
     		if (viewer != null) {
 	    		setBreakpointOrganizers(fOrganizers);    		
     		}

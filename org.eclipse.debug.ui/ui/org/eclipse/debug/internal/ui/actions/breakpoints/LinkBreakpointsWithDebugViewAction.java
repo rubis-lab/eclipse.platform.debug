@@ -7,7 +7,6 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Patrick Chuong (Texas Instruments) - Improve usability of the breakpoint view (Bug 238956)
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.actions.breakpoints;
 
@@ -22,6 +21,7 @@ import org.eclipse.ui.IViewPart;
  * breakpoints view.
  */
 public class LinkBreakpointsWithDebugViewAction implements IViewActionDelegate {
+	
 	private BreakpointsView fView;
 	private IAction fAction= null;
 	
@@ -32,14 +32,14 @@ public class LinkBreakpointsWithDebugViewAction implements IViewActionDelegate {
 	 * @see org.eclipse.ui.IViewActionDelegate#init(org.eclipse.ui.IViewPart)
 	 */
 	public void init(IViewPart view) {
-		fView = (BreakpointsView) view;
+		fView= (BreakpointsView) view;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
 	public void run(IAction action) {
-		fView.setTrackSelection(action.isChecked());		
+		fView.setTrackSelection(action.isChecked());
 	}
 
 	/* (non-Javadoc)
@@ -47,7 +47,7 @@ public class LinkBreakpointsWithDebugViewAction implements IViewActionDelegate {
 	 */
 	public void selectionChanged(IAction action, ISelection selection) {
 		if (fAction == null) {
-			action.setChecked(fView.isTrackingSelection());			
+			action.setChecked(fView.isTrackingSelection());
 			fAction= action;
 		}
 	}

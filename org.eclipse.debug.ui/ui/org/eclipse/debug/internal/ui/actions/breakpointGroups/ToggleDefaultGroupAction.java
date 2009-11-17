@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.actions.breakpointGroups;
 
+import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointSetOrganizer;
 import org.eclipse.debug.internal.ui.views.breakpoints.WorkingSetCategory;
 import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
