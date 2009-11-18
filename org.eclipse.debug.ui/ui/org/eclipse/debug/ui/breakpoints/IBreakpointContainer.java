@@ -45,9 +45,4 @@ public interface IBreakpointContainer {
      * Returns the array of breakpoints in this container.
      */
     public IBreakpoint[] getBreakpoints();
-    
-    /**
-     * Returns an array of children in this container.
-     */
-    public Object[] getChildren();
 }
