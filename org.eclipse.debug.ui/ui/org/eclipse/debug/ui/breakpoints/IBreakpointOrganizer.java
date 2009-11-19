@@ -21,7 +21,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
  * organizer are intended to implement <code>IBreakpointOrganizerDelegate</code>.
  * </p>
  * @noimplement This interface is not intended to be implemented by clients.
- * @since 3.6 (interface since 3.1)
+ * @since 3.6 (internal interface since 3.1)
  */
 public interface IBreakpointOrganizer extends IBreakpointOrganizerDelegate {
     
