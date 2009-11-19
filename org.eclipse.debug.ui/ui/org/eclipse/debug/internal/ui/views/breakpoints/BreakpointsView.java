@@ -246,7 +246,8 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 	 */
 	protected void contextActivated(ISelection selection) {
 		if (selection == null || selection.isEmpty()) {
-			setViewerInput(new DefaultBreakpointManagerInput(getTreeModelViewer().getPresentationContext()));
+			Object input = new DefaultBreakpointManagerInput(getTreeModelViewer().getPresentationContext());
+			super.contextActivated(new StructuredSelection(input));
 		} else {
 			super.contextActivated(selection);
 		}
