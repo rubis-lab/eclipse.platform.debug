@@ -11,6 +11,7 @@
 package org.eclipse.debug.internal.ui.model.elements;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.internal.ui.CompositeDebugImageDescriptor;
@@ -19,7 +20,10 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationCont
 import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.ui.model.IWorkbenchAdapter2;
 
 public class BreakpointContainerLabelProvider extends DebugElementLabelProvider {
 	/*
@@ -90,6 +94,48 @@ public class BreakpointContainerLabelProvider extends DebugElementLabelProvider 
 		return super.getGrayed(path, presentationContext);
 	}
 	
+	// Forward font data requests to the workbench adapter
+	protected FontData getFontData(TreePath elementPath, IPresentationContext presentationContext, String columnId) throws CoreException {
+		Object element = elementPath.getLastSegment();
+		FontData fontData = super.getFontData(elementPath, presentationContext, columnId);
+		if (fontData == null && element instanceof IAdaptable) {
+			
+            IWorkbenchAdapter2 adapter = (IWorkbenchAdapter2) ((IAdaptable)element).getAdapter(IWorkbenchAdapter2.class);
+            if (adapter != null) {
+                fontData = adapter.getFont(element);
+            }
+		}
+		return fontData;
+	}
+
+	// Forward foreground color requests to the workbench adapter
+	protected RGB getForeground(TreePath elementPath, IPresentationContext presentationContext, String columnId) throws CoreException {
+		Object element = elementPath.getLastSegment();
+		RGB rgb = super.getForeground(elementPath, presentationContext, columnId);
+		if (rgb == null && element instanceof IAdaptable) {
+			
+            IWorkbenchAdapter2 adapter = (IWorkbenchAdapter2) ((IAdaptable)element).getAdapter(IWorkbenchAdapter2.class);
+            if (adapter != null) {
+            	rgb = adapter.getForeground(element);
+            }
+		}
+		return rgb;
+	}
+
+	// Forward background color requests to the workbench adapter
+	protected RGB getBackground(TreePath elementPath, IPresentationContext presentationContext, String columnId) throws CoreException {
+		Object element = elementPath.getLastSegment();
+		RGB rgb = super.getBackground(elementPath, presentationContext, columnId);
+		if (rgb == null && element instanceof IAdaptable) {
+			
+            IWorkbenchAdapter2 adapter = (IWorkbenchAdapter2) ((IAdaptable)element).getAdapter(IWorkbenchAdapter2.class);
+            if (adapter != null) {
+            	rgb = adapter.getBackground(element);
+            }
+		}
+		return rgb;
+	}
+
 	/**
      * Computes and return common adornment flags for the given category.
      * 

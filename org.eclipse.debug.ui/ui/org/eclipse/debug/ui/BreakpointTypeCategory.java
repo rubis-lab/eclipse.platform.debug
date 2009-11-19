@@ -106,4 +106,8 @@ public class BreakpointTypeCategory extends PlatformObject implements IBreakpoin
 	public Object getParent(Object o) {
 		return null;
 	}
+	
+	public String toString() {
+	    return fName;
+	}
 }
