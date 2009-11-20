@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.DelegatingModelPresentation;
@@ -27,9 +28,10 @@ import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsContentProvide
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsLabelProvider;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsView;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsViewer;
-import org.eclipse.debug.ui.breakpoints.IBreakpointOrganizer;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
+import org.eclipse.debug.ui.breakpoints.IBreakpointOrganizer;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -151,11 +153,12 @@ public class EmbeddedBreakpointsViewer {
 		ArrayList list = new ArrayList();
 		for(int i = 0; i < items.length; i++) {
 			Object item = items[i];
-			if(item instanceof IBreakpoint) {
-				list.add(item);
+			IBreakpoint breakpoint = (IBreakpoint)DebugPlugin.getAdapter(item, IBreakpoint.class);
+			if(breakpoint != null) {
+				list.add(breakpoint);
 			}
-			else if (item instanceof BreakpointContainer) {
-				getBreakpointsFromContainers((BreakpointContainer)item, list);
+			else if (item instanceof IBreakpointContainer) {
+			    getBreakpointsFromContainers((IBreakpointContainer)item, list);
 			}
 		}
 		for(int i = 0; i < list.size(); i++) {
@@ -168,16 +171,12 @@ public class EmbeddedBreakpointsViewer {
 	 * @param container the container to get breakpoints from
 	 * @param list the list of breakpoints to update state for
 	 */
-	private void getBreakpointsFromContainers(BreakpointContainer container, ArrayList list) {
-		Object[] elements = container.getChildren();
-		for(int i = 0; i < elements.length; i++) {
-			if(elements[i] instanceof IBreakpoint) {
-				list.add(elements[i]);
-			}
-			else {
-				getBreakpointsFromContainers((BreakpointContainer)elements[i], list);
-			}
-		}
+	private void getBreakpointsFromContainers(IBreakpointContainer container, ArrayList list) {
+        IBreakpoint[] bps = container.getBreakpoints();
+        list.ensureCapacity(list.size() + bps.length);
+        for (int j = 0; j < bps.length; j++) {
+            list.add(bps[j]);
+        }
 	}
 	
 	/**
@@ -240,22 +239,23 @@ public class EmbeddedBreakpointsViewer {
      * @param enable the checked status of the obj
      */
     private void updateCheckedState(Object obj, boolean enable) {
-	        if (obj instanceof IBreakpoint) {
-	        	Widget[] list = searchItems(obj);
-	        	TreeItem item = null;
-	        	for(int i = 0; i < list.length; i++) {
-		        	item = (TreeItem)list[i];
-		            item.setChecked(enable);
-		            refreshParents(item);
-	        	}
-	        }
-	        else if (obj instanceof BreakpointContainer) {
-	        	ArrayList bps = new ArrayList();
-	        	getBreakpointsFromContainers((BreakpointContainer)obj, bps);
-	        	for(int j = 0; j < bps.size(); j++) {
-	        		updateCheckedState(bps.get(j), enable);
-	        	}
-	        }
+        IBreakpoint breakpoint = (IBreakpoint)DebugPlugin.getAdapter(obj, IBreakpoint.class);
+        if (breakpoint != null) {
+        	Widget[] list = searchItems(obj);
+        	TreeItem item = null;
+        	for(int i = 0; i < list.length; i++) {
+	        	item = (TreeItem)list[i];
+	            item.setChecked(enable);
+	            refreshParents(item);
+        	}
+        }
+        else if (obj instanceof BreakpointContainer) {
+        	ArrayList bps = new ArrayList();
+        	getBreakpointsFromContainers((BreakpointContainer)obj, bps);
+        	for(int j = 0; j < bps.size(); j++) {
+        		updateCheckedState(bps.get(j), enable);
+        	}
+        }
      }
 
     /**

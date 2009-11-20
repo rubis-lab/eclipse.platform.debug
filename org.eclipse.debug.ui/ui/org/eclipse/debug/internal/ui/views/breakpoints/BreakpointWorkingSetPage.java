@@ -164,8 +164,9 @@ public class BreakpointWorkingSetPage extends WizardPage implements IWorkingSetP
 		ArrayList elements = new ArrayList();
 		//weed out non-breakpoint elements since 3.2
 		for(int i = 0; i < adaptable.length; i++) {
-			if(adaptable[i] instanceof IBreakpoint) {
-				elements.add(adaptable[i]);
+            IBreakpoint breakpoint = (IBreakpoint)DebugPlugin.getAdapter(adaptable[i], IBreakpoint.class);
+			if(breakpoint != null) {
+				elements.add(breakpoint);
 			}//end if
 		}//end for
 		if (fWorkingSet == null) {

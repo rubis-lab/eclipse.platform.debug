@@ -62,8 +62,9 @@ public class RemoveBreakpointAction extends AbstractRemoveActionDelegate {
 				boolean prompted = false;
 				while (itr.hasNext()) {		
 					Object next= itr.next();
-					if (next instanceof IBreakpoint) {
-						breakpointsToDelete.add(next);
+					IBreakpoint breakpoint = (IBreakpoint)DebugPlugin.getAdapter(next, IBreakpoint.class);
+					if (breakpoint != null) {
+						breakpointsToDelete.add(breakpoint);
 					} else if (next instanceof IBreakpointContainer) {
 						//the the container is a workingset, ask if they want to delete it as well
 						IBreakpointContainer bpc = (IBreakpointContainer) next;
@@ -161,6 +162,6 @@ public class RemoveBreakpointAction extends AbstractRemoveActionDelegate {
 			}
 			return ((IBreakpointContainer)element).getBreakpoints().length > 0;
 		}
-		return element instanceof IBreakpoint;
+		return DebugPlugin.getAdapter(element, IBreakpoint.class) != null;
 	}
 }

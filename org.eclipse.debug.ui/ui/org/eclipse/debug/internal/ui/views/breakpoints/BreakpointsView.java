@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IThread;
@@ -593,15 +594,9 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
     	}
     	IStructuredSelection ss = (IStructuredSelection) selection;
     	IBreakpointContainer container = (IBreakpointContainer) target;
-    	IBreakpoint breakpoint = null;
-    	Object element = null;
     	for(Iterator iter = ss.iterator(); iter.hasNext();) {
-    		element = iter.next();
-    		if(!(element instanceof IBreakpoint)) {
-    			return false;
-    		}
-    		breakpoint = (IBreakpoint) element;
-    		if (container.contains(breakpoint) || !container.getOrganizer().canAdd(breakpoint, container.getCategory())) {
+    		IBreakpoint breakpoint = (IBreakpoint)DebugPlugin.getAdapter(iter.next(), IBreakpoint.class);
+    		if (breakpoint == null || container.contains(breakpoint) || !container.getOrganizer().canAdd(breakpoint, container.getCategory())) {
                 return false;
             }
     	}
@@ -623,7 +618,10 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
             IBreakpointContainer container = (IBreakpointContainer) target;            
             Object[] objects = ((IStructuredSelection)selection).toArray();
             for (int i = 0; i < objects.length; i++) {
-                container.getOrganizer().addBreakpoint((IBreakpoint)objects[i], container.getCategory());
+                IBreakpoint breakpoint = (IBreakpoint)DebugPlugin.getAdapter(objects[i], IBreakpoint.class);
+                if (breakpoint != null) {
+                    container.getOrganizer().addBreakpoint(breakpoint, container.getCategory());
+                }
             }
             return true;
         }
@@ -638,8 +636,8 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
      */
     public IBreakpointContainer getRemovableContainer(TreePath path) {
     	if (path != null) {
-        	if (path.getLastSegment() instanceof IBreakpoint) {
-		    	IBreakpoint breakpoint = (IBreakpoint) path.getLastSegment();
+            IBreakpoint breakpoint = (IBreakpoint)DebugPlugin.getAdapter(path.getLastSegment(), IBreakpoint.class);
+        	if (breakpoint != null) {
 		    	IBreakpointContainer container = null;
 		    	for(int i = path.getSegmentCount()-2; i > -1; i--) {
 		    	    Object segment = path.getSegment(i); 
@@ -669,9 +667,9 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 	    	if (element instanceof IBreakpointContainer) {
 	    		return (IBreakpointContainer)element;
 	    	}
-	    	if (element instanceof IBreakpoint) {
+            IBreakpoint breakpoint = (IBreakpoint)DebugPlugin.getAdapter(element, IBreakpoint.class);
+	    	if (breakpoint != null) {
 		    	IBreakpointContainer container = null;
-		    	IBreakpoint breakpoint = (IBreakpoint) element;
 		    	for (int i = path.getSegmentCount()-2; i > -1; i--) {
                     Object segment = path.getSegment(i); 
                     if (segment instanceof IBreakpointContainer) {
@@ -751,8 +749,8 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 
     	Map containersToBreakpoints = new HashMap();
     	for (int i = 0; i < paths.length; i++) {
-    		if (paths[i].getLastSegment() instanceof IBreakpoint) {
-	    		IBreakpoint breakpoint = (IBreakpoint)paths[i].getLastSegment();
+            IBreakpoint breakpoint = (IBreakpoint)DebugPlugin.getAdapter(paths[i].getLastSegment(), IBreakpoint.class);
+    		if (breakpoint != null) {
 	    		IBreakpointContainer container = getRemovableContainer(paths[i]);
 	    		if(container != null) {
 	    			List list = (List) containersToBreakpoints.get(container);
@@ -799,16 +797,21 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 		}
     	
     	IBreakpointOrganizer organizer = container.getOrganizer();
+        List breakpoints = new ArrayList(selection.size());
+        for (Iterator iter = selection.iterator(); iter.hasNext();) {
+            IBreakpoint breakpoint = (IBreakpoint) DebugPlugin.getAdapter(iter.next(), IBreakpoint.class);
+            if (breakpoint != null) {
+                breakpoints.add(breakpoint);
+            }
+        }
     	if (organizer instanceof IBreakpointOrganizerDelegateExtension) {
     		IBreakpointOrganizerDelegateExtension extension = (IBreakpointOrganizerDelegateExtension) organizer;
-    		Object[] array = selection.toArray();
-    		IBreakpoint[] breakpoints = new IBreakpoint[array.length];
-    		System.arraycopy(array, 0, breakpoints, 0, array.length);
-    		extension.addBreakpoints(breakpoints, container.getCategory());
+    		extension.addBreakpoints(
+    		    (IBreakpoint[])breakpoints.toArray(new IBreakpoint[breakpoints.size()]), 
+    		    container.getCategory());
     	} else {
-	    	for (Iterator iter = selection.iterator(); iter.hasNext();) {
-	        	IBreakpoint breakpoint = (IBreakpoint) iter.next();
-				organizer.addBreakpoint(breakpoint, container.getCategory());
+	    	for (int i = 0; i < breakpoints.size(); i++) {
+	    	    organizer.addBreakpoint((IBreakpoint)breakpoints.get(i), container.getCategory());
 	    	}
     	}
     	// TODO expandToLevel(target.getData(), ALL_LEVELS);
@@ -835,8 +838,9 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
     		return false;
     	}
     	for(Iterator iter = selection.iterator(); iter.hasNext();) {
-    		Object currentObject = iter.next();
-    		if (!(currentObject instanceof IBreakpoint) || !checkAddableParentContainers(target, (IBreakpoint)currentObject)){
+            IBreakpoint breakpoint = (IBreakpoint)DebugPlugin.getAdapter(iter.next(), IBreakpoint.class);
+
+    		if (breakpoint == null || !checkAddableParentContainers(target, breakpoint)){
     			return false;
     		}
     	}

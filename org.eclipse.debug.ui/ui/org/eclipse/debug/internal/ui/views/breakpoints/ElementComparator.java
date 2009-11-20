@@ -14,6 +14,7 @@ import java.util.Comparator;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.core.model.ILineBreakpoint;
 import org.eclipse.debug.internal.core.IInternalDebugCoreConstants;
@@ -37,9 +38,11 @@ public class ElementComparator implements Comparator {
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
 	public int compare(Object arg0, Object arg1) {
-		if (arg0 instanceof IBreakpoint & arg1 instanceof IBreakpoint) {
-			return compare((IBreakpoint) arg0, (IBreakpoint) arg1);
-		} if (arg0 instanceof IBreakpointContainer & arg1 instanceof IBreakpointContainer) {
+        IBreakpoint bp0 = (IBreakpoint)DebugPlugin.getAdapter(arg0, IBreakpoint.class);            
+        IBreakpoint bp1 = (IBreakpoint)DebugPlugin.getAdapter(arg1, IBreakpoint.class);            
+	    if (bp0 != null && bp1 != null) {
+			return compare(bp0, bp1);
+		} else if (arg0 instanceof IBreakpointContainer && arg1 instanceof IBreakpointContainer) {
 			return compare((IBreakpointContainer) arg0, (IBreakpointContainer) arg1);
 		} else {		
 			return -1; // just return -1 if the two objects are not IBreakpoint type

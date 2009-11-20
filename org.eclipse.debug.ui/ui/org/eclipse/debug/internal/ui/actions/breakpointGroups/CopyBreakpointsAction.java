@@ -13,6 +13,7 @@ package org.eclipse.debug.internal.ui.actions.breakpointGroups;
 import java.util.Iterator;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.internal.ui.IDebugHelpContextIds;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsView;
@@ -125,7 +126,8 @@ public class CopyBreakpointsAction extends BreakpointSelectionAction {
         }
         Iterator iterator = selection.iterator();
         while (iterator.hasNext()) {
-            if (!(iterator.next() instanceof IBreakpoint)) {
+            IBreakpoint breakpoint = (IBreakpoint)DebugPlugin.getAdapter(iterator.next(), IBreakpoint.class);            
+            if (breakpoint == null) {
                 return false;
             }
         }

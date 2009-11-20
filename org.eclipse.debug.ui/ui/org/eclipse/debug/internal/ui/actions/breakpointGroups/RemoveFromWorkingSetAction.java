@@ -15,6 +15,7 @@ package org.eclipse.debug.internal.ui.actions.breakpointGroups;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsView;
 import org.eclipse.debug.internal.ui.views.breakpoints.WorkingSetCategory;
@@ -77,8 +78,8 @@ public class RemoveFromWorkingSetAction extends BreakpointSelectionAction {
     			TreePath path = paths[i]; 
     			
     			// We can remove Breakpoints from their working set if any of their parents is a non "Other" breakpoint working set
-    			if (path.getLastSegment()  instanceof IBreakpoint) {
-    				IBreakpoint breakpoint = (IBreakpoint)path.getLastSegment();
+                IBreakpoint breakpoint = (IBreakpoint)DebugPlugin.getAdapter(path.getLastSegment(), IBreakpoint.class);            
+    			if (breakpoint != null) {
     				TreePath parents = path.getParentPath();
     				
     				for (int j = 0; j < parents.getSegmentCount(); j++) {

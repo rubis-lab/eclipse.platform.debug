@@ -91,8 +91,9 @@ public class EnableBreakpointsAction implements IViewActionDelegate, IPartListen
 					Object element= itr.next();
 					try {
 						IBreakpoint[] breakpoints= null;
-						if (element instanceof IBreakpoint) {
-							breakpoints= new IBreakpoint[] { (IBreakpoint) element };
+						IBreakpoint breakpoint = (IBreakpoint)DebugPlugin.getAdapter(element, IBreakpoint.class); 
+						if (breakpoint != null) {
+							breakpoints= new IBreakpoint[] { breakpoint };
 						} else if (element instanceof IBreakpointContainer) {
 							breakpoints= ((IBreakpointContainer) element).getBreakpoints();
 						}
@@ -147,7 +148,20 @@ public class EnableBreakpointsAction implements IViewActionDelegate, IPartListen
 		boolean allDisabled= true;
 		while (itr.hasNext()) {
 			Object selected= itr.next();
-			if (selected instanceof IBreakpointContainer) {
+            IBreakpoint bp = (IBreakpoint)DebugPlugin.getAdapter(selected, IBreakpoint.class);
+			
+            if (bp != null) {
+                try {
+                    if (bp.isEnabled()) {
+                        allDisabled= false;
+                    } else {
+                        allEnabled= false;
+                    }
+                } catch (CoreException ce) {
+                    handleException(ce);
+                }
+            } 
+            else if (selected instanceof IBreakpointContainer) {
 				IBreakpoint[] breakpoints = ((IBreakpointContainer) selected).getBreakpoints();
 				for (int i = 0; i < breakpoints.length; i++) {
 					try {
@@ -159,17 +173,6 @@ public class EnableBreakpointsAction implements IViewActionDelegate, IPartListen
 					} catch (CoreException ce) {
 						handleException(ce);
 					}
-				}
-			} else if (selected instanceof IBreakpoint) {
-				IBreakpoint bp= (IBreakpoint)selected;
-				try {
-					if (bp.isEnabled()) {
-						allDisabled= false;
-					} else {
-						allEnabled= false;
-					}
-				} catch (CoreException ce) {
-					handleException(ce);
 				}
 			} else {
 				return;
