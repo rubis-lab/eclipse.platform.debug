@@ -66,7 +66,6 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
@@ -185,8 +184,8 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 		menu.add(getAction(ACTION_GOTO_MARKER));
 		menu.add(new Separator(IDebugUIConstants.EMPTY_BREAKPOINT_GROUP));
 		menu.add(new Separator(IDebugUIConstants.BREAKPOINT_GROUP));
-		menu.add(getAction(IWorkbenchCommandConstants.EDIT_COPY));
-		menu.add(getAction(IWorkbenchCommandConstants.EDIT_PASTE));
+		menu.add(getAction(ActionFactory.COPY.getCommandId()));
+		menu.add(getAction(ActionFactory.PASTE.getCommandId()));
 		IAction action = getAction(ACTION_REMOVE_FROM_GROUP);
 		if (action != null && action.isEnabled()) {
 			menu.add(action);
@@ -211,10 +210,9 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 		fClipboard = new Clipboard(getSite().getShell().getDisplay());
 		        
 		PasteBreakpointsAction paste = new PasteBreakpointsAction(this);
-		configure(paste, ActionFactory.PASTE.getCommandId(),
-		ActionFactory.PASTE.getId(), ISharedImages.IMG_TOOL_PASTE);
+		configure(paste, ActionFactory.PASTE.getCommandId(), ActionFactory.PASTE.getCommandId(), ISharedImages.IMG_TOOL_PASTE);
 		SelectionListenerAction copy = new CopyBreakpointsAction(this, fClipboard, paste);
-		configure(copy, ActionFactory.COPY.getCommandId(), ActionFactory.COPY.getId(), ISharedImages.IMG_TOOL_COPY);
+		configure(copy, ActionFactory.COPY.getCommandId(), ActionFactory.COPY.getCommandId(), ISharedImages.IMG_TOOL_COPY);
 		        
 		SelectionListenerAction remove = new RemoveFromWorkingSetAction(this);
 		setAction(ACTION_REMOVE_FROM_GROUP, remove);
