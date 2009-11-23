@@ -82,7 +82,7 @@ public class ViewerInputService {
 		}
 		if (provdier == null) {
 			fPendingUpdate.setInputElement(source);
-			fRequestor.viewerInputComplete(fPendingUpdate);
+            fPendingUpdate.done();
 		} else {
 			provdier.update(fPendingUpdate);
 		}
