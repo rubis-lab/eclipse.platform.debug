@@ -15,6 +15,11 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationCont
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdate;
 import org.eclipse.debug.ui.IDebugUIConstants;
 
+/**
+ *  Breakpoint content provider.
+ *  
+ *  @since 3.6
+ */
 public class BreakpointContentProvider extends ElementContentProvider {
 
 	/* (non-Javadoc)

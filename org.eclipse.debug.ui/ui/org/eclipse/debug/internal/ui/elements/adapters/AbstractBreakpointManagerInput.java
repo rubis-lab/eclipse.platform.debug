@@ -12,14 +12,33 @@ package org.eclipse.debug.internal.ui.elements.adapters;
 
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 
+/**
+ * A breakpoint manager input allows the breakpoints view to link the active debug context
+ * per workbench window.
+ * 
+ * @since 3.6
+ */
 public abstract class AbstractBreakpointManagerInput {
 	
-	protected IPresentationContext fContext;
+	/**
+	 * The presentation context of the breakpoints view.
+	 */
+	final protected IPresentationContext fContext;
 	
+	/**
+	 * Constructor.
+	 * 
+	 * @param context the presentation context for this input
+	 */
 	protected AbstractBreakpointManagerInput(IPresentationContext context) {
 		fContext = context;
 	}
 		
+	/**
+	 * Returns the presentation context for this input.
+	 * 
+	 * @return the presentation context
+	 */
 	public IPresentationContext getContext() {
 		return fContext;
 	}

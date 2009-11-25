@@ -22,19 +22,50 @@ import org.eclipse.debug.ui.breakpoints.IBreakpointOrganizer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 
+/**
+ * Breakpoint manager model proxy.
+ * 
+ * @since 3.6
+ */
 public class BreakpointManagerProxy extends AbstractModelProxy {
+	/**
+	 * The breakpoint manager content provider for this model proxy
+	 */
 	protected AbstractBreakpointManagerContentProvider fProvider;
+	
+	/**
+	 * The breakpoint manager input for this model proxy
+	 */
 	protected AbstractBreakpointManagerInput fInput;
+	
+	/**
+	 * The root breakpoint organizer for this model proxy
+	 */
 	protected IBreakpointOrganizer[] fOrganizers;
+	
+	/**
+	 * The element comparator for this model proxy
+	 */
 	protected ElementComparator fComparator;
+	
+	/**
+	 * The initial selection for this model proxy
+	 */
 	protected IStructuredSelection fSelection;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param input the breakpoint manager input
+	 * @param context the presentation context for this model proxy
+	 */
 	public BreakpointManagerProxy(Object input, IPresentationContext context) {
 		super();
 				
 		if (input instanceof AbstractBreakpointManagerInput) {
 			fInput = (AbstractBreakpointManagerInput) input;
 			
+			// cache the required data and pass to the provider when this model is installed
 			IElementContentProvider provider = ViewerAdapterService.getContentProvider(input);
 			if (provider instanceof AbstractBreakpointManagerContentProvider) {
 				fProvider = (AbstractBreakpointManagerContentProvider) provider;

@@ -23,9 +23,22 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
+/**
+ * This class implements the show target breakpoint action.
+ * 
+ * @since 3.6
+ */
 public class ShowTargetBreakpointsAction extends Action implements ISelectionListener {
+	/**
+	 * Breakpoints view
+	 */
 	BreakpointsView fView;
 	
+	/**
+	 * Constructor.
+	 * 
+	 * @param view the breakpoints view
+	 */
 	public ShowTargetBreakpointsAction(BreakpointsView view) {
 		super();
 		

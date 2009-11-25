@@ -25,6 +25,11 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.model.IWorkbenchAdapter2;
 
+/**
+ * Breakpoint container label provider.
+ *
+ * @since 3.6
+ */
 public class BreakpointContainerLabelProvider extends DebugElementLabelProvider {
 	/*
 	 * (non-Javadoc)

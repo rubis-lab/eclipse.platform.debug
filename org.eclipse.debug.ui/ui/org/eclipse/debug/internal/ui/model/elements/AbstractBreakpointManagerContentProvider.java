@@ -42,21 +42,58 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.breakpoints.IBreakpointOrganizer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+/**
+ * This class provides breakpoint content for the breakpoint manager.
+ * 
+ * @since 3.6
+ */
 public abstract class AbstractBreakpointManagerContentProvider extends ElementContentProvider 
 		implements IBreakpointFilterListener, IBreakpointOrganizerListener, IBreakpointsListener {
 	
 	/**
-	 * Contains all input specific data.
+	 * Breakpoint input data. Contains all input specific data.
+	 * 
+	 * @since 3.6
 	 */
 	protected class InputData {
+		/**
+		 * Breakpoint manager input
+		 */
 		AbstractBreakpointManagerInput fInput;
-		AbstractModelProxy fProxy;				
+		
+		/**
+		 * Model proxy of the input
+		 */
+		AbstractModelProxy fProxy;	
+		
+		/**
+		 * Selection filter, will be use to provide debug context filtering
+		 */
 		IStructuredSelection fSelectionFilter;
+		
+		/**
+		 * Element comparator, use to compare the ordering of elements for the model
+		 */
 		ElementComparator fComparator;
 		
+		/**
+		 * A list of breakpoint organizers
+		 */
 		IBreakpointOrganizer[] fOrganizers;
+		
+		/**
+		 * The breakpoint root container
+		 */
 		BreakpointContainer fContainer;
 		
+		/**
+		 * Constructor
+		 *  
+		 * @param input the breakpoint manager input
+		 * @param proxy the model proxy 
+		 * @param filter the debug context selection 
+		 * @param comparator the element comparator 
+		 */
 		InputData(AbstractBreakpointManagerInput input, AbstractModelProxy proxy, IStructuredSelection filter, ElementComparator comparator) {
 			fInput = input;
 			fProxy = proxy;
@@ -234,7 +271,9 @@ public abstract class AbstractBreakpointManagerContentProvider extends ElementCo
 		 Platform.getDebugOption("org.eclipse.debug.ui/debug/viewers/breakpointDeltas")); 	//$NON-NLS-1$
 	} 
 		
-	// a map of input to info data cache
+	/**
+	 * A map of input to info data cache
+	 */
 	protected Map fInputToData;
 	
 	/**
@@ -260,7 +299,7 @@ public abstract class AbstractBreakpointManagerContentProvider extends ElementCo
 	protected abstract IBreakpoint[] filterBreakpoints(AbstractBreakpointManagerInput input, IBreakpoint[] breakpoints);
 	
 	/**
-	 * Determine whether the breakpoint is supported by the selection.
+	 * Sub-classes is required to implements this method, to determine whether the breakpoint is supported by the selection.
 	 * 
 	 * @param ss the selection of the debug elements.
 	 * @param breakpoint the breakpoint.
@@ -326,26 +365,29 @@ public abstract class AbstractBreakpointManagerContentProvider extends ElementCo
 		return data != null ? data.fProxy : null;
 	}	
 	
-	/**
-	 * Returns the breakpoint container for the input.
-	 * 
-	 * @param input the input.
-	 * @return the breakpoint container.
-	 */
-	public BreakpointContainer getBreakpointContainer(Object input) {
-		InputData data = getInputData(input);
-		return data != null ? data.fContainer : null;
-	}
-	
-	/**
-	 * Sets the input container.
-	 */
-	public void setBreakpointContainer(Object input, BreakpointContainer container) {
-		InputData data = getInputData(input);
-		if (data != null) {
-			data.fContainer = container;
-		}
-	}
+//	/**
+//	 * Returns the root breakpoint container for the input.
+//	 * 
+//	 * @param input the input.
+//	 * @return the breakpoint container.
+//	 */
+//	public BreakpointContainer getBreakpointContainer(Object input) {
+//		InputData data = getInputData(input);
+//		return data != null ? data.fContainer : null;
+//	}
+//	
+//	/**
+//	 * Sets the breakpoint input root container.
+//	 * 
+//	 * @param input the input.
+//	 * @param container the breakpoint container.
+//	 */
+//	public void setBreakpointContainer(Object input, BreakpointContainer container) {
+//		InputData data = getInputData(input);
+//		if (data != null) {
+//			data.fContainer = container;
+//		}
+//	}
 	
 	/**
 	 * Returns the selection filter for the input.
@@ -448,6 +490,12 @@ public abstract class AbstractBreakpointManagerContentProvider extends ElementCo
 		}
 	}
 	
+	/**
+	 * Helper method to add breakpoints to the given input.
+	 * 
+	 * @param data the input to add the breakpoints
+	 * @param breakpoints the breakpoints
+	 */
 	private void breakpointsAddedInput(InputData data, IBreakpoint[] breakpoints) {
 		if (data == null || data.fContainer == null) {
 			return;
@@ -479,6 +527,12 @@ public abstract class AbstractBreakpointManagerContentProvider extends ElementCo
 		}				
 	}
 	
+	/**
+	 * Helper method to remove breakpoints from a given input.
+	 * 
+	 * @param data the input to add the breakpoints
+	 * @param breakpoints the breakpoints
+	 */
 	private void breakpointsRemovedInput(InputData data, IBreakpoint[] breakpoints) {
 		if (data == null || data.fContainer == null) {
 			return;	

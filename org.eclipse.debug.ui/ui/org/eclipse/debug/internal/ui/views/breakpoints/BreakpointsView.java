@@ -73,6 +73,9 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.SelectionListenerAction;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
+/**
+ * This class implements the breakpoints view.
+ */
 public class BreakpointsView extends VariablesView implements ISelectionListener {	
 	private static final String ACTION_GOTO_MARKER				= "GotoMarker";				//$NON-NLS-1$
 	private static final String ACTION_SKIP_BREAKPOINTS			= "SkipBreakpoints";		//$NON-NLS-1$
@@ -367,7 +370,7 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
      * the action for selection change notification, and registers
      * the action with this view.
      * 
-     * @param sla action
+     * @param action selection action
      * @param defId action definition id
      * @param globalId global action id
      * @param imgId image identifier
@@ -459,6 +462,11 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 			viewer.setSelection(new StructuredSelection(breakpoints), true);
 	}
 
+	/**
+	 * Preserves the selection.
+	 * 
+	 * @param selection the selection
+	 */
 	public void preserveSelection(IStructuredSelection selection) {
 		if (selection instanceof ITreeSelection && !selection.isEmpty()) {
 			TreePath path = ((ITreeSelection) selection).getPaths()[0];

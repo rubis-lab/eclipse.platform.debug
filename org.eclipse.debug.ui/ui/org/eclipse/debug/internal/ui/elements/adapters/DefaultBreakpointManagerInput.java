@@ -12,6 +12,11 @@ package org.eclipse.debug.internal.ui.elements.adapters;
 
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 
+/**
+ * Default breakpoint manager input.
+ * 
+ * @since 3.6
+ */
 public class DefaultBreakpointManagerInput extends AbstractBreakpointManagerInput {
 		
 	/**

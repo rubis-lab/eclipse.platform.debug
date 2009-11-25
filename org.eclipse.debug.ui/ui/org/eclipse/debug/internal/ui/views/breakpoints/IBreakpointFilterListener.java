@@ -13,6 +13,11 @@ package org.eclipse.debug.internal.ui.views.breakpoints;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+/**
+ * This interface can be implemented by a breakpoint manager content provider to provides filtering support.
+ * 
+ * @since 3.6
+ */
 public interface IBreakpointFilterListener {
 	
 	/**

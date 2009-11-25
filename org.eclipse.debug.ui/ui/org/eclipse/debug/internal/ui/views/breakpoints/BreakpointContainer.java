@@ -31,25 +31,72 @@ import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
 import org.eclipse.debug.ui.breakpoints.IBreakpointOrganizer;
 import org.eclipse.debug.ui.breakpoints.OtherBreakpointCategory;
 
+/**
+ * This class contains the list of container or a list of breakpoint, elements are sorted according to rules
+ * in the comparator.
+ */
 public class BreakpointContainer extends ElementContentProvider implements IAdaptable, IBreakpointContainer {
-	// the breakpoint cache - inserting new element into this collection should use the insertBreakpoint method
-    private List fBreakpoints = new ArrayList();
+	/**
+	 * Child breakpoints - inserting new element into this collection should use the insertBreakpoint method
+	 */
+    final private List fBreakpoints = new ArrayList();
     
-    // the child container - inserting new element into this container should use the insertChildContainer method
-    private List fChildContainers = new ArrayList();
+    /**
+     * Child containers - inserting new element into this container should use the insertChildContainer method
+     */
+    final private List fChildContainers = new ArrayList();
 	
+    /**
+     * The category for this container
+     */
     private IAdaptable fCategory;
+    
+    /**
+     * The breakpoint organizer for this container
+     */
     private IBreakpointOrganizer fOrganizer;
+    
+    /**
+     * The nested breakpoint organizer
+     */
     private IBreakpointOrganizer[] fNesting;
-    private boolean fInitialContainer;
+    
+    /**
+     * A flag to indicate this is the default container
+     */
+    private boolean fDefaultContainer;
+    
+    /**
+     * Parent container
+     */
     private BreakpointContainer fParent;
+    
+    /**
+     * The comparator, will be use to compare the order for inserting new element into this container
+     */
     private ElementComparator fComparator;
     
+    /**
+     * Constructor, intended to be call when creating the root container.
+     * 
+     * @param organizers the breakpoint organizer for this container
+     * @param comparator the element comparator, can be <code>null</code>. If <code>null</code> than new element
+     * will be added to the end of the list.
+     */
     public BreakpointContainer(IBreakpointOrganizer[] organizers, ElementComparator comparator) {
     	fNesting = organizers;
     	fComparator = comparator;
     }
     
+    /**
+     * Constructor, intended to be call within this class only.
+     * 
+     * @param parent the parent breakpoint container
+     * @param category the category for this container
+     * @param organizer the organizer for this container
+     * @param comparator the element comparator
+     * @param nesting the nested breakpoint organizer
+     */
     private BreakpointContainer(BreakpointContainer parent, IAdaptable category, IBreakpointOrganizer organizer, 
     		ElementComparator comparator, IBreakpointOrganizer[] nesting) {     	
     	this(category, organizer, nesting);
@@ -57,46 +104,53 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     	fComparator = comparator;
     }
     
+    /**
+     * Constructor, intended to be call when reorganizing the content.
+     * 
+     * @param category the breakpoint category
+     * @param organizer the breakpoint organizer
+     * @param nesting the nested breakpoint organizer
+     */
     BreakpointContainer(IAdaptable category, IBreakpointOrganizer organizer, IBreakpointOrganizer[] nesting) {    	
-        fCategory = category;
-        fOrganizer = organizer;
-        fNesting = nesting;
+    	fCategory = category;
+    	fOrganizer = organizer;
+    	fNesting = nesting;
     }
     
     /**
      * Initialize the default containers.
      * 
-     * @param parentDelta the parent delta, addition child delta will be added to the parent.
+     * @param parentDelta the parent delta, addition child delta will be added to the parent
      */
     public void initDefaultContainers(ModelDelta parentDelta) {
-   	 // seed with all nested categories
-       if (fNesting != null && fNesting.length > 0) {
-           IAdaptable[] emptyCategories = fNesting[0].getCategories();
-           if (emptyCategories != null) {
-               for (int i = 0; i < emptyCategories.length; i++) {
-                   IAdaptable empty = emptyCategories[i];
-                   BreakpointContainer container = findExistingContainer(fChildContainers, empty);
-                   if (container == null) {
-	                   IBreakpointOrganizer[] siblings = new IBreakpointOrganizer[fNesting.length - 1];
-	                   System.arraycopy(fNesting, 1, siblings, 0, siblings.length);
-                       container = new BreakpointContainer(this, empty, fNesting[0], fComparator, siblings);
-                       insertChildContainer(container);
-                       container.fInitialContainer = true;
-                       
-                       int size = container.getChildren().length;
-                       parentDelta.addNode(container, fChildContainers.indexOf(container), IModelDelta.INSTALL|IModelDelta.ADDED|IModelDelta.EXPAND, size);
+    	// seed with all nested categories
+    	if (fNesting != null && fNesting.length > 0) {
+    		IAdaptable[] emptyCategories = fNesting[0].getCategories();
+    		if (emptyCategories != null) {
+    			for (int i = 0; i < emptyCategories.length; i++) {
+    				IAdaptable empty = emptyCategories[i];
+    				BreakpointContainer container = findExistingContainer(fChildContainers, empty);
+    				if (container == null) {
+    					IBreakpointOrganizer[] siblings = new IBreakpointOrganizer[fNesting.length - 1];
+    					System.arraycopy(fNesting, 1, siblings, 0, siblings.length);
+    					container = new BreakpointContainer(this, empty, fNesting[0], fComparator, siblings);
+    					insertChildContainer(container);
+    					container.fDefaultContainer = true;
 
-                   }
-               }
-           }
-       }
+    					int size = container.getChildren().length;
+    					parentDelta.addNode(container, fChildContainers.indexOf(container), IModelDelta.INSTALL|IModelDelta.ADDED|IModelDelta.EXPAND, size);
+
+    				}
+    			}
+    		}
+    	}
     }    
     
     /**
-     * Insert the breakpoint into the cached.
+     * Insert the breakpoint to this container.
      * 
-     * @param breakpoint the new breakpoint.
-     * @return the index of the breakpoint in the cache, -1 if the breakpoint already exist.
+     * @param breakpoint the new breakpoint
+     * @return the index of the breakpoint in the cache, -1 if the breakpoint already exist
      */
     private int insertBreakpoint(IBreakpoint breakpoint) {
     	if (fBreakpoints.contains(breakpoint))
@@ -116,10 +170,10 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     }
     
     /**
-     * Insert the child container into the cache.
+     * Insert the child container this container.
      * 
-     * @param container the child container.
-     * @return the index of the container in the cache, -1 if the child container already exist.
+     * @param container the child container
+     * @return the index of the container in the cache, -1 if the child container already exist
      */
     private int insertChildContainer(BreakpointContainer container) {
     	int index = fChildContainers.size();
@@ -139,7 +193,7 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     /**
      * Returns the element comparator.
      * 
-     * @return the element comparator.
+     * @return the element comparator
      */
     public ElementComparator getElementComparator() {
     	return fComparator;
@@ -148,7 +202,7 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     /**
      * Returns the parent container, can be <code>null</code>.
      * 
-     * @return the parent container.
+     * @return the parent container
      */
     public BreakpointContainer getParent() {
     	return fParent;
@@ -157,7 +211,7 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     /**
      * Determine whether there is any nested container.
      * 
-     * @return true if has nested container.
+     * @return true if has nested container
      */
     private boolean hasNesting() {
     	return fNesting != null && fNesting.length > 0;
@@ -166,9 +220,9 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     /**
      * Get the categories for the breakpoint with the given organizer.
      * 
-     * @param breakpoint the breakpoint.
-     * @param organizer the organizer.
-     * @return
+     * @param breakpoint the breakpoint
+     * @param organizer the organizer
+     * @return the categories
      */
     private static IAdaptable[] getCategories(IBreakpoint breakpoint, IBreakpointOrganizer organizer) {
     	IAdaptable[] categories = organizer.getCategories(breakpoint);
@@ -182,8 +236,8 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     /**
      * Find existing breakpoint container in the container array the given category.
      * 
-     * @param containers the container array.
-     * @param category the category.
+     * @param containers the container array
+     * @param category the category
      * @return the breakpoint container, can be <code>null</code>.
      */
     private static BreakpointContainer findExistingContainer(List containers, IAdaptable category) {
@@ -211,8 +265,8 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     /**
      * Add a breakpoint to the container, additional delta will be added to the root delta. 
      * 
-     * @param breakpoint the breakpoint to added.
-     * @param rootDelta the root delta of this container.
+     * @param breakpoint the breakpoint to added
+     * @param rootDelta the root delta of this container
      * @see removeBreakpoint
      */
     public void addBreakpoint(IBreakpoint breakpoint, ModelDelta rootDelta) {    	
@@ -265,8 +319,8 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     /**
      * Remove a breakpoint from the container, additional delta will be added to the root delta.
      * 
-     * @param breakpoint the breakpoint to remove.
-     * @param delta the root delta of this container.
+     * @param breakpoint the breakpoint to remove
+     * @param delta the root delta of this container
      * @see addBreakpoint
      */
     public void removeBreakpoint(IBreakpoint breakpoint, ModelDelta rootDelta) {
@@ -284,7 +338,7 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     				// than remove the container from the collection
         			if (container.contains(breakpoint)) {
         				ModelDelta childDelta = null;
-        				if ((!container.isInitialContainer()) && (container.getBreakpoints().length <= 1)) {
+        				if ((!container.isDefaultContainer()) && (container.getBreakpoints().length <= 1)) {
     	    				it.remove();
     	    				childDelta = rootDelta.addNode(container, IModelDelta.REMOVED|IModelDelta.UNINSTALL);
     	    				 
@@ -307,8 +361,8 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     /**
      * A helper method to copy the organizers between two containers.
      * 
-     * @param destContainer the destination container.
-     * @param sourceContainer the source container.
+     * @param destContainer the destination container
+     * @param sourceContainer the source container
      */
     public static void copyOrganizers(BreakpointContainer destContainer, BreakpointContainer sourceContainer) {
     	destContainer.fNesting = sourceContainer.fNesting;
@@ -319,9 +373,9 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     /**
      * A helper method to update the breakpoint cache of the container and it's ancestors.
      * 
-     * @param container the breakpoint container.
-     * @param breakpoints the breakpoint to update.
-     * @param add true if breakpoint should be added to the cache, otherwise remove the breakpoint from the cache.
+     * @param container the breakpoint container
+     * @param breakpoints the breakpoint to update
+     * @param add true if breakpoint should be added to the cache, otherwise remove the breakpoint from the cache
      */
     private static void updateSelfAndAncestorsBreakpointCache(BreakpointContainer container, List breakpoints, boolean add) {
     	if (container != null) {
@@ -335,9 +389,9 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     /**
      * A helper method to add a breakpoint to an existing container.
      * 
-     * @param destContainer the destination container.
-     * @param breakpoint the breakpoint to add.
-     * @param destContainerDelta the destination container delta, additional delta will be added to this delta.
+     * @param destContainer the destination container
+     * @param breakpoint the breakpoint to add
+     * @param destContainerDelta the destination container delta, additional delta will be added to this delta
      */
     static public void addBreakpoint(BreakpointContainer destContainer, IBreakpoint breakpoint, ModelDelta destContainerDelta) {
     	int index = destContainer.insertBreakpoint(breakpoint);
@@ -353,9 +407,9 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     /**
      * A helper method to add a child container to an existing container.
      * 
-     * @param destContainer the destination container.
-     * @param sourceContainer the source container.
-     * @param destContainerDelta the delta of the destination container, additional delta will be added to this delta.
+     * @param destContainer the destination container
+     * @param sourceContainer the source container
+     * @param destContainerDelta the delta of the destination container, additional delta will be added to this delta
      */
     static public void addChildContainer(BreakpointContainer destContainer, BreakpointContainer sourceContainer, ModelDelta destContainerDelta) {
     	destContainer.insertChildContainer(sourceContainer);
@@ -375,8 +429,8 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     /**
      * A helper method to append delta to the breakpoint container. This method is used by addContainer only.
      * 
-     * @param container the container to append child delta.
-     * @param containerDelta the delta of the breakpoint container, additional delta will be added to this delta. 
+     * @param container the container to append child delta
+     * @param containerDelta the delta of the breakpoint container, additional delta will be added to this delta
      * @see BreakpointContainer.addContainer
      */
     static private void appendContainerDelta(BreakpointContainer container, ModelDelta containerDelta) {
@@ -398,9 +452,9 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     /**
      * A helper method to remove the breakpoint from the container.
      * 
-     * @param container the container to remove the breakpoint.
-     * @param breakpoint the breakpoint to remove.
-     * @param containerDelta the delta of the breakpoint container, additional delta will be added to this delta.  
+     * @param container the container to remove the breakpoint
+     * @param breakpoint the breakpoint to remove
+     * @param containerDelta the delta of the breakpoint container, additional delta will be added to this delta
      */
     static public void removeBreakpoint(BreakpointContainer container, IBreakpoint breakpoint, ModelDelta containerDelta) {
     	container.removeBreakpoint(breakpoint, containerDelta);
@@ -412,8 +466,8 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     /**
      * Remove all child elements including the given container itself.
      * 
-     * @param container the breakpoint container.
-     * @param parentDelta the parent delta.
+     * @param container the breakpoint container
+     * @param parentDelta the parent delta
      */
     static public void removeAll(BreakpointContainer container, ModelDelta delta) {
     	BreakpointContainer parent = container.getParent();
@@ -449,12 +503,12 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     }
     
     /**
-     * Returns whether this is the initial container.
+     * Returns whether this is the default container.
      * 
-     * @return true if it is an initial container.
+     * @return true if it is a default container
      */
-    public boolean isInitialContainer() {
-    	return fInitialContainer;
+    boolean isDefaultContainer() {
+    	return fDefaultContainer;
     }
     
     /**
@@ -490,7 +544,7 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
     /**
      * Returns the containers nested in this container, possibly empty.
      * 
-     * @return the containers nested in this container, possibly empty
+     * @return the containers nested in this container, can be empty.
      */
     public BreakpointContainer[] getContainers() {
         return (BreakpointContainer[]) fChildContainers.toArray(new BreakpointContainer[fChildContainers.size()]);
@@ -509,17 +563,17 @@ public class BreakpointContainer extends ElementContentProvider implements IAdap
      * Returns whether this container contains the given breakpoint.
      * 
      * @param breakpoint
-     * @return whether this container contains the given breakpoint
+     * @return true if this container contains the given breakpoint
      */
     public boolean contains(IBreakpoint breakpoint) {
         return fBreakpoints.contains(breakpoint);
     }    
     
     /**
-     * Returns the leaf containers the given breakpoint is contained in.
+     * Returns the child containers for the given breakpoint.
      *  
      * @param breakpoint
-     * @return leaf containers the given breakpoint is contained in
+     * @return child containers
      */
     public BreakpointContainer[] getContainers(IBreakpoint breakpoint) {
         if (contains(breakpoint)) {

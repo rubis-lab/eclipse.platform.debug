@@ -13,6 +13,12 @@ package org.eclipse.debug.internal.ui.views.breakpoints;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.swt.widgets.Menu;
 
+/**
+ * This interface can be implement by the breakpoint manager input to overrides the standard
+ * breakpoint group local menu in the breakpoints view.
+ * 
+ * @since 3.6
+ */
 public interface IBreakpointOrganizerInputProvider {
 	
 	/**

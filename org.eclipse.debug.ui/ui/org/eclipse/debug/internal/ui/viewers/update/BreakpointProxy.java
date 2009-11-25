@@ -17,10 +17,23 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationCont
 import org.eclipse.debug.internal.ui.viewers.provisional.AbstractModelProxy;
 import org.eclipse.jface.viewers.TreePath;
 
+/**
+ * Breakpoint model proxy.
+ * 
+ * @since 3.6
+ */
 public class BreakpointProxy extends AbstractModelProxy implements ICheckboxModelProxy {
 
+	/**
+	 * Breakpoint object
+	 */
 	protected IBreakpoint fBreakpoint;
 	
+	/**
+	 * Constructor.
+	 * 
+	 * @param breakpoint the breakpoint for this model proxy
+	 */
 	public BreakpointProxy(IBreakpoint breakpoint) {
 		fBreakpoint = breakpoint;
 	}

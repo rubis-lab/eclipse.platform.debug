@@ -15,8 +15,17 @@ import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.jface.viewers.TreePath;
 
+/**
+ * Breakpoint label provider.
+ * 
+ * @since 3.6
+ */
 public class BreakpointLabelProvider extends DebugElementLabelProvider {
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.debug.internal.ui.model.elements.ElementLabelProvider#getChecked(org.eclipse.jface.viewers.TreePath, org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext)
+	 */
 	public boolean getChecked(TreePath path, IPresentationContext presentationContext) throws CoreException {
 		Object lastSegment = path.getLastSegment();
 		if (lastSegment instanceof IBreakpoint) {

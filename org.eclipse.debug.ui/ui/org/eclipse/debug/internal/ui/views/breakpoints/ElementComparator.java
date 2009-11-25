@@ -23,6 +23,11 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationCont
 import org.eclipse.debug.internal.ui.views.DebugModelPresentationContext;
 import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
 
+/**
+ * Breakpoint element comparator.
+ * 
+ * @since 3.6
+ */
 public class ElementComparator implements Comparator {
 	final private static String SPACE = " "; //$NON-NLS-1$
 	
@@ -49,6 +54,13 @@ public class ElementComparator implements Comparator {
 		}
 	}
     
+	/**
+	 * Compares two breakpoint containers.
+	 * 
+	 * @param c1
+	 * @param c2
+	 * @return
+	 */
 	private int compare(IBreakpointContainer c1, IBreakpointContainer c2) {
 		if (fContext != null) {
 			String name1 = fContext.getModelPresentation().getText(c1);
@@ -60,6 +72,13 @@ public class ElementComparator implements Comparator {
 		return -1;
 	}	
 	
+	/**
+	 * Compares two breakpoints.
+	 * 
+	 * @param b1
+	 * @param b2
+	 * @return
+	 */
 	private int compare(IBreakpoint b1, IBreakpoint b2) {
 		String text1 = IInternalDebugCoreConstants.EMPTY_STRING;
 		String text2 = IInternalDebugCoreConstants.EMPTY_STRING;
@@ -103,6 +122,15 @@ public class ElementComparator implements Comparator {
 		return result;
 	}
 	
+	/**
+	 * Compares two line breakpoints.
+	 * 
+	 * @param b1
+	 * @param b2
+	 * @param name1
+	 * @param name2
+	 * @return
+	 */
 	private int compareLineBreakpoints(IBreakpoint b1, IBreakpoint b2, String name1, String name2) {
 		int colon1 = name1.indexOf(':');
 		if (colon1 != -1) {

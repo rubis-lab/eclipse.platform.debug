@@ -14,6 +14,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.ui.IDebugUIConstants;
 
+/**
+ * Breakpoint manager input memento provider.
+ * 
+ * @since 3.6
+ */
 public class BreakpointManagerInputMementoProvider extends DebugElementMementoProvider {
 
 	/* (non-Javadoc)

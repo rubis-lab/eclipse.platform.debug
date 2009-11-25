@@ -27,7 +27,6 @@ import org.eclipse.jface.viewers.TreePath;
 /**
  * Removes a breakpoint from a breakpoint working set.
  */
-// TODO [pchuong] - diff with cvs head
 public class RemoveFromWorkingSetAction extends BreakpointSelectionAction {
 	
     private BreakpointSetElement[] fBreakpoints;

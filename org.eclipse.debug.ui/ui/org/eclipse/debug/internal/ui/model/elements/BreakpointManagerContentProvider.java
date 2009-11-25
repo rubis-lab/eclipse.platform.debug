@@ -22,6 +22,11 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.internal.ui.elements.adapters.AbstractBreakpointManagerInput;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+/**
+ * Breakpoint manager content provider.
+ * 
+ * @since 3.6
+ */
 public class BreakpointManagerContentProvider extends AbstractBreakpointManagerContentProvider {
 	/*
 	 * (non-Javadoc)
