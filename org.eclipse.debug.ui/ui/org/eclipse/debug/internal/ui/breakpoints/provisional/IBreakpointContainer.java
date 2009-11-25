@@ -9,13 +9,17 @@
  *     Wind River Systems - initial API and implementation
  *     Patrick Chuong (Texas Instruments) - Improve usability of the breakpoint view (Bug 238956)
  *******************************************************************************/
-package org.eclipse.debug.ui.breakpoints;
+package org.eclipse.debug.internal.ui.breakpoints.provisional;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.debug.core.model.IBreakpoint;
 
 /**
- * Interface representing a breakpoint category container in Breakpoints view.
+ * Interface representing a breakpoint category container elements in 
+ * Breakpoints view. Clients which provide custom content in the 
+ * Breakpoints view may implement this interface to represent container
+ * elements.  This will allow the breakpoints view to properly handle
+ * drag-and-drop and copy-paste operations.  
  * 
  * @since 3.6
  */

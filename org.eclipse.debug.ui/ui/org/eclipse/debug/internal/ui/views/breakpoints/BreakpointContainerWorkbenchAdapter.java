@@ -13,7 +13,7 @@ package org.eclipse.debug.internal.ui.views.breakpoints;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.debug.internal.core.IInternalDebugCoreConstants;
-import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
+import org.eclipse.debug.internal.ui.breakpoints.provisional.IBreakpointContainer;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;

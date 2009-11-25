@@ -30,6 +30,9 @@ import org.eclipse.debug.internal.ui.actions.breakpointGroups.RemoveFromWorkingS
 import org.eclipse.debug.internal.ui.actions.breakpoints.OpenBreakpointMarkerAction;
 import org.eclipse.debug.internal.ui.actions.breakpoints.ShowTargetBreakpointsAction;
 import org.eclipse.debug.internal.ui.actions.breakpoints.SkipAllBreakpointsAction;
+import org.eclipse.debug.internal.ui.breakpoints.provisional.IBreakpointContainer;
+import org.eclipse.debug.internal.ui.breakpoints.provisional.IBreakpointOrganizer;
+import org.eclipse.debug.internal.ui.breakpoints.provisional.IBreakpointUIConstants;
 import org.eclipse.debug.internal.ui.elements.adapters.DefaultBreakpointManagerInput;
 import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
 import org.eclipse.debug.internal.ui.viewers.model.ViewerAdapterService;
@@ -43,8 +46,6 @@ import org.eclipse.debug.ui.IBreakpointOrganizerDelegate;
 import org.eclipse.debug.ui.IBreakpointOrganizerDelegateExtension;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
-import org.eclipse.debug.ui.breakpoints.IBreakpointOrganizer;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -281,13 +282,13 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 		if (context instanceof IAdaptable) {
 			organizerInputAdapter = ((IAdaptable) context).getAdapter(IBreakpointOrganizerInputProvider.class);
 		}
-		presentationContext.setProperty(IDebugUIConstants.PROP_BREAKPOINTS_ORGANIZERS, organizerInputAdapter != null ? null : fOrganizers);
+		presentationContext.setProperty(IBreakpointUIConstants.PROP_BREAKPOINTS_ORGANIZERS, organizerInputAdapter != null ? null : fOrganizers);
 		
 		// set the view filter selection
-		presentationContext.setProperty(IDebugUIConstants.PROP_BREAKPOINTS_FILTER_SELECTION, fFilterSelection);
+		presentationContext.setProperty(IBreakpointUIConstants.PROP_BREAKPOINTS_FILTER_SELECTION, fFilterSelection);
 
 		// set the element comparator 
-		presentationContext.setProperty(IDebugUIConstants.PROP_BREAKPOINTS_ELEMENT_COMPARATOR, new ElementComparator(presentationContext));
+		presentationContext.setProperty(IBreakpointUIConstants.PROP_BREAKPOINTS_ELEMENT_COMPARATOR, new ElementComparator(presentationContext));
 		
 		showViewer();
 		getViewer().setInput(context);
@@ -332,7 +333,7 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 		// set the track selection property for non-standard model to track the debug context
 		final TreeModelViewer viewer = getTreeModelViewer();
 		if (viewer != null) {
-			viewer.getPresentationContext().setProperty(IDebugUIConstants.PROP_BREAKPOINTS_TRACK_SELECTION, new Boolean(fIsTrackingSelection));
+			viewer.getPresentationContext().setProperty(IBreakpointUIConstants.PROP_BREAKPOINTS_TRACK_SELECTION, new Boolean(fIsTrackingSelection));
 		}
 	}
 	
@@ -534,7 +535,7 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 		TreeModelViewer viewer = getTreeModelViewer();
 		if (viewer != null) {
 			// update the presentation context organizer
-			viewer.getPresentationContext().setProperty(IDebugUIConstants.PROP_BREAKPOINTS_ORGANIZERS, fOrganizers);			
+			viewer.getPresentationContext().setProperty(IBreakpointUIConstants.PROP_BREAKPOINTS_ORGANIZERS, fOrganizers);			
 
 			// notify input the organizer has changed
 			Object input = viewer.getInput();			
@@ -556,7 +557,7 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 		TreeModelViewer viewer = getTreeModelViewer();
 		if (viewer != null) {
 			// update the presentation context filter
-			viewer.getPresentationContext().setProperty(IDebugUIConstants.PROP_BREAKPOINTS_FILTER_SELECTION, fFilterSelection);
+			viewer.getPresentationContext().setProperty(IBreakpointUIConstants.PROP_BREAKPOINTS_FILTER_SELECTION, fFilterSelection);
 			
 			// notify input the filter has changed
 			Object input = viewer.getInput();

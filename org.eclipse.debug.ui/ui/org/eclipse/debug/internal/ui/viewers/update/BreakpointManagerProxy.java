@@ -10,6 +10,8 @@
  *****************************************************************/
 package org.eclipse.debug.internal.ui.viewers.update;
 
+import org.eclipse.debug.internal.ui.breakpoints.provisional.IBreakpointOrganizer;
+import org.eclipse.debug.internal.ui.breakpoints.provisional.IBreakpointUIConstants;
 import org.eclipse.debug.internal.ui.elements.adapters.AbstractBreakpointManagerInput;
 import org.eclipse.debug.internal.ui.model.elements.AbstractBreakpointManagerContentProvider;
 import org.eclipse.debug.internal.ui.viewers.model.ViewerAdapterService;
@@ -17,8 +19,6 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementContentPr
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.provisional.AbstractModelProxy;
 import org.eclipse.debug.internal.ui.views.breakpoints.ElementComparator;
-import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.debug.ui.breakpoints.IBreakpointOrganizer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -69,9 +69,9 @@ public class BreakpointManagerProxy extends AbstractModelProxy {
 			IElementContentProvider provider = ViewerAdapterService.getContentProvider(input);
 			if (provider instanceof AbstractBreakpointManagerContentProvider) {
 				fProvider = (AbstractBreakpointManagerContentProvider) provider;
-				fOrganizers = (IBreakpointOrganizer[]) context.getProperty(IDebugUIConstants.PROP_BREAKPOINTS_ORGANIZERS);
-				fSelection = (IStructuredSelection) context.getProperty(IDebugUIConstants.PROP_BREAKPOINTS_FILTER_SELECTION);
-				fComparator = (ElementComparator) context.getProperty(IDebugUIConstants.PROP_BREAKPOINTS_ELEMENT_COMPARATOR);
+				fOrganizers = (IBreakpointOrganizer[]) context.getProperty(IBreakpointUIConstants.PROP_BREAKPOINTS_ORGANIZERS);
+				fSelection = (IStructuredSelection) context.getProperty(IBreakpointUIConstants.PROP_BREAKPOINTS_FILTER_SELECTION);
+				fComparator = (ElementComparator) context.getProperty(IBreakpointUIConstants.PROP_BREAKPOINTS_ELEMENT_COMPARATOR);
 			}
 		}
 	}

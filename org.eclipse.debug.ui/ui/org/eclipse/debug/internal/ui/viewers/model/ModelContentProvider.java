@@ -492,7 +492,7 @@ abstract class ModelContentProvider implements IContentProvider, IModelChangedLi
                                 if (DEBUG_STATE_SAVE_RESTORE
                                     && (DEBUG_PRESENTATION_ID == null || DEBUG_PRESENTATION_ID.equals(getPresentationContext()
                                         .getId()))) {
-                                    System.out.println("STATE RESTORE INPUT COMARE ENDED : " + fRequest + " - MATCHING STATE FOUND"); //$NON-NLS-1$ //$NON-NLS-2$
+                                    System.out.println("STATE RESTORE INPUT COMPARE ENDED : " + fRequest + " - MATCHING STATE FOUND"); //$NON-NLS-1$ //$NON-NLS-2$
                                 }
 
                                 stateDelta.setElement(input);
@@ -527,7 +527,7 @@ abstract class ModelContentProvider implements IContentProvider, IModelChangedLi
                                 if (DEBUG_STATE_SAVE_RESTORE
                                     && (DEBUG_PRESENTATION_ID == null || DEBUG_PRESENTATION_ID.equals(getPresentationContext()
                                         .getId()))) {
-                                    System.out.println("STATE RESTORE INPUT COMARE ENDED : " + fRequest + " - NO MATCHING STATE"); //$NON-NLS-1$ //$NON-NLS-2$
+                                    System.out.println("STATE RESTORE INPUT COMPARE ENDED : " + fRequest + " - NO MATCHING STATE"); //$NON-NLS-1$ //$NON-NLS-2$
                                 }
                             }
                         } catch (IOException e) {
@@ -550,7 +550,7 @@ abstract class ModelContentProvider implements IContentProvider, IModelChangedLi
                     if (DEBUG_STATE_SAVE_RESTORE
                         && (DEBUG_PRESENTATION_ID == null || DEBUG_PRESENTATION_ID.equals(getPresentationContext()
                             .getId()))) {
-                        System.out.println("STATE RESTORE INPUT COMARE BEGIN : " + fRequest); //$NON-NLS-1$
+                        System.out.println("STATE RESTORE INPUT COMPARE BEGIN : " + fRequest); //$NON-NLS-1$
                     }
                     notifyStateUpdate(input, UPDATE_BEGINS, fRequest);
                     defaultProvider.encodeElements(new IElementMementoRequest[] { fRequest });

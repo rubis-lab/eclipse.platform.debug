@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.ui.breakpoints;
+package org.eclipse.debug.internal.ui.breakpoints.provisional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,9 +21,15 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
 /**
- * Category for breakpoints in "other" categories.
+ * Category for breakpoints in "other" categories.   Clients which provide 
+ * custom content in the Breakpoints view may instantiate this object to 
+ * represent elements in a breakpoint organizer that do not fall into any known
+ * category.
  * 
  * @since 3.6
+ * 
+ * @see IBreakpointContainer
+ * @see org.eclipse.debug.ui.IBreakpointOrganizerDelegate
  */
 public class OtherBreakpointCategory extends PlatformObject implements IWorkbenchAdapter {
     

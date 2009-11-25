@@ -27,6 +27,7 @@ import org.eclipse.debug.core.model.IRegisterGroup;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IThread;
 import org.eclipse.debug.core.model.IVariable;
+import org.eclipse.debug.internal.ui.breakpoints.provisional.IBreakpointContainer;
 import org.eclipse.debug.internal.ui.elements.adapters.AsynchronousDebugLabelAdapter;
 import org.eclipse.debug.internal.ui.elements.adapters.DefaultBreakpointManagerInput;
 import org.eclipse.debug.internal.ui.elements.adapters.DefaultViewerInputProvider;
@@ -80,7 +81,6 @@ import org.eclipse.debug.internal.ui.viewers.provisional.IAsynchronousLabelAdapt
 import org.eclipse.debug.internal.ui.viewers.update.DefaultModelProxyFactory;
 import org.eclipse.debug.internal.ui.viewers.update.DefaultModelSelectionPolicyFactory;
 import org.eclipse.debug.internal.ui.views.memory.renderings.MemorySegment;
-import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
 import org.eclipse.debug.ui.sourcelookup.ISourceDisplay;
 
 /**

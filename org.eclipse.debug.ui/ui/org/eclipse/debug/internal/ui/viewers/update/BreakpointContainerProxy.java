@@ -12,10 +12,10 @@ package org.eclipse.debug.internal.ui.viewers.update;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.debug.internal.ui.breakpoints.provisional.IBreakpointContainer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.ICheckboxModelProxy;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.provisional.AbstractModelProxy;
-import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
 import org.eclipse.jface.viewers.TreePath;
 
 /**

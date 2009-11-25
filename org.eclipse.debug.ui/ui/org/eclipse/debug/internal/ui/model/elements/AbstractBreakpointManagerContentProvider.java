@@ -28,6 +28,7 @@ import org.eclipse.debug.core.IBreakpointManager;
 import org.eclipse.debug.core.IBreakpointsListener;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
+import org.eclipse.debug.internal.ui.breakpoints.provisional.IBreakpointOrganizer;
 import org.eclipse.debug.internal.ui.elements.adapters.AbstractBreakpointManagerInput;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
@@ -39,7 +40,6 @@ import org.eclipse.debug.internal.ui.views.breakpoints.ElementComparator;
 import org.eclipse.debug.internal.ui.views.breakpoints.IBreakpointFilterListener;
 import org.eclipse.debug.internal.ui.views.breakpoints.IBreakpointOrganizerListener;
 import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.debug.ui.breakpoints.IBreakpointOrganizer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 /**

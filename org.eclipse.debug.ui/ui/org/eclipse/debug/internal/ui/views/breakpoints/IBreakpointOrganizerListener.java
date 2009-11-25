@@ -10,8 +10,8 @@
  *****************************************************************/
 package org.eclipse.debug.internal.ui.views.breakpoints;
 
+import org.eclipse.debug.internal.ui.breakpoints.provisional.IBreakpointOrganizer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
-import org.eclipse.debug.ui.breakpoints.IBreakpointOrganizer;
 
 /**
  * This interface can be implements by a breakpoint manager provider.

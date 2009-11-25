@@ -13,9 +13,9 @@ package org.eclipse.debug.internal.ui.actions.breakpointGroups;
 import java.util.List;
 
 import org.eclipse.debug.internal.ui.IDebugHelpContextIds;
-import org.eclipse.debug.ui.breakpoints.IBreakpointContainer;
+import org.eclipse.debug.internal.ui.breakpoints.provisional.IBreakpointContainer;
+import org.eclipse.debug.internal.ui.breakpoints.provisional.OtherBreakpointCategory;
 import org.eclipse.debug.internal.ui.views.breakpoints.BreakpointsView;
-import org.eclipse.debug.ui.breakpoints.OtherBreakpointCategory;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
