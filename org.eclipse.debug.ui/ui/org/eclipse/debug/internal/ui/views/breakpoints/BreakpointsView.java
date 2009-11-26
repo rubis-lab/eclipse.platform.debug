@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Patrick Chuong (Texas Instruments) - Initial API and implementation (Bug 238956)
+ *     IBM Corporation - ongoing enhancements and bug fixing
  *****************************************************************/
 package org.eclipse.debug.internal.ui.views.breakpoints;
 
@@ -42,6 +43,7 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerInputUpdat
 import org.eclipse.debug.internal.ui.viewers.model.provisional.TreeModelViewer;
 import org.eclipse.debug.internal.ui.views.DebugUIViewsMessages;
 import org.eclipse.debug.internal.ui.views.variables.VariablesView;
+import org.eclipse.debug.internal.ui.views.variables.details.AvailableDetailPanesAction;
 import org.eclipse.debug.ui.IBreakpointOrganizerDelegate;
 import org.eclipse.debug.ui.IBreakpointOrganizerDelegateExtension;
 import org.eclipse.debug.ui.IDebugModelPresentation;
@@ -196,6 +198,10 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 			menu.add(action);
 		}
 		menu.add(new Separator(IDebugUIConstants.EMPTY_RENDER_GROUP));
+		action = new AvailableDetailPanesAction(this);
+		if (isDetailPaneVisible() && action.isEnabled()) {
+			menu.add(action);
+		}
 		menu.add(new Separator(IDebugUIConstants.BREAKPOINT_GROUP_GROUP));
 
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
