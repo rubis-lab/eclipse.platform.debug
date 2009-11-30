@@ -136,7 +136,9 @@ abstract public class StateTests extends TestCase implements ITestModelUpdatesLi
         ModelDelta savedDelta = new ModelDelta(model.getRootElement(), IModelDelta.NO_CHANGE);
         fViewer.saveElementState(path0, savedDelta, IModelDelta.EXPAND | IModelDelta.SELECT);
         
-        Assert.assertTrue( deltaMatches(updateDelta, savedDelta) );
+        if (!deltaMatches(updateDelta, savedDelta) ) {
+            Assert.fail("Expected:\n" + updateDelta.toString() + "\nGot:\n" + savedDelta); 
+        }
     }
 
     boolean deltaMatches(ModelDelta requested, ModelDelta received) {
@@ -668,7 +670,9 @@ abstract public class StateTests extends TestCase implements ITestModelUpdatesLi
         ModelDelta restoredState = new ModelDelta(model.getRootElement(), IModelDelta.NO_CHANGE);
         fViewer.saveElementState(TreePath.EMPTY, restoredState, IModelDelta.EXPAND | IModelDelta.SELECT);
 
-        Assert.assertTrue( deltaMatches(originalState, restoredState) );
+        if (!deltaMatches(originalState, restoredState)) {
+            Assert.fail("Expected:\n" + originalState.toString() + "\nGot:\n" + restoredState);
+        }
     }
 
     public void testSaveAndRstore2() {
@@ -715,7 +719,9 @@ abstract public class StateTests extends TestCase implements ITestModelUpdatesLi
         ModelDelta restoredState = new ModelDelta(model.getRootElement(), IModelDelta.NO_CHANGE);
         fViewer.saveElementState(TreePath.EMPTY, restoredState, IModelDelta.EXPAND | IModelDelta.SELECT);
 
-        Assert.assertTrue( deltaMatches(originalState, restoredState) );
+        if (!deltaMatches(originalState, restoredState)) {
+            Assert.fail("Expected:\n" + originalState.toString() + "\nGot:\n" + restoredState);
+        }
     }
 
 }
