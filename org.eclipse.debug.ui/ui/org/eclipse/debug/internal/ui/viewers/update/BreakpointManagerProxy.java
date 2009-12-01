@@ -10,16 +10,12 @@
  *****************************************************************/
 package org.eclipse.debug.internal.ui.viewers.update;
 
-import org.eclipse.debug.internal.ui.breakpoints.provisional.IBreakpointOrganizer;
-import org.eclipse.debug.internal.ui.breakpoints.provisional.IBreakpointUIConstants;
 import org.eclipse.debug.internal.ui.elements.adapters.AbstractBreakpointManagerInput;
 import org.eclipse.debug.internal.ui.model.elements.AbstractBreakpointManagerContentProvider;
 import org.eclipse.debug.internal.ui.viewers.model.ViewerAdapterService;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementContentProvider;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.provisional.AbstractModelProxy;
-import org.eclipse.debug.internal.ui.views.breakpoints.ElementComparator;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 
 /**
@@ -39,21 +35,6 @@ public class BreakpointManagerProxy extends AbstractModelProxy {
 	protected AbstractBreakpointManagerInput fInput;
 	
 	/**
-	 * The root breakpoint organizer for this model proxy
-	 */
-	protected IBreakpointOrganizer[] fOrganizers;
-	
-	/**
-	 * The element comparator for this model proxy
-	 */
-	protected ElementComparator fComparator;
-	
-	/**
-	 * The initial selection for this model proxy
-	 */
-	protected IStructuredSelection fSelection;
-
-	/**
 	 * Constructor.
 	 * 
 	 * @param input the breakpoint manager input
@@ -69,9 +50,6 @@ public class BreakpointManagerProxy extends AbstractModelProxy {
 			IElementContentProvider provider = ViewerAdapterService.getContentProvider(input);
 			if (provider instanceof AbstractBreakpointManagerContentProvider) {
 				fProvider = (AbstractBreakpointManagerContentProvider) provider;
-				fOrganizers = (IBreakpointOrganizer[]) context.getProperty(IBreakpointUIConstants.PROP_BREAKPOINTS_ORGANIZERS);
-				fSelection = (IStructuredSelection) context.getProperty(IBreakpointUIConstants.PROP_BREAKPOINTS_FILTER_SELECTION);
-				fComparator = (ElementComparator) context.getProperty(IBreakpointUIConstants.PROP_BREAKPOINTS_ELEMENT_COMPARATOR);
 			}
 		}
 	}
@@ -83,7 +61,7 @@ public class BreakpointManagerProxy extends AbstractModelProxy {
 	public void installed(Viewer viewer) {
 		super.installed(viewer);
 		if (fProvider != null) {
-			fProvider.registerModelProxy(fInput, this, fOrganizers, fSelection, fComparator);
+			fProvider.registerModelProxy(fInput, this);
 		}
 	}
 	
@@ -93,7 +71,7 @@ public class BreakpointManagerProxy extends AbstractModelProxy {
 	 */
 	public synchronized void dispose() {
 		if (fProvider != null) {
-			fProvider.unregisterModelProxy(fInput);
+			fProvider.unregisterModelProxy(fInput, this);
 		}
 		super.dispose();		
 	}

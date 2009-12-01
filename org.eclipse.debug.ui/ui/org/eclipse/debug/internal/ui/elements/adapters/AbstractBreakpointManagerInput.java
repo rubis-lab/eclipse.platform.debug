@@ -23,7 +23,7 @@ public abstract class AbstractBreakpointManagerInput {
 	/**
 	 * The presentation context of the breakpoints view.
 	 */
-	final protected IPresentationContext fContext;
+	final private IPresentationContext fContext;
 	
 	/**
 	 * Constructor.

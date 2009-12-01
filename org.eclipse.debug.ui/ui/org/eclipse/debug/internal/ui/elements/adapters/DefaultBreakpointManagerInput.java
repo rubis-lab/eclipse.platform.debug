@@ -34,8 +34,8 @@ public class DefaultBreakpointManagerInput extends AbstractBreakpointManagerInpu
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-		if (fContext != null) {
-			return fContext.hashCode();
+		if (getContext() != null) {
+			return getContext().hashCode();
 		} else {
 			return 1;
 		}
@@ -48,9 +48,9 @@ public class DefaultBreakpointManagerInput extends AbstractBreakpointManagerInpu
 	public boolean equals(Object arg0) {
 		if ( (arg0 != null) && arg0.getClass().equals(this.getClass()) ) {
 
-			IPresentationContext context = ((DefaultBreakpointManagerInput) arg0).fContext;
-			if (fContext != null && context != null)
-				return fContext.equals(context);
+			IPresentationContext context = ((DefaultBreakpointManagerInput) arg0).getContext();
+			if (getContext() != null && context != null)
+				return getContext().equals(context);
 		} 
 		
 		return super.equals(arg0);				

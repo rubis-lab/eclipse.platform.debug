@@ -133,5 +133,9 @@ public class WorkingSetCategory extends PlatformObject implements IWorkbenchAdap
     private boolean isDefault() {
         return fWorkingSet.equals(BreakpointSetOrganizer.getDefaultWorkingSet());
     }
+    
+    public String toString() {
+        return fWorkingSet.getName();
+    }
 }
 

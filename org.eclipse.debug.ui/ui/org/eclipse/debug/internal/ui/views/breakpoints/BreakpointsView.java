@@ -36,8 +36,6 @@ import org.eclipse.debug.internal.ui.breakpoints.provisional.IBreakpointOrganize
 import org.eclipse.debug.internal.ui.breakpoints.provisional.IBreakpointUIConstants;
 import org.eclipse.debug.internal.ui.elements.adapters.DefaultBreakpointManagerInput;
 import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
-import org.eclipse.debug.internal.ui.viewers.model.ViewerAdapterService;
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementContentProvider;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerInputUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.TreeModelViewer;
@@ -542,13 +540,6 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 		if (viewer != null) {
 			// update the presentation context organizer
 			viewer.getPresentationContext().setProperty(IBreakpointUIConstants.PROP_BREAKPOINTS_ORGANIZERS, fOrganizers);			
-
-			// notify input the organizer has changed
-			Object input = viewer.getInput();			
-			IElementContentProvider provider = ViewerAdapterService.getContentProvider(input);
-			if (provider instanceof IBreakpointOrganizerListener) {
-				((IBreakpointOrganizerListener) provider).setOrganizers(input, viewer.getPresentationContext(), organizers);				
-			}
 		}
 	}
 
@@ -564,13 +555,6 @@ public class BreakpointsView extends VariablesView implements ISelectionListener
 		if (viewer != null) {
 			// update the presentation context filter
 			viewer.getPresentationContext().setProperty(IBreakpointUIConstants.PROP_BREAKPOINTS_FILTER_SELECTION, fFilterSelection);
-			
-			// notify input the filter has changed
-			Object input = viewer.getInput();
-			IElementContentProvider provider = ViewerAdapterService.getContentProvider(input);
-			if (provider instanceof IBreakpointFilterListener) {				
-				((IBreakpointFilterListener) provider).setFilterSelection(input, viewer.getPresentationContext(), ss);
-			}
 		}
 	}
 	
