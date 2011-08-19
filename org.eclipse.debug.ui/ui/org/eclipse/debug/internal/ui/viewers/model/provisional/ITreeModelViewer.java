@@ -9,16 +9,9 @@
  *     Wind River Systems - initial API and implementation
  *     IBM Corporation - ongoing bug fixes and enhancements
  *******************************************************************************/
-package org.eclipse.debug.internal.ui.viewers.model;
+package org.eclipse.debug.internal.ui.viewers.model.provisional;
 
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedListener;
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IStateUpdateListener;
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdateListener;
-import org.eclipse.debug.internal.ui.viewers.model.provisional.ModelDelta;
-import org.eclipse.debug.internal.ui.viewers.model.provisional.TreeModelViewer;
-import org.eclipse.debug.internal.ui.viewers.model.provisional.VirtualTreeModelViewer;
+import org.eclipse.debug.internal.ui.viewers.model.ILabelUpdateListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.TreePath;
@@ -47,6 +40,7 @@ public interface ITreeModelViewer extends ISelectionProvider {
      * Returns the Display object that this viewer is in.  The
      * display object can be used by clients to access the display thread
      * to call the viewer methods.
+     * @return The display.
      */
     public Display getDisplay();
 
@@ -61,6 +55,7 @@ public interface ITreeModelViewer extends ISelectionProvider {
      * Returns the current input of this viewer, or <code>null</code>
      * if none. The viewer's input provides the "model" for the viewer's
      * content.
+     * @return Input object
      */
     public Object getInput();
 
@@ -74,6 +69,7 @@ public interface ITreeModelViewer extends ISelectionProvider {
     
     /**
      * Returns the current selection in viewer.
+     * @return selection object
      */
     public ISelection getSelection();
 
@@ -140,7 +136,7 @@ public interface ITreeModelViewer extends ISelectionProvider {
      * events to be notified when element labels are updated.
      * 
      * @param path Path of the element.
-     * @param columnIdx ID of the column for which to return the label data.
+     * @param columnId ID of the column for which to return the label data.
      * @return Label object containing the label information.  Can be 
      * <code>null</code> if the given element is not found or is not 
      * materialized in the virtual viewer.
@@ -149,33 +145,39 @@ public interface ITreeModelViewer extends ISelectionProvider {
     
     /**
      * Registers the specified listener for view update notifications.
+     * @param listener Listener to add
      */
     public void addViewerUpdateListener(IViewerUpdateListener listener);
     
     /**
      * Removes the specified listener from update notifications.
+     * @param listener Listener to remove
      */
     public void removeViewerUpdateListener(IViewerUpdateListener listener);
     
     /**
      * Registers the specified listener for state update notifications.
+     * @param listener Listener to add
      * @since 3.6
      */
     public void addStateUpdateListener(IStateUpdateListener listener);
     
     /**
      * Removes the specified listener from state update notifications.
+     * @param listener Listener to remove
      * @since 3.6
      */
     public void removeStateUpdateListener(IStateUpdateListener listener);
     
     /**
      * Registers the specified listener for view label update notifications.
+     * @param listener Listener to add
      */
     public void addLabelUpdateListener(ILabelUpdateListener listener);
     
     /**
      * Removes the specified listener from view label update notifications.
+     * @param listener Listener to remove
      */
     public void removeLabelUpdateListener(ILabelUpdateListener listener);
     
@@ -183,11 +185,13 @@ public interface ITreeModelViewer extends ISelectionProvider {
      * Registers the given listener for model delta notification.
      * This listener is called immediately after the viewer processes
      * the delta.  
+     * @param listener Listener to add
      */
     public void addModelChangedListener(IModelChangedListener listener);
     
     /**
      * Removes the given listener from model delta notification.
+     * @param listener Listener to remove
      */
     public void removeModelChangedListener(IModelChangedListener listener);
     
@@ -211,9 +215,31 @@ public interface ITreeModelViewer extends ISelectionProvider {
     /**
      * Causes the viewer to process the given delta as if it came from a
      * model proxy.  This method is intended to be used to restore state
-     * saved using {@link #saveElementState(TreePath, ModelDelta)}.
+     * saved using {@link #saveElementState(TreePath, ModelDelta, int)}.
      * 
      * @param delta Delta to process.
      */
     public void updateViewer(IModelDelta delta);
+    
+    /**
+     * Triggers an update of the given element and its children.  If 
+     * multiple instances of the given element are found in the tree, 
+     * they will all be updated.
+     * 
+     * @param element Element to update.
+     */
+    public void refresh(Object element);
+
+    /**
+     * Triggers a full update of all the elements in the tree.
+     */
+    public void refresh();
+
+    /**
+     * Returns the paths at which the given elment is found realized in viewer
+     * or an empty array if not found.
+     * @param element Element to find.
+     * @return Array of paths for given element.
+     */
+    public TreePath[] getElementPaths(Object element);
 }

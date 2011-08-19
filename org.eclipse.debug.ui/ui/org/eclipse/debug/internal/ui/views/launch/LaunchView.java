@@ -505,7 +505,7 @@ public class LaunchView extends AbstractDebugView implements ISelectionChangedLi
 		fAddToFavoritesAction = new AddToFavoritesAction();
 		fEditSourceAction = new EditSourceLookupPathAction(this);
 		fLookupAction = new LookupSourceAction(this);
-		setAction(FIND_ACTION, new VirtualFindAction((InternalTreeModelViewer) getViewer())); 
+		setAction(FIND_ACTION, new VirtualFindAction((TreeModelViewer) getViewer())); 
         
         addCapabilityAction(new TerminateCommandAction(), TERMINATE);
         addCapabilityAction(new DisconnectCommandAction(), DISCONNECT);

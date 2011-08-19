@@ -98,7 +98,7 @@ public interface ITreeModelContentProvider extends ILazyTreePathContentProvider 
     /**
      * Notification the given element is being unmapped.
      * 
-     * @param path
+     * @param path Path to unmap
      */
     public void unmapPath(TreePath path);
 
@@ -107,7 +107,7 @@ public interface ITreeModelContentProvider extends ILazyTreePathContentProvider 
      * coming from the model.  Any delta flags which are hidden by the mask
      * will be ignored.
      *  
-     * @param the bit mask for <code>IModelDelta</code> flags
+     * @param mask for <code>IModelDelta</code> flags
      * 
      * @since 3.6
      */
@@ -135,11 +135,13 @@ public interface ITreeModelContentProvider extends ILazyTreePathContentProvider 
 
     /**
      * Registers the specified listener for view update notifications.
+     * @param listener Listener to add
      */
     public void addViewerUpdateListener(IViewerUpdateListener listener);
     
     /**
      * Removes the specified listener from update notifications.
+     * @param listener Listener to remove
      */
     public void removeViewerUpdateListener(IViewerUpdateListener listener);
     
@@ -147,23 +149,27 @@ public interface ITreeModelContentProvider extends ILazyTreePathContentProvider 
      * Registers the given listener for model delta notification.
      * This listener is called immediately after the viewer processes
      * the delta.  
+     * @param listener Listener to add
      */
     public void addModelChangedListener(IModelChangedListener listener);
     
     /**
      * Removes the given listener from model delta notification.
+     * @param listener Listener to remove
      */
     public void removeModelChangedListener(IModelChangedListener listener);
     
 
     /**
      * Registers the specified listener for state update notifications.
+     * @param listener Listener to add
      * @since 3.6
      */
     public void addStateUpdateListener(IStateUpdateListener listener);
 
     /**
      * Removes the specified listener from state update notifications.
+     * @param listener Listener to remove
      * @since 3.6
      */
     public void removeStateUpdateListener(IStateUpdateListener listener);
@@ -204,5 +210,15 @@ public interface ITreeModelContentProvider extends ILazyTreePathContentProvider 
      * 
      * @since 3.7
      */
-    public void inputAboutToChange(ITreeModelContentProviderTarget viewer, Object oldInput, Object newInput);
+    public void inputAboutToChange(IInternalTreeModelViewer viewer, Object oldInput, Object newInput);
+    
+    /**
+     * Notifies the receiver that the given element has had its 
+     * checked state modified in the viewer.
+     * 
+     * @param path Path of the element that had its checked state changed
+     * @param checked The new checked state of the element
+     * @return false if the check state should not change
+     */
+    public boolean setChecked(TreePath path, boolean checked);
 }

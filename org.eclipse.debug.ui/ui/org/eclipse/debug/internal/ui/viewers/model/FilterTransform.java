@@ -330,14 +330,14 @@ public class FilterTransform {
 	 * @return whether the filter was added - returns <code>true</code> if the filter is
 	 *  added, and <code>false</code> if the index was already filtered
 	 */
-	public synchronized boolean addFilteredIndex(TreePath parentPath, int childIndex, Object element) {
+	public boolean addFilteredIndex(TreePath parentPath, int childIndex, Object element) {
 		return root.addFilter(parentPath, childIndex, 0, element);
 	}
 	
 	/**
 	 * Clears all filtered elements.
 	 */
-	public synchronized void clear() {
+	public void clear() {
 		root = new Node();
 	}
 	
@@ -346,7 +346,7 @@ public class FilterTransform {
 	 * 
 	 * @param path element path
 	 */
-	public synchronized void clear(TreePath path) {
+	public void clear(TreePath path) {
 		root.clear(path, 0);
 	}
 	
@@ -354,10 +354,10 @@ public class FilterTransform {
 	 * Clears the given filtered index of the specified parent. I.e.
 	 * the child still exists, but is no longer filtered.
 	 * 
-	 * @param path parent path
+	 * @param parentPath parent path
 	 * @param index index to clear
 	 */
-	public synchronized void clear(TreePath parentPath, int index) {
+	public void clear(TreePath parentPath, int index) {
 		root.clear(parentPath, index, 0);
 	}	
 	
@@ -369,7 +369,7 @@ public class FilterTransform {
 	 * @param childIndex index of child element in model space
 	 * @return the given index in view coordinates, or -1 if filtered.
 	 */
-	public synchronized int modelToViewIndex(TreePath parentPath, int childIndex) {
+	public int modelToViewIndex(TreePath parentPath, int childIndex) {
 		Node parentNode = root.find(parentPath, 0);
 		if (parentNode == null) {
 			return childIndex;
@@ -385,7 +385,7 @@ public class FilterTransform {
 	 * @param childIndex index of child element in view space
 	 * @return the given index in model coordinates
 	 */
-	public synchronized int viewToModelIndex(TreePath parentPath, int childIndex) {
+	public int viewToModelIndex(TreePath parentPath, int childIndex) {
 		Node parentNode = root.find(parentPath, 0);
 		if (parentNode == null) {
 			return childIndex;
@@ -400,7 +400,7 @@ public class FilterTransform {
 	 * @param viewCount number of children in the view
 	 * @return number of children in the model
 	 */
-	public synchronized int viewToModelCount(TreePath parentPath, int viewCount) {
+	public int viewToModelCount(TreePath parentPath, int viewCount) {
 		Node parentNode = root.find(parentPath, 0);
 		if (parentNode != null) {
 			if (parentNode.filteredIndexes != null) {
@@ -418,7 +418,7 @@ public class FilterTransform {
 	 * @param count child count in model space
 	 * @return the given count in view coordinates
 	 */
-	public synchronized int modelToViewCount(TreePath parentPath, int count) {
+	public int modelToViewCount(TreePath parentPath, int count) {
 		Node parentNode = root.find(parentPath, 0);
 		if (parentNode == null) {
 			return count;
@@ -433,7 +433,7 @@ public class FilterTransform {
 	 * @param index index of child element
 	 * @return whether the child is currently filtered
 	 */
-	public synchronized boolean isFiltered(TreePath parentPath, int index) {
+	public boolean isFiltered(TreePath parentPath, int index) {
 		Node parentNode = root.find(parentPath, 0);
 		if (parentNode == null) {
 			return false;
@@ -444,7 +444,7 @@ public class FilterTransform {
 	/**
 	 * Returns filtered children of the given parent, or <code>null</code> if none.
 	 * 
-	 * @param parentPath
+	 * @param parentPath Path of parent element
 	 * @return filtered children or <code>null</code>
 	 */
 	public int[] getFilteredChildren(TreePath parentPath) {
@@ -461,7 +461,7 @@ public class FilterTransform {
 	 * @param parentPath path to parent element
 	 * @param childCount child count
 	 */
-	public synchronized void setModelChildCount(TreePath parentPath, int childCount) {
+	public void setModelChildCount(TreePath parentPath, int childCount) {
 		Node parentNode = root.find(parentPath, 0);
 		if (parentNode != null) {
 			parentNode.setModelChildCount(childCount);
@@ -475,7 +475,7 @@ public class FilterTransform {
 	 * @param parentPath path to parent element
 	 * @param index index of child element in model coordinates
 	 */
-	public synchronized void removeElementFromFilters(TreePath parentPath, int index) {
+	public void removeElementFromFilters(TreePath parentPath, int index) {
 		Node parentNode = root.find(parentPath, 0);
 		if (parentNode != null) {
 			parentNode.removeElementFromFilters(index);
@@ -488,8 +488,9 @@ public class FilterTransform {
 	 * 
 	 * @param parentPath path to parent element
 	 * @param element removed element
+	 * @return true if element was removed
 	 */
-	public synchronized boolean removeElementFromFilters(TreePath parentPath, Object element) {
+	public boolean removeElementFromFilters(TreePath parentPath, Object element) {
 		Node parentNode = root.find(parentPath, 0);
 		if (parentNode != null) {
 			int index = parentNode.indexOfFilteredElement(element);

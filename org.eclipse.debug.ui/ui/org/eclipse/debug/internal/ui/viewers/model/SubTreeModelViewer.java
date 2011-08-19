@@ -53,7 +53,7 @@ public class SubTreeModelViewer extends TreeModelViewer {
     private DelegatingTreeModelViewer fDelegatingViewer;
     
     /**
-     * Returns the root element's model tree path. 
+     * @return Returns the root element's model tree path. 
      */
     public TreePath getRootPath() {
         return fRootPath;
@@ -80,7 +80,7 @@ public class SubTreeModelViewer extends TreeModelViewer {
      * full model paths that the providers expect.
      */
     public class DelegatingTreeModelViewer extends Viewer 
-        implements ITreeModelLabelProviderTarget, ITreeModelContentProviderTarget 
+        implements IInternalTreeModelViewer 
     {
         public void reveal(TreePath path, int index) {
             if (path.startsWith(fRootPath, null)) {
@@ -357,6 +357,27 @@ public class SubTreeModelViewer extends TreeModelViewer {
         public void clearSelectionQuiet() {
         	SubTreeModelViewer.this.clearSelectionQuiet();
         }
+        
+        public TreePath[] getElementPaths(Object element) {
+            TreePath[] subViewerPaths = SubTreeModelViewer.this.getElementPaths(element);
+            TreePath[] retVal = new TreePath[subViewerPaths.length];
+            for (int i = 0; i < subViewerPaths.length; i++) {
+                retVal[i] = createFullPath(subViewerPaths[i]);
+            }
+            return retVal;
+        }
+        
+        public boolean getElementChecked(TreePath path) {
+            return SubTreeModelViewer.this.getElementChecked(createSubPath(path));
+        }
+        
+        public boolean getElementGrayed(TreePath path) {
+            return SubTreeModelViewer.this.getElementGrayed(createSubPath(path));
+        }
+        
+        public void setElementChecked(TreePath path, boolean checked, boolean grayed) {
+            SubTreeModelViewer.this.setElementChecked(createSubPath(path), checked, grayed);
+        }
     }
 
     
@@ -467,8 +488,12 @@ public class SubTreeModelViewer extends TreeModelViewer {
             fBaseProvider.inputChanged(fDelegatingViewer, oldInput, newInput);
         }
         
-        public void inputAboutToChange(ITreeModelContentProviderTarget viewer, Object oldInput, Object newInput) {
+        public void inputAboutToChange(IInternalTreeModelViewer viewer, Object oldInput, Object newInput) {
             fBaseProvider.inputAboutToChange(viewer, oldInput, newInput);
+        }
+        
+        public boolean setChecked(TreePath path, boolean checked) {
+            return fBaseProvider.setChecked(createFullPath(path), checked);
         }
     }
 
@@ -482,7 +507,7 @@ public class SubTreeModelViewer extends TreeModelViewer {
 
         private TreeModelLabelProvider fBaseProvider;
         
-        public SubTreeModelLabelProvider(ITreeModelLabelProviderTarget viewer) {
+        public SubTreeModelLabelProvider(IInternalTreeModelViewer viewer) {
             fBaseProvider = new TreeModelLabelProvider(viewer);
         }
         

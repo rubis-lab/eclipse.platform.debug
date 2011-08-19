@@ -11,9 +11,13 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers.model;
 
+import org.eclipse.debug.internal.ui.viewers.model.provisional.ITreeModelViewer;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.RGB;
 
 /**
  * This interface must be implemented by the viewer which uses the
@@ -23,13 +27,13 @@ import org.eclipse.jface.viewers.ViewerFilter;
  * 
  * @since 3.5
  */
-public interface ITreeModelContentProviderTarget extends ITreeModelViewer {
+public interface IInternalTreeModelViewer extends ITreeModelViewer {
 
     /**
      * Returns this viewer's filters.
      * 
      * @return an array of viewer filters
-     * @see StructuredViewer#setFilters(ViewerFilter[])
+     * @see org.eclipse.jface.viewers.StructuredViewer#setFilters(ViewerFilter[])
      */    
     public ViewerFilter[] getFilters();
 
@@ -47,22 +51,6 @@ public interface ITreeModelContentProviderTarget extends ITreeModelViewer {
      * @param element Element to update.
      */
     public void update(Object element);
-
-    /**
-     * Triggers an update of the given element and its children.  If 
-     * multiple instances of the given element are found in the tree, 
-     * they will all be updated.
-     * 
-     * @param element Element to update.
-     */
-    public void refresh(Object element);
-
-    /**
-     * Triggers a full update of all the elements in the tree.
-     * 
-     * @param element Element to update.
-     */
-    public void refresh();
 
     /**
      * Sets the given object to be the element at the given index of the given parent.
@@ -85,7 +73,7 @@ public interface ITreeModelContentProviderTarget extends ITreeModelViewer {
      * </p>
      * 
      * @param elementOrTreePath The element, or tree path.
-     * @param count 
+     * @param count new value
      */
     public void setChildCount(final Object elementOrTreePath, final int count);
     
@@ -97,9 +85,8 @@ public interface ITreeModelContentProviderTarget extends ITreeModelViewer {
      * This method should only be called by the viewer framework.
      * </p>
      * 
-     * @param elementOrTreePath
-     *            the element, or tree path
-     * @param hasChildren
+     * @param elementOrTreePath the element, or tree path
+     * @param hasChildren new value.
      */
     public void setHasChildren(final Object elementOrTreePath, final boolean hasChildren);
 
@@ -145,17 +132,13 @@ public interface ITreeModelContentProviderTarget extends ITreeModelViewer {
      */
     public void expandToLevel(Object elementOrTreePath, int level);
 
-    
-
     /**
      * Removes the given element from the viewer. The selection is updated if
      * necessary.
      * <p>
      * This method should only be called by the viewer framework.
      * </p>
-     *
-     * @param elementsOrTreePaths
-     *            the element, or the tree path to the element
+     * @param elementOrTreePath the element, or the tree path to the element
      */    
     public void remove(Object elementOrTreePath);
 
@@ -178,20 +161,20 @@ public interface ITreeModelContentProviderTarget extends ITreeModelViewer {
      * <p>
      * This method should only be called by the viewer framework.
      * </p>
+     * @param parentOrTreePath the parent element, or the tree path to the parent 
      *
-     * @param parentElementOrTreePath
-     *            the parent element, or the tree path to the parent
-     * @param element
-     *            the element
-     * @param position
-     *            a 0-based position relative to the model, or -1 to indicate
-     *            the last position
+     * @param element the element
+     * @param position a 0-based position relative to the model, or -1 to indicate
+     * the last position
      */    
     public void insert(Object parentOrTreePath, Object element, int position);
 
     /**
      * Returns whether the candidate selection should override the current
      * selection.
+     * @param current Current selection in viewer. 
+     * @param candidate Proposed new selection.
+     * @return whether new selection should override the current
      */
     public boolean overrideSelection(ISelection current, ISelection candidate);
 
@@ -207,7 +190,8 @@ public interface ITreeModelContentProviderTarget extends ITreeModelViewer {
     public boolean getExpandedState(Object elementOrTreePath);
     
     /**
-     * Returns whether the given element has children.
+     * @param elementOrTreePath Path to element
+     * @return Returns whether the given element has children.
      * 
      * @since 3.6
      */
@@ -217,23 +201,31 @@ public interface ITreeModelContentProviderTarget extends ITreeModelViewer {
      * Returns the child count of the element at the given path. <br>
      * Note: The child count may be incorrect if the element is not
      * expanded in the tree.
+     * @param path Path to get count for. 
+     * @return The child count.
      */
     public int getChildCount(TreePath path);
 
     /**
      * Returns the element which is a child of the element at the
      * given path, with the given index.
+     * @param path Path to parent element.
+     * @param index Index of child element.
+     * @return Child element.
      */
     public Object getChildElement(TreePath path, int index);
     
     /**
-     * Returns the tree path of the element that is at the top of the 
+     * @return Returns the tree path of the element that is at the top of the 
      * viewer.
      */
     public TreePath getTopElementPath();
     
     /** 
      * Finds the index of the given element with a parent of given path.
+     * 
+     * @param parentPath Path of parent element. 
+     * @param element Element to find.
      * 
      * @return The element's index, or -1 if not found.
      */
@@ -243,8 +235,8 @@ public interface ITreeModelContentProviderTarget extends ITreeModelViewer {
      * Returns a boolean indicating whether all the child elements of the 
      * given parent have been realized already.
      * 
-     * @param parentPath
-     * @return
+     * @param parentPath Path of parent element.
+     * @return true if all children realized
      *
      * @since 3.6
      */
@@ -258,4 +250,56 @@ public interface ITreeModelContentProviderTarget extends ITreeModelViewer {
      * @since 3.6
      */
     public void clearSelectionQuiet();
+    
+    /**
+     * Sets the element's display information.
+     * <p>
+     * This method should only be called by the viewer framework.
+     * </p>
+     * 
+     * @param path Element path. 
+     * @param numColumns Number of columns in the data.
+     * @param labels Array of labels.  The array cannot to be 
+     * <code>null</code>, but values within the array may be.
+     * @param images Array of image descriptors, may be <code>null</code>.
+     * @param fontDatas Array of fond data objects, may be <code>null</code>.
+     * @param foregrounds Array of RGB values for foreground colors, may be 
+     * <code>null</code>.
+     * @param backgrounds Array of RGB values for background colors, may be 
+     * <code>null</code>.
+     */
+    public void setElementData(TreePath path, int numColumns, String[] labels, ImageDescriptor[] images, FontData[] fontDatas, RGB[] foregrounds, RGB[] backgrounds); 
+
+    /**
+     * Returns identifiers of the visible columns in this viewer, or <code>null</code>
+     * if there is currently no column presentation.
+     *  
+     * @return visible columns or <code>null</code>
+     */
+    public String[] getVisibleColumns();    
+    
+    /**
+     * Sets the element check state data.
+     * 
+     * @param path Path of element to check.
+     * @param checked if true, item will be checked
+     * @param grayed if true item will be grayed
+     */
+    public void setElementChecked(TreePath path, boolean checked, boolean grayed);    
+
+    /**
+     * Retrieves the element check state.
+     * 
+     * @param path Path of element to return check state for.
+     * @return checked
+     */
+    public boolean getElementChecked(TreePath path);    
+
+    /**
+     * Retrieves the element's check box grayed state.
+     * 
+     * @param path Path of element to return grayed state for.
+     * @return grayed
+     */
+    public boolean getElementGrayed(TreePath path);        
 }

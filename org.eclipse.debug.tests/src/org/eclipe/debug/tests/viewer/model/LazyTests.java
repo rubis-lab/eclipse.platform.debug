@@ -15,7 +15,7 @@ import junit.framework.TestCase;
 
 import org.eclipe.debug.tests.viewer.model.TestModel.TestElement;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.debug.internal.ui.viewers.model.ITreeModelContentProviderTarget;
+import org.eclipse.debug.internal.ui.viewers.model.IInternalTreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.ModelDelta;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -36,7 +36,7 @@ abstract public class LazyTests extends TestCase implements ITestModelUpdatesLis
     
     Display fDisplay;
     Shell fShell;
-    ITreeModelContentProviderTarget fViewer;
+    IInternalTreeModelViewer fViewer;
     TestModelUpdatesListener fListener;
     
     public LazyTests(String name) {
@@ -59,7 +59,7 @@ abstract public class LazyTests extends TestCase implements ITestModelUpdatesLis
         fShell.open ();
     }
 
-    abstract protected ITreeModelContentProviderTarget createViewer(Display display, Shell shell);
+    abstract protected IInternalTreeModelViewer createViewer(Display display, Shell shell);
         /**
      * @throws java.lang.Exception
      */

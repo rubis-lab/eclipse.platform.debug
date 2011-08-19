@@ -15,9 +15,7 @@ import java.util.Arrays;
 import junit.framework.Assert;
 
 import org.eclipse.core.runtime.PlatformObject;
-import org.eclipse.debug.internal.ui.viewers.model.ITreeModelCheckProviderTarget;
-import org.eclipse.debug.internal.ui.viewers.model.ITreeModelContentProviderTarget;
-import org.eclipse.debug.internal.ui.viewers.model.ITreeModelViewer;
+import org.eclipse.debug.internal.ui.viewers.model.IInternalTreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.ICheckUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IChildrenCountUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IChildrenUpdate;
@@ -34,6 +32,7 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxyFactor
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelSelectionPolicy;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelSelectionPolicyFactory;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.ITreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.ModelDelta;
 import org.eclipse.debug.internal.ui.viewers.provisional.AbstractModelProxy;
 import org.eclipse.jface.viewers.TreePath;
@@ -328,12 +327,11 @@ public class TestModel implements IElementContentProvider, IElementLabelProvider
     }
 
     public void validateData(ITreeModelViewer _viewer, TreePath path, boolean expandedElementsOnly) {
-        ITreeModelContentProviderTarget viewer = (ITreeModelContentProviderTarget)_viewer;
+        IInternalTreeModelViewer viewer = (IInternalTreeModelViewer)_viewer;
         TestElement element = getElement(path);
         if ( Boolean.TRUE.equals(_viewer.getPresentationContext().getProperty(ICheckUpdate.PROP_CHECK)) ) {
-            ITreeModelCheckProviderTarget checkTarget = (ITreeModelCheckProviderTarget)_viewer;  
-            Assert.assertEquals(element.getChecked(), checkTarget.getElementChecked(path));
-            Assert.assertEquals(element.getGrayed(), checkTarget.getElementGrayed(path));
+            Assert.assertEquals(element.getChecked(), viewer.getElementChecked(path));
+            Assert.assertEquals(element.getGrayed(), viewer.getElementGrayed(path));
         }
         
         if (!expandedElementsOnly || path.getSegmentCount() == 0 || viewer.getExpandedState(path) ) {
@@ -590,17 +588,28 @@ public class TestModel implements IElementContentProvider, IElementLabelProvider
     
     public static TestModel simpleSingleLevel() {
         TestModel model = new TestModel();
-        model.setRoot( new TestElement(model, "root", new TestElement[] {
-            new TestElement(model, "1", true, true, new TestElement[0]),
-            new TestElement(model, "2", true, false, new TestElement[0]),
-            new TestElement(model, "3", false, true, new TestElement[0]),
-            new TestElement(model, "4", false, false, new TestElement[0]),
-            new TestElement(model, "5", new TestElement[0]),
-            new TestElement(model, "6", new TestElement[0])
-        }) );
+        model.setRoot( new TestElement(model, "root", makeSingleLevelModelElements(model, 6, "")));
         return model;
     }
+
+    public static TestElement[] makeSingleLevelModelElements(TestModel model, int length, String prefix) {
+        TestElement[] elements = new TestElement[length];
+        for (int i = 1; i <= length; i++) {
+            String name = prefix + i;
+            elements[i - 1] = new TestElement(model, name, new TestElement[0]);
+        }
+        return elements;
+    }    
     
+    public static TestElement[] makeMultiLevelElements(TestModel model, int depth, String prefix) {
+        TestElement[] elements = new TestElement[depth];
+        for (int i = 0; i < depth; i++) {
+            String name = prefix + i;
+            elements[i] = new TestElement(model, name, makeMultiLevelElements(model, i, name + "."));
+        }
+        return elements;
+    }    
+
     public static TestModel simpleMultiLevel() {
         TestModel model = new TestModel();
         model.setRoot( new TestElement(model, "root", new TestElement[] {

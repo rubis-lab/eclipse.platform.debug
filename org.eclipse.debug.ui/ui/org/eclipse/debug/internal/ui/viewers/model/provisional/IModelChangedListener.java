@@ -16,7 +16,7 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
  *
  * @since 3.2
  * @see IModelProxy
- * @see IModelDeltaNode
+ * @see IModelDelta
  */
 public interface IModelChangedListener {
 	

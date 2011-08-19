@@ -40,9 +40,7 @@ public interface IChildrenUpdate extends IViewerUpdate {
 	 * Sets the child for this request's parent at the given offset.
 	 * 
 	 * @param child child
-	 * @param index child offset
-	 * 
-	 * TODO: what to do with <code>null</code>
+	 * @param offset child offset
 	 */
 	public void setChild(Object child, int offset); 	
 }

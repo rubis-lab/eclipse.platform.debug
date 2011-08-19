@@ -84,7 +84,6 @@ public class PresentationContext implements IPresentationContext {
      * Constructs a presentation context for the given id and part.
      * The presentation context id and window are derived from the part.
      * 
-     * @param id presentation context id
      * @param part presentation context part, can NOT be <code>null</code>
      */
     public PresentationContext(IWorkbenchPart part) {

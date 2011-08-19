@@ -26,7 +26,7 @@ public interface IElementEditor {
 	 * if none.
 	 * 
 	 * @param context presentation context
-	 * @param id column id
+	 * @param columnId column id
 	 * @param element object to be edited
 	 * @param parent parent control to create the cell editor in
 	 * @return cell editor or <code>null</code>
@@ -36,6 +36,8 @@ public interface IElementEditor {
 	/**
 	 * Returns a cell modifier for the specified element in the given context
 	 * or <code>null</code> if none.
+	 * @param context Presentation context
+	 * @param element Model element.
 	 * 
 	 * @return cell modifier or <code>null</code>
 	 */

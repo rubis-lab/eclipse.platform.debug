@@ -19,9 +19,9 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.eclipe.debug.tests.viewer.model.TestModel.TestElement;
-import org.eclipse.debug.internal.ui.viewers.model.ITreeModelContentProviderTarget;
-import org.eclipse.debug.internal.ui.viewers.model.ITreeModelViewer;
+import org.eclipse.debug.internal.ui.viewers.model.IInternalTreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.ITreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.ModelDelta;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeSelection;
@@ -65,8 +65,8 @@ abstract public class PopupTests extends TestCase implements ITestModelUpdatesLi
         fShell.open ();
     }
 
-    protected ITreeModelContentProviderTarget getCTargetViewer() {
-        return (ITreeModelContentProviderTarget)fViewer;
+    protected IInternalTreeModelViewer getCTargetViewer() {
+        return (IInternalTreeModelViewer)fViewer;
     }
     
 
@@ -147,7 +147,7 @@ abstract public class PopupTests extends TestCase implements ITestModelUpdatesLi
 
         // Validate the expansion state BEFORE posting the delta.
         
-        ITreeModelContentProviderTarget contentProviderViewer = (ITreeModelContentProviderTarget)fViewer; 
+        IInternalTreeModelViewer contentProviderViewer = (IInternalTreeModelViewer)fViewer; 
         Assert.assertFalse(contentProviderViewer.getExpandedState(path_root_3));
         
         model.postDelta(deltaRoot);

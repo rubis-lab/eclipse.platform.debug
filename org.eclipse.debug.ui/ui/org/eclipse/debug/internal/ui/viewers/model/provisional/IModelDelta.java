@@ -28,7 +28,7 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
  * <p>
  * Clients are not intended to implement this interface directly. Instead, clients
  * creating and firing model deltas should create instances of
- * {@link org.eclipse.debug.internal.ui.viewers.update.ModelDelta}.
+ * {@link ModelDelta}.
  * </p>
  * </p>
  * @since 3.2
@@ -185,7 +185,7 @@ public interface IModelDelta {
 	/**
 	 * Accepts the given visitor.
 	 * 
-	 * @param visitor
+	 * @param visitor delta visitor to accept
 	 * @since 3.3
 	 */
 	public void accept(IModelDeltaVisitor visitor);

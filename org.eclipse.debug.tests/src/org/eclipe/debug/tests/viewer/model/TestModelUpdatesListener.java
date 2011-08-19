@@ -28,8 +28,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.internal.ui.viewers.model.ElementCompareRequest;
 import org.eclipse.debug.internal.ui.viewers.model.ILabelUpdateListener;
-import org.eclipse.debug.internal.ui.viewers.model.ITreeModelContentProviderTarget;
-import org.eclipse.debug.internal.ui.viewers.model.ITreeModelViewer;
+import org.eclipse.debug.internal.ui.viewers.model.IInternalTreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IChildrenCountUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IChildrenUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IHasChildrenUpdate;
@@ -38,6 +37,7 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedList
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxy;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IStateUpdateListener;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.ITreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdateListener;
 import org.eclipse.jface.viewers.TreePath;
@@ -255,11 +255,11 @@ public class TestModelUpdatesListener
         addUpdates(path, element, levels, ALL_UPDATES_COMPLETE);
     }
 
-    public void addStateUpdates(ITreeModelContentProviderTarget viewer, TreePath path, TestElement element) {
+    public void addStateUpdates(IInternalTreeModelViewer viewer, TreePath path, TestElement element) {
         addUpdates(viewer, path, element, -1, STATE_UPDATES);
     }
     
-    public void addStateUpdates(ITreeModelContentProviderTarget viewer, IModelDelta pendingDelta, int deltaFlags) {
+    public void addStateUpdates(IInternalTreeModelViewer viewer, IModelDelta pendingDelta, int deltaFlags) {
     	TreePath treePath = getViewerTreePath(pendingDelta);
     	if ( !TreePath.EMPTY.equals(treePath) && (pendingDelta.getFlags() & deltaFlags) != 0 ) {
     		addUpdates(viewer, treePath, (TestElement)treePath.getLastSegment(), 0, STATE_UPDATES);
@@ -286,6 +286,33 @@ public class TestModelUpdatesListener
         fRedundantLabelUpdateExceptions.add(path);
     }
     
+    public boolean checkCoalesced(TreePath path, int offset, int length) {
+        for (Iterator itr = fChildrenUpdatesCompleted.iterator(); itr.hasNext();) {
+            IChildrenUpdate update = (IChildrenUpdate)itr.next();
+            if (path.equals( update.getElementPath() ) &&
+                offset == update.getOffset() &&
+                length == update.getLength()) 
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+
+    
+    public Set getHasChildrenUpdatesCompleted() {
+        return fHasChildrenUpdatesCompleted;
+    }
+    
+    public Set getChildCountUpdatesCompleted() {
+        return fChildCountUpdatesCompleted;
+    }
+    
+    public Set getChildrenUpdatesCompleted() {
+        return fChildrenUpdatesCompleted;
+    }
+    
     /**
      * Returns a tree path for the node, *not* including the root element.
      * 
@@ -308,7 +335,7 @@ public class TestModelUpdatesListener
         addUpdates(null, path, element, levels, flags);
     }
 
-    public void addUpdates(ITreeModelContentProviderTarget viewer, TreePath path, TestElement element, int levels, int flags) {    
+    public void addUpdates(IInternalTreeModelViewer viewer, TreePath path, TestElement element, int levels, int flags) {    
         if (!path.equals(TreePath.EMPTY)) {
             if ((flags & LABEL_UPDATES) != 0) {
                 fLabelUpdates.add(path);
@@ -763,6 +790,8 @@ public class TestModelUpdatesListener
     public String toString() {
         return toString(ALL_UPDATES_COMPLETE | MODEL_CHANGED_COMPLETE | STATE_RESTORE_COMPLETE | VIEWER_UPDATES_STARTED | LABEL_UPDATES_STARTED | STATE_UPDATES);
     }
+    
+    
 }
 
 

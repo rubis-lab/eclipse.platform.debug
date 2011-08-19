@@ -36,7 +36,7 @@ public interface ILabelUpdate extends IViewerUpdate {
 	/**
 	 * Sets the text of the label of the specified column. Cannot be <code>null</code>.
 	 * 
-	 * @param text
+	 * @param text to set to viewer
 	 * @param columnIndex column index (0 when no columns)
 	 */
     public void setLabel(String text, int columnIndex);
@@ -44,7 +44,7 @@ public interface ILabelUpdate extends IViewerUpdate {
     /**
      * Sets the font of the label.
      * 
-     * @param fontData
+     * @param fontData to set to viewer
      * @param columnIndex column index (0 when no columns)
      */
     public void setFontData(FontData fontData, int columnIndex);
@@ -52,7 +52,7 @@ public interface ILabelUpdate extends IViewerUpdate {
     /**
      * Sets the image of the label.
      * 
-     * @param image
+     * @param image to set to viewer
      * @param columnIndex column index (0 when no columns)
      */
     public void setImageDescriptor(ImageDescriptor image, int columnIndex);
@@ -60,7 +60,7 @@ public interface ILabelUpdate extends IViewerUpdate {
     /**
      * Sets the foreground color of the label.
      * 
-     * @param foreground
+     * @param foreground to set to viewer
      * @param columnIndex column index (0 when no columns)
      */
     public void setForeground(RGB foreground, int columnIndex);
@@ -68,7 +68,7 @@ public interface ILabelUpdate extends IViewerUpdate {
     /**
      * Sets the background color of the label.
      * 
-     * @param background
+     * @param background to set to viewer
      * @param columnIndex column index (0 when no columns)
      */
     public void setBackground(RGB background, int columnIndex);

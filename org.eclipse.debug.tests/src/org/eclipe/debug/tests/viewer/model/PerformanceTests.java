@@ -14,11 +14,12 @@ import junit.framework.TestCase;
 
 import org.eclipe.debug.tests.viewer.model.TestModel.TestElement;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.debug.internal.ui.viewers.model.ITreeModelContentProviderTarget;
-import org.eclipse.debug.internal.ui.viewers.model.ITreeModelViewer;
+import org.eclipse.debug.internal.ui.viewers.model.IInternalTreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.ITreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.ModelDelta;
 import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -55,7 +56,7 @@ abstract public class PerformanceTests extends TestCase implements ITestModelUpd
         fShell.open ();
     }
 
-    abstract protected ITreeModelContentProviderTarget createViewer(Display display, Shell shell);
+    abstract protected IInternalTreeModelViewer createViewer(Display display, Shell shell);
     
     /**
      * @throws java.lang.Exception
@@ -87,7 +88,7 @@ abstract public class PerformanceTests extends TestCase implements ITestModelUpd
     public void testRefreshStruct() throws InterruptedException {
         TestModel model = new TestModel();
         model.setRoot( new TestElement(model, "root", new TestElement[0] ) ); 
-        model.setElementChildren(TreePath.EMPTY, makeModelElements(model, getTestModelDepth(), "model"));
+        model.setElementChildren(TreePath.EMPTY, TestModel.makeMultiLevelElements(model, getTestModelDepth(), "model."));
         
         fViewer.setAutoExpandLevel(-1);
 
@@ -105,7 +106,6 @@ abstract public class PerformanceTests extends TestCase implements ITestModelUpd
             for (int i = 0; i < 100; i++) {
                 // Update the model
                 model.setAllAppendix(" - pass " + i);
-                //model.setElementChildren(TreePath.EMPTY, makeModelElements(model, getTestModelDepth(), "pass " + i));
                 
                 TestElement element = model.getRootElement();
                 fListener.reset(TreePath.EMPTY, element, -1, false, false);
@@ -114,7 +114,6 @@ abstract public class PerformanceTests extends TestCase implements ITestModelUpd
                 model.postDelta(new ModelDelta(element, IModelDelta.CONTENT));
                 while (!fListener.isFinished(ALL_UPDATES_COMPLETE | MODEL_CHANGED_COMPLETE)) 
                     if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
-                model.validateData(fViewer, TreePath.EMPTY);
                 meter.stop();
                 System.gc();
             }
@@ -129,7 +128,7 @@ abstract public class PerformanceTests extends TestCase implements ITestModelUpd
     public void testRefreshStructReplaceElements() throws InterruptedException {
         TestModel model = new TestModel();
         model.setRoot( new TestElement(model, "root", new TestElement[0] ) ); 
-        model.setElementChildren(TreePath.EMPTY, makeModelElements(model, getTestModelDepth(), "model"));
+        model.setElementChildren(TreePath.EMPTY, TestModel.makeMultiLevelElements(model, getTestModelDepth(), "model."));
         
         fViewer.setAutoExpandLevel(-1);
 
@@ -144,9 +143,9 @@ abstract public class PerformanceTests extends TestCase implements ITestModelUpd
         Performance perf = Performance.getDefault();
         PerformanceMeter meter = perf.createPerformanceMeter(perf.getDefaultScenarioId(this));
         try {
-            for (int i = 0; i < 2000; i++) {
+            for (int i = 0; i < 100; i++) {
                 // Update the model
-                model.setElementChildren(TreePath.EMPTY, makeModelElements(model, getTestModelDepth(), "pass " + i));
+                model.setElementChildren(TreePath.EMPTY, TestModel.makeMultiLevelElements(model, getTestModelDepth(), "pass " + i + "."));
                 
                 TestElement element = model.getRootElement();
                 fListener.reset(TreePath.EMPTY, element, -1, false, false);
@@ -155,7 +154,6 @@ abstract public class PerformanceTests extends TestCase implements ITestModelUpd
                 model.postDelta(new ModelDelta(element, IModelDelta.CONTENT));
                 while (!fListener.isFinished(ALL_UPDATES_COMPLETE | MODEL_CHANGED_COMPLETE)) 
                     if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
-                model.validateData(fViewer, TreePath.EMPTY);
                 meter.stop();
                 System.gc();
             }
@@ -167,12 +165,100 @@ abstract public class PerformanceTests extends TestCase implements ITestModelUpd
         }
     }
 
-    private TestElement[] makeModelElements(TestModel model, int depth, String prefix) {
-        TestElement[] elements = new TestElement[depth];
-        for (int i = 0; i < depth; i++) {
-            String name = prefix + "." + i;
-            elements[i] = new TestElement(model, name, makeModelElements(model, i, name));
+    
+    public void testRefreshList() throws InterruptedException {
+        TestModel model = new TestModel();
+        model.setRoot( new TestElement(model, "root", new TestElement[0] ) ); 
+        int numElements = (int)Math.pow(2, getTestModelDepth());
+        model.setElementChildren(TreePath.EMPTY, TestModel.makeSingleLevelModelElements(model, numElements, "model."));
+        
+        fViewer.setAutoExpandLevel(-1);
+
+        // Create the listener
+        fListener.reset(TreePath.EMPTY, model.getRootElement(), -1, true, false); 
+
+        // Set the input into the view and update the view.
+        fViewer.setInput(model.getRootElement());
+        while (!fListener.isFinished()) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        model.validateData(fViewer, TreePath.EMPTY);
+
+        Performance perf = Performance.getDefault();
+        PerformanceMeter meter = perf.createPerformanceMeter(perf.getDefaultScenarioId(this));
+        try {
+            for (int i = 0; i < 100; i++) {
+                // Update the model
+                model.setAllAppendix(" - pass " + i);
+                
+                TestElement element = model.getRootElement();
+                fListener.reset(TreePath.EMPTY, element, -1, false, false);
+                
+                meter.start();
+                model.postDelta(new ModelDelta(element, IModelDelta.CONTENT));
+                while (!fListener.isFinished(ALL_UPDATES_COMPLETE | MODEL_CHANGED_COMPLETE)) 
+                    if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+                meter.stop();
+                System.gc();
+            }
+            
+            meter.commit();
+            perf.assertPerformance(meter);
+        } finally {
+            meter.dispose();
         }
-        return elements;
     }
+
+    public void testSaveAndRestore() throws InterruptedException {
+        //TreeModelViewerAutopopulateAgent autopopulateAgent = new TreeModelViewerAutopopulateAgent(fViewer);
+        TestModel model = TestModel.simpleMultiLevel();
+
+        // expand all elements
+        fViewer.setAutoExpandLevel(-1);
+        
+        // Create the listener, only check the first level
+        fListener.reset(TreePath.EMPTY, model.getRootElement(), -1, true, false); 
+
+        // Set the input into the view and update the view.
+        fViewer.setInput(model.getRootElement());
+        while (!fListener.isFinished()) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        model.validateData(fViewer, TreePath.EMPTY);
+
+        // Set a selection in view
+        fViewer.setSelection(new TreeSelection(model.findElement("3.2.3")));
+                
+        // Turn off the auto-expand now since we want to text the auto-expand logic
+        fViewer.setAutoExpandLevel(-1);
+
+        Performance perf = Performance.getDefault();
+        PerformanceMeter meter = perf.createPerformanceMeter(perf.getDefaultScenarioId(this));
+        try {
+            for (int i = 0; i < 100; i++) {
+                // Update the model
+                model.setAllAppendix(" - pass " + i);
+
+                // Set the viewer input to null.  This will trigger the view to save the viewer state.
+                fListener.reset(true, false);
+        
+                meter.start();
+                fViewer.setInput(null);
+                while (!fListener.isFinished(STATE_SAVE_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        
+                // Set the viewer input back to the model.  When view updates are complete
+                // the viewer 
+                // Note: disable redundant updates because the reveal delta triggers one.
+                fListener.reset(TreePath.EMPTY, model.getRootElement(), 1, false, false);
+                // TODO: add state updates somehow?
+                fViewer.setInput(model.getRootElement());
+                while (!fListener.isFinished(ALL_UPDATES_COMPLETE | STATE_RESTORE_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+                meter.stop();
+                System.gc();
+            }
+            
+            meter.commit();
+            perf.assertPerformance(meter);
+        } finally {
+            meter.dispose();
+        }
+
+    }
+    
 }

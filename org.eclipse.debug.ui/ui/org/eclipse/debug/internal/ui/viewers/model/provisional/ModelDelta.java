@@ -19,7 +19,7 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
  * <p>
  * Clients may instantiate this class; not intended to be subclassed.
  * </p>
- * @see org.eclipse.debug.internal.ui.viewers.IModelDelta
+ * @see IModelDelta
  * @since 3.2
  */
 public class ModelDelta implements IModelDelta {
@@ -332,7 +332,7 @@ public class ModelDelta implements IModelDelta {
 	/**
 	 * Sets this delta's element
 	 * 
-	 * @param element
+	 * @param element element to set
 	 */
 	public void setElement(Object element) {
 		fElement = element;
@@ -341,7 +341,7 @@ public class ModelDelta implements IModelDelta {
 	/**
 	 * Sets this delta's flags.
 	 * 
-	 * @param flags
+	 * @param flags new flags to set
 	 */
 	public void setFlags(int flags) {
 		fFlags = flags;
@@ -350,7 +350,7 @@ public class ModelDelta implements IModelDelta {
     /**
      * Sets this delta's index
      * 
-     * @param index
+     * @param index new index to set.
      * @since 3.6
      */
     public void setIndex(int index) {
@@ -360,7 +360,7 @@ public class ModelDelta implements IModelDelta {
 	/**
      * Sets this delta's child count.
      * 
-     * @param count
+     * @param count New child count to set.
      */
     public void setChildCount(int count) {
         fChildCount = count;

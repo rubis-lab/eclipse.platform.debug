@@ -8,7 +8,7 @@
  * Contributors:
  *     Wind River Systems - initial API and implementation
  *******************************************************************************/
-package org.eclipse.debug.internal.ui.viewers.model;
+package org.eclipse.debug.internal.ui.viewers.model.provisional;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -18,11 +18,14 @@ import org.eclipse.swt.SWT;
 
 
 /**
- * Tree of virtual items that is analogous to SWT's tree control. 
+ * Tree of virtual items that is analogous to SWT's tree control.  The tree is used
+ * by the {@link VirtualTreeModelViewer}. 
  * 
- * @since 3.5
+ * @since 3.8
+ * 
+ * @see VirtualTreeModelViewer
  */
-class VirtualTree extends VirtualItem {
+public class VirtualTree extends VirtualItem {
 
     /**
      * Lazy virtual tree does not retrieve elements or labels,
@@ -30,10 +33,26 @@ class VirtualTree extends VirtualItem {
      */
     private boolean fLazy;
     
-    /**
-     * The item currently at the top of the "virtual" view-port.
-     */
-    private VirtualItem fTopItem;
+    private IVirtualItemValidator fValidator;
+    
+    private class SelectedItemValidator implements IVirtualItemValidator {
+        public boolean isItemVisible(VirtualItem item) {
+            // visible items.  For now only mark the selected items as visible.
+            for (int i = 0; i < fSelection.length; i++) {
+                VirtualItem selectionItem = fSelection[i]; 
+                while (selectionItem != null) {
+                    if (item.equals(selectionItem)) {
+                        return true;
+                    }
+                    selectionItem = selectionItem.getParent();
+                }
+            }
+            return false;
+        }
+        
+        public void showItem(VirtualItem item) {
+        }
+    }
     
     /**
      * Interface for listeners that need to be notified when items 
@@ -70,83 +89,95 @@ class VirtualTree extends VirtualItem {
      */
     private VirtualItem[] fSelection = new VirtualItem[0];
     
-    VirtualTree(int style) {
+    /**
+     * Constructs the virtual tree with the given style and validator.
+     * 
+     * @param style The style flag.  Only SWT.VIRTUAL flag is used.
+     * @param validator Item validator used to determine item visibility.
+     */
+    public VirtualTree(int style, IVirtualItemValidator validator) {
         super(null, new VirtualItem.Index(0));
         fLazy = (style & SWT.VIRTUAL) != 0;
+        if (fLazy && validator == null) {
+            fValidator = new SelectedItemValidator();
+        } else { 
+            fValidator = validator;
+        }
         clearNeedsLabelUpdate();
         clearNeedsDataUpdate();
     }
     
-    void dispose() {
+    /**
+     * Disposes the virtual tree.
+     */
+    public void dispose() {
         super.dispose();
         fVirtualItemListeners.clear();
     }
 
-    void setNeedsCountUpdate() {
+    public void setNeedsCountUpdate() {
         super.setNeedsCountUpdate();
         clearNeedsLabelUpdate();
         clearNeedsDataUpdate();
     }
     
-    void setNeedsLabelUpdate() {
+    public void setNeedsLabelUpdate() {
         // no-op
     }
 
-    void setData(String key, Object data) {
+    public void setData(String key, Object data) {
         super.setData(key, data);
         if (data == null) {
             clearNeedsDataUpdate();
         }
     }
     
-    void addItemListener(IVirtualItemListener listener) {
+    /**
+     * Adds a listener for when virtual items are revealed in the view.   
+     * @param listener Listener to add to list of listeners.
+     */
+    public void addItemListener(IVirtualItemListener listener) {
         fVirtualItemListeners.add(listener);
     }
 
-    void removeItemListener(IVirtualItemListener listener) {
+    public void removeItemListener(IVirtualItemListener listener) {
         fVirtualItemListeners.remove(listener);
     }
 
-    VirtualItem[] getSelection() {
+    public VirtualItem[] getSelection() {
         return fSelection;
     }
     
-    void setSelection(VirtualItem[] items) {
+    public void setSelection(VirtualItem[] items) {
         fSelection = items;
     }
     
-    void showItem(VirtualItem item) {
-        setTopItem(item);
+    public void showItem(VirtualItem item) {
+        if (fValidator != null) {
+            fValidator.showItem(item);
+        }
     }
     
-    void fireItemDisposed(VirtualItem item) {
+    public void fireItemDisposed(VirtualItem item) {
         for (Iterator itr = fVirtualItemListeners.iterator(); itr.hasNext();) {
             ((IVirtualItemListener)itr.next()).disposed(item);
         }
     }
     
-    void fireItemRevealed(VirtualItem item) {
+    public void fireItemRevealed(VirtualItem item) {
         for (Iterator itr = fVirtualItemListeners.iterator(); itr.hasNext();) {
             ((IVirtualItemListener)itr.next()).revealed(item);
         }        
     }
 
-    void setData(Object data) {
+    public void setData(Object data) {
         super.setData(data);
         // The root item always has children as long as the input is non-null, 
         // so that it should be expanded.
         setHasItems(data != null);
     }
 
-    void setTopItem(VirtualItem item) {
-        fTopItem = item;
-    }
-    
-    VirtualItem getTopItem() {
-        return fTopItem;
-    }
-    
-    void setHasItems(boolean hasChildren) {
+    public void setHasItems(boolean hasChildren) {
         super.setHasItems(hasChildren);
         // The root item is always expanded as long as it has children. 
         if (hasChildren) {
@@ -154,30 +185,25 @@ class VirtualTree extends VirtualItem {
         }
     }
     
-    boolean isItemVisible(VirtualItem item) {
-        if (!fLazy) {
-            // If not in lazy mode, all items are visible.
-            return true;
-        } else {
-            // TODO: use top item and visible item count to determine list of 
-            // visible items.  For now only mark the selected items as visible.
-            for (int i = 0; i < fSelection.length; i++) {
-                VirtualItem selectionItem = fSelection[i]; 
-                while (selectionItem != null) {
-                    if (item.equals(selectionItem)) {
-                        return true;
-                    }
-                    selectionItem = selectionItem.getParent();
-                }
-            }
-            return false;
+    /**
+     * Returns whether the given item is considered visible by the tree as 
+     * determined by its virtual item validator.
+     *  
+     * @param item Item to check.
+     * @return true if items is vislble.
+     * @see IVirtualItemValidator
+     */
+    public boolean isItemVisible(VirtualItem item) {
+        if (fLazy) {
+            return fValidator.isItemVisible(item);
         }
+        return true;
     }
 
     /**
      * Validates the entire tree.
      */
-    void validate() {
+    public void validate() {
         validate(VirtualTree.this);
     }
     
@@ -187,7 +213,7 @@ class VirtualTree extends VirtualItem {
      * 
      * @param item The item which to validate.
      */
-    void validate(VirtualItem item) {
+    public void validate(VirtualItem item) {
         if (item.needsDataUpdate()) {
             if (isItemVisible(item)) {
                 fireItemRevealed(item);

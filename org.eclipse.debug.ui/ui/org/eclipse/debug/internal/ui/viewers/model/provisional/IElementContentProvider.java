@@ -13,7 +13,12 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
 
 
 /**
- * Provides content for an element in a virtual viewer.
+ * Provides content for an element in a tree model viewer.
+ * <p>
+ * Note: provider methods are called in the Display thread of the viewer.
+ * To avoid blocking the UI, long running operations should be performed 
+ * asynchronously.
+ * </p>
  * 
  * @since 3.3
  */

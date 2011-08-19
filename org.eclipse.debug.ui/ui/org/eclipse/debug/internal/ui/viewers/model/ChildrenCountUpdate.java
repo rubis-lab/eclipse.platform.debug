@@ -17,7 +17,6 @@ import java.util.List;
 
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IChildrenCountUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementContentProvider;
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.jface.viewers.TreePath;
 
 /**
@@ -31,15 +30,14 @@ class ChildrenCountUpdate extends ViewerUpdateMonitor implements IChildrenCountU
 	
 	/**
 	 * Constructor
-	 * @param contentProvider the content provider to use for the update
+	 * @param provider the content provider to use for the update
 	 * @param viewerInput the current input
 	 * @param elementPath the path of the element to update
 	 * @param element the element to update
 	 * @param elementContentProvider the content provider for the element
-	 * @param context the presentation context
 	 */
-	public ChildrenCountUpdate(ModelContentProvider contentProvider, Object viewerInput, TreePath elementPath, Object element, IElementContentProvider elementContentProvider, IPresentationContext context) {
-		super(contentProvider, viewerInput, elementPath, element, elementContentProvider, context);
+	public ChildrenCountUpdate(TreeModelContentProvider provider, Object viewerInput, TreePath elementPath, Object element, IElementContentProvider elementContentProvider) {
+		super(provider, viewerInput, elementPath, element, elementContentProvider, provider.getPresentationContext());
 	}
 
 	/* (non-Javadoc)
@@ -54,11 +52,11 @@ class ChildrenCountUpdate extends ViewerUpdateMonitor implements IChildrenCountU
 			getContentProvider().setModelChildCount(elementPath, fCount);
 			viewCount = getContentProvider().modelToViewChildCount(elementPath, fCount);
 		}
-		if (ModelContentProvider.DEBUG_CONTENT_PROVIDER && ModelContentProvider.DEBUG_TEST_PRESENTATION_ID(getPresentationContext())) {
+		if (TreeModelContentProvider.DEBUG_CONTENT_PROVIDER && TreeModelContentProvider.DEBUG_TEST_PRESENTATION_ID(getPresentationContext())) {
 			System.out.println("setChildCount(" + getElement() + ", modelCount: " + fCount + " viewCount: " + viewCount + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 		getContentProvider().getViewer().setChildCount(elementPath, viewCount);
-		getContentProvider().restorePendingStateOnUpdate(getElementPath(), -1, true, true, false);
+		getContentProvider().getStateTracker().restorePendingStateOnUpdate(getElementPath(), -1, true, true, false);
 	}
 
 	public void setChildCount(int numChildren) {
@@ -140,4 +138,19 @@ class ChildrenCountUpdate extends ViewerUpdateMonitor implements IChildrenCountU
 		}
 		return path;
 	}		
+	
+	int getCount() {
+	    return fCount;
+	}
+	
+    protected boolean doEquals(ViewerUpdateMonitor update) {
+        return 
+            update instanceof ChildrenCountUpdate && 
+            getViewerInput().equals(update.getViewerInput()) && 
+            getElementPath().equals(getElementPath());
+    }
+    
+    protected int doHashCode() {
+        return getClass().hashCode() + getViewerInput().hashCode() + getElementPath().hashCode();
+    }
 }

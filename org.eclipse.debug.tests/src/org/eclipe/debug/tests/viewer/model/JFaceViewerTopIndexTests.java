@@ -17,7 +17,7 @@ import junit.framework.TestCase;
 import org.eclipe.debug.tests.viewer.model.TestModel.TestElement;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.debug.internal.ui.viewers.model.ITreeModelContentProviderTarget;
+import org.eclipse.debug.internal.ui.viewers.model.IInternalTreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDeltaVisitor;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.ModelDelta;
@@ -80,7 +80,7 @@ public class JFaceViewerTopIndexTests extends TestCase implements ITestModelUpda
         }
     }
     
-    protected ITreeModelContentProviderTarget getCTargetViewer() {
+    protected IInternalTreeModelViewer getCTargetViewer() {
         return fViewer;
     }
 

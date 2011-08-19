@@ -14,6 +14,11 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
 /**
  * Provides context sensitive labels. Can be registered as an adapter for an element,
  * or implemented directly.
+ * <p>
+ * Note: provider methods are called in the Display thread of the viewer.
+ * To avoid blocking the UI, long running operations should be performed 
+ * asynchronously.
+ * </p>
  * 
  * @since 3.3
  */

@@ -25,7 +25,7 @@ public interface IColumnPresentation {
 	 * Initializes this column presentation to be used in the
 	 * given context.
 	 * 
-	 * @param context
+	 * @param context Presentation context.
 	 */
 	public void init(IPresentationContext context);
 	

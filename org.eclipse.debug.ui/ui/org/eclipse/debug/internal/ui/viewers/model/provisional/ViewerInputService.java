@@ -55,8 +55,8 @@ public class ViewerInputService {
 	/**
 	 * Constructs a viewer input service for the given requester and presentation context.
 	 * 
+     * @param viewer for which inputs are required
 	 * @param requestor client requesting viewer inputs 
-	 * @param context context for which inputs are required
 	 */
 	public ViewerInputService(TreeModelViewer viewer, IViewerInputRequestor requestor) {
 		fRequestor = requestor;

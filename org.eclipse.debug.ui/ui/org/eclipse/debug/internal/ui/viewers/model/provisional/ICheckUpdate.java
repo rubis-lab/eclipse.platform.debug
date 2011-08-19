@@ -28,8 +28,8 @@ public interface ICheckUpdate extends ILabelUpdate {
     /**
      * Sets the check state of the tree node.
      * 
-     * @param checked
-     * @param grayed
+     * @param checked Whether element should be checked.
+     * @param grayed Whether element should be grayed out.
      */
     public void setChecked(boolean checked, boolean grayed);
     
