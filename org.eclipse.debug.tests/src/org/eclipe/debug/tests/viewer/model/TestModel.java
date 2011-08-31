@@ -37,6 +37,7 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.ModelDelta;
 import org.eclipse.debug.internal.ui.viewers.provisional.AbstractModelProxy;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 /**
  * Test model for the use in unit tests.  This test model contains a set of 
@@ -325,8 +326,12 @@ public class TestModel implements IElementContentProvider, IElementLabelProvider
     public void validateData(ITreeModelViewer viewer, TreePath path) {
         validateData(viewer, path, false);
     }
-
+    
     public void validateData(ITreeModelViewer _viewer, TreePath path, boolean expandedElementsOnly) {
+    	validateData(_viewer, path, expandedElementsOnly, TestModelUpdatesListener.EMPTY_FILTER_ARRAY);
+    }
+    
+    public void validateData(ITreeModelViewer _viewer, TreePath path, boolean expandedElementsOnly, ViewerFilter[] filters) {
         IInternalTreeModelViewer viewer = (IInternalTreeModelViewer)_viewer;
         TestElement element = getElement(path);
         if ( Boolean.TRUE.equals(_viewer.getPresentationContext().getProperty(ICheckUpdate.PROP_CHECK)) ) {
@@ -336,12 +341,17 @@ public class TestModel implements IElementContentProvider, IElementLabelProvider
         
         if (!expandedElementsOnly || path.getSegmentCount() == 0 || viewer.getExpandedState(path) ) {
             TestElement[] children = element.getChildren();
-            Assert.assertEquals(children.length, viewer.getChildCount(path));
 
+            int viewerIndex = 0;
             for (int i = 0; i < children.length; i++) {
-                Assert.assertEquals(children[i], viewer.getChildElement(path, i));
-                validateData(viewer, path.createChildPath(children[i]), expandedElementsOnly);
+            	if (TestModelUpdatesListener.isFiltered(children[i], filters)) {
+            		continue;
+            	}
+                Assert.assertEquals(children[i], viewer.getChildElement(path, viewerIndex));
+                validateData(viewer, path.createChildPath(children[i]), expandedElementsOnly, filters);
+            	viewerIndex++;
             }
+            Assert.assertEquals(viewerIndex, viewer.getChildCount(path));            
         } else if (!viewer.getExpandedState(path)) {
             // If element not expanded, verify the plus sign.
             Assert.assertEquals(viewer.getHasChildren(path), element.getChildren().length > 0);

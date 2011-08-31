@@ -15,6 +15,7 @@ import org.eclipse.debug.internal.ui.viewers.model.ILabelUpdateListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.widgets.Display;
 
@@ -242,4 +243,23 @@ public interface ITreeModelViewer extends ISelectionProvider {
      * @return Array of paths for given element.
      */
     public TreePath[] getElementPaths(Object element);
-}
+
+    /**
+     * Returns filters currently configured in viewer.
+     * @return filter array in viewer.
+     */
+    public ViewerFilter[] getFilters();
+    
+    /**
+     * Add a new filter to use in viewer.
+     * @param filter Filter to add.
+     */
+    public void addFilter(ViewerFilter filter);
+    
+    /**
+     * Sets viewer filters to the filters in array.
+     * @param filters New filter array to use.
+     */
+    public void setFilters(ViewerFilter[] filters);
+
+ }

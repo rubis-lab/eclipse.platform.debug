@@ -338,10 +338,19 @@ public class SubTreeModelViewer extends TreeModelViewer {
             SubTreeModelViewer.this.updateViewer(delta);
         }
 
+        
         public ViewerFilter[] getFilters() {
             return SubTreeModelViewer.this.getFilters();
         }
 
+        public void addFilter(ViewerFilter filter) {
+            SubTreeModelViewer.this.addFilter(filter);
+        }
+        
+        public void setFilters(ViewerFilter[] filters) {
+        	SubTreeModelViewer.this.setFilters(filters);
+        }
+        
         public boolean overrideSelection(ISelection current, ISelection candidate) {
             return SubTreeModelViewer.this.overrideSelection(current, candidate);
         }

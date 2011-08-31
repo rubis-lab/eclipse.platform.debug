@@ -116,7 +116,10 @@ public class ChildrenUpdateTests extends TestCase {
 				public ViewerFilter[] getFilters() {
 					return null;
 				}
-			
+
+				public void addFilter(ViewerFilter filter) {}
+				public void setFilters(ViewerFilter[] filters) {}
+				
 				public boolean getExpandedState(Object elementOrTreePath) {
 					return false;
 				}
@@ -166,8 +169,7 @@ public class ChildrenUpdateTests extends TestCase {
                 }
                 public String[] getVisibleColumns() {
                     return null;
-                }
-                
+                }                
 			};
 		}
 	}

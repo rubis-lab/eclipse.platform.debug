@@ -577,10 +577,13 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
                 List requests = (List) fRequestsInProgress.get(update.getSchedulingPath());
                 if (requests != null) {
                     requests.remove(update);
+                    // Trigger may initate new udpates, so wait to remove requests array from 
+                    // fRequestsInProgress map.  This way updateStarted() will not send a 
+                    // redundant "UPDATE SEQUENCE STARTED" notification.
+                    trigger(update);
                     if (requests.isEmpty()) {
                         fRequestsInProgress.remove(update.getSchedulingPath());
                     }
-                    trigger(update);
                 }
                 if (fRequestsInProgress.isEmpty()) {
                     if (DEBUG_UPDATE_SEQUENCE && DEBUG_TEST_PRESENTATION_ID(getPresentationContext())) {
@@ -822,12 +825,14 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
      */
     private boolean isRequestBlocked(TreePath requestPath) {
         TreePath parentPath = requestPath;
-        while (fRequestsInProgress.get(parentPath) == null) {
+        List parentRequests = (List)fRequestsInProgress.get(parentPath); 
+        while (parentRequests == null || parentRequests.isEmpty()) {
             parentPath = parentPath.getParentPath();
             if (parentPath == null) {
                 // no running requests: start request
                 return false;
             }
+            parentRequests = (List)fRequestsInProgress.get(parentPath);
         }
         return true;
     }
@@ -936,22 +941,6 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
         }
     }
     
-	/**
-	 * Re-filters any filtered children of the given parent element.
-	 * 
-	 * @param path parent element
-	 */
-	private void refilterChildren(TreePath path) {
-		if (getViewer() != null) {
-			int[] filteredChildren = getFilteredChildren(path);
-			if (filteredChildren != null) {
-				for (int i = 0; i < filteredChildren.length; i++) {
-					doUpdateElement(path, filteredChildren[i]);
-				}
-			}
-		}
-	}
-	
 	private void doUpdateChildCount(TreePath path) {
         Assert.isTrue( getViewer().getDisplay().getThread() == Thread.currentThread() );        
         
@@ -1351,6 +1340,13 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
 
 	protected void handleReplace(IModelDelta delta) {
 		TreePath parentPath = getViewerTreePath(delta.getParentDelta());
+		int index = delta.getIndex();
+		if (index < 0) {
+		    index = fTransform.indexOfFilteredElement(parentPath, delta.getElement());
+		}
+		if (index >= 0) {
+	        clearFilteredChild(parentPath, index);		    
+		}
 		getViewer().replace(parentPath, delta.getIndex(), delta.getElement());
 	}
 
@@ -1459,9 +1455,6 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
 		if (DEBUG_CONTENT_PROVIDER && DEBUG_TEST_PRESENTATION_ID(getPresentationContext())) {
 			System.out.println("updateChildCount(" + getElement(treePath) + ", " + currentChildCount + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
-		refilterChildren(treePath);
-		//re-filter children when asked to update the child count for an element (i.e.
-		// when refreshing, see if filtered children are still filtered)
 		doUpdateChildCount(treePath);
 	}
 
@@ -1506,7 +1499,9 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
             if (fCompletedUpdatesJob == null) {
 	            fCompletedUpdatesJob = new Runnable() {
 	                public void run() {
-	                    performUpdates();
+	                    if (!isDisposed()) {
+	                        performUpdates();
+	                    }
 	                }
 	            };
 	            display.asyncExec(fCompletedUpdatesJob);

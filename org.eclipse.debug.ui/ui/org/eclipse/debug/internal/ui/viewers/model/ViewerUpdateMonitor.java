@@ -16,8 +16,10 @@ import org.eclipse.debug.internal.core.commands.Request;
 import org.eclipse.debug.internal.ui.viewers.AsynchronousSchedulingRuleFactory;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementContentProvider;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.ITreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdate;
 import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * @since 3.3
@@ -188,7 +190,7 @@ public abstract class ViewerUpdateMonitor extends Request implements IViewerUpda
 	/**
 	 * Starts this request. Subclasses must override startRequest().
 	 */
-	final void start() {
+	protected void start() {
 		synchronized (this) {
 			if (fStarted) {
 				return;
@@ -276,4 +278,24 @@ public abstract class ViewerUpdateMonitor extends Request implements IViewerUpda
      * @since 3.8
 	 */
     abstract protected int doHashCode();
+    
+    /**
+     * Executes the given runnable in the UI thread.  If method is called in 
+     * UI thread, then runnable is executed immediately, otherwise it's executed
+     * using <code>Display.asyncExec()</code>.  Runnable is not executed if update is 
+     * canceled or content provider is disposed.
+     * @since 3.8
+     */
+	protected void execInDisplayThread(Runnable runnable) {
+   	    ITreeModelViewer viewer = getContentProvider().getViewer();
+   	    if (viewer != null  && !isCanceled()) {
+   	    	Display display = viewer.getDisplay();
+   	    	if (Thread.currentThread() == display.getThread()) {
+   	    		runnable.run();
+   	    	} else {
+   	    		display.asyncExec(runnable);
+   	    	}
+	    }
+	}
+
 }

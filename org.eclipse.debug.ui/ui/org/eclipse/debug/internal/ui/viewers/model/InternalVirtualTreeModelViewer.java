@@ -96,6 +96,11 @@ public class InternalVirtualTreeModelViewer extends Viewer
     private static final String TREE_PATH_KEY = "TREE_PATH_KEY"; //$NON-NLS-1$
 
     /**
+     * Viewer filters currently configured for viewer.
+     */
+    private ViewerFilter[] fFilters = new ViewerFilter[0];
+    
+    /**
      * The display that this virtual tree viewer is associated with. It is used
      * for access to the UI thread.
      */
@@ -435,6 +440,12 @@ public class InternalVirtualTreeModelViewer extends Viewer
 
     
     public void reveal(TreePath path, final int index) {
+        VirtualItem parentItem = findItem(path);
+        if (parentItem != null && parentItem.getItemCount() >= index) {
+            VirtualItem revealItem = parentItem.getItem(new Index(index));
+            getTree().showItem(revealItem);
+            getTree().validate();
+        }
         // TODO: implement reveal()
     }
 
@@ -1008,11 +1019,19 @@ public class InternalVirtualTreeModelViewer extends Viewer
         return !selectionPolicy.isSticky(current, getPresentationContext());
     }
 
-    private static ViewerFilter[] EMPTY_FILTER_ARRAY = new ViewerFilter[0];
-    
     public ViewerFilter[] getFilters() {
-        // TODO: Add filter support
-        return EMPTY_FILTER_ARRAY;
+    	return fFilters;
+    }
+    
+    public void addFilter(ViewerFilter filter) {
+    	ViewerFilter[] newFilters = new ViewerFilter[fFilters.length + 1];
+    	System.arraycopy(fFilters, 0, newFilters, 0, fFilters.length);
+    	newFilters[fFilters.length] = filter;
+    	fFilters = newFilters;
+    }
+    
+    public void setFilters(ViewerFilter[] filters) {
+    	fFilters = filters;
     }
     
     public void dispose() {

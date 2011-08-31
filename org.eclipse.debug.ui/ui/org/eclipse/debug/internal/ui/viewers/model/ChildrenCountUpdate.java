@@ -24,9 +24,28 @@ import org.eclipse.jface.viewers.TreePath;
  */
 class ChildrenCountUpdate extends ViewerUpdateMonitor implements IChildrenCountUpdate {
 
+    /**
+     * Child count result.
+     */
 	private int fCount = 0;
 	
+	/**
+	 * Other child count updates for the same content provider.  Coalesced requests are
+	 * batched together into an array.
+	 */
 	private List fBatchedRequests = null;
+	
+    /**
+     * Flag whether filtering is enabled in viewer.  If filtering is enabled, then a 
+     * children update is performed on child elements to filter them as part of the
+     * child count calculation.
+     */
+	private boolean fShouldFilter;
+    
+	/**
+	 * Children update used to filter children.
+	 */
+	private ChildrenUpdate fChildrenUpdate;
 	
 	/**
 	 * Constructor
@@ -38,8 +57,50 @@ class ChildrenCountUpdate extends ViewerUpdateMonitor implements IChildrenCountU
 	 */
 	public ChildrenCountUpdate(TreeModelContentProvider provider, Object viewerInput, TreePath elementPath, Object element, IElementContentProvider elementContentProvider) {
 		super(provider, viewerInput, elementPath, element, elementContentProvider, provider.getPresentationContext());
+		fShouldFilter = provider.getViewer().getFilters().length != 0;
 	}
 
+	public synchronized void cancel() {
+		if (fChildrenUpdate != null) {
+			fChildrenUpdate.cancel();
+		}
+		super.cancel();
+	}
+	
+	protected synchronized void scheduleViewerUpdate() {
+		if (fShouldFilter) {
+		    // If filtering is enabled perform child update on all children in order to update
+		    // viewer filters.
+		    if (fChildrenUpdate == null) {
+     		    fChildrenUpdate = new ChildrenUpdate(getContentProvider(), getViewerInput(), getElementPath(), getElement(), 0, getCount(), getElementContentProvider()) {
+     		    	protected void performUpdate() {
+     		    		performUpdate(true);
+     		    		ChildrenCountUpdate.super.scheduleViewerUpdate();
+     		    	}
+     		    	
+     		    	protected void scheduleViewerUpdate() {
+     		    		execInDisplayThread(new Runnable() {
+    	   	    			public void run() {
+    	   	    				if (!getContentProvider().isDisposed() && !isCanceled()) {
+    	   	    					performUpdate();
+    	   	    				}
+    	   	    			}
+    	   	    		});
+     		    	}
+     		    };
+     		    execInDisplayThread(new Runnable() {
+     		    	public void run() {
+     		 		    fChildrenUpdate.startRequest();
+     		    	}
+     		    });
+     		    return;
+    		}
+		} else {
+		    super.scheduleViewerUpdate();
+		}
+	}
+	
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.viewers.ViewerUpdateMonitor#performUpdate()
 	 */

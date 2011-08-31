@@ -361,6 +361,14 @@ public class FilterTransform {
 		root.clear(parentPath, index, 0);
 	}	
 	
+	public int indexOfFilteredElement(TreePath parentPath, Object element) {
+        Node parentNode = root.find(parentPath, 0);
+        if (parentNode == null) {
+            return -1;
+        }
+        return parentNode.indexOfFilteredElement(element);	    
+	}
+	
 	/**
 	 * Translates and returns the given model index (raw index) into
 	 * a view index (filtered index), or -1 if filtered.

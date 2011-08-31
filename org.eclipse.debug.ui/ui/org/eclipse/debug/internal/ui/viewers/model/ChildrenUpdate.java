@@ -42,13 +42,15 @@ public class ChildrenUpdate extends ViewerUpdateMonitor implements IChildrenUpda
 		fIndex = index;
 		fLength = 1;
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.debug.ui.viewers.AsynchronousRequestMonitor#performUpdate()
-	 */
-	protected void performUpdate() {
+	
+	public ChildrenUpdate(TreeModelContentProvider provider, Object viewerInput, TreePath elementPath, Object element, int index, int length, IElementContentProvider elementContentProvider) {
+		super(provider, viewerInput, elementPath, element, elementContentProvider, provider.getPresentationContext());
+		fIndex = index;
+		fLength = length;
+	}
+	
+	
+	protected void performUpdate(boolean updateFilterOnly) {
 		TreeModelContentProvider provider = getContentProvider();
 		TreePath elementPath = getElementPath();
 		if (fElements != null) {
@@ -60,36 +62,54 @@ public class ChildrenUpdate extends ViewerUpdateMonitor implements IChildrenUpda
 					int viewIndex = provider.modelToViewIndex(elementPath, modelIndex);
 					if (provider.shouldFilter(elementPath, element)) {
 						if (provider.addFilteredIndex(elementPath, modelIndex, element)) {
-                            if (TreeModelContentProvider.DEBUG_CONTENT_PROVIDER && TreeModelContentProvider.DEBUG_TEST_PRESENTATION_ID(getPresentationContext())) {
-								System.out.println("REMOVE(" + getElement() + ", modelIndex: " + modelIndex + " viewIndex: " + viewIndex + ", " + element + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-							}
-							viewer.remove(elementPath, viewIndex);
+                            if (!updateFilterOnly) {
+                                if (TreeModelContentProvider.DEBUG_CONTENT_PROVIDER && TreeModelContentProvider.DEBUG_TEST_PRESENTATION_ID(getPresentationContext())) {
+    								System.out.println("REMOVE(" + getElement() + ", modelIndex: " + modelIndex + " viewIndex: " + viewIndex + ", " + element + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+    							}
+							    viewer.remove(elementPath, viewIndex);
+                            }
 						}
 					} else {
 						if (provider.isFiltered(elementPath, modelIndex)) {
 							provider.clearFilteredChild(elementPath, modelIndex);
-							int insertIndex = provider.modelToViewIndex(elementPath, modelIndex);
-							if (TreeModelContentProvider.DEBUG_CONTENT_PROVIDER) {
-								System.out.println("insert(" + getElement() + ", modelIndex: " + modelIndex + " insertIndex: " + insertIndex + ", " + element + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-							}
-							viewer.insert(elementPath, element, insertIndex);
-						} else {
+                            if (!updateFilterOnly) {
+								int insertIndex = provider.modelToViewIndex(elementPath, modelIndex);
+								if (TreeModelContentProvider.DEBUG_CONTENT_PROVIDER) {
+									System.out.println("insert(" + getElement() + ", modelIndex: " + modelIndex + " insertIndex: " + insertIndex + ", " + element + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+								}
+								viewer.insert(elementPath, element, insertIndex);
+                            }
+						} else if (!updateFilterOnly){
 		                    if (TreeModelContentProvider.DEBUG_CONTENT_PROVIDER && TreeModelContentProvider.DEBUG_TEST_PRESENTATION_ID(getPresentationContext())) {
 								System.out.println("replace(" + getElement() + ", modelIndex: " + modelIndex + " viewIndex: " + viewIndex + ", " + element + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 							}
 							viewer.replace(elementPath, viewIndex, element);
 						}
-						TreePath childPath = elementPath.createChildPath(element);
-						provider.updateHasChildren(childPath);
-						provider.getStateTracker().restorePendingStateOnUpdate(childPath, modelIndex, false, false, false);
+						if (!updateFilterOnly) {
+							TreePath childPath = elementPath.createChildPath(element);
+							provider.updateHasChildren(childPath);
+							provider.getStateTracker().restorePendingStateOnUpdate(childPath, modelIndex, false, false, false);
+						}
 					}
 				}
 			}
 			
-            provider.getStateTracker().restorePendingStateOnUpdate(elementPath, -1, true, true, true);
-		} else {
+			if (!updateFilterOnly) {
+				provider.getStateTracker().restorePendingStateOnUpdate(elementPath, -1, true, true, true);
+			}
+		} else if (!updateFilterOnly) {
 			provider.updateHasChildren(elementPath);
 		}
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.debug.ui.viewers.AsynchronousRequestMonitor#performUpdate()
+	 */
+	protected void performUpdate() {
+		performUpdate(false);
 	}
 	
 	/* (non-Javadoc)
@@ -209,8 +229,8 @@ public class ChildrenUpdate extends ViewerUpdateMonitor implements IChildrenUpda
     protected int doHashCode() {
         return (int)Math.pow(
             (getClass().hashCode() + getViewerInput().hashCode() + getElementPath().hashCode()) * (getOffset() + 2),
+            
             getLength() + 2);
     }
 
 }
-

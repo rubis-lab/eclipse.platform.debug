@@ -27,8 +27,8 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.internal.ui.viewers.model.ElementCompareRequest;
-import org.eclipse.debug.internal.ui.viewers.model.ILabelUpdateListener;
 import org.eclipse.debug.internal.ui.viewers.model.IInternalTreeModelViewer;
+import org.eclipse.debug.internal.ui.viewers.model.ILabelUpdateListener;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IChildrenCountUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IChildrenUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IHasChildrenUpdate;
@@ -41,11 +41,14 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.ITreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdateListener;
 import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 public class TestModelUpdatesListener 
     implements IViewerUpdateListener, ILabelUpdateListener, IModelChangedListener, ITestModelUpdatesListenerConstants,
         IStateUpdateListener, IJobChangeListener 
 {
+    public static final ViewerFilter[] EMPTY_FILTER_ARRAY = new ViewerFilter[0]; 
+	
     private final ITreeModelViewer fViewer;
     
     private IStatus fJobError;
@@ -153,8 +156,12 @@ public class TestModelUpdatesListener
     }
     
     public void reset(TreePath path, TestElement element, int levels, boolean failOnRedundantUpdates, boolean failOnMultipleUpdateSequences) {
+        reset(path, element, EMPTY_FILTER_ARRAY, levels, failOnRedundantUpdates, failOnMultipleUpdateSequences);
+    }
+
+    public void reset(TreePath path, TestElement element, ViewerFilter[] filters, int levels, boolean failOnRedundantUpdates, boolean failOnMultipleUpdateSequences) {
         reset();
-        addUpdates(path, element, levels);
+        addUpdates(path, element, filters, levels);
         addProxies(element);
         setFailOnRedundantUpdates(failOnRedundantUpdates);
         setFailOnMultipleModelUpdateSequences(failOnMultipleUpdateSequences);
@@ -252,7 +259,11 @@ public class TestModelUpdatesListener
     }
 
     public void addUpdates(TreePath path, TestElement element, int levels) {
-        addUpdates(path, element, levels, ALL_UPDATES_COMPLETE);
+        addUpdates(null, path, element, EMPTY_FILTER_ARRAY, levels, ALL_UPDATES_COMPLETE );
+    }
+    
+    public void addUpdates(TreePath path, TestElement element, ViewerFilter[] filters, int levels) {
+        addUpdates(null, path, element, filters, levels, ALL_UPDATES_COMPLETE );
     }
 
     public void addStateUpdates(IInternalTreeModelViewer viewer, TreePath path, TestElement element) {
@@ -335,7 +346,24 @@ public class TestModelUpdatesListener
         addUpdates(null, path, element, levels, flags);
     }
 
-    public void addUpdates(IInternalTreeModelViewer viewer, TreePath path, TestElement element, int levels, int flags) {    
+    public void addUpdates(IInternalTreeModelViewer viewer, TreePath path, TestElement element, int levels, int flags) {
+    	addUpdates(viewer, path, element, EMPTY_FILTER_ARRAY,  levels, flags);
+    }
+    
+    public static boolean isFiltered(Object element, ViewerFilter[] filters) {
+    	for (int i = 0; i < filters.length; i++) {
+    		if (!filters[i].select(null, null, element)) {
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    
+    public void addUpdates(IInternalTreeModelViewer viewer, TreePath path, TestElement element, ViewerFilter[] filters, int levels, int flags) {
+    	if (isFiltered(path.getLastSegment(), filters)) {
+    		return;
+    	}
+    	
         if (!path.equals(TreePath.EMPTY)) {
             if ((flags & LABEL_UPDATES) != 0) {
                 fLabelUpdates.add(path);
@@ -358,13 +386,15 @@ public class TestModelUpdatesListener
                 if ((flags & CHILDREN_UPDATES) != 0) {
                     Set childrenIndexes = new HashSet();
                     for (int i = 0; i < children.length; i++) {
-                        childrenIndexes.add(new Integer(i));
+                    	if (!isFiltered(children[i], filters)) {
+                    		childrenIndexes.add(new Integer(i));
+                    	}
                     }
                     fChildrenUpdatesScheduled.put(path, childrenIndexes);
                 }
 
                 for (int i = 0; i < children.length; i++) {
-                    addUpdates(viewer, path.createChildPath(children[i]), children[i], levels, flags);
+                    addUpdates(viewer, path.createChildPath(children[i]), children[i], filters, levels, flags);
                 }
             }
         

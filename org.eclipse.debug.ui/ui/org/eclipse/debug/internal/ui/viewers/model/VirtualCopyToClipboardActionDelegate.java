@@ -219,8 +219,6 @@ public class VirtualCopyToClipboardActionDelegate extends AbstractDebugActionDel
 	    }
 	    
 	    public void showItem(VirtualItem item) {
-	        // TODO Auto-generated method stub
-	        
 	    }
 	}
 	
