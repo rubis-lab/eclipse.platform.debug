@@ -405,6 +405,8 @@ public class TreeModelLabelProvider extends ColumnLabelProvider
      * @param update Update that is to be completed.
      */
     synchronized void complete(ILabelUpdate update) {
+        if (fViewer == null) return;
+        
 		if (fComplete == null) {
 			fComplete = new LinkedList();
 			fViewer.getDisplay().asyncExec(new Runnable() {
