@@ -63,9 +63,9 @@ public class TestModelUpdatesListener
     private Set fRedundantLabelUpdateExceptions = new HashSet();
     
     private boolean fFailOnMultipleModelUpdateSequences;
-    private boolean fMultipleModelUpdateSequencesObserved;
+    private boolean fUnmatchedModelUpdatesObserved;
     private boolean fFailOnMultipleLabelUpdateSequences;
-    private boolean fMultipleLabelUpdateSequencesObserved;
+    private boolean fUnmatchedLabelUpdatesObserved;
     
     private Set fHasChildrenUpdatesScheduled = new HashSet();
     private Set fHasChildrenUpdatesRunning = new HashSet();
@@ -81,10 +81,14 @@ public class TestModelUpdatesListener
     private Set fLabelUpdatesCompleted = new HashSet();
     private Set fProxyModels = new HashSet();
     private Set fStateUpdates = new HashSet();
-    private boolean fViewerUpdatesStarted;
-    private boolean fViewerUpdatesComplete;
-    private boolean fLabelUpdatesStarted;
-    private boolean fLabelUpdatesComplete;
+    private int fViewerUpdatesStarted = 0;
+    private int fViewerUpdatesComplete = 0;
+    private int fViewerUpdatesStartedAtReset;
+    private int fViewerUpdatesCompleteAtReset;
+    private int fLabelUpdatesStarted = 0;
+    private int fLabelUpdatesComplete = 0;
+    private int fLabelUpdatesStartedAtReset;
+    private int fLabelUpdatesCompleteAtReset;
     private boolean fModelChangedComplete;
     private boolean fStateSaveStarted;
     private boolean fStateSaveComplete;
@@ -183,8 +187,6 @@ public class TestModelUpdatesListener
         fRedundantChildCountUpdateExceptions.clear();
         fRedundantChildrenUpdateExceptions.clear();
         fRedundantLabelUpdateExceptions.clear();
-        fMultipleLabelUpdateSequencesObserved = false;
-        fMultipleModelUpdateSequencesObserved = false;
         fHasChildrenUpdatesScheduled.clear();
         fHasChildrenUpdatesRunning.clear();
         fHasChildrenUpdatesCompleted.clear();
@@ -198,10 +200,10 @@ public class TestModelUpdatesListener
         fLabelUpdatesRunning.clear();
         fLabelUpdatesCompleted.clear();
         fProxyModels.clear();
-        fViewerUpdatesStarted = false;
-        fViewerUpdatesComplete = false;
-        fLabelUpdatesStarted = false;
-        fLabelUpdatesComplete = false;
+        fViewerUpdatesStartedAtReset = fViewerUpdatesStarted;
+        fViewerUpdatesCompleteAtReset = fViewerUpdatesComplete;
+        fLabelUpdatesStartedAtReset = fLabelUpdatesStarted;
+        fLabelUpdatesCompleteAtReset = fLabelUpdatesComplete;
         fStateUpdates.clear();
         fStateSaveStarted = false;
         fStateSaveComplete = false;
@@ -435,27 +437,35 @@ public class TestModelUpdatesListener
         if (fFailOnRedundantLabelUpdates && !fRedundantLabelUpdates.isEmpty()) {
             Assert.fail("Redundant Label Updates: " + fRedundantLabelUpdates.toString());
         }        
-        if (fFailOnMultipleLabelUpdateSequences && !fMultipleLabelUpdateSequencesObserved) {
+        if (fFailOnMultipleLabelUpdateSequences && fLabelUpdatesComplete > (fLabelUpdatesCompleteAtReset + 1)) {
             Assert.fail("Multiple label update sequences detected");
         }
-        if (fFailOnMultipleModelUpdateSequences && fMultipleModelUpdateSequencesObserved) {
+        if (fFailOnMultipleModelUpdateSequences && fViewerUpdatesComplete > (fViewerUpdatesCompleteAtReset + 1)) {
             Assert.fail("Multiple viewer update sequences detected");
         }
 
         if ( (flags & LABEL_UPDATES_COMPLETE) != 0) {
-            if (!fLabelUpdatesComplete) return false;
+            if (fUnmatchedLabelUpdatesObserved) {
+                throw new RuntimeException("Unmatches labelUpdatesStarted/labelUpdateCompleted notifications observed.");
+            }
+            
+            if (fLabelUpdatesComplete == fLabelUpdatesCompleteAtReset) return false;
         }
         if ( (flags & LABEL_UPDATES_STARTED) != 0) {
-            if (!fLabelUpdatesStarted) return false;
+            if (fLabelUpdatesStarted == fLabelUpdatesStartedAtReset) return false;
         }
         if ( (flags & LABEL_UPDATES) != 0) {
             if (!fLabelUpdates.isEmpty()) return false;
         }
         if ( (flags & CONTENT_UPDATES_STARTED) != 0) {
-            if (!fViewerUpdatesStarted) return false;
+            if (fViewerUpdatesStarted == fViewerUpdatesStartedAtReset) return false;
         }
         if ( (flags & CONTENT_UPDATES_COMPLETE) != 0) {
-            if (!fViewerUpdatesComplete) return false;
+            if (fUnmatchedModelUpdatesObserved) {
+                throw new RuntimeException("Unmatches updatesStarted/updateCompleted notifications observed.");
+            }
+            
+            if (fViewerUpdatesComplete == fViewerUpdatesCompleteAtReset) return false;
         }
         if ( (flags & HAS_CHILDREN_UPDATES_STARTED) != 0) {
             if (fHasChildrenUpdatesRunning.isEmpty() && fHasChildrenUpdatesCompleted.isEmpty()) return false;
@@ -574,22 +584,23 @@ public class TestModelUpdatesListener
     }
     
     public void viewerUpdatesBegin() {
-        if (fFailOnMultipleModelUpdateSequences && fViewerUpdatesComplete) {
-            fMultipleModelUpdateSequencesObserved = true;
+        if (fViewerUpdatesStarted > fViewerUpdatesComplete) {
+            fUnmatchedModelUpdatesObserved = true;
         }
-        fViewerUpdatesStarted = true;
+        fViewerUpdatesStarted++;
     }
     
     public void viewerUpdatesComplete() {
-        fViewerUpdatesComplete = true;
+        if (fViewerUpdatesStarted <= fViewerUpdatesComplete) {
+            fUnmatchedModelUpdatesObserved = true;
+        }
+        fViewerUpdatesComplete++;
     }
 
     public void labelUpdateComplete(ILabelUpdate update) {
-        synchronized (this) {
-            fLabelUpdatesRunning.remove(update);
-            fLabelUpdatesCompleted.add(update);
-        	fLabelUpdatesCounter--;
-        }
+        fLabelUpdatesRunning.remove(update);
+        fLabelUpdatesCompleted.add(update);
+    	fLabelUpdatesCounter--;
         if (!fLabelUpdates.remove(update.getElementPath()) && 
             fFailOnRedundantLabelUpdates && 
             !fRedundantLabelUpdateExceptions.contains(update.getElementPath())) 
@@ -600,21 +611,22 @@ public class TestModelUpdatesListener
     }
 
     public void labelUpdateStarted(ILabelUpdate update) {
-        synchronized (this) {
-            fLabelUpdatesRunning.add(update);
-        	fLabelUpdatesCounter++;
-        }
+        fLabelUpdatesRunning.add(update);
+    	fLabelUpdatesCounter++;
     }
 
     public void labelUpdatesBegin() {
-        if (fFailOnMultipleLabelUpdateSequences && fLabelUpdatesComplete) {
-            fMultipleLabelUpdateSequencesObserved = true;
+        if (fLabelUpdatesStarted > fLabelUpdatesComplete) {
+            fUnmatchedLabelUpdatesObserved = true;
         }
-        fLabelUpdatesStarted = true;
+        fLabelUpdatesStarted++;
     }
 
     public void labelUpdatesComplete() {
-        fLabelUpdatesComplete = true;
+        if (fLabelUpdatesStarted <= fLabelUpdatesComplete) {
+            fUnmatchedLabelUpdatesObserved = true;
+        }
+        fLabelUpdatesComplete++;
     }
     
     public void modelChanged(IModelDelta delta, IModelProxy proxy) {
@@ -674,14 +686,6 @@ public class TestModelUpdatesListener
             buf.append("\n\t");
             buf.append("fRedundantUpdates = " + fRedundantUpdates);
         }
-        if (fFailOnMultipleLabelUpdateSequences) {
-            buf.append("\n\t");
-            buf.append("fMultipleLabelUpdateSequencesObserved = " + fMultipleLabelUpdateSequencesObserved);
-        }
-        if (fFailOnMultipleModelUpdateSequences) {
-            buf.append("\n\t");
-            buf.append("fMultipleModelUpdateSequencesObserved = " + fMultipleModelUpdateSequencesObserved);
-        }
         if ( (flags & LABEL_UPDATES_COMPLETE) != 0) {
             buf.append("\n\t");
             buf.append("fLabelUpdatesComplete = " + fLabelUpdatesComplete);
@@ -692,8 +696,8 @@ public class TestModelUpdatesListener
         }
         if ( (flags & LABEL_UPDATES_STARTED) != 0) {
             buf.append("\n\t");
-            buf.append("fLabelUpdatesRunning = ");
-            buf.append( fLabelUpdatesRunning );
+            buf.append("fLabelUpdatesStarted = ");
+            buf.append( fLabelUpdatesStarted );
             buf.append("\n\t");
             buf.append("fLabelUpdatesCompleted = ");
             buf.append( fLabelUpdatesCompleted );
@@ -703,13 +707,15 @@ public class TestModelUpdatesListener
             buf.append("fLabelUpdates = ");
             buf.append( toString(fLabelUpdates) );
         }
+        if ( (flags & VIEWER_UPDATES_RUNNING) != 0) {
+            buf.append("\n\t");
+            buf.append("fViewerUpdatesStarted = " + fViewerUpdatesStarted);
+            buf.append("\n\t");
+            buf.append("fViewerUpdatesRunning = " + fViewerUpdatesCounter);
+        }
         if ( (flags & CONTENT_UPDATES_COMPLETE) != 0) {
             buf.append("\n\t");
             buf.append("fViewerUpdatesComplete = " + fViewerUpdatesComplete);
-        }
-        if ( (flags & VIEWER_UPDATES_RUNNING) != 0) {
-            buf.append("\n\t");
-            buf.append("fViewerUpdatesRunning = " + fViewerUpdatesCounter);
         }
         if ( (flags & HAS_CHILDREN_UPDATES_STARTED) != 0) {
             buf.append("\n\t");
