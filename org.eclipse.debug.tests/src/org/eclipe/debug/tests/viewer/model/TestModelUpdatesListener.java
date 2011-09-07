@@ -430,6 +430,14 @@ public class TestModelUpdatesListener
         if (fJobError != null) {
             throw new RuntimeException("Job Error: " + fJobError);
         }
+
+        if (fUnmatchedModelUpdatesObserved) {
+            throw new RuntimeException("Unmatches updatesStarted/updateCompleted notifications observed.");
+        }
+        
+        if (fUnmatchedLabelUpdatesObserved) {
+            throw new RuntimeException("Unmatches labelUpdatesStarted/labelUpdateCompleted notifications observed.");
+        }
         
         if (fFailOnRedundantUpdates && !fRedundantUpdates.isEmpty()) {
             Assert.fail("Redundant Updates: " + fRedundantUpdates.toString());
@@ -445,10 +453,6 @@ public class TestModelUpdatesListener
         }
 
         if ( (flags & LABEL_UPDATES_COMPLETE) != 0) {
-            if (fUnmatchedLabelUpdatesObserved) {
-                throw new RuntimeException("Unmatches labelUpdatesStarted/labelUpdateCompleted notifications observed.");
-            }
-            
             if (fLabelUpdatesComplete == fLabelUpdatesCompleteAtReset) return false;
         }
         if ( (flags & LABEL_UPDATES_STARTED) != 0) {
@@ -461,10 +465,6 @@ public class TestModelUpdatesListener
             if (fViewerUpdatesStarted == fViewerUpdatesStartedAtReset) return false;
         }
         if ( (flags & CONTENT_UPDATES_COMPLETE) != 0) {
-            if (fUnmatchedModelUpdatesObserved) {
-                throw new RuntimeException("Unmatches updatesStarted/updateCompleted notifications observed.");
-            }
-            
             if (fViewerUpdatesComplete == fViewerUpdatesCompleteAtReset) return false;
         }
         if ( (flags & HAS_CHILDREN_UPDATES_STARTED) != 0) {

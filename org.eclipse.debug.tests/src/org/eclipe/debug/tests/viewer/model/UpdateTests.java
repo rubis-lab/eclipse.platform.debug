@@ -295,7 +295,7 @@ abstract public class UpdateTests extends TestCase implements ITestModelUpdatesL
     /**
      * This test forces the viewer to reschedule pending content updates
      * due to a remove event from the model.
-     * @see org.eclipse.debug.internal.ui.viewers.model.ModelContentProvider#rescheduleUpdates
+     * @see org.eclipse.debug.internal.ui.viewers.model.TreeModelContentProvider#rescheduleUpdates
      */
     public void testRescheduleUpdates() throws InterruptedException {
         TestModel model = TestModel.simpleSingleLevel();
@@ -325,5 +325,30 @@ abstract public class UpdateTests extends TestCase implements ITestModelUpdatesL
         }
     }
 
+    /**
+     * This test forces the viewer to cancel a pending child count update due 
+     * to refresh event from model.
+     */
+    public void testCancelStaleChildrenCountUpdate() throws InterruptedException {
+        TestModel model = TestModel.simpleMultiLevel();
+        fViewer.setAutoExpandLevel(-1);
+
+        // Create the listener
+        fListener.reset(TreePath.EMPTY, model.getRootElement(), -1, false, false); 
+
+        // Set the input into the view and update the view.
+        fViewer.setInput(model.getRootElement());
+        while (!fListener.isFinished()) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        model.validateData(fViewer, TreePath.EMPTY);
+
+        for (int i = 0; i < 5; i++) {
+            // Refresh the viewer so that updates are generated.
+            TestElement rootElement = model.getRootElement();
+            fListener.reset();
+            model.postDelta(new ModelDelta(rootElement, IModelDelta.CONTENT));
+            while (!fListener.isFinished(MODEL_CHANGED_COMPLETE | CHILD_COUNT_UPDATES_STARTED)) 
+                if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        }
+    }
 
 }

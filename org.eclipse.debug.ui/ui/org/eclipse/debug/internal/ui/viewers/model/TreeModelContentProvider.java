@@ -702,14 +702,13 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
                 if (staleUpdateIndex >= 0) {
                     ViewerUpdateMonitor staleUpdate = (ViewerUpdateMonitor)inProgressList.remove(staleUpdateIndex);
                     staleUpdate.cancel();
-                }
-                
-                if (inProgressList.isEmpty()) {
-                    fRequestsInProgress.remove(schedulingPath);
-                    inProgressList = null;
+                    // Do not reset the inProgressList to null.  This would cause the 
+                    // updateStarted() method to think that a new update sequence is 
+                    // being started.  Since there are waiting requests for this scheduling 
+                    // path, the list will be cleaned up later. 
                 }
             }
-            if (inProgressList == null) {
+            if (inProgressList == null || inProgressList.isEmpty()) {
                 getViewer().getDisplay().asyncExec(new Runnable() {
                     public void run() {
                         trigger(update);
