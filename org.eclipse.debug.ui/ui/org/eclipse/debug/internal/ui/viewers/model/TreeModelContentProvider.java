@@ -562,35 +562,56 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
     /**
      * Notification an update request has completed
      * 
-     * @param update the update to notify
+     * @param updates the updates to notify
      */
-    void updateComplete(final ViewerUpdateMonitor update) {
-        notifyUpdate(UPDATE_COMPLETE, update);
-        if (DEBUG_UPDATE_SEQUENCE && DEBUG_TEST_PRESENTATION_ID(getPresentationContext())) {
-            System.out.println("\tEND - " + update); //$NON-NLS-1$
-        }
-
+    void updatesComplete(final List updates) {
+    	for (int i = 0; i < updates.size(); i++) {
+    		ViewerUpdateMonitor update = (ViewerUpdateMonitor)updates.get(i);
+	        notifyUpdate(UPDATE_COMPLETE, update);
+	        if (DEBUG_UPDATE_SEQUENCE && DEBUG_TEST_PRESENTATION_ID(getPresentationContext())) {
+	            System.out.println("\tEND - " + update); //$NON-NLS-1$
+	        }
+    	}
+    	
+    	// Wait a single cycle to allow viewer to queue requests triggered by completed updates.
         getViewer().getDisplay().asyncExec(new Runnable() {
             public void run() {
                 if (isDisposed()) return;
-                
-                List requests = (List) fRequestsInProgress.get(update.getSchedulingPath());
-                if (requests != null) {
-                    requests.remove(update);
-                    // Trigger may initate new udpates, so wait to remove requests array from 
-                    // fRequestsInProgress map.  This way updateStarted() will not send a 
-                    // redundant "UPDATE SEQUENCE STARTED" notification.
-                    trigger(update);
-                    if (requests.isEmpty()) {
-                        fRequestsInProgress.remove(update.getSchedulingPath());
-                    }
-                }
-                if (fRequestsInProgress.isEmpty()) {
+
+            	for (int i = 0; i < updates.size(); i++) {
+            		ViewerUpdateMonitor update = (ViewerUpdateMonitor)updates.get(i);
+	                
+            		// Search for update in list using identity test.  Otherwise a completed canceled
+            		// update may trigger removal of up-to-date running update on the same element.
+	                List requests = (List) fRequestsInProgress.get(update.getSchedulingPath());
+	            	boolean found = false;
+	            	for (int j = 0; j < requests.size(); j++) {
+	            		if (requests.get(j) == update) {
+	            			found = true;
+	            			requests.remove(j);
+	            			break;
+	            		}
+	            	}
+	            	
+	            	if (found) {
+	                    // Trigger may initiate new updates, so wait to remove requests array from 
+	                    // fRequestsInProgress map.  This way updateStarted() will not send a 
+	                    // redundant "UPDATE SEQUENCE STARTED" notification.
+	                    trigger(update);
+	                    if (requests.isEmpty()) {
+	                        fRequestsInProgress.remove(update.getSchedulingPath());
+	                    }
+	            	} else {
+	            		// Update may be removed from in progress list if it was canceled by schedule().
+	                    Assert.isTrue( update.isCanceled() );
+	            	}
+            	}
+                if (fRequestsInProgress.isEmpty() && fWaitingRequests.isEmpty()) {
                     if (DEBUG_UPDATE_SEQUENCE && DEBUG_TEST_PRESENTATION_ID(getPresentationContext())) {
                         System.out.println("MODEL SEQUENCE ENDS"); //$NON-NLS-1$
                     }
                     notifyUpdate(UPDATE_SEQUENCE_COMPLETE, null);
-                }
+                }            	
             }
         });
             
@@ -1489,12 +1510,11 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
 	 * @param update Update to perform.
 	 */
 	void scheduleViewerUpdate(ViewerUpdateMonitor update) {
-	    List completedUpdates;
 	    Display display;
 	    synchronized(this) {
 	        if (isDisposed()) return;
 	        display = getViewer().getDisplay();
-	        completedUpdates = fCompletedUpdates;
+	        fCompletedUpdates.add(update);
             if (fCompletedUpdatesJob == null) {
 	            fCompletedUpdatesJob = new Runnable() {
 	                public void run() {
@@ -1506,7 +1526,6 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
 	            display.asyncExec(fCompletedUpdatesJob);
 	        }
 	    }
-	    completedUpdates.add(update);
 	}
 
 	/**
@@ -1525,18 +1544,18 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
             fCompletedUpdates = new ArrayList();
         }
         // necessary to check if viewer is disposed
-        for (int i = 0; i < jobCompletedUpdates.size(); i++) {
-            ViewerUpdateMonitor completedUpdate = (ViewerUpdateMonitor)jobCompletedUpdates.get(i);
-            try {
+        try {
+	        for (int i = 0; i < jobCompletedUpdates.size(); i++) {
+	        	ViewerUpdateMonitor completedUpdate = (ViewerUpdateMonitor)jobCompletedUpdates.get(i);
                 if (!completedUpdate.isCanceled() && !isDisposed()) {
                     IStatus status = completedUpdate.getStatus();
                     if (status == null || status.isOK()) {
                         completedUpdate.performUpdate();
                     }
-                }
-            } finally {
-                updateComplete(completedUpdate);
-            }
-        }
+                } 
+	        }
+        } finally {
+            updatesComplete(jobCompletedUpdates);
+        }        
 	}
 }
