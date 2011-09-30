@@ -585,12 +585,14 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
             		// update may trigger removal of up-to-date running update on the same element.
 	                List requests = (List) fRequestsInProgress.get(update.getSchedulingPath());
 	            	boolean found = false;
-	            	for (int j = 0; j < requests.size(); j++) {
-	            		if (requests.get(j) == update) {
-	            			found = true;
-	            			requests.remove(j);
-	            			break;
-	            		}
+	            	if (requests != null) {
+    	            	for (int j = 0; j < requests.size(); j++) {
+    	            		if (requests.get(j) == update) {
+    	            			found = true;
+    	            			requests.remove(j);
+    	            			break;
+    	            		}
+    	            	}
 	            	}
 	            	
 	            	if (found) {
@@ -683,7 +685,11 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
                 List requests = (List) entry.getValue();
                 Iterator reqIter = requests.iterator();
                 while (reqIter.hasNext()) {
+                    // Cancel update and remove from requests list.  Removing from 
+                    // fRequestsInProgress ensures that isRequestBlocked() won't be triggered 
+                    // by a canceled update.
                     ((IRequest) reqIter.next()).cancel();
+                    reqIter.remove();
                 }
             }
         }
@@ -721,9 +727,12 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
             if (inProgressList != null) {
                 int staleUpdateIndex = inProgressList.indexOf(update);
                 if (staleUpdateIndex >= 0) {
+                    // Cancel update and remove from requests list.  Removing from 
+                    // fRequestsInProgress ensures that isRequestBlocked() won't be triggered 
+                    // by a canceled update.
                     ViewerUpdateMonitor staleUpdate = (ViewerUpdateMonitor)inProgressList.remove(staleUpdateIndex);
                     staleUpdate.cancel();
-                    // Do not reset the inProgressList to null.  This would cause the 
+                    // Note: Do not reset the inProgressList to null.  This would cause the 
                     // updateStarted() method to think that a new update sequence is 
                     // being started.  Since there are waiting requests for this scheduling 
                     // path, the list will be cleaned up later. 
@@ -917,7 +926,11 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
                 if (update instanceof IChildrenUpdate) {
                     IChildrenUpdate childrenUpdate = (IChildrenUpdate) update;
                     if (childrenUpdate.getOffset() > modelIndex) {
+                        // Cancel update and remove from requests list.  Removing from 
+                        // fRequestsInProgress ensures that isRequestBlocked() won't be triggered 
+                        // by a canceled update.
                         childrenUpdate.cancel();
+                        iterator.remove();
                         if (reCreate == null) {
                             reCreate = new ArrayList();
                         }

@@ -432,11 +432,11 @@ public class TestModelUpdatesListener
         }
 
         if (fUnmatchedModelUpdatesObserved) {
-            throw new RuntimeException("Unmatches updatesStarted/updateCompleted notifications observed.");
+            throw new RuntimeException("Unmatched updatesStarted/updateCompleted notifications observed.");
         }
         
         if (fUnmatchedLabelUpdatesObserved) {
-            throw new RuntimeException("Unmatches labelUpdatesStarted/labelUpdateCompleted notifications observed.");
+            throw new RuntimeException("Unmatched labelUpdatesStarted/labelUpdateCompleted notifications observed.");
         }
         
         if (fFailOnRedundantUpdates && !fRedundantUpdates.isEmpty()) {

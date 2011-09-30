@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipe.debug.tests.viewer.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import junit.framework.Assert;
 
@@ -33,6 +36,7 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelSelectionPo
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelSelectionPolicyFactory;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.ITreeModelViewer;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.ModelDelta;
 import org.eclipse.debug.internal.ui.viewers.provisional.AbstractModelProxy;
 import org.eclipse.jface.viewers.TreePath;
@@ -158,7 +162,8 @@ public class TestModel implements IElementContentProvider, IElementLabelProvider
     private TreePath fRootPath = TreePath.EMPTY;
     private ModelProxy fModelProxy;
     private IModelSelectionPolicy fModelSelectionPolicy;
-    
+    private boolean fQueueingUpdates = false;
+    private List fQueuedUpdates = new LinkedList();
     
     /**
      * Constructor private.  Use static factory methods instead. 
@@ -207,46 +212,109 @@ public class TestModel implements IElementContentProvider, IElementLabelProvider
         return depth;
     }
     
-    public void update(IHasChildrenUpdate[] updates) {
-        for (int i = 0; i < updates.length; i++) {
-            TestElement element = (TestElement)updates[i].getElement();
-            updates[i].setHasChilren(element.getChildren().length > 0);
-            updates[i].done();
+    public void setQeueueingUpdate(boolean queueingUpdates) {
+        fQueueingUpdates = queueingUpdates;
+        if (!fQueueingUpdates) {
+            processQueuedUpdates();
         }
+    }
+    
+    public List getQueuedUpdates() {
+        return fQueuedUpdates;
+    }
+    
+    public void processQueuedUpdates() {
+        List updates = new ArrayList(fQueuedUpdates);
+        fQueuedUpdates.clear();
+        for (int i = 0; i < updates.size(); i++) {
+            processUpdate((IViewerUpdate)updates.get(i));
+        }
+    }
+    
+    public void processUpdate(IViewerUpdate update) {
+        if (update instanceof IHasChildrenUpdate) {
+            doUpdate((IHasChildrenUpdate)update);
+        } else if (update instanceof IChildrenCountUpdate) {
+            doUpdate((IChildrenCountUpdate)update);
+        } else if (update instanceof IChildrenUpdate) {
+            doUpdate((IChildrenUpdate)update);
+        } else if (update instanceof ILabelUpdate) {
+            doUpdate((ILabelUpdate)update);
+        } 
+    }
+    
+    public void update(IHasChildrenUpdate[] updates) {
+        if (fQueueingUpdates) {
+            fQueuedUpdates.addAll(Arrays.asList(updates));
+        } else {
+            for (int i = 0; i < updates.length; i++) {
+                doUpdate(updates[i]);
+            }
+        }
+    }
+
+    private void doUpdate(IHasChildrenUpdate update) {
+        TestElement element = (TestElement)update.getElement();
+        update.setHasChilren(element.getChildren().length > 0);
+        update.done();
     }
     
     public void update(IChildrenCountUpdate[] updates) {
-        for (int i = 0; i < updates.length; i++) {
-            TestElement element = (TestElement)updates[i].getElement();
-            updates[i].setChildCount(element.getChildren().length);
-            updates[i].done();
+        if (fQueueingUpdates) {
+            fQueuedUpdates.addAll(Arrays.asList(updates));
+        } else {
+            for (int i = 0; i < updates.length; i++) {
+                doUpdate(updates[i]);
+            }
         }
+    }
+
+    private void doUpdate(IChildrenCountUpdate update) {
+        TestElement element = (TestElement)update.getElement();
+        update.setChildCount(element.getChildren().length);
+        update.done();
     }
     
     public void update(IChildrenUpdate[] updates) {
-        for (int i = 0; i < updates.length; i++) {
-            TestElement element = (TestElement)updates[i].getElement();
-            int endOffset = updates[i].getOffset() + updates[i].getLength();
-            for (int j = updates[i].getOffset(); j < endOffset; j++) {
-                if (j < element.getChildren().length) {
-                    updates[i].setChild(element.getChildren()[j], j);
-                }
+        if (fQueueingUpdates) {
+            fQueuedUpdates.addAll(Arrays.asList(updates));
+        } else {
+            for (int i = 0; i < updates.length; i++) {
+                doUpdate(updates[i]);
             }
-            updates[i].done();
         }
+    }
+
+    private void doUpdate(IChildrenUpdate update) {
+        TestElement element = (TestElement)update.getElement();
+        int endOffset = update.getOffset() + update.getLength();
+        for (int j = update.getOffset(); j < endOffset; j++) {
+            if (j < element.getChildren().length) {
+                update.setChild(element.getChildren()[j], j);
+            }
+        }
+        update.done();
     }
     
     public void update(ILabelUpdate[] updates) {
-        for (int i = 0; i < updates.length; i++) {
-            TestElement element = (TestElement)updates[i].getElement();
-            updates[i].setLabel(element.getLabel(), 0);
-            if (updates[i] instanceof ICheckUpdate && 
-                Boolean.TRUE.equals(updates[i].getPresentationContext().getProperty(ICheckUpdate.PROP_CHECK))) 
-            {
-                ((ICheckUpdate)updates[i]).setChecked(element.getChecked(), element.getGrayed());
+        if (fQueueingUpdates) {
+            fQueuedUpdates.addAll(Arrays.asList(updates));
+        } else {
+            for (int i = 0; i < updates.length; i++) {
+                doUpdate(updates[i]);
             }
-            updates[i].done();
-        }        
+        }
+    }
+
+    private void doUpdate(ILabelUpdate update) {
+        TestElement element = (TestElement)update.getElement();
+        update.setLabel(element.getLabel(), 0);
+        if (update instanceof ICheckUpdate && 
+            Boolean.TRUE.equals(update.getPresentationContext().getProperty(ICheckUpdate.PROP_CHECK))) 
+        {
+            ((ICheckUpdate)update).setChecked(element.getChecked(), element.getGrayed());
+        }
+        update.done();
     }
     
     public final static String ELEMENT_MEMENTO_ID = "id";
