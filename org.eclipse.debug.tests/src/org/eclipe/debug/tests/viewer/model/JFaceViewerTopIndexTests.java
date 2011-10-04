@@ -211,7 +211,7 @@ public class JFaceViewerTopIndexTests extends TestCase implements ITestModelUpda
         
         model.postDelta(rootDelta);
 
-        while (!fListener.isFinished(CONTENT_UPDATES_COMPLETE | MODEL_CHANGED_COMPLETE)) 
+        while (!fListener.isFinished(CONTENT_SEQUENCE_COMPLETE | MODEL_CHANGED_COMPLETE)) 
             if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
 
         // Validate that the first node is expanded
@@ -379,7 +379,7 @@ public class JFaceViewerTopIndexTests extends TestCase implements ITestModelUpda
         // Wait for the second model delta to process
         fListener.reset();
         model.postDelta(revealDelta);
-        while (!fListener.isFinished(MODEL_CHANGED_COMPLETE | CONTENT_UPDATES_COMPLETE)) 
+        while (!fListener.isFinished(MODEL_CHANGED_COMPLETE | CONTENT_SEQUENCE_COMPLETE)) 
             if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
         
         // Clear view then reset it again.
@@ -512,7 +512,7 @@ public class JFaceViewerTopIndexTests extends TestCase implements ITestModelUpda
         fListener.reset(false, false);
         fListener.addUpdates(getCTargetViewer(), originalTopPath, (TestElement)originalTopPath.getLastSegment(), 0, STATE_UPDATES);
         fViewer.setInput(model.getRootElement());
-        while (!fListener.isFinished(STATE_UPDATES | CONTENT_UPDATES_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        while (!fListener.isFinished(STATE_UPDATES | CONTENT_SEQUENCE_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
 
         while (fDisplay.readAndDispatch ()) {}
         // check if REVEAL was restored OK

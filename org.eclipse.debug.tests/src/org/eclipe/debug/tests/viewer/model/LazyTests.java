@@ -140,7 +140,7 @@ abstract public class LazyTests extends TestCase implements ITestModelUpdatesLis
         }
         model.postDelta(rootDelta);
 
-        while (!fListener.isFinished(CONTENT_UPDATES_COMPLETE | MODEL_CHANGED_COMPLETE | LABEL_UPDATES_COMPLETE)) 
+        while (!fListener.isFinished(CONTENT_SEQUENCE_COMPLETE | MODEL_CHANGED_COMPLETE | LABEL_SEQUENCE_COMPLETE)) 
             if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
     }
 
@@ -165,7 +165,7 @@ abstract public class LazyTests extends TestCase implements ITestModelUpdatesLis
         fListener.setFailOnRedundantUpdates(false);
         fViewer.setInput(model.getRootElement());
         fListener.addLabelUpdate(model.findElement("1.0"));
-        while (!fListener.isFinished(CONTENT_UPDATES_COMPLETE | LABEL_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        while (!fListener.isFinished(CONTENT_SEQUENCE_COMPLETE | LABEL_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
 
         // Set selection so that the initial selection is not empty
         fViewer.setSelection(new TreeSelection(new TreePath[] { model.findElement("1.0")} ));
@@ -209,7 +209,7 @@ abstract public class LazyTests extends TestCase implements ITestModelUpdatesLis
         // Populate initial view content
         fListener.reset(TreePath.EMPTY, model.getRootElement(), -1, true, true); 
         fViewer.setInput(model.getRootElement());
-        while (!fListener.isFinished(CONTENT_UPDATES_COMPLETE | LABEL_UPDATES_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        while (!fListener.isFinished(CONTENT_SEQUENCE_COMPLETE | LABEL_SEQUENCE_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
 
         // Turn off autoexpand
         fViewer.setAutoExpandLevel(0);
@@ -218,7 +218,7 @@ abstract public class LazyTests extends TestCase implements ITestModelUpdatesLis
         fListener.reset();
         fListener.setFailOnRedundantUpdates(false);
         fViewer.reveal(model.findElement("1"), 500);
-        while (!fListener.isFinished(CONTENT_UPDATES_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        while (!fListener.isFinished(CONTENT_SEQUENCE_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
         
         // Create delta to refresh the "1" element.
         TestElement rootElement = model.getRootElement();
@@ -248,7 +248,7 @@ abstract public class LazyTests extends TestCase implements ITestModelUpdatesLis
             }
             model.postDelta(rootDelta);
     
-            while (!fListener.isFinished(CONTENT_UPDATES_COMPLETE | MODEL_CHANGED_COMPLETE)) 
+            while (!fListener.isFinished(CONTENT_SEQUENCE_COMPLETE | MODEL_CHANGED_COMPLETE)) 
                 if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
         }
     }

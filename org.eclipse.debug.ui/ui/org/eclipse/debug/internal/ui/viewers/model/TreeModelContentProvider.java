@@ -386,6 +386,9 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
 
             updateModel(delta, getModelDeltaMask());
 
+            // Initiate model update sequence before notifying of the model changed. 
+            trigger(null);
+            
             // Call model listeners after updating the viewer model.
             Object[] listeners = fModelListeners.getListeners();
             for (int i = 0; i < listeners.length; i++) {
@@ -599,7 +602,7 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
 	                    // Trigger may initiate new updates, so wait to remove requests array from 
 	                    // fRequestsInProgress map.  This way updateStarted() will not send a 
 	                    // redundant "UPDATE SEQUENCE STARTED" notification.
-	                    trigger(update);
+	                    trigger(update.getSchedulingPath());
 	                    if (requests.isEmpty()) {
 	                        fRequestsInProgress.remove(update.getSchedulingPath());
 	                    }
@@ -741,7 +744,7 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
             if (inProgressList == null || inProgressList.isEmpty()) {
                 getViewer().getDisplay().asyncExec(new Runnable() {
                     public void run() {
-                        trigger(update);
+                        trigger(update.getSchedulingPath());
                     }
                 });
             }
@@ -816,13 +819,13 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
      * properly restored as new elements are retreived from model.  
      * </p>
      * 
-     * @param request the request that just completed
+     * @param The schedulingPath path or requests to start processing.  May 
+     * be <code>null</code> to start the shortest path request.
      */
-    private void trigger(ViewerUpdateMonitor request) {
+    private void trigger(TreePath schedulingPath) {
         if (fWaitingRequests.isEmpty()) {
             return;
         }
-        TreePath schedulingPath = request.getSchedulingPath();
         List waiting = (List) fWaitingRequests.get(schedulingPath);
         if (waiting == null) {
             // no waiting, update the entry with the shortest path

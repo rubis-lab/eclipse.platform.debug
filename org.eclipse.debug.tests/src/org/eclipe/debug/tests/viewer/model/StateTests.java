@@ -138,7 +138,7 @@ abstract public class StateTests extends TestCase implements ITestModelUpdatesLi
         fListener.addLabelUpdate(path3);
         
         fViewer.updateViewer(updateDelta);
-        while (!fListener.isFinished(CONTENT_UPDATES_COMPLETE | LABEL_UPDATES)) 
+        while (!fListener.isFinished(CONTENT_SEQUENCE_COMPLETE | LABEL_UPDATES)) 
             if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
 
         // Extract the new state from viewer
@@ -247,7 +247,7 @@ abstract public class StateTests extends TestCase implements ITestModelUpdatesLi
         }
         model.postDelta(rootDelta);
 
-        while (!fListener.isFinished(CONTENT_UPDATES_COMPLETE | MODEL_CHANGED_COMPLETE)) 
+        while (!fListener.isFinished(CONTENT_SEQUENCE_COMPLETE | MODEL_CHANGED_COMPLETE)) 
             if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
     }
     
@@ -527,7 +527,7 @@ abstract public class StateTests extends TestCase implements ITestModelUpdatesLi
 
         // Set the input into the view and update the view.
         fViewer.setInput(model.getRootElement());
-        while (!fListener.isFinished(CONTENT_UPDATES_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        while (!fListener.isFinished(CONTENT_SEQUENCE_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
 //        model.validateData(fViewer, TreePath.EMPTY, true);
 
         expandAlternateElements(model, false);
@@ -543,7 +543,7 @@ abstract public class StateTests extends TestCase implements ITestModelUpdatesLi
         // Note: Re-expanding nodes causes redundant updates.
         fListener.reset(false, false);
         model.postDelta(new ModelDelta(model.getRootElement(), IModelDelta.CONTENT));
-        while (!fListener.isFinished(CONTENT_UPDATES_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        while (!fListener.isFinished(CONTENT_SEQUENCE_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
 
         // Validate data
         Assert.assertTrue(getInternalViewer().getExpandedState(model.findElement("2")) == false);
@@ -561,7 +561,7 @@ abstract public class StateTests extends TestCase implements ITestModelUpdatesLi
         // Note: Re-expanding nodes causes redundant updates.
         fListener.reset(false, false);
         model.postDelta(new ModelDelta(model.getRootElement(), IModelDelta.CONTENT));
-        while (!fListener.isFinished(CONTENT_UPDATES_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        while (!fListener.isFinished(CONTENT_SEQUENCE_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
 
         // Validate data
         Assert.assertTrue(getInternalViewer().getExpandedState(model.findElement("2")) == false);
@@ -835,7 +835,7 @@ abstract public class StateTests extends TestCase implements ITestModelUpdatesLi
 
         // Set the input into the view and update the view.
         fViewer.setInput(model.getRootElement());
-        while (!fListener.isFinished(CONTENT_UPDATES_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        while (!fListener.isFinished(CONTENT_SEQUENCE_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
 
         expandAlternateElements(model, false);
         
@@ -861,7 +861,7 @@ abstract public class StateTests extends TestCase implements ITestModelUpdatesLi
         // Note: disable redundant updates because the reveal delta triggers one.
         fListener.reset();
         fViewer.setInput(model.getRootElement());
-        while (!fListener.isFinished(CONTENT_UPDATES_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        while (!fListener.isFinished(CONTENT_SEQUENCE_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
 
         // Validate data (only select visible elements).
         Assert.assertTrue(getInternalViewer().getExpandedState(model.findElement("1")) == true);
@@ -892,7 +892,7 @@ abstract public class StateTests extends TestCase implements ITestModelUpdatesLi
 
         // Set the input into the view and update the view.
         fViewer.setInput(model.getRootElement());
-        while (!fListener.isFinished(CONTENT_UPDATES_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        while (!fListener.isFinished(CONTENT_SEQUENCE_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
 
         expandAlternateElements(model, false);
         
@@ -926,7 +926,7 @@ abstract public class StateTests extends TestCase implements ITestModelUpdatesLi
         fViewer.setInput(model.getRootElement());
         
         // MONITOR FOR THE STATE RESTORE TO COMPLETE   
-        while (!fListener.isFinished(CONTENT_UPDATES_COMPLETE| STATE_RESTORE_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        while (!fListener.isFinished(CONTENT_SEQUENCE_COMPLETE| STATE_RESTORE_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
 
         // Validate data
         Assert.assertTrue(getInternalViewer().getExpandedState(model.findElement("1")) == true);

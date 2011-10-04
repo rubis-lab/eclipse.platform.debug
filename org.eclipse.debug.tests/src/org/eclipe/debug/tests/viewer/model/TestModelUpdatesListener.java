@@ -452,19 +452,19 @@ public class TestModelUpdatesListener
             Assert.fail("Multiple viewer update sequences detected");
         }
 
-        if ( (flags & LABEL_UPDATES_COMPLETE) != 0) {
+        if ( (flags & LABEL_SEQUENCE_COMPLETE) != 0) {
             if (fLabelUpdatesComplete == fLabelUpdatesCompleteAtReset) return false;
         }
-        if ( (flags & LABEL_UPDATES_STARTED) != 0) {
+        if ( (flags & LABEL_SEQUENCE_STARTED) != 0) {
             if (fLabelUpdatesStarted == fLabelUpdatesStartedAtReset) return false;
         }
         if ( (flags & LABEL_UPDATES) != 0) {
             if (!fLabelUpdates.isEmpty()) return false;
         }
-        if ( (flags & CONTENT_UPDATES_STARTED) != 0) {
+        if ( (flags & CONTENT_SEQUENCE_STARTED) != 0) {
             if (fViewerUpdatesStarted == fViewerUpdatesStartedAtReset) return false;
         }
-        if ( (flags & CONTENT_UPDATES_COMPLETE) != 0) {
+        if ( (flags & CONTENT_SEQUENCE_COMPLETE) != 0) {
             if (fViewerUpdatesComplete == fViewerUpdatesCompleteAtReset) return false;
         }
         if ( (flags & HAS_CHILDREN_UPDATES_STARTED) != 0) {
@@ -686,7 +686,7 @@ public class TestModelUpdatesListener
             buf.append("\n\t");
             buf.append("fRedundantUpdates = " + fRedundantUpdates);
         }
-        if ( (flags & LABEL_UPDATES_COMPLETE) != 0) {
+        if ( (flags & LABEL_SEQUENCE_COMPLETE) != 0) {
             buf.append("\n\t");
             buf.append("fLabelUpdatesComplete = " + fLabelUpdatesComplete);
         }
@@ -694,7 +694,7 @@ public class TestModelUpdatesListener
             buf.append("\n\t");
             buf.append("fLabelUpdatesRunning = " + fLabelUpdatesCounter);
         }
-        if ( (flags & LABEL_UPDATES_STARTED) != 0) {
+        if ( (flags & LABEL_SEQUENCE_STARTED) != 0) {
             buf.append("\n\t");
             buf.append("fLabelUpdatesStarted = ");
             buf.append( fLabelUpdatesStarted );
@@ -713,7 +713,7 @@ public class TestModelUpdatesListener
             buf.append("\n\t");
             buf.append("fViewerUpdatesRunning = " + fViewerUpdatesCounter);
         }
-        if ( (flags & CONTENT_UPDATES_COMPLETE) != 0) {
+        if ( (flags & CONTENT_SEQUENCE_COMPLETE) != 0) {
             buf.append("\n\t");
             buf.append("fViewerUpdatesComplete = " + fViewerUpdatesComplete);
         }
@@ -824,7 +824,7 @@ public class TestModelUpdatesListener
     }
     
     public String toString() {
-        return toString(ALL_UPDATES_COMPLETE | MODEL_CHANGED_COMPLETE | STATE_RESTORE_COMPLETE | VIEWER_UPDATES_STARTED | LABEL_UPDATES_STARTED | STATE_UPDATES);
+        return toString(ALL_UPDATES_COMPLETE | MODEL_CHANGED_COMPLETE | STATE_RESTORE_COMPLETE | ALL_VIEWER_UPDATES_STARTED | LABEL_SEQUENCE_STARTED | STATE_UPDATES);
     }
     
     

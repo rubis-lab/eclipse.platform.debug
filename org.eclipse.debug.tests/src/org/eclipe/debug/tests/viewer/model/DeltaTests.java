@@ -410,7 +410,7 @@ abstract public class DeltaTests extends TestCase implements ITestModelUpdatesLi
         fListener.reset();
         fListener.setFailOnRedundantUpdates(false);
         model.postDelta(rootDelta);
-        while (!fListener.isFinished(MODEL_CHANGED_COMPLETE | CONTENT_UPDATES_COMPLETE)) 
+        while (!fListener.isFinished(MODEL_CHANGED_COMPLETE | CONTENT_SEQUENCE_COMPLETE)) 
             if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
 
         // Update the elements that were added.
@@ -429,7 +429,7 @@ abstract public class DeltaTests extends TestCase implements ITestModelUpdatesLi
         fListener.reset(parentPath, model.getElement(parentPath), 1, false, true);
         ((IInternalTreeModelViewer)fViewer).expandToLevel(parentPath, 1);
 
-        while (fListener.isFinished(CONTENT_UPDATES_STARTED) && !fListener.isFinished(CONTENT_UPDATES_COMPLETE)) 
+        while (fListener.isFinished(CONTENT_SEQUENCE_STARTED) && !fListener.isFinished(CONTENT_SEQUENCE_COMPLETE)) 
             if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
 
         model.validateData(fViewer, parentPath);
@@ -455,7 +455,7 @@ abstract public class DeltaTests extends TestCase implements ITestModelUpdatesLi
         fListener.reset(parentPath, model.getElement(parentPath), 1, false, true);
         ((IInternalTreeModelViewer)fViewer).expandToLevel(parentPath, 1);
 
-        while (fListener.isFinished(CONTENT_UPDATES_STARTED) && !fListener.isFinished(CONTENT_UPDATES_COMPLETE)) 
+        while (fListener.isFinished(CONTENT_SEQUENCE_STARTED) && !fListener.isFinished(CONTENT_SEQUENCE_COMPLETE)) 
             if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
 
         // Collapse back element "2"
@@ -477,7 +477,7 @@ abstract public class DeltaTests extends TestCase implements ITestModelUpdatesLi
         fListener.reset(parentPath, model.getElement(parentPath), 1, false, true);
         ((IInternalTreeModelViewer)fViewer).expandToLevel(parentPath, 1);
 
-        while (fListener.isFinished(CONTENT_UPDATES_STARTED) && !fListener.isFinished(CONTENT_UPDATES_COMPLETE)) 
+        while (fListener.isFinished(CONTENT_SEQUENCE_STARTED) && !fListener.isFinished(CONTENT_SEQUENCE_COMPLETE)) 
             if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
 
         model.validateData(fViewer, parentPath, true);
@@ -626,7 +626,7 @@ abstract public class DeltaTests extends TestCase implements ITestModelUpdatesLi
         model.postDelta(deltaRoot);
         while (true) {
             if (fListener.isFinished(MODEL_CHANGED_COMPLETE)) {
-                if (fListener.isFinished(CONTENT_UPDATES_COMPLETE | LABEL_UPDATES_COMPLETE) ) {
+                if (fListener.isFinished(CONTENT_SEQUENCE_COMPLETE | LABEL_SEQUENCE_COMPLETE) ) {
                     break;
                 }
             }

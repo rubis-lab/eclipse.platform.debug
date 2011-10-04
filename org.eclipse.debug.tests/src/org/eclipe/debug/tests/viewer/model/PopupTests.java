@@ -153,8 +153,8 @@ abstract public class PopupTests extends TestCase implements ITestModelUpdatesLi
         model.postDelta(deltaRoot);
         while (true) {
             if (fListener.isFinished(MODEL_CHANGED_COMPLETE)) {
-                if (fListener.isFinished(CONTENT_UPDATES_STARTED)) {
-                    if (fListener.isFinished(CONTENT_UPDATES_COMPLETE)) {
+                if (fListener.isFinished(CONTENT_SEQUENCE_STARTED)) {
+                    if (fListener.isFinished(CONTENT_SEQUENCE_COMPLETE)) {
                         break;
                     }
                 } else {

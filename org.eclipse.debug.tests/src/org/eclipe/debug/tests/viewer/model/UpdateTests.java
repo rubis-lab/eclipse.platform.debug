@@ -30,6 +30,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.junit.Assert;
 
 /**
  * Tests to verify that the viewer property updates following changes in the 
@@ -189,7 +190,7 @@ abstract public class UpdateTests extends TestCase implements ITestModelUpdatesL
         model.postDelta(delta);
         
         if (validate) {
-            while (!fListener.isFinished(MODEL_CHANGED_COMPLETE | CONTENT_UPDATES_COMPLETE | LABEL_UPDATES_COMPLETE)) 
+            while (!fListener.isFinished(MODEL_CHANGED_COMPLETE | CONTENT_SEQUENCE_COMPLETE | LABEL_SEQUENCE_COMPLETE)) 
                 if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
             model.validateData(fViewer, TreePath.EMPTY);                
         } else {
@@ -206,7 +207,7 @@ abstract public class UpdateTests extends TestCase implements ITestModelUpdatesL
         model.postDelta(delta);
         
         if (validate) {
-            while (!fListener.isFinished(MODEL_CHANGED_COMPLETE | CONTENT_UPDATES_COMPLETE | LABEL_UPDATES_COMPLETE)) 
+            while (!fListener.isFinished(MODEL_CHANGED_COMPLETE | CONTENT_SEQUENCE_COMPLETE | LABEL_SEQUENCE_COMPLETE)) 
                 if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
             model.validateData(fViewer, TreePath.EMPTY);                
         } else {
@@ -237,6 +238,33 @@ abstract public class UpdateTests extends TestCase implements ITestModelUpdatesL
         addElement(model, "1-new", 1, true);
         removeElement(model, 3, true);
         addElement(model, "4-new", 4, true);
+    }
+
+    /**
+     * This test verifies that when the viewer processes a delta that causes viewer 
+     * updates it initiates the model update sequence before it finishes processing 
+     * the delta.
+     */
+    public void testNotifyUpdatesTartedOnModelChanged() throws InterruptedException {
+        TestModel model = TestModel.simpleSingleLevel();
+        fViewer.setAutoExpandLevel(-1);
+
+        // Create the listener
+        fListener.reset(TreePath.EMPTY, model.getRootElement(), -1, false, false); 
+
+        // Set the input into the view and update the view.
+        fViewer.setInput(model.getRootElement());
+        while (!fListener.isFinished()) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        model.validateData(fViewer, TreePath.EMPTY);
+
+        // Refresh the viewer so that updates are generated.
+        fListener.reset();
+        model.postDelta(new ModelDelta(model.getRootElement(), IModelDelta.CONTENT));
+    
+        // Wait for the delta to be processed.
+        while (!fListener.isFinished(MODEL_CHANGED_COMPLETE)) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        
+        Assert.assertTrue( fListener.isFinished(CONTENT_SEQUENCE_STARTED) );
     }
 
 
@@ -465,7 +493,6 @@ abstract public class UpdateTests extends TestCase implements ITestModelUpdatesL
             fListener.reset();
             model.postDelta(new ModelDelta(model.getRootElement(), IModelDelta.CONTENT));
     
-            // Wait for the delta to be processed.
             // Wait for the delta to be processed.
             while (!fListener.isFinished(MODEL_CHANGED_COMPLETE | CHILDREN_UPDATES_STARTED)) {
                 completeQueuedUpdatesOfType(model, IChildrenCountUpdate.class);
