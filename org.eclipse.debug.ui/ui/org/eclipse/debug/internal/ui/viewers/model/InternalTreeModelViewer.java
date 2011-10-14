@@ -77,7 +77,7 @@ import org.eclipse.ui.IMemento;
  * @since 3.3
  */
 public class InternalTreeModelViewer extends TreeViewer 
-    implements IInternalTreeModelViewer
+    implements IInternalTreeModelViewer, org.eclipse.debug.internal.ui.viewers.model.ITreeModelViewer
 {
 	
 	private IPresentationContext fContext;

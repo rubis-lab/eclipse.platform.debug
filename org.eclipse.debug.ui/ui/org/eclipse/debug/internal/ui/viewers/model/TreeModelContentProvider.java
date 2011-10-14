@@ -22,11 +22,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.IRequest;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.ICheckboxModelProxy;
@@ -35,6 +38,7 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IElementContentPr
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedListener;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxy;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxy2;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxyFactory;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxyFactory2;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
@@ -281,9 +285,37 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
                 }
             }
 
-            if (proxy != null) {
+            if (proxy instanceof IModelProxy2) {
                 proxy.addModelChangedListener(this);
-                proxy.initialize(getViewer());
+                ((IModelProxy2)proxy).initialize(getViewer());
+            } else if (proxy != null) {
+                final IModelProxy finalProxy = proxy;
+                Job job = new Job("Model Proxy installed notification job") {//$NON-NLS-1$
+                    protected IStatus run(IProgressMonitor monitor) {
+                        if (!monitor.isCanceled()) {
+                            IPresentationContext context = null;
+                            Viewer viewer = null;
+                            synchronized (TreeModelContentProvider.this) {
+                                if (!isDisposed()) {
+                                    context = getPresentationContext();
+                                    viewer = (Viewer) getViewer();
+                                }
+                            }
+                            if (viewer != null && context != null && !finalProxy.isDisposed()) {
+                                finalProxy.init(context);
+                                finalProxy.addModelChangedListener(TreeModelContentProvider.this);
+                                finalProxy.installed(viewer);
+                            }
+                        }
+                        return Status.OK_STATUS;
+                    }
+
+                    public boolean shouldRun() {
+                        return !isDisposed();
+                    }
+                };
+                job.setSystem(true);
+                job.schedule();
             }
         }
     }

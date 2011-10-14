@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedListener;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxy;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxy2;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.ITreeModelViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -33,7 +33,7 @@ import org.eclipse.jface.viewers.Viewer;
  * </p>
  * @since 3.2
  */
-public abstract class AbstractModelProxy implements IModelProxy {
+public abstract class AbstractModelProxy implements IModelProxy2 {
 	
 	private IPresentationContext fContext;
 	private boolean fInstalled = false;

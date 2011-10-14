@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2010 Wind River Systems and others.
+ * Copyright (c) 2009, 2011 Wind River Systems and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.Display;
  * JFace-based {@link TreeModelViewer} and the UI-less 
  * {@link VirtualTreeModelViewer}.
  *
- * @since 3.5
+ * @since 3.8
  */
 public interface ITreeModelViewer extends ISelectionProvider {
 

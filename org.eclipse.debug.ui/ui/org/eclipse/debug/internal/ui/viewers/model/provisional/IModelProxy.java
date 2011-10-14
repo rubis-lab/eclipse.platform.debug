@@ -38,44 +38,21 @@ import org.eclipse.jface.viewers.Viewer;
  * @see IModelProxyFactory
  * @see IModelChangedListener
  * @see ICheckboxModelProxy
+ * @see IModelProxy2
  * @since 3.2
  */
 public interface IModelProxy {
-
-    /**
-     * Initialize model proxy with given tree model viewer.  This method is 
-     * called on the viewer's Display thread and is guaranteed to be called 
-     * before the dispose() method is called on the same proxy.  The default 
-     * implementation of this method calls {@link #init(IPresentationContext)} 
-     * and {@link #installed(Viewer)} asynchornously and not in the Display 
-     * thread.
-     * <br>Client may override this method directly, in order to initialize the 
-     * model proxy in the viewer's display thread.  Alternatively clients may 
-     * override the {@link #installed(Viewer)} method to initialize the proxy
-     * in an asynchronous job thread. 
-     * </p>
-     * <p>
-     * This method is called by the asynchronous viewer framework and should 
-     * not be called by clients.
-     * </p>
-     * @param viewer Viewer that is installing this model proxy.
-     * 
-     * @since 3.8
-     */
-    public void initialize(ITreeModelViewer viewer);
     
 	/**
 	 * Notification this model proxy has been created and is about to be installed
 	 * in the following context. This is the first method called after a model proxy
-	 * is created.  This method is called by the {@link AbstractModelProxy} base 
-	 * class using a job and NOT in viewers display thread. It allows the client to
-	 * initialize the proxy without blocking the UI.  The default implementaiton is 
-	 * a no-op. 
+	 * is created and it's called in a job thread and not on a display thread.
 	 * <p>
 	 * This method is called by the asynchronous viewer framework and should not
 	 * be called by clients.
 	 * </p>
 	 * @param context presentation context in which the proxy will be installed
+	 * @see IModelProxy2#initialize(ITreeModelViewer)
 	 */
 	public void init(IPresentationContext context);
 	
@@ -91,6 +68,7 @@ public interface IModelProxy {
 	 * be called by clients.
 	 * </p>
      * @param viewer viewer
+     * @see IModelProxy2#initialize(ITreeModelViewer)
 	 * @since 3.3
 	 */
 	public void installed(Viewer viewer);
