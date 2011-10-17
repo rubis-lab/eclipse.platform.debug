@@ -14,7 +14,7 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
 /**
  * Listener for viewer state updates.
  * 
- * @since 3.6
+ * @since 3.8
  */
 public interface IStateUpdateListener {
 

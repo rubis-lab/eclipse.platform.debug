@@ -15,7 +15,7 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
  * The label provider can use the presentation context to determine whether the 
  * viewer is showing item check boxes. 
  * 
- * @since 3.6
+ * @since 3.8
  */
 public interface ICheckUpdate extends ILabelUpdate {
 

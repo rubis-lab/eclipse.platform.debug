@@ -21,7 +21,7 @@ import org.eclipse.ui.IWorkbenchWindow;
  * Clients may implement and extend this interface to provide
  * special contexts. Implementations must subclass {@link PresentationContext}.
  * </p>
- * @since 3.2
+ * @since 3.8
  */
 public interface IPresentationContext {
 

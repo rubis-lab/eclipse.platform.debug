@@ -20,7 +20,7 @@ import org.eclipse.debug.internal.ui.viewers.model.ViewerInputUpdate;
  * <p>
  * This class may be instantiated. Not intended to be subclassed.
  * </p>
- * @since 3.4
+ * @since 3.8
  */
 public class ViewerInputService {
 	

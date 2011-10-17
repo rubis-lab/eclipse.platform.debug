@@ -20,7 +20,7 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
  * asynchronously.
  * </p>
  * 
- * @since 3.3
+ * @since 3.8
  */
 public interface IElementLabelProvider {
 	

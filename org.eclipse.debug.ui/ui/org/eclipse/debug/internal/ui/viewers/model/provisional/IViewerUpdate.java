@@ -18,7 +18,7 @@ import org.eclipse.jface.viewers.TreePath;
  * <p>
  * Clients are not intended to implement this interface.
  * </p>
- * @since 3.3
+ * @since 3.8
  */
 public interface IViewerUpdate extends IRequest {
 

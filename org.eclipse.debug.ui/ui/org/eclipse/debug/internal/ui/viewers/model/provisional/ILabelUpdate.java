@@ -19,7 +19,7 @@ import org.eclipse.swt.graphics.RGB;
  * <p>
  * Clients are not intended to implement this interface.
  * </p> 
- * @since 3.3
+ * @since 3.8
  */
 public interface ILabelUpdate extends IViewerUpdate {
 		

@@ -20,7 +20,7 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
  * Clients may instantiate this class; not intended to be subclassed.
  * </p>
  * @see IModelDelta
- * @since 3.2
+ * @since 3.8
  */
 public class ModelDelta implements IModelDelta {
 

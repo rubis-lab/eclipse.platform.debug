@@ -39,7 +39,7 @@ import org.eclipse.jface.viewers.Viewer;
  * @see IModelChangedListener
  * @see ICheckboxModelProxy
  * @see IModelProxy2
- * @since 3.2
+ * @since 3.8
  */
 public interface IModelProxy {
     

@@ -17,7 +17,7 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
  * Clients may implement this interface.
  * </p>
  * @see ViewerInputService
- * @since 3.4 
+ * @since 3.8
  */
 public interface IViewerInputRequestor {
 

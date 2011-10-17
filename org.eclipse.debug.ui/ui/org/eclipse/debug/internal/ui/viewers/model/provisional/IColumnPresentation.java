@@ -17,7 +17,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
  * A column presentation is customizable per presentation context (view) and
  * view input, and is created by an <code>IColumnPresentationFactory</code>.
  * 
- * @since 3.2
+ * @since 3.8
  */
 public interface IColumnPresentation {
 	

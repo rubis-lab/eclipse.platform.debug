@@ -20,7 +20,7 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
  * Clients may implement this interface.
  * </p>
  * @see IModelSelectionPolicy
- * @since 3.2
+ * @since 3.8
  */
 public interface IModelSelectionPolicyFactory {
 	/**

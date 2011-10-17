@@ -20,7 +20,7 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
  * </p>
  * @see IModelProxy
  * @see IModelDelta
- * @since 3.2
+ * @since 3.8
  */
 public interface IModelProxyFactory {
 	/**

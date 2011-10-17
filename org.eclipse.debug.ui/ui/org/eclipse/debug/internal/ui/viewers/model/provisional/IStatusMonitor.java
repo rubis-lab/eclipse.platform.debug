@@ -29,7 +29,7 @@ import org.eclipse.core.runtime.IStatus;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
- * @since 3.3
+ * @since 3.8
  * <p>
  * <strong>EXPERIMENTAL</strong>. This interface has been added as
  * part of a work in progress. There is no guarantee that this API will

@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Composite;
 /**
  * Creates context specific cell modifiers and editors for elements.
  *  
- * @since 3.3
+ * @since 3.8
  */
 public interface IElementEditor {
 	

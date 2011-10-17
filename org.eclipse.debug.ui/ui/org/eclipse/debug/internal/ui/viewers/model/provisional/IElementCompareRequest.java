@@ -16,7 +16,7 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
  * <p>
  * Clients are not intended to implement this interface.
  * </p>
- * @since 3.3
+ * @since 3.8
  */
 public interface IElementCompareRequest extends IElementMementoRequest {
 	

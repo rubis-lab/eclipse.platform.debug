@@ -29,7 +29,7 @@ import org.eclipse.jface.viewers.ISelection;
  * </p>
  * 
  * @see IModelSelectionPolicyFactory
- * @since 3.2
+ * @since 3.8
  */
 public interface IModelSelectionPolicy {
 	

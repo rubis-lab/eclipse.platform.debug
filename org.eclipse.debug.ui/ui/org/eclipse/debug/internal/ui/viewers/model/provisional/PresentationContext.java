@@ -34,7 +34,7 @@ import org.eclipse.ui.PlatformUI;
  * <p>
  * Clients may instantiate and subclass this class.
  * </p>
- * @since 3.2
+ * @since 3.8
  */
 public class PresentationContext implements IPresentationContext {
     

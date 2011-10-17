@@ -14,7 +14,7 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
  * An adapter used to create column presentations.
  * 
  * @see IColumnPresentation
- * @since 3.2
+ * @since 3.8
  */
 public interface IColumnPresentationFactory {
 

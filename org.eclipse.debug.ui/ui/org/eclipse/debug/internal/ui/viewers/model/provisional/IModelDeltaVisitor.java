@@ -14,7 +14,7 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
 /**
  * An objects that visits model deltas.
  * 
- * @since 3.3
+ * @since 3.8
  */
 public interface IModelDeltaVisitor {
 	

@@ -14,7 +14,7 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
  * Extension to allow column presentation to specify initial column sizes in a 
  * TreeModelViewer.
  * 
- * @since 3.7
+ * @since 3.8
  * 
  * @see TreeModelViewer
  */
