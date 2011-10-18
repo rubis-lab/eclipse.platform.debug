@@ -15,6 +15,7 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IStateUpdateListener;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdateListener;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.TreeModelViewer;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILazyTreePathContentProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.Viewer;
@@ -202,15 +203,16 @@ public interface ITreeModelContentProvider extends ILazyTreePathContentProvider 
     
     /**
      * Notifies the content provider that a client called {@link Viewer#setInput(Object)}, 
-     * and the viewer input is about to change.  
+     * and the viewer input is changed. 
+     * This method is guaranteed to be called after {@link IContentProvider#inputChanged(Viewer, Object, Object)} 
      *  
      * @param viewer The viewer that uses this content provider.
      * @param oldInput Old input object.
      * @param newInput New input object.
      * 
-     * @since 3.7
+     * @since 3.8
      */
-    public void inputAboutToChange(IInternalTreeModelViewer viewer, Object oldInput, Object newInput);
+    public void postInputChanged(IInternalTreeModelViewer viewer, Object oldInput, Object newInput);
     
     /**
      * Notifies the receiver that the given element has had its 

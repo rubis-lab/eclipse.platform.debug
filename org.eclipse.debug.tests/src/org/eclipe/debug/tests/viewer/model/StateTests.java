@@ -823,6 +823,93 @@ abstract public class StateTests extends TestCase implements ITestModelUpdatesLi
         }
     }
 
+    public void testSaveAndRestoreInputInstance() throws InterruptedException {
+        //TreeModelViewerAutopopulateAgent autopopulateAgent = new TreeModelViewerAutopopulateAgent(fViewer);
+        TestModel model = alternatingSubsreesModel(6);
+
+        // NOTE: WE ARE NOT EXPANDING ANY CHILDREN
+        
+        // Create the listener, only check the first level
+        fListener.reset(TreePath.EMPTY, model.getRootElement(), 1, true, false); 
+
+        // Set the input into the view and update the view.
+        fViewer.setInput(model.getRootElement());
+        while (!fListener.isFinished()) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        model.validateData(fViewer, TreePath.EMPTY, true);
+
+        // Expand some, but not all elements
+        expandAlternateElements(model, true);
+
+        // Set a selection in view
+        fViewer.setSelection(new TreeSelection(new TreePath[] { model.findElement("5.1"), model.findElement("5.1.1"), model.findElement("6.1.1") } ));
+        
+        // Extract the original state from viewer
+        ModelDelta originalState = new ModelDelta(model.getRootElement(), IModelDelta.NO_CHANGE);
+        fViewer.saveElementState(TreePath.EMPTY, originalState, IModelDelta.EXPAND | IModelDelta.SELECT);
+
+        // Do not reset to null, just reset input to the same object.
+        
+        // Set the viewer input back to the model.  When view updates are complete
+        // the viewer 
+        // Note: disable redundant updates because the reveal delta triggers one.
+        fListener.reset(TreePath.EMPTY, model.getRootElement(), 1, false, false);
+        fViewer.setInput(model.getRootElement());
+        while (!fListener.isFinished()) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+
+        // Extract the restored state from viewer
+        ModelDelta restoredState = new ModelDelta(model.getRootElement(), IModelDelta.NO_CHANGE);
+        fViewer.saveElementState(TreePath.EMPTY, restoredState, IModelDelta.EXPAND | IModelDelta.SELECT);
+
+        if (!deltaMatches(originalState, restoredState)) {
+            Assert.fail("Expected:\n" + originalState.toString() + "\nGot:\n" + restoredState);
+        }
+    }
+
+    public void testSaveAndRestoreInputInstanceEquals() throws InterruptedException {
+        //TreeModelViewerAutopopulateAgent autopopulateAgent = new TreeModelViewerAutopopulateAgent(fViewer);
+        TestModel model = alternatingSubsreesModel(6);
+
+        // NOTE: WE ARE NOT EXPANDING ANY CHILDREN
+        
+        // Create the listener, only check the first level
+        fListener.reset(TreePath.EMPTY, model.getRootElement(), 1, true, false); 
+
+        // Set the input into the view and update the view.
+        fViewer.setInput(model.getRootElement());
+        while (!fListener.isFinished()) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        model.validateData(fViewer, TreePath.EMPTY, true);
+
+        // Expand some, but not all elements
+        expandAlternateElements(model, true);
+
+        // Set a selection in view
+        fViewer.setSelection(new TreeSelection(new TreePath[] { model.findElement("5.1"), model.findElement("5.1.1"), model.findElement("6.1.1") } ));
+        
+        // Extract the original state from viewer
+        ModelDelta originalState = new ModelDelta(model.getRootElement(), IModelDelta.NO_CHANGE);
+        fViewer.saveElementState(TreePath.EMPTY, originalState, IModelDelta.EXPAND | IModelDelta.SELECT);
+
+        // Create a copy of the input object and set it to model. 
+        TestElement newRoot = new TestElement(model, model.getRootElement().getID(), model.getRootElement().getChildren());
+        model.setRoot(newRoot);
+        
+        // Set the viewer input back to the model.  When view updates are complete
+        // the viewer 
+        // Note: disable redundant updates because the reveal delta triggers one.
+        fListener.reset(TreePath.EMPTY, model.getRootElement(), 1, false, false);
+        
+        fViewer.setInput(model.getRootElement());
+        while (!fListener.isFinished()) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+
+        // Extract the restored state from viewer
+        ModelDelta restoredState = new ModelDelta(model.getRootElement(), IModelDelta.NO_CHANGE);
+        fViewer.saveElementState(TreePath.EMPTY, restoredState, IModelDelta.EXPAND | IModelDelta.SELECT);
+
+        if (!deltaMatches(originalState, restoredState)) {
+            Assert.fail("Expected:\n" + originalState.toString() + "\nGot:\n" + restoredState);
+        }
+    }
+
     
     public void testSaveAndRestoreLarge() throws InterruptedException {
         //TreeModelViewerAutopopulateAgent autopopulateAgent = new TreeModelViewerAutopopulateAgent(fViewer);

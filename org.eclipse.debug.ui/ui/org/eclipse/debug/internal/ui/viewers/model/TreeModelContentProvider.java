@@ -197,27 +197,28 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
         }
     }
 
-    public void inputAboutToChange(IInternalTreeModelViewer viewer, Object oldInput, Object newInput) {        
-        Assert.isTrue( viewer.getDisplay().getThread() == Thread.currentThread() );
-        if (newInput != oldInput && oldInput != null) {
-            fStateTracker.saveViewerState(oldInput);
-        }
-    }
-    
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
         synchronized(this) {
             fViewer = (IInternalTreeModelViewer) viewer;
         }
+        
+        Assert.isTrue( fViewer.getDisplay().getThread() == Thread.currentThread() );
+
+        if (oldInput != null) {
+            fStateTracker.saveViewerState(oldInput);
+        }
+    }
+    
+    public void postInputChanged(IInternalTreeModelViewer viewer, Object oldInput, Object newInput) {
         Assert.isTrue( getViewer().getDisplay().getThread() == Thread.currentThread() );
-        if (newInput != oldInput) {
-            cancelSubtreeUpdates(TreePath.EMPTY);
-            disposeAllModelProxies();
-            cancelSubtreeUpdates(TreePath.EMPTY);
-            fTransform.clear();
-            if (newInput != null) {
-                installModelProxy(newInput, TreePath.EMPTY);
-                fStateTracker.restoreViewerState(newInput);
-            }
+        
+        cancelSubtreeUpdates(TreePath.EMPTY);
+        disposeAllModelProxies();
+        cancelSubtreeUpdates(TreePath.EMPTY);
+        fTransform.clear();
+        if (newInput != null) {
+            installModelProxy(newInput, TreePath.EMPTY);
+            fStateTracker.restoreViewerState(newInput);
         }
     }
 

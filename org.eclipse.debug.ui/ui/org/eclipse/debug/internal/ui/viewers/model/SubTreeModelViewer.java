@@ -497,13 +497,15 @@ public class SubTreeModelViewer extends TreeModelViewer {
             fBaseProvider.inputChanged(fDelegatingViewer, oldInput, newInput);
         }
         
-        public void inputAboutToChange(IInternalTreeModelViewer viewer, Object oldInput, Object newInput) {
-            fBaseProvider.inputAboutToChange(viewer, oldInput, newInput);
-        }
-        
+		public void postInputChanged(IInternalTreeModelViewer viewer,
+				Object oldInput, Object newInput) {
+			fBaseProvider.postInputChanged(viewer, oldInput, newInput);
+		}
+		
         public boolean setChecked(TreePath path, boolean checked) {
             return fBaseProvider.setChecked(createFullPath(path), checked);
         }
+
     }
 
     /**

@@ -499,12 +499,13 @@ public class InternalTreeModelViewer extends TreeViewer
 	 * @see org.eclipse.jface.viewers.AbstractTreeViewer#inputChanged(java.lang.Object, java.lang.Object)
 	 */
 	protected void inputChanged(Object input, Object oldInput) {
-        ((ITreeModelContentProvider)getContentProvider()).inputAboutToChange(this, oldInput, input);
-        // Clear items map now that we've called inputAboutToChange.
+        // Clear items map now that ITreeModelContentProvider.inputChanged() was already called.
         // Bug 326917
         super.unmapAllElements();
+		((ITreeModelContentProvider)getContentProvider()).postInputChanged(this, oldInput, input);
 		super.inputChanged(input, oldInput);
-		resetColumns(input);
+		
+		resetColumns(input);		
 	}
 
 	/**
