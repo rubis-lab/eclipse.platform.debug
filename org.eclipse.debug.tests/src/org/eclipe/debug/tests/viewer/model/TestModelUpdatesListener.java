@@ -63,9 +63,7 @@ public class TestModelUpdatesListener
     private Set fRedundantLabelUpdateExceptions = new HashSet();
     
     private boolean fFailOnMultipleModelUpdateSequences;
-    private boolean fUnmatchedModelUpdatesObserved;
     private boolean fFailOnMultipleLabelUpdateSequences;
-    private boolean fUnmatchedLabelUpdatesObserved;
     
     private Set fHasChildrenUpdatesScheduled = new HashSet();
     private Set fHasChildrenUpdatesRunning = new HashSet();
@@ -98,6 +96,10 @@ public class TestModelUpdatesListener
     private int fLabelUpdatesCounter;
     private int fTimeoutInterval = 60000;
 	private long fTimeoutTime;
+
+	private boolean fExpectRestoreAfterSaveComplete;
+
+	private RuntimeException fFailExpectation;
 	
 	
     public TestModelUpdatesListener(ITreeModelViewer viewer, boolean failOnRedundantUpdates, boolean failOnMultipleModelUpdateSequences) {
@@ -150,6 +152,10 @@ public class TestModelUpdatesListener
     public void setFailOnMultipleLabelUpdateSequences(boolean failOnMultipleLabelUpdateSequences) {
         fFailOnMultipleLabelUpdateSequences = failOnMultipleLabelUpdateSequences;
     }
+    
+    public void expectRestoreAfterSaveComplete() {
+    	fExpectRestoreAfterSaveComplete = true;
+    }
 
     /**
      * Sets the the maximum amount of time (in milliseconds) that the update listener 
@@ -181,6 +187,7 @@ public class TestModelUpdatesListener
 
     public void reset() {
         fJobError = null;
+        fFailExpectation = null;
         fRedundantUpdates.clear();
         fRedundantLabelUpdates.clear();
         fRedundantHasChildrenUpdateExceptions.clear();
@@ -209,6 +216,7 @@ public class TestModelUpdatesListener
         fStateSaveComplete = false;
         fStateRestoreStarted = false;
         fStateRestoreComplete = false;
+        fExpectRestoreAfterSaveComplete = false;
         fTimeoutTime = System.currentTimeMillis() + fTimeoutInterval;
         resetModelChanged();
     }
@@ -427,18 +435,14 @@ public class TestModelUpdatesListener
             throw new RuntimeException("Timed Out: " + toString(flags));
         }
         
+        if (fFailExpectation != null) {
+        	throw fFailExpectation;
+        }
+        
         if (fJobError != null) {
             throw new RuntimeException("Job Error: " + fJobError);
         }
 
-        if (fUnmatchedModelUpdatesObserved) {
-            throw new RuntimeException("Unmatched updatesStarted/updateCompleted notifications observed.");
-        }
-        
-        if (fUnmatchedLabelUpdatesObserved) {
-            throw new RuntimeException("Unmatched labelUpdatesStarted/labelUpdateCompleted notifications observed.");
-        }
-        
         if (fFailOnRedundantUpdates && !fRedundantUpdates.isEmpty()) {
             Assert.fail("Redundant Updates: " + fRedundantUpdates.toString());
         }
@@ -585,14 +589,14 @@ public class TestModelUpdatesListener
     
     public void viewerUpdatesBegin() {
         if (fViewerUpdatesStarted > fViewerUpdatesComplete) {
-            fUnmatchedModelUpdatesObserved = true;
+            fFailExpectation = new RuntimeException("Unmatched updatesStarted/updateCompleted notifications observed.");
         }
         fViewerUpdatesStarted++;
     }
     
     public void viewerUpdatesComplete() {
         if (fViewerUpdatesStarted <= fViewerUpdatesComplete) {
-            fUnmatchedModelUpdatesObserved = true;
+            fFailExpectation = new RuntimeException("Unmatched updatesStarted/updateCompleted notifications observed.");
         }
         fViewerUpdatesComplete++;
     }
@@ -617,14 +621,14 @@ public class TestModelUpdatesListener
 
     public void labelUpdatesBegin() {
         if (fLabelUpdatesStarted > fLabelUpdatesComplete) {
-            fUnmatchedLabelUpdatesObserved = true;
+            fFailExpectation = new RuntimeException("Unmatched labelUpdatesStarted/labelUpdateCompleted notifications observed.");
         }
         fLabelUpdatesStarted++;
     }
 
     public void labelUpdatesComplete() {
         if (fLabelUpdatesStarted <= fLabelUpdatesComplete) {
-            fUnmatchedLabelUpdatesObserved = true;
+            fFailExpectation = new RuntimeException("Unmatched labelUpdatesStarted/labelUpdateCompleted notifications observed.");
         }
         fLabelUpdatesComplete++;
     }
@@ -642,6 +646,9 @@ public class TestModelUpdatesListener
     }
     
     public void stateRestoreUpdatesBegin(Object input) {
+    	if (fExpectRestoreAfterSaveComplete && !fStateSaveComplete) {
+    		fFailExpectation = new RuntimeException("RESTORE should begin after SAVE completed!");
+    	}
         fStateRestoreStarted = true;
     }
     
@@ -824,7 +831,7 @@ public class TestModelUpdatesListener
     }
     
     public String toString() {
-        return toString(ALL_UPDATES_COMPLETE | MODEL_CHANGED_COMPLETE | STATE_RESTORE_COMPLETE | ALL_VIEWER_UPDATES_STARTED | LABEL_SEQUENCE_STARTED | STATE_UPDATES);
+        return toString(ALL_UPDATES_COMPLETE | MODEL_CHANGED_COMPLETE | STATE_SAVE_COMPLETE | STATE_RESTORE_COMPLETE | ALL_VIEWER_UPDATES_STARTED | LABEL_SEQUENCE_STARTED | STATE_UPDATES);
     }
     
     

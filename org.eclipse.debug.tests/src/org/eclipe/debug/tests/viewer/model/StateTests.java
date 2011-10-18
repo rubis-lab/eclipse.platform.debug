@@ -1094,4 +1094,34 @@ abstract public class StateTests extends TestCase implements ITestModelUpdatesLi
         Assert.assertEquals(new TreeSelection(model.findElement("1")), fViewer.getSelection());
     }
 
+    /**
+     * Test for bug 359859.<br>
+     * This test verifies that RESTORE state is handled after SAVE previous state was completed
+     */
+    public void testSaveRestoreOrder() throws InterruptedException {
+        //TreeModelViewerAutopopulateAgent autopopulateAgent = new TreeModelViewerAutopopulateAgent(fViewer);
+        TestModel model = TestModel.simpleMultiLevel();
+
+        // Expand all
+        fViewer.setAutoExpandLevel(-1);
+        
+        // Create the listener.
+        fListener.reset(TreePath.EMPTY, model.getRootElement(), -1, false, false); 
+
+        // Set the input into the view and update the view.
+        fViewer.setInput(model.getRootElement());
+        while (!fListener.isFinished()) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        model.validateData(fViewer, TreePath.EMPTY, true);
+        
+        // a new similar model
+        TestModel copyModel = TestModel.simpleMultiLevel();
+        
+        // Trigger save - restore sequence.
+        fListener.reset();
+        fListener.expectRestoreAfterSaveComplete();
+        fViewer.setInput(copyModel.getRootElement());
+        while (!fListener.isFinished(STATE_RESTORE_STARTED)) Thread.sleep(0);
+        Assert.assertTrue("RESTORE started before SAVE to complete", fListener.isFinished(STATE_SAVE_COMPLETE));        
+    }    
+
 }
