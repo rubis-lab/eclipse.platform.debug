@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2005, 2009 IBM Corporation and others.
+ *  Copyright (c) 2005, 2011 IBM Corporation and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -11,16 +11,14 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.viewers.model.provisional;
 
-
-
-
 /**
  * A model delta. Used to create model deltas.
  * <p>
- * Clients may instantiate this class; not intended to be subclassed.
+ * Clients may instantiate this class; not intended to be sub-classed.
  * </p>
  * @see IModelDelta
  * @since 3.2
+ * @noextend This class is not intended to be sub-classed by clients.
  */
 public class ModelDelta implements IModelDelta {
 

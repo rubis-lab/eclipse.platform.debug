@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2011 Wind River Systems and others.
+ * Copyright (c) 2011 Wind River Systems and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ public interface ITreeModelViewer extends ISelectionProvider {
      * Returns the Display object that this viewer is in.  The
      * display object can be used by clients to access the display thread
      * to call the viewer methods.
+     * 
      * @return The display.
      */
     public Display getDisplay();
@@ -56,6 +57,7 @@ public interface ITreeModelViewer extends ISelectionProvider {
      * Returns the current input of this viewer, or <code>null</code>
      * if none. The viewer's input provides the "model" for the viewer's
      * content.
+     * 
      * @return Input object
      */
     public Object getInput();
@@ -64,12 +66,14 @@ public interface ITreeModelViewer extends ISelectionProvider {
      * Sets the input of this viewer.  Setting the input resets the 
      * viewer's contents and triggers an update starting at the input
      * element.
+     * 
      * @param object Input element, or <code>null</code> if none.
      */
     public void setInput(Object object);
     
     /**
      * Returns the current selection in viewer.
+     * 
      * @return selection object
      */
     public ISelection getSelection();
@@ -146,38 +150,42 @@ public interface ITreeModelViewer extends ISelectionProvider {
     
     /**
      * Registers the specified listener for view update notifications.
+     * 
      * @param listener Listener to add
      */
     public void addViewerUpdateListener(IViewerUpdateListener listener);
     
     /**
      * Removes the specified listener from update notifications.
+     * 
      * @param listener Listener to remove
      */
     public void removeViewerUpdateListener(IViewerUpdateListener listener);
     
     /**
      * Registers the specified listener for state update notifications.
+     * 
      * @param listener Listener to add
-     * @since 3.6
      */
     public void addStateUpdateListener(IStateUpdateListener listener);
     
     /**
      * Removes the specified listener from state update notifications.
+     * 
      * @param listener Listener to remove
-     * @since 3.6
      */
     public void removeStateUpdateListener(IStateUpdateListener listener);
     
     /**
      * Registers the specified listener for view label update notifications.
+     * 
      * @param listener Listener to add
      */
     public void addLabelUpdateListener(ILabelUpdateListener listener);
     
     /**
      * Removes the specified listener from view label update notifications.
+     * 
      * @param listener Listener to remove
      */
     public void removeLabelUpdateListener(ILabelUpdateListener listener);
@@ -185,13 +193,15 @@ public interface ITreeModelViewer extends ISelectionProvider {
     /**
      * Registers the given listener for model delta notification.
      * This listener is called immediately after the viewer processes
-     * the delta.  
+     * the delta.
+     * 
      * @param listener Listener to add
      */
     public void addModelChangedListener(IModelChangedListener listener);
     
     /**
      * Removes the given listener from model delta notification.
+     * 
      * @param listener Listener to remove
      */
     public void removeModelChangedListener(IModelChangedListener listener);
@@ -200,6 +210,7 @@ public interface ITreeModelViewer extends ISelectionProvider {
      * Writes state information into a delta for the sub-tree at the given
      * path.  It adds delta nodes and IModelDelta.EXPAND and IModelDelta.SELECT 
      * as it parses the sub-tree.
+     * 
      * @param path Path where to start saving the state.
      * @param delta The delta where the state is to be saved.
      * @param flagsToSave The flags to preserve during the state save.  The 
@@ -208,8 +219,6 @@ public interface ITreeModelViewer extends ISelectionProvider {
      * @return Returns whether the state was saved for the given path.  Will 
      * return <code>false</code> if an element at the given path cannot 
      * be found.
-     *
-     * @since 3.6
      */
     public boolean saveElementState(TreePath path, ModelDelta delta, int flagsToSave);
     
@@ -237,8 +246,9 @@ public interface ITreeModelViewer extends ISelectionProvider {
     public void refresh();
 
     /**
-     * Returns the paths at which the given elment is found realized in viewer
+     * Returns the paths at which the given element is found realized in viewer
      * or an empty array if not found.
+     * 
      * @param element Element to find.
      * @return Array of paths for given element.
      */
@@ -246,18 +256,21 @@ public interface ITreeModelViewer extends ISelectionProvider {
 
     /**
      * Returns filters currently configured in viewer.
+     * 
      * @return filter array in viewer.
      */
     public ViewerFilter[] getFilters();
     
     /**
      * Add a new filter to use in viewer.
+     * 
      * @param filter Filter to add.
      */
     public void addFilter(ViewerFilter filter);
     
     /**
      * Sets viewer filters to the filters in array.
+     * 
      * @param filters New filter array to use.
      */
     public void setFilters(ViewerFilter[] filters);

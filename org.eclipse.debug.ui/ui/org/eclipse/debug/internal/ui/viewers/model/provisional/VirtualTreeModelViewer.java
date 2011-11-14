@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 Wind River Systems and others.
+ * Copyright (c) 2008, 2011 Wind River Systems and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ import org.eclipse.ui.IMemento;
  * </ul>
  * </p>
  * @since 3.5
- * @noextend
+ * @noextend This class is not intended to be sub-classed by clients.
  */
 public class VirtualTreeModelViewer extends InternalVirtualTreeModelViewer {
     
@@ -51,7 +51,7 @@ public class VirtualTreeModelViewer extends InternalVirtualTreeModelViewer {
      * Creates a virtual tree model viewer.
      * @param display Display used by the viewer to call the data providers
      * on the UI thread.
-     * @param style Stlye flags.
+     * @param style style flags.
      * @param context Viewer's presentation context.
      * @param validator Optional validator that is used to determine which items should be 
      * considered visible when SWT.VIRTUAL style is used.  If <code>null</code> then the 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 Wind River Systems and others.
+ * Copyright (c) 2011 Wind River Systems and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -104,7 +104,7 @@ public class VirtualItem {
     private boolean fExpanded = false;
 
     /**
-     * The cound of child items.  <code>-1</code> indicates that the count 
+     * The count of child items.  <code>-1</code> indicates that the count 
      * is not known.
      */
     private int fItemCount = -1;
