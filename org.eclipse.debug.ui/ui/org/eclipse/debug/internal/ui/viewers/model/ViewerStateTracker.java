@@ -367,6 +367,8 @@ class ViewerStateTracker {
      * @param path Path to subtree to restore.
      */
     void appendToPendingStateDelta(final TreePath path) {
+        if (fContentProvider.getViewer() == null) return; // Not initialized yet.
+        
         if (DEBUG_STATE_SAVE_RESTORE && TreeModelContentProvider.DEBUG_TEST_PRESENTATION_ID(fContentProvider.getPresentationContext()))  {
             System.out.println("STATE APPEND BEGIN: " + path.getLastSegment()); //$NON-NLS-1$
         }

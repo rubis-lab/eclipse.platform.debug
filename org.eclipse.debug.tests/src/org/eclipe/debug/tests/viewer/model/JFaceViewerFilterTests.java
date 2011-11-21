@@ -27,6 +27,6 @@ public class JFaceViewerFilterTests extends FilterTests {
     }
 
     protected IInternalTreeModelViewer createViewer(Display display, Shell shell) {
-        return new TreeModelViewer(fShell, SWT.VIRTUAL, new PresentationContext("TestViewer"));
+        return new TreeModelViewer(fShell, SWT.VIRTUAL | SWT.MULTI, new PresentationContext("TestViewer"));
     }
 }

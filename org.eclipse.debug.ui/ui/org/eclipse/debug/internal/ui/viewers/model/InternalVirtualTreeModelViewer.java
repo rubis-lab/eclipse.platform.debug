@@ -493,6 +493,8 @@ public class InternalVirtualTreeModelViewer extends Viewer
     }
 
     private void refresh(VirtualItem item) {
+        getContentProvider().preserveState(getTreePathFromItem(item));
+        
         if (!item.needsDataUpdate()) {
             if (item.getParent() != null) {
                 item.setNeedsLabelUpdate();

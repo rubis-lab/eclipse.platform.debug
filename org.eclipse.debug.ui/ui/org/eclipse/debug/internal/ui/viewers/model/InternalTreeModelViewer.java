@@ -625,6 +625,27 @@ public class InternalTreeModelViewer extends TreeViewer
 			refreshColumns();
 		}
 	}	
+
+	protected void internalRefresh(Object element, boolean updateLabels) {
+	    ITreeModelContentProvider contentProvider = (ITreeModelContentProvider)getContentProvider(); 
+	    
+        if (element == null) {
+            internalRefresh(getControl(), getRoot(), true, updateLabels);
+            contentProvider.preserveState(TreePath.EMPTY);
+        } else {
+            Widget[] items = findItems(element);
+            if (items.length != 0) {
+                for (int i = 0; i < items.length; i++) {
+                    if (items[i] instanceof TreeItem) {
+                        contentProvider.preserveState(getTreePathFromItem((TreeItem)items[i]));
+                    } else {
+                        contentProvider.preserveState(TreePath.EMPTY);
+                    }
+                }
+            }
+        }
+	    super.internalRefresh(element, updateLabels);
+	}
 	
     /**
      * Refreshes the columns in the view, based on the viewer input.

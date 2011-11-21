@@ -426,6 +426,10 @@ public class SubTreeModelViewer extends TreeModelViewer {
             fBaseProvider.addModelChangedListener(listener);
         }
 
+        public void preserveState(TreePath subPath) {
+            fBaseProvider.preserveState(createFullPath(subPath));
+        }
+
         public void addStateUpdateListener(IStateUpdateListener listener) {
             fBaseProvider.addStateUpdateListener(listener);
         }
@@ -462,6 +466,10 @@ public class SubTreeModelViewer extends TreeModelViewer {
             fBaseProvider.setModelDeltaMask(mask);
         }
 
+        public boolean areTreeModelViewerFiltersApplicable(Object parentElement) {
+            return fBaseProvider.areTreeModelViewerFiltersApplicable(parentElement);
+        }
+        
         public boolean shouldFilter(Object parentElementOrTreePath, Object element) {
             if (parentElementOrTreePath instanceof TreePath) {
                 TreePath path = (TreePath)parentElementOrTreePath;

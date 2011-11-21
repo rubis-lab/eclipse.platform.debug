@@ -46,6 +46,7 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IStateUpdateListe
 import org.eclipse.debug.internal.ui.viewers.model.provisional.ITreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdateListener;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.TreeModelViewerFilter;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreePath;
@@ -234,6 +235,10 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
         fStateTracker.addStateUpdateListener(listener);
     }
 
+    public void preserveState(TreePath path) {
+        fStateTracker.appendToPendingStateDelta(path);        
+    }
+    
     public void removeStateUpdateListener(IStateUpdateListener listener) {
         fStateTracker.removeStateUpdateListener(listener);
     }
@@ -509,10 +514,34 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
         return fTransform.modelToViewCount(parentPath, count);
     }
 
+    public boolean areTreeModelViewerFiltersApplicable(Object parentElement) {
+        ViewerFilter[] filters = fViewer.getFilters();
+        if (filters.length > 0) {
+            for (int j = 0; j < filters.length; j++) {
+                if (filters[j] instanceof TreeModelViewerFilter &&
+                    ((TreeModelViewerFilter)filters[j]).isApplicable(fViewer, parentElement)) 
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public boolean shouldFilter(Object parentElementOrTreePath, Object element) {
         ViewerFilter[] filters = fViewer.getFilters();
         if (filters.length > 0) {
             for (int j = 0; j < filters.length; j++) {
+                if (filters[j] instanceof TreeModelViewerFilter) {
+                    // Skip the filter if not applicable to parent element
+                    Object parentElement = parentElementOrTreePath instanceof TreePath 
+                        ? ((TreePath)parentElementOrTreePath).getLastSegment() : parentElementOrTreePath;
+                    if (parentElement == null) parentElement = fViewer.getInput();
+                    if (!((TreeModelViewerFilter)filters[j]).isApplicable(fViewer, parentElement)) {
+                        continue;
+                    }
+                }
+                
                 if (!(filters[j].select((Viewer) fViewer, parentElementOrTreePath, element))) {
                     return true;
                 }
@@ -1219,7 +1248,6 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
 		}
 		TreePath treePath = getViewerTreePath(delta);
 		cancelSubtreeUpdates(treePath);
-		fStateTracker.appendToPendingStateDelta(treePath);
 		getViewer().refresh(getElement(treePath));
 	}
 	
@@ -1414,9 +1442,31 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
 		    index = fTransform.indexOfFilteredElement(parentPath, delta.getElement());
 		}
 		if (index >= 0) {
-	        clearFilteredChild(parentPath, index);		    
+		    boolean filtered = isFiltered(parentPath, index);
+		    boolean shouldFilter = shouldFilter(parentPath, delta.getReplacementElement());
+		    
+		    // Update the filter transform
+		    if (filtered) {
+                clearFilteredChild(parentPath, index);
+		    }
+		    if (shouldFilter) {
+		        addFilteredIndex(parentPath, index, delta.getElement());
+		    }
+		    
+		    // Update the viewer
+		    if (filtered) {
+		        if (!shouldFilter) {
+		            getViewer().insert(parentPath, delta.getReplacementElement(), modelToViewIndex(parentPath, index));
+		        } 
+		        //else do nothing
+		    } else {
+		        if (shouldFilter) {
+		            getViewer().remove(parentPath, modelToViewIndex(parentPath, index));
+		        } else {
+		            getViewer().replace(parentPath, delta.getIndex(), delta.getReplacementElement());
+		        }
+		    }
 		}
-		getViewer().replace(parentPath, delta.getIndex(), delta.getElement());
 	}
 
 	protected void handleSelect(IModelDelta delta) {

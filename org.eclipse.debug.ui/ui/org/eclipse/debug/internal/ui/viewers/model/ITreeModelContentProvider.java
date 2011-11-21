@@ -15,6 +15,7 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IStateUpdateListener;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdateListener;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.TreeModelViewer;
+import org.eclipse.debug.internal.ui.viewers.model.provisional.TreeModelViewerFilter;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILazyTreePathContentProvider;
 import org.eclipse.jface.viewers.TreePath;
@@ -85,6 +86,20 @@ public interface ITreeModelContentProvider extends ILazyTreePathContentProvider 
      */
     public int modelToViewIndex(TreePath parentPath, int index);
 
+    /**
+     * Returns whether the children of given element should be filtered.
+     * <p>This method is used to determine whether any of the registered filters
+     * that extend {@link TreeModelViewerFilter} are applicable to the given 
+     * element.  If so, then children of given element should be filtered 
+     * prior to populating them in the viewer.  
+     * 
+     * @param parentElement
+     *            the parent element 
+     * @return whether there are any {@link TreeModelViewerFilter} filters 
+     * applicable to given parent
+     */
+    public boolean areTreeModelViewerFiltersApplicable(Object parentElement);        
+    
     /**
      * Returns whether the given element is filtered.
      * 
@@ -160,6 +175,13 @@ public interface ITreeModelContentProvider extends ILazyTreePathContentProvider 
      */
     public void removeModelChangedListener(IModelChangedListener listener);
     
+    /**
+     * Causes the content provider to save the expansion and selection state
+     * of given element.  The state is then restored as the tree is lazily
+     * re-populated.
+     * @param path Path of the element to save.
+     */
+    public void preserveState(TreePath path);
 
     /**
      * Registers the specified listener for state update notifications.

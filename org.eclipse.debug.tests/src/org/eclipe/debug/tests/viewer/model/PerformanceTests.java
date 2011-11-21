@@ -20,6 +20,8 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.ITreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.ModelDelta;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -259,6 +261,62 @@ abstract public class PerformanceTests extends TestCase implements ITestModelUpd
             meter.dispose();
         }
 
+    }
+
+    public void testRefreshListFiltered() throws InterruptedException {
+        TestModel model = new TestModel();
+        model.setRoot( new TestElement(model, "root", new TestElement[0] ) ); 
+        int numElements = (int)Math.pow(2, getTestModelDepth());
+        model.setElementChildren(TreePath.EMPTY, TestModel.makeSingleLevelModelElements(model, 1000, "model."));
+        
+        fViewer.setAutoExpandLevel(-1);
+
+        // Create the listener
+        fListener.reset(TreePath.EMPTY, model.getRootElement(), -1, true, false); 
+
+        fViewer.addFilter(new ViewerFilter() {
+            public boolean select(Viewer viewer, Object parentElement, Object element) {
+                if (element instanceof TestElement) {
+                    String id = ((TestElement)element).getID();
+                    if (id.startsWith("model.")) {
+                        id = id.substring("model.".length());
+                    }
+                    if (id.length() >= 2 && (id.charAt(1) == '1' || id.charAt(1) == '3' || id.charAt(1) == '5' || id.charAt(1) == '7' || id.charAt(1) == '9')) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        });
+        
+        // Set the input into the view and update the view.
+        fViewer.setInput(model.getRootElement());
+        while (!fListener.isFinished()) if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+        model.validateData(fViewer, TreePath.EMPTY);
+
+        Performance perf = Performance.getDefault();
+        PerformanceMeter meter = perf.createPerformanceMeter(perf.getDefaultScenarioId(this));
+        try {
+            for (int i = 0; i < 100; i++) {
+                // Update the model
+                model.setAllAppendix(" - pass " + i);
+                
+                TestElement element = model.getRootElement();
+                fListener.reset(TreePath.EMPTY, element, -1, false, false);
+                
+                meter.start();
+                model.postDelta(new ModelDelta(element, IModelDelta.CONTENT));
+                while (!fListener.isFinished(ALL_UPDATES_COMPLETE | MODEL_CHANGED_COMPLETE)) 
+                    if (!fDisplay.readAndDispatch ()) Thread.sleep(0);
+                meter.stop();
+                System.gc();
+            }
+            
+            meter.commit();
+            perf.assertPerformance(meter);
+        } finally {
+            meter.dispose();
+        }
     }
     
 }

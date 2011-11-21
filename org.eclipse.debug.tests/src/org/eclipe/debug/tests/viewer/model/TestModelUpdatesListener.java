@@ -431,9 +431,9 @@ public class TestModelUpdatesListener
     }
     
     public boolean isFinished(int flags) {
-        if (isTimedOut()) {
-            throw new RuntimeException("Timed Out: " + toString(flags));
-        }
+//        if (isTimedOut()) {
+//            throw new RuntimeException("Timed Out: " + toString(flags));
+//        }
         
         if (fFailExpectation != null) {
         	throw fFailExpectation;

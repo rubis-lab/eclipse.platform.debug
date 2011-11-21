@@ -40,7 +40,13 @@ class ChildrenCountUpdate extends ViewerUpdateMonitor implements IChildrenCountU
      * children update is performed on child elements to filter them as part of the
      * child count calculation.
      */
-	private boolean fShouldFilter;
+	private boolean fShouldFilter = false;
+	
+	/**
+	 * Children indexes which are currently filtered.  When updating child count, also need 
+	 * to verify that currently filtered children are still filtered.
+	 */
+    private int[] fFilteredChildren = null;
     
 	/**
 	 * Children update used to filter children.
@@ -57,7 +63,8 @@ class ChildrenCountUpdate extends ViewerUpdateMonitor implements IChildrenCountU
 	 */
 	public ChildrenCountUpdate(TreeModelContentProvider provider, Object viewerInput, TreePath elementPath, Object element, IElementContentProvider elementContentProvider) {
 		super(provider, viewerInput, elementPath, element, elementContentProvider, provider.getPresentationContext());
-		fShouldFilter = provider.getViewer().getFilters().length != 0;
+		fShouldFilter = provider.areTreeModelViewerFiltersApplicable(element);
+		fFilteredChildren = provider.getFilteredChildren(elementPath);
 	}
 
 	public synchronized void cancel() {
@@ -66,13 +73,24 @@ class ChildrenCountUpdate extends ViewerUpdateMonitor implements IChildrenCountU
 		}
 		super.cancel();
 	}
-	
+
 	protected synchronized void scheduleViewerUpdate() {
-		if (fShouldFilter) {
-		    // If filtering is enabled perform child update on all children in order to update
-		    // viewer filters.
+        // If filtering is enabled perform child update on all children in order to update
+        // viewer filters.
+		if (fShouldFilter || fFilteredChildren != null) {
 		    if (fChildrenUpdate == null) {
-     		    fChildrenUpdate = new ChildrenUpdate(getContentProvider(), getViewerInput(), getElementPath(), getElement(), 0, getCount(), getElementContentProvider()) {
+		        int startIdx;
+		        int count;
+		        if (fShouldFilter) {
+		            startIdx = 0;
+		            count = getCount();
+		        } else {
+		            startIdx =  fFilteredChildren[0];
+		            int endIdx = fFilteredChildren[fFilteredChildren.length - 1];
+		            count = endIdx - startIdx + 1;
+		        }
+		        
+     		    fChildrenUpdate = new ChildrenUpdate(getContentProvider(), getViewerInput(), getElementPath(), getElement(), startIdx, count, getElementContentProvider()) {
      		    	protected void performUpdate() {
      		    		performUpdate(true);
      		    		ChildrenCountUpdate.super.scheduleViewerUpdate();
@@ -116,7 +134,13 @@ class ChildrenCountUpdate extends ViewerUpdateMonitor implements IChildrenCountU
 		if (TreeModelContentProvider.DEBUG_CONTENT_PROVIDER && TreeModelContentProvider.DEBUG_TEST_PRESENTATION_ID(getPresentationContext())) {
 			System.out.println("setChildCount(" + getElement() + ", modelCount: " + fCount + " viewCount: " + viewCount + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-		getContentProvider().getViewer().setChildCount(elementPath, viewCount);
+		// Special case for element 0 in a set of filtered elements:  
+		// Child 0 is automatically updated by the tree at the same time that the child count is requested. Therefore, 
+		// If this child count update filtered out this element, it needs to be updated again.
+		if (fShouldFilter && getContentProvider().isFiltered(elementPath, 0)) {
+		    getContentProvider().updateElement(elementPath, 0);
+		}
+        getContentProvider().getViewer().setChildCount(elementPath, viewCount);
 		getContentProvider().getStateTracker().restorePendingStateOnUpdate(getElementPath(), -1, true, true, false);
 	}
 
