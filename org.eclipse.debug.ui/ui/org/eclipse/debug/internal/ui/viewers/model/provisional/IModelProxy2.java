@@ -16,10 +16,9 @@ import org.eclipse.jface.viewers.Viewer;
 /**
  * Extension to the model proxy interface which allows the proxy to be initialized
  * on the viewer's Display thread
- * <p>
- * Clients may implement this interface. Implementations of this interface
- * must subclass {@link AbstractModelProxy}.
- * </p>
+ * 
+ * @noimplement Clients are not intended to implement this interface directly. Instead, clients
+ * creating and firing model deltas should create instances of {@link AbstractModelProxy}.
  * @since 3.8
  */
 public interface IModelProxy2 extends IModelProxy {

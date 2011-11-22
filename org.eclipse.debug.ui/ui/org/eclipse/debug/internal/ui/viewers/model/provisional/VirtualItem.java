@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.Assert;
  * Virtual item, which is analogous to the SWT's tree item.  This class is used
  * by the {@link VirtualTreeModelViewer}. 
  * 
+ * @see VirtualTreeModelViewer
  * @since 3.8
  */
 public class VirtualItem {

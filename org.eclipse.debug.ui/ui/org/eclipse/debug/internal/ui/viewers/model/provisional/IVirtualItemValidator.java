@@ -15,6 +15,7 @@ package org.eclipse.debug.internal.ui.viewers.model.provisional;
  * A validator to be used with a VirtualTreeModelViewer to determine which viewer
  * items should be updated by the viewer.   
  * 
+ * @see VirtualTreeModelViewer
  * @since 3.8
  */
 public interface IVirtualItemValidator {

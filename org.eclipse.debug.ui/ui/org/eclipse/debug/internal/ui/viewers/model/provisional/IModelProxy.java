@@ -26,14 +26,13 @@ import org.eclipse.jface.viewers.Viewer;
  * within that model for a specific presentation context. 
  * </p>
  * <p>
- * Clients may implement this interface. Implementations of this interface
- * must subclass {@link AbstractModelProxy}.
- * </p>
- * <p>
  * Note: provider methods are called in the Display thread of the viewer.
  * To avoid blocking the UI, long running operations should be performed 
  * asynchronously.
  * </p>
+ * 
+ * @noimplement Clients are not intended to implement this interface directly. Instead, clients
+ * creating and firing model deltas should create instances of {@link AbstractModelProxy}.
  * @see IModelDelta
  * @see IModelProxyFactory
  * @see IModelChangedListener

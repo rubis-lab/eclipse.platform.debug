@@ -21,7 +21,7 @@ import org.eclipse.debug.internal.ui.viewers.model.ViewerInputUpdate;
  * This class may be instantiated, but it not intended to be sub-classed.
  * </p>
  * @since 3.4
- * @noinstantiate This class is not intended to be instantiated by clients.
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class ViewerInputService {
 	
