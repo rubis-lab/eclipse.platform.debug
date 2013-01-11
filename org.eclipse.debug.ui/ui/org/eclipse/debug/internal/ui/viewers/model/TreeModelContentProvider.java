@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -377,7 +377,7 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
                 display = fViewer.getDisplay();
             }
         }
-        if (display != null) {
+        if (display != null && !display.isDisposed()) {
             // If we're in display thread, process the delta immediately to 
             // avoid "skid" in processing events.
             if (Thread.currentThread().equals(display.getThread())) {
@@ -778,7 +778,7 @@ public class TreeModelContentProvider implements ITreeModelContentProvider, ICon
             fWaitingRequests.put(schedulingPath, requests);
 
             List inProgressList = (List)fRequestsInProgress.get(schedulingPath);
-            if (inProgressList != null) {
+            if (inProgressList != null && inProgressList.size() != 0) {
                 int staleUpdateIndex = inProgressList.indexOf(update);
                 if (staleUpdateIndex >= 0) {
                     // Cancel update and remove from requests list.  Removing from 

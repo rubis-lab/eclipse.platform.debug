@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2012 Wind River Systems and others.
+ * Copyright (c) 2009, 2013 Wind River Systems and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.VirtualTree;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreePath;
@@ -186,8 +187,12 @@ public class InternalVirtualTreeModelViewer extends Viewer
      * UI thread whenever a tree validation is requested.
      */
     private Runnable fValidateRunnable;
-    
+
     public InternalVirtualTreeModelViewer(Display display, int style, IPresentationContext context, IVirtualItemValidator itemValidator) {        
+        this (display, style, context, itemValidator, ((style & SWT.POP_UP) != 0) ? ~ITreeModelContentProvider.CONTROL_MODEL_DELTA_FLAGS : ~0);
+    }
+
+    public InternalVirtualTreeModelViewer(Display display, int style, IPresentationContext context, IVirtualItemValidator itemValidator, int modelDeltaMask) {        
         fDisplay = display;
         fContext = context;        
         fTree = new VirtualTree(style, itemValidator);
@@ -196,9 +201,7 @@ public class InternalVirtualTreeModelViewer extends Viewer
         fContentProvider = new TreeModelContentProvider();
         fLabelProvider = new TreeModelLabelProvider(this);
         
-        if ((style & SWT.POP_UP) != 0) {
-            getContentProvider().setModelDeltaMask(~ITreeModelContentProvider.CONTROL_MODEL_DELTA_FLAGS);
-        }
+        getTreeModelContentProvider().setModelDeltaMask(modelDeltaMask);
     }
 
     public Object getInput() {
@@ -217,12 +220,12 @@ public class InternalVirtualTreeModelViewer extends Viewer
 
     public void setInput(Object input) {
         Object oldInput = fInput;
-        getContentProvider().inputChanged(this, oldInput, input);
+        getTreeModelContentProvider().inputChanged(this, oldInput, input);
         fItemsMap.clear();
         fTree.clearAll();
         fInput = input;
         mapElement(fInput, getTree());
-        getContentProvider().postInputChanged(this, oldInput  , input);
+        getTreeModelContentProvider().postInputChanged(this, oldInput  , input);
         fTree.setData(fInput);
         fTree.setSelection(EMPTY_ITEMS_ARRAY);
         inputChanged(fInput, oldInput);
@@ -378,6 +381,7 @@ public class InternalVirtualTreeModelViewer extends Viewer
                 TreePath[] paths = new TreePath[length + 1];
                 System.arraycopy(originalPaths, 0, paths, 0, length);
                 // set the element temporarily so that we can call getTreePathFromItem
+                if (item.getData() == null) throw new NullPointerException();
                 item.setData(element);
                 paths[length] = getTreePathFromItem(item);
                 item.setData(null);
@@ -471,11 +475,11 @@ public class InternalVirtualTreeModelViewer extends Viewer
     }
 
 
-    private ITreeModelLabelProvider getLabelProvider() {
+    public ITreeModelLabelProvider getTreeModelLabelProvider() {
         return fLabelProvider;
     }
 
-    private ITreeModelContentProvider getContentProvider() {
+    public ITreeModelContentProvider getTreeModelContentProvider() {
         return fContentProvider;
     }
 
@@ -495,7 +499,7 @@ public class InternalVirtualTreeModelViewer extends Viewer
     }
 
     private void refresh(VirtualItem item) {
-        getContentProvider().preserveState(getTreePathFromItem(item));
+        getTreeModelContentProvider().preserveState(getTreePathFromItem(item));
         
         if (!item.needsDataUpdate()) {
             if (item.getParent() != null) {
@@ -668,22 +672,22 @@ public class InternalVirtualTreeModelViewer extends Viewer
         TreePath treePath;
         treePath = getTreePathFromItem(item);
         item.clearNeedsCountUpdate();
-        getContentProvider().updateHasChildren(treePath);
+        getTreeModelContentProvider().updateHasChildren(treePath);
     }
 
     private void virtualLazyUpdateChildCount(VirtualItem item) {
         item.clearNeedsCountUpdate();
-        getContentProvider().updateChildCount(getTreePathFromItem(item), item.getItemCount());
+        getTreeModelContentProvider().updateChildCount(getTreePathFromItem(item), item.getItemCount());
     }
 
     private void virtualLazyUpdateData(VirtualItem item) {
         item.clearNeedsDataUpdate();
-        getContentProvider().updateElement(getTreePathFromItem(item.getParent()), item.getIndex().intValue());
+        getTreeModelContentProvider().updateElement(getTreePathFromItem(item.getParent()), item.getIndex().intValue());
     }
 
     private void virtualLazyUpdateLabel(VirtualItem item) {
         item.clearNeedsLabelUpdate();
-        if ( !getLabelProvider().update(getTreePathFromItem(item)) ) {
+        if ( !getTreeModelLabelProvider().update(getTreePathFromItem(item)) ) {
             if (item.getData() instanceof String) {
                 item.setData(VirtualItem.LABEL_KEY, new String[] { (String)item.getData() } );
             }
@@ -702,7 +706,7 @@ public class InternalVirtualTreeModelViewer extends Viewer
     private void unmapElement(Object element, VirtualItem item) {
         if (fNotifyUnmap) {
             // TODO: should we update the filter with the "new non-identical element"?
-            IContentProvider provider = getContentProvider();
+            IContentProvider provider = getTreeModelContentProvider();
             if (provider instanceof TreeModelContentProvider) {
                 ((TreeModelContentProvider) provider).unmapPath((TreePath) item.getData(TREE_PATH_KEY));
             }
@@ -778,6 +782,7 @@ public class InternalVirtualTreeModelViewer extends Viewer
     }
     
     private void doAssociate(Object element, VirtualItem item) {
+    	if (element == null) throw new NullPointerException();
         Object data = item.getData();
         if (data != null && data != element && data.equals(element)) {
             // workaround for PR 1FV62BT
@@ -790,7 +795,6 @@ public class InternalVirtualTreeModelViewer extends Viewer
             // recursively disassociate all
             if (data != element) {
                 if (data != null) {
-                    unmapElement(element, item);
                     disassociate(item);
                 }
                 item.setData(element);
@@ -803,7 +807,7 @@ public class InternalVirtualTreeModelViewer extends Viewer
     }
 
     private void disassociate(VirtualItem item) {
-        unmapElement(item.getData(), item);
+    	unmapElement(item.getData(), item);
         
         // Clear the map before we clear the data
         item.setData(null);
@@ -847,9 +851,11 @@ public class InternalVirtualTreeModelViewer extends Viewer
     }
 
     private void internalSetSelection(ISelection selection, boolean reveal) {
+        List newSelection = null;
+        
         if (selection instanceof ITreeSelection) {
             TreePath[] paths = ((ITreeSelection) selection).getPaths();
-            List newSelection = new ArrayList(paths.length);
+            newSelection = new ArrayList(paths.length);
             for (int i = 0; i < paths.length; ++i) {
                 // Use internalExpand since item may not yet be created. See
                 // 1G6B1AR.
@@ -858,6 +864,22 @@ public class InternalVirtualTreeModelViewer extends Viewer
                     newSelection.add(item);
                 }
             }
+        } else if (selection instanceof IStructuredSelection) {
+            Object[] elements = ((IStructuredSelection) selection).toArray();
+            newSelection = new ArrayList(elements.length);
+            for (int i = 0; i < elements.length; ++i) {
+                // Use internalExpand since item may not yet be created. See
+                // 1G6B1AR.
+                VirtualItem[] items = findItems(elements[i]);
+                if (items != null) {
+                    for (int j = 0; j < items.length; j++) {
+                        newSelection.add(items[j]);
+                    }
+                }
+            }
+        }
+        
+        if (newSelection != null) {
             fTree.setSelection((VirtualItem[]) newSelection.toArray(new VirtualItem[newSelection.size()]));
 
             // Although setting the selection in the control should reveal it,
@@ -870,7 +892,7 @@ public class InternalVirtualTreeModelViewer extends Viewer
                 for (int i = (newSelection.size() - 1); i >= 0; i--) {
                     fTree.showItem((VirtualItem) newSelection.get(i));
                 }
-            }
+            }  
         } else {
             fTree.setSelection(EMPTY_ITEMS_ARRAY);
         }
@@ -988,6 +1010,10 @@ public class InternalVirtualTreeModelViewer extends Viewer
         }
     }
 
+    public void collapseToLevel(Object elementOrTreePath, int level) {
+    	// TODO implement
+    }
+    
     private void handleInvalidSelection(ISelection selection, ISelection newSelection) {
         IModelSelectionPolicy selectionPolicy = ViewerAdapterService.getSelectionPolicy(selection, getPresentationContext());
         if (selectionPolicy != null) {
@@ -1061,6 +1087,10 @@ public class InternalVirtualTreeModelViewer extends Viewer
         fTree.dispose();
     }
 
+    public boolean isDisposed() {
+    	return fTree.isDisposed();
+    }
+    
     /**
      * Returns this viewer's presentation context.
      * 
@@ -1288,7 +1318,6 @@ public class InternalVirtualTreeModelViewer extends Viewer
         if (context instanceof PresentationContext) {
             PresentationContext pc = (PresentationContext) context;
             pc.saveProperites(memento);
-            
         }
     }    
     
@@ -1331,44 +1360,44 @@ public class InternalVirtualTreeModelViewer extends Viewer
     }
 
     public void addViewerUpdateListener(IViewerUpdateListener listener) {
-        getContentProvider().addViewerUpdateListener(listener);
+        getTreeModelContentProvider().addViewerUpdateListener(listener);
     }
     
     public void removeViewerUpdateListener(IViewerUpdateListener listener) {
-        ITreeModelContentProvider cp = getContentProvider();
+        ITreeModelContentProvider cp = getTreeModelContentProvider();
         if (cp !=  null) {
             cp.removeViewerUpdateListener(listener);
         }
     }
     
     public void addModelChangedListener(IModelChangedListener listener) {
-        getContentProvider().addModelChangedListener(listener); 
+        getTreeModelContentProvider().addModelChangedListener(listener); 
     }
     
     public void removeModelChangedListener(IModelChangedListener listener) {
-        ITreeModelContentProvider cp = getContentProvider();
+        ITreeModelContentProvider cp = getTreeModelContentProvider();
         if (cp !=  null) {
             cp.removeModelChangedListener(listener);
         }
     }
     
     public void addStateUpdateListener(IStateUpdateListener listener) {
-        getContentProvider().addStateUpdateListener(listener);
+        getTreeModelContentProvider().addStateUpdateListener(listener);
     }
     
     public void removeStateUpdateListener(IStateUpdateListener listener) {
-        ITreeModelContentProvider cp = getContentProvider();
+        ITreeModelContentProvider cp = getTreeModelContentProvider();
         if (cp !=  null) {
             cp.removeStateUpdateListener(listener);
         }
     }
         
     public void addLabelUpdateListener(ILabelUpdateListener listener) {
-        getLabelProvider().addLabelUpdateListener(listener);
+        getTreeModelLabelProvider().addLabelUpdateListener(listener);
     }
     
     public void removeLabelUpdateListener(ILabelUpdateListener listener) {
-        getLabelProvider().removeLabelUpdateListener(listener);
+        getTreeModelLabelProvider().removeLabelUpdateListener(listener);
     }
     
     /**
@@ -1427,7 +1456,7 @@ public class InternalVirtualTreeModelViewer extends Viewer
         VirtualItem parent = findItem(path);
        
         if (parent != null) {
-            delta.setChildCount(((TreeModelContentProvider)getContentProvider()).viewToModelCount(path, parent.getItemCount()));
+            delta.setChildCount(((TreeModelContentProvider)getTreeModelContentProvider()).viewToModelCount(path, parent.getItemCount()));
             if (parent.getExpanded()) {
                 if ((flagsToSave & IModelDelta.EXPAND) != 0) {
                     delta.setFlags(delta.getFlags() | IModelDelta.EXPAND);
@@ -1450,7 +1479,8 @@ public class InternalVirtualTreeModelViewer extends Viewer
         }
     }
     
-    private void doSaveElementState(TreePath parentPath, ModelDelta delta, VirtualItem item, Collection set, int flagsToSave) {
+    private boolean doSaveElementState(TreePath parentPath, ModelDelta delta, VirtualItem item, Collection set, int flagsToSave) {
+    	boolean hasFlags = false;
         Object element = item.getData();
         if (element != null) {
             boolean expanded = item.getExpanded();
@@ -1465,23 +1495,37 @@ public class InternalVirtualTreeModelViewer extends Viewer
             if (selected && (flagsToSave & IModelDelta.SELECT) != 0) {
                 flags = flags | IModelDelta.SELECT;
             }
+            hasFlags = flags != IModelDelta.NO_CHANGE;
             if (expanded || flags != IModelDelta.NO_CHANGE) {
-                int modelIndex = ((TreeModelContentProvider)getContentProvider()).viewToModelIndex(parentPath, item.getIndex().intValue());
+                int modelIndex = ((TreeModelContentProvider)getTreeModelContentProvider()).viewToModelIndex(parentPath, item.getIndex().intValue());
                 TreePath elementPath = parentPath.createChildPath(element);
-                int numChildren = ((TreeModelContentProvider)getContentProvider()).viewToModelCount(elementPath, item.getItemCount());
-                ModelDelta childDelta = delta.addNode(element, modelIndex, flags, numChildren);
+                int numChildren = ((TreeModelContentProvider)getTreeModelContentProvider()).viewToModelCount(elementPath, item.getItemCount());
+                ModelDelta childDelta = new ModelDelta(element, modelIndex, flags, numChildren);
                 if (expanded) {
                     VirtualItem[] items = item.getItems();
                     for (int i = 0; i < items.length; i++) {
-                        doSaveElementState(elementPath, childDelta, items[i], set, flagsToSave);
+                        if (doSaveElementState(elementPath, childDelta, items[i], set, flagsToSave)) {
+                        	hasFlags = true;
+                        }
                     }
                 }
+                if (hasFlags) copyIntoDelta(childDelta, delta);
             }
+        }
+        return hasFlags;
+    }
+    
+    private void copyIntoDelta(IModelDelta delta, ModelDelta destParent) {
+        ModelDelta newDelta = destParent.addNode(delta.getElement(), delta.getIndex(), delta.getFlags(), delta
+            .getChildCount());
+        for (int i = 0; i < delta.getChildDeltas().length; i++) {
+            copyIntoDelta(delta.getChildDeltas()[i], newDelta);
         }
     }
 
+
     public void updateViewer(IModelDelta delta) {
-        getContentProvider().updateModel(delta, ITreeModelContentProvider.ALL_MODEL_DELTA_FLAGS);
+        getTreeModelContentProvider().updateModel(delta, ITreeModelContentProvider.ALL_MODEL_DELTA_FLAGS);
     }
     
     public ViewerLabel getElementLabel(TreePath path, String columnId) {
@@ -1538,7 +1582,7 @@ public class InternalVirtualTreeModelViewer extends Viewer
     public Image getImage(VirtualItem item, int columnIdx) {
         ImageDescriptor[] imageDescriptors = (ImageDescriptor[]) item.getData(VirtualItem.IMAGE_KEY);
         if (imageDescriptors != null && imageDescriptors.length > columnIdx) {
-            return getLabelProvider().getImage(imageDescriptors[columnIdx]);
+            return getTreeModelLabelProvider().getImage(imageDescriptors[columnIdx]);
         }
         return null;
     }
@@ -1546,7 +1590,7 @@ public class InternalVirtualTreeModelViewer extends Viewer
     public Font getFont(VirtualItem item, int columnIdx) {
         FontData[] fontDatas = (FontData[]) item.getData(VirtualItem.FONT_KEY);
         if (fontDatas != null) {
-            return getLabelProvider().getFont(fontDatas[columnIdx]);
+            return getTreeModelLabelProvider().getFont(fontDatas[columnIdx]);
         }
         return null;
     }
@@ -1554,7 +1598,7 @@ public class InternalVirtualTreeModelViewer extends Viewer
     public Color getForeground(VirtualItem item, int columnIdx) {
         RGB[] rgbs = (RGB[]) item.getData(VirtualItem.FOREGROUND_KEY);
         if (rgbs != null) {
-            return getLabelProvider().getColor(rgbs[columnIdx]);
+            return getTreeModelLabelProvider().getColor(rgbs[columnIdx]);
         }
         return null;
     }
@@ -1562,7 +1606,7 @@ public class InternalVirtualTreeModelViewer extends Viewer
     public Color getBackground(VirtualItem item, int columnIdx) {
         RGB[] rgbs = (RGB[]) item.getData(VirtualItem.BACKGROUND_KEY);
         if (rgbs != null) {
-            return getLabelProvider().getColor(rgbs[columnIdx]);
+            return getTreeModelLabelProvider().getColor(rgbs[columnIdx]);
         }
         return null;
     }
@@ -1591,4 +1635,17 @@ public class InternalVirtualTreeModelViewer extends Viewer
     public String toString() {
         return getTree().toString();
     }
+    
+    public void preserveViewerState(int flags, boolean append) {
+    	ViewerStateTracker stateTracker = fContentProvider.getStateTracker();
+    	stateTracker.saveViewerState(fInput, IModelDelta.SELECT | IModelDelta.REVEAL | IModelDelta.FORCE, false);
+    	stateTracker.restoreViewerState(fInput);
+    }
+    
+    public void restoreViewerState() {
+    	ViewerStateTracker stateTracker = fContentProvider.getStateTracker();
+    	stateTracker.restoreViewerState(fInput);
+    	refresh();
+    }
+
 }

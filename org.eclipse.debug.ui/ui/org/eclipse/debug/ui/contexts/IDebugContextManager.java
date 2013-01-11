@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,4 +52,15 @@ public interface IDebugContextManager {
 	 * @return debug context service
 	 */
 	public IDebugContextService getContextService(IWorkbenchWindow window);
+	
+	/**
+	 * Returns the pinned context viewer factory for the given id.   
+	 *
+	 * @since 3.9
+	 * 
+	 * @param id ID of the context viewer factory.
+	 * @return pinned context viewer factory, <code>null</code> if no 
+	 * factory for given ID was found
+	 */
+	public IPinnedContextViewerFactory getPinnedContextViewerFactory(String id);
 }

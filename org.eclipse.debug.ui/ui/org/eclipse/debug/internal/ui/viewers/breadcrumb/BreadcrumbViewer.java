@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -153,7 +153,8 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
      * @param parent the parent composite 
      * @param site the site to create the drop down for
      * @param path the path to show
-     * @return the drop down control
+     * @return the drop down control.  May return <code>null</code> if a drop 
+     * down is not supported for the given element. 
      */
 	protected abstract Control createDropDown(Composite parent, IBreadcrumbDropDownSite site, TreePath path);
 	
@@ -262,6 +263,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		} finally {
 			enableRedraw();
 		}
+		refresh();
 	}
 
 	/*
@@ -349,6 +351,26 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
             }
         }
         return null;
+    }
+    
+    /**
+     * Returns the label information for given element if element is in viewer.
+     * @param element Element to return label for.
+     * @return Label data.
+     * 
+     * @since 3.9
+     */
+    public ViewerLabel getElementLabel(Object element) {
+    	Widget[] items = findItems(element);
+    	if (items.length > 0) {
+    		BreadcrumbItem item = (BreadcrumbItem)items[0];
+    		ViewerLabel label = new ViewerLabel(item.getText(), item.getImage());
+    		label.setFont(item.getFont());
+    		label.setForeground(item.getForeground());
+    		label.setBackground(item.getBackground());
+    		return label;
+    	}
+    	return null;
     }
     
 	/*
@@ -639,6 +661,16 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	    if (label.hasNewTooltipText()) {
 	        item.setToolTip(label.getTooltipText());
 	    }
+	    if (label.getFont() != item.getFont()) {
+	    	item.setFont(label.getFont());
+	    }
+	    if (label.getForeground() != item.getForeground()) {
+	    	item.setForeground(label.getForeground());
+	    }
+	    if (label.getBackground() != item.getBackground()) {
+	    	item.setBackground(label.getBackground());
+	    }
+	    
 	    return layoutChanged;
 	}
 	
@@ -691,9 +723,16 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 
 		if (currentWidth > width) {
 			int index= 0;
-			while (currentWidth > width && index < fBreadcrumbItems.size() - 1) {
+			while (currentWidth > width && index < fBreadcrumbItems.size()) {
 				BreadcrumbItem viewer= (BreadcrumbItem) fBreadcrumbItems.get(index);
-				if (viewer.isShowText()) {
+				if (index == fBreadcrumbItems.size() - 1) {
+				    if (!viewer.isShowText()) {
+		                // Always show the last item's text.
+	                    viewer.setShowText(true);
+	                    requiresLayout= true;
+				    }
+				}
+				else if (viewer.isShowText()) {
 					viewer.setShowText(false);
 					currentWidth= getCurrentWidth();
 					requiresLayout= true;
@@ -701,13 +740,19 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 
 				index++;
 			}
-
 		} else if (currentWidth < width) {
-
 			int index= fBreadcrumbItems.size() - 1;
+            BreadcrumbItem viewer= (BreadcrumbItem) fBreadcrumbItems.get(index);
+            if (index >=0) {
+                // Always show the last item's text.
+                if (!viewer.isShowText()) {
+                    viewer.setShowText(true);
+                    requiresLayout = true;
+                }
+                index--;
+            }
 			while (currentWidth < width && index >= 0) {
-
-				BreadcrumbItem viewer= (BreadcrumbItem) fBreadcrumbItems.get(index);
+				viewer= (BreadcrumbItem) fBreadcrumbItems.get(index);
 				if (!viewer.isShowText()) {
 					viewer.setShowText(true);
 					currentWidth= getCurrentWidth();

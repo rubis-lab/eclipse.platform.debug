@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others.
+ * Copyright (c) 2004, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,11 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.views.memory;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -26,6 +31,8 @@ import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.views.variables.VariablesViewMessages;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.contexts.AbstractPinnableView;
+import org.eclipse.debug.ui.contexts.IPinnableDebugContextProvider;
 import org.eclipse.debug.ui.memory.IMemoryRendering;
 import org.eclipse.debug.ui.memory.IMemoryRenderingContainer;
 import org.eclipse.debug.ui.memory.IMemoryRenderingSite;
@@ -61,16 +68,17 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
+import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.handlers.IHandlerService;
-import org.eclipse.ui.part.ViewPart;
 
 /**
  * 
  * @since 3.0
  */
-public class MemoryView extends ViewPart implements IMemoryRenderingSite2 {
+public class MemoryView extends AbstractPinnableView implements IMemoryRenderingSite2 {
 
 	protected MemoryViewSelectionProvider fSelectionProvider;
 	private MemoryViewPartListener fPartListener;
@@ -94,6 +102,8 @@ public class MemoryView extends ViewPart implements IMemoryRenderingSite2 {
 	public static final String VIEW_PANE_ORIENTATION_PREF = IDebugUIConstants.ID_MEMORY_VIEW+".orientation"; //$NON-NLS-1$
 	public static final int HORIZONTAL_VIEW_ORIENTATION = 0;
 	public static final int VERTICAL_VIEW_ORIENTATION =1;
+
+	public static final String PINNED_CONTEXT_VIEWER_PREF = IDebugUIConstants.ID_MEMORY_VIEW+".pinnedContextViewer"; //$NON-NLS-1$
 
 	private String[] defaultVisiblePaneIds ={MemoryBlocksTreeViewPane.PANE_ID, IDebugUIConstants.ID_RENDERING_VIEW_PANE_1};
 		
@@ -307,7 +317,7 @@ public class MemoryView extends ViewPart implements IMemoryRenderingSite2 {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
-	public void createPartControl(Composite parent) {
+	protected void doCreatePartControl(Composite parent) {
 		fSashForm = new SashForm(parent, SWT.HORIZONTAL);
 		
 		fSelectionProvider = new MemoryViewSelectionProvider();
@@ -339,8 +349,19 @@ public class MemoryView extends ViewPart implements IMemoryRenderingSite2 {
 		activateHandlers();
 		// restore view pane after finishing creating all the view panes
 		restoreView();
+		
+		loadPinnedContextViewer();
 	}
 
+	public void pinToProvider(IPinnableDebugContextProvider provider) {
+		super.pinToProvider(provider);
+		savePinnedContextViewer();
+	}
+	
+	public void clearPinnedProvider() {
+		super.clearPinnedProvider();
+		savePinnedContextViewer();
+	}
 	
     public void activateHandlers() {
 		ICommandService commandSupport = (ICommandService)getSite().getService(ICommandService.class);		
@@ -677,13 +698,13 @@ public class MemoryView extends ViewPart implements IMemoryRenderingSite2 {
 			}
 		}
 		
-		prefs.setValue(getVisibilityPrefId(), visibleViewPanes.toString());		 
+		prefs.setValue(getVisibilityPrefId(getViewSite().getSecondaryId()), visibleViewPanes.toString());		 
 	}
 	
 	private void loadViewPanesVisibility()
 	{
 		Preferences prefs = DebugUIPlugin.getDefault().getPluginPreferences();
-		String visiblePanes = prefs.getString(getVisibilityPrefId());
+		String visiblePanes = prefs.getString(getVisibilityPrefId(getViewSite().getSecondaryId()));
 		
 		if (visiblePanes != null && visiblePanes.length() > 0)
 		{
@@ -719,11 +740,57 @@ public class MemoryView extends ViewPart implements IMemoryRenderingSite2 {
 		
 		fSashForm.layout();
 	}
-	
+
+	private void loadPinnedContextViewer()
+	{
+		Preferences prefs = DebugUIPlugin.getDefault().getPluginPreferences();
+		String string = prefs.getString(getPinnedContextViewerPrefId(getViewSite().getSecondaryId()));
+		
+        if(string != null && string.length() > 0) {
+        	ByteArrayInputStream bin = new ByteArrayInputStream(string.getBytes());
+        	InputStreamReader reader = new InputStreamReader(bin);
+        	try {
+        		XMLMemento memento = XMLMemento.createReadRoot(reader);
+        		initPinnedContextViewerState(memento);
+        	} catch (WorkbenchException e) {
+        	} finally {
+        		try {
+        			reader.close();
+        			bin.close();
+        		} catch (IOException e){}
+        	}
+        }
+	}
+
+	private void savePinnedContextViewer()
+	{
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		OutputStreamWriter writer = new OutputStreamWriter(bout);
+
+		try {
+			XMLMemento memento = XMLMemento.createWriteRoot("VariablesViewMemento"); //$NON-NLS-1$
+			savePinnedContextViewerState(memento);
+			memento.save(writer);
+
+			Preferences prefs = DebugUIPlugin.getDefault().getPluginPreferences();
+			String xmlString = bout.toString();
+			prefs.setValue(getPinnedContextViewerPrefId(getViewSite().getSecondaryId()), xmlString);
+		} catch (IOException e) {
+		} finally {
+			try {
+				writer.close();
+				bout.close();
+			} catch (IOException e) {
+			}
+		}    	
+		
+		
+	}
+
 	private void loadOrientation()
 	{
 		Preferences prefs = DebugUIPlugin.getDefault().getPluginPreferences();
-		fViewOrientation = prefs.getInt(getOrientationPrefId());
+		fViewOrientation = prefs.getInt(getOrientationPrefId(getViewSite().getSecondaryId()));
 		
 		for (int i=0; i<fOrientationActions.length; i++)
 		{
@@ -738,7 +805,7 @@ public class MemoryView extends ViewPart implements IMemoryRenderingSite2 {
 	private void saveOrientation()
 	{
 		Preferences prefs = DebugUIPlugin.getDefault().getPluginPreferences();
-		prefs.setValue(getOrientationPrefId(), fViewOrientation);
+		prefs.setValue(getOrientationPrefId(getViewSite().getSecondaryId()), fViewOrientation);
 	}
 	
 	private void updateOrientationActions()
@@ -800,28 +867,30 @@ public class MemoryView extends ViewPart implements IMemoryRenderingSite2 {
 		fPinMBDisplay = pinMBDisplay;
 	}
 	
-	private String getVisibilityPrefId()
+	private String getVisibilityPrefId(String secondaryId)
 	{
-		IViewSite vs = getViewSite();
-		String viewId = vs.getSecondaryId();
-		
-		if (viewId != null)
-			return VISIBILITY_PREF + "." + viewId; //$NON-NLS-1$
+		if (secondaryId != null)
+			return VISIBILITY_PREF + "." + secondaryId; //$NON-NLS-1$
 
 		return VISIBILITY_PREF;
 	}
 	
-	private String getOrientationPrefId()
+	private String getOrientationPrefId(String secondaryId)
 	{
-		IViewSite vs = getViewSite();
-		String viewId = vs.getSecondaryId();
-		
-		if (viewId != null)
-			return VIEW_PANE_ORIENTATION_PREF + "." + viewId; //$NON-NLS-1$
+		if (secondaryId != null)
+			return VIEW_PANE_ORIENTATION_PREF + "." + secondaryId; //$NON-NLS-1$
 
 		return VIEW_PANE_ORIENTATION_PREF;
 	}
-	
+
+	private String getPinnedContextViewerPrefId(String secondaryId)
+	{
+		if (secondaryId != null)
+			return PINNED_CONTEXT_VIEWER_PREF + "." + secondaryId; //$NON-NLS-1$
+
+		return PINNED_CONTEXT_VIEWER_PREF;
+	}
+
 	private void createOrientationActions()
 	{
 		IActionBars actionBars = getViewSite().getActionBars();
@@ -837,6 +906,17 @@ public class MemoryView extends ViewPart implements IMemoryRenderingSite2 {
 		layoutSubMenu.add(fOrientationActions[1]);
 		viewMenu.add(layoutSubMenu);
 		viewMenu.add(new Separator());
+	}
+	
+	public void copyViewSettings(String copySecondaryId) {
+		Preferences prefs = DebugUIPlugin.getDefault().getPluginPreferences();
+		String myOrientationId = getOrientationPrefId(getViewSite().getSecondaryId());
+		String copyOrientationId = getOrientationPrefId(copySecondaryId);
+		prefs.setValue(copyOrientationId, prefs.getString(myOrientationId));
+
+		String myVisibilityId = getVisibilityPrefId(getViewSite().getSecondaryId());
+		String copyVisibilityId = getVisibilityPrefId(copySecondaryId);
+		prefs.setValue(copyVisibilityId, prefs.getString(myVisibilityId));
 	}
 	
 	public void setViewPanesOrientation(int orientation)

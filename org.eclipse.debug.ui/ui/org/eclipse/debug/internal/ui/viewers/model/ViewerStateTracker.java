@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2012 Wind River Systems and others.
+ * Copyright (c) 2011, 2013 Wind River Systems and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,6 +68,14 @@ import org.eclipse.ui.XMLMemento;
  * elements using mementos.  As the refresh of the tree progresses, the save state
  * is restored to the tree and elements are expanded or collapsed as needed to 
  * compensate for changes in model structure.
+ * </p>
+ * <p>
+ * Most of the flags used in saving state are used as described in <code>IModelDelta</code>
+ * interface.  However, the {@value IModelDelta#FORCE} flag triggers special 
+ * handling when restoring the state. It causes the node with the 
+ * <code>IModelDelta.SELECT</code> to be continuously re-selected as the view
+ * state changes.  I.e. if the selected is removed, then re-created, it will 
+ * automatically be reselected.
  * </p>
  * @see TreeModelContentProvider
  */
@@ -275,7 +283,7 @@ class ViewerStateTracker {
                             ModelDelta stateDelta = (ModelDelta) fViewerStates.get(keyMementoString);
                             if (stateDelta != null) {
                                 if (DebugUIPlugin.DEBUG_STATE_SAVE_RESTORE && DebugUIPlugin.DEBUG_TEST_PRESENTATION_ID(fContentProvider.getPresentationContext()))  {
-                                	DebugUIPlugin.trace("STATE RESTORE INPUT COMARE ENDED : " + fRequest + " - MATCHING STATE FOUND"); //$NON-NLS-1$ //$NON-NLS-2$
+                                	DebugUIPlugin.trace("STATE RESTORE INPUT COMPARE ENDED : " + fRequest + " - MATCHING STATE FOUND"); //$NON-NLS-1$ //$NON-NLS-2$
                                 }
 
                                 // Process start of restore in an async cycle because we may still be inside inputChanged() 
@@ -303,7 +311,7 @@ class ViewerStateTracker {
                                 });
                             } else {
                                 if (DebugUIPlugin.DEBUG_STATE_SAVE_RESTORE && DebugUIPlugin.DEBUG_TEST_PRESENTATION_ID(fContentProvider.getPresentationContext()))  {
-                                	DebugUIPlugin.trace("STATE RESTORE INPUT COMARE ENDED : " + fRequest + " - NO MATCHING STATE"); //$NON-NLS-1$ //$NON-NLS-2$
+                                	DebugUIPlugin.trace("STATE RESTORE INPUT COMPARE ENDED : " + fRequest + " - NO MATCHING STATE"); //$NON-NLS-1$ //$NON-NLS-2$
                                 }
                             }
                         } catch (IOException e) {
@@ -495,6 +503,20 @@ class ViewerStateTracker {
      * @param input the {@link ModelDelta} input
      */
     protected void saveViewerState(Object input) {
+    	saveViewerState(input, IModelDelta.SELECT | IModelDelta.EXPAND | IModelDelta.REVEAL, true);
+    }
+
+    /**
+     * Saves the viewer's state for the previous input.  
+     * 
+     * @param input the {@link ModelDelta} input
+     * @param flags The flags to preserve during the state save.  The 
+     * supported flags are <code>IModelDelta.SELECT</code>, 
+     * <code>IModelDelta.EXPAND</code>, <code>IModelDelta.COLLAPSE</code>, 
+     * <code>IModelDelta.REVEAL</code>, and <code>IModelDelta.FORCE</code>.
+     * @param append Whether to append the outstanding delta to the state being saved.  
+     */
+    protected void saveViewerState(Object input, int flags, boolean append) {
         for (Iterator itr = fCompareRequestsInProgress.values().iterator(); itr.hasNext();) {
             ((ElementCompareRequest) itr.next()).cancel();
             itr.remove();
@@ -508,11 +530,25 @@ class ViewerStateTracker {
 
             // build a model delta representing expansion and selection state
             final ModelDelta saveDeltaRoot = new ModelDelta(input, IModelDelta.NO_CHANGE);
-            buildViewerState(saveDeltaRoot);
+            buildViewerState(saveDeltaRoot, flags);
             if (DebugUIPlugin.DEBUG_STATE_SAVE_RESTORE && DebugUIPlugin.DEBUG_TEST_PRESENTATION_ID(fContentProvider.getPresentationContext())) {
             	DebugUIPlugin.trace("\tSAVE DELTA FROM VIEW:\n" + saveDeltaRoot); //$NON-NLS-1$
             }
 
+            if ((flags & IModelDelta.FORCE) != 0) {
+            	saveDeltaRoot.accept(new IModelDeltaVisitor() {
+					public boolean visit(IModelDelta delta, int depth) {
+						if ((delta.getFlags() &  IModelDelta.SELECT) != 0) {
+							while (delta != null) {
+								((ModelDelta)delta).setFlags(delta.getFlags() | IModelDelta.FORCE | IModelDelta.SELECT | IModelDelta.EXPAND);
+								delta = delta.getParentDelta();
+							}
+						}
+						return true;
+					}
+				});
+            }
+            
             // check if pending restore reveal
             if (fPendingSetTopItem != null) {
                 // set back the pending reveal flag
@@ -539,7 +575,7 @@ class ViewerStateTracker {
                 }
             }
             
-            if (fPendingState != null) {
+            if (fPendingState != null && append) {
                 // If the restore for the current input was never completed,
                 // preserve
                 // that restore along with the restore that was completed.
@@ -1092,13 +1128,14 @@ class ViewerStateTracker {
                 int flags = (delta.getFlags() & ~IModelDelta.CONTENT);
                 
                 if (flags != IModelDelta.NO_CHANGE) {
-                    IModelDelta parentDelta = delta.getParentDelta();
                     // Remove the delta if :
                     // - The parent delta has no more flags on it (the content flag is removed as well), 
-                    // which means that parent element's children have been completely exposed.
+                    // which means that parent element's children have been completely exposed. 
+                	// Ignore the force flag in the parent delta it should only be used to protect the parent.
                     // - There are no more pending updates for the element.
                     // - If element is a memento, there are no state requests pending.
-                    if (parentDelta != null && parentDelta.getFlags() == IModelDelta.NO_CHANGE) {
+                    IModelDelta parentDelta = delta.getParentDelta();
+                    if (parentDelta != null && (parentDelta.getFlags() & ~IModelDelta.FORCE) == IModelDelta.NO_CHANGE) {
                         TreePath deltaPath = fContentProvider.getViewerTreePath(delta);
                         if ( !fContentProvider.areElementUpdatesPending(deltaPath) &&
                              (!(delta.getElement() instanceof IMemento) || !areMementoUpdatesPending(delta)) ) 
@@ -1121,6 +1158,8 @@ class ViewerStateTracker {
             }
 
             private boolean areMementoUpdatesPending(IModelDelta delta) {
+            	if ((delta.getFlags() & IModelDelta.FORCE) != 0) return true;
+            	
                 for (Iterator itr = fCompareRequestsInProgress.keySet().iterator(); itr.hasNext();) {
                     CompareRequestKey key = (CompareRequestKey) itr.next();
                     if (delta.getElement().equals(key.fDelta.getElement())) {
@@ -1201,29 +1240,35 @@ class ViewerStateTracker {
         
         if ((delta.getFlags() & IModelDelta.SELECT) != 0) {
             delta.setFlags(delta.getFlags() & ~IModelDelta.SELECT);
-            if (DebugUIPlugin.DEBUG_STATE_SAVE_RESTORE && DebugUIPlugin.DEBUG_TEST_PRESENTATION_ID(fContentProvider.getPresentationContext())) {
-            	DebugUIPlugin.trace("\tRESTORE SELECT: " + treePath.getLastSegment()); //$NON-NLS-1$
-            }
+            // If current selection in viewer is a child of this element, do an additional test:
+            // If select delta has a child delta with a select flag, do not override that selection
+            // since it is more accurate than the selection in current delta.
             ITreeSelection currentSelection = (ITreeSelection)viewer.getSelection();
-            if (currentSelection == null || currentSelection.isEmpty()) {
-                viewer.setSelection(new TreeSelection(treePath), false, false);
-            } else {
-                TreePath[] currentPaths = currentSelection.getPaths();
-                boolean pathInSelection = false;
-                for (int i = 0; i < currentPaths.length; i++) {
-                    if (currentPaths[i].equals(treePath)) {
-                        pathInSelection = true;
-                        break;
-                    }
+            if ( !isPathParentInSelection(currentSelection, treePath) || !doDeltaChildrenHaveSelectionFlag(delta) ) {
+                if (DebugUIPlugin.DEBUG_STATE_SAVE_RESTORE && DebugUIPlugin.DEBUG_TEST_PRESENTATION_ID(fContentProvider.getPresentationContext())) {
+                	DebugUIPlugin.trace("\tRESTORE SELECT: " + treePath.getLastSegment()); //$NON-NLS-1$
                 }
-                // Only set the selection if the element is not yet in 
-                // selection.  Otherwise the setSelection() call will 
-                // update selection listeners needlessly. 
-                if (!pathInSelection) {
-                    TreePath[] newPaths = new TreePath[currentPaths.length + 1];
-                    System.arraycopy(currentPaths, 0, newPaths, 0, currentPaths.length);
-                    newPaths[newPaths.length - 1] = treePath;
-                    viewer.setSelection(new TreeSelection(newPaths), false, false);
+                if (currentSelection == null || currentSelection.isEmpty()) {
+                    viewer.setSelection(new TreeSelection(treePath), false, false);
+                } else {
+                    TreePath[] currentPaths = currentSelection.getPaths();
+                    boolean pathInSelection = false;
+                    for (int i = 0; i < currentPaths.length; i++) {
+                        if (currentPaths[i].equals(treePath)) {
+                            pathInSelection = true;
+                            break;
+                        }
+                    }
+                    // Only set the selection if the element is not yet in 
+                    // selection.  Otherwise the setSelection() call will 
+                    // update selection listeners needlessly. 
+                    if (!pathInSelection && treePath.getSegmentCount() != 0) {
+                        TreePath[] newPaths = new TreePath[currentPaths.length + 1];
+                        System.arraycopy(currentPaths, 0, newPaths, 0, currentPaths.length);
+                        newPaths[newPaths.length - 1] = treePath;
+                        boolean force = (delta.getFlags() & IModelDelta.FORCE) != 0; 
+                    	viewer.setSelection(new TreeSelection(treePath), false, force);
+                    }
                 }
             }
         }
@@ -1282,13 +1327,41 @@ class ViewerStateTracker {
              fContentProvider.getViewer().getElementChildrenRealized(treePath)) ||
             (knowsHasChildren && !viewer.getHasChildren(treePath)) ) 
         {
-            if (DebugUIPlugin.DEBUG_STATE_SAVE_RESTORE && DebugUIPlugin.DEBUG_TEST_PRESENTATION_ID(fContentProvider.getPresentationContext())) {
-            	DebugUIPlugin.trace("\tRESTORE CONTENT: " + treePath.getLastSegment()); //$NON-NLS-1$
-            }
-            delta.setFlags(delta.getFlags() & ~IModelDelta.CONTENT);            
+        	//TODO: experiment:
+        	if (!(delta.getElement() instanceof IMemento)) {
+	            if (DebugUIPlugin.DEBUG_STATE_SAVE_RESTORE && DebugUIPlugin.DEBUG_TEST_PRESENTATION_ID(fContentProvider.getPresentationContext())) {
+	            	DebugUIPlugin.trace("\tRESTORE CONTENT: " + treePath.getLastSegment()); //$NON-NLS-1$
+	            }
+	            delta.setFlags(delta.getFlags() & ~IModelDelta.CONTENT);            
+        	}
         }
     }
 
+    private boolean doDeltaChildrenHaveSelectionFlag(IModelDelta delta) {
+        final boolean[] foundSelectFlag = new boolean[] { false };
+        delta.accept(new IModelDeltaVisitor() {
+            public boolean visit(IModelDelta delta, int depth) {
+                if (depth != 0) {
+                    foundSelectFlag[0] |= (delta.getFlags() & IModelDelta.SELECT) != 0;
+                }
+                return !foundSelectFlag[0];
+            }
+            
+        });
+        return foundSelectFlag[0];
+    }
+    
+    private boolean isPathParentInSelection(ITreeSelection selection, TreePath path) {
+        TreePath[] selectionPaths = selection.getPaths();
+        for (int i = 0; i < selectionPaths.length; i++) {
+            if (selectionPaths[i].startsWith(path, null)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    
     /**
      * Utility that reveals the saved top item in the viewer.  It listens for 
      * all content updates to complete in order to avoid having the desired top item
@@ -1442,31 +1515,33 @@ class ViewerStateTracker {
     /**
      * Builds a delta with the given root delta for expansion/selection state.
      * 
-     * @param delta
-     *            root delta
+     * @param delta root delta
+     * @param flags Flags to include in the saving of delta
      */
-    private void buildViewerState(ModelDelta delta) {
+    private void buildViewerState(ModelDelta delta, int flags) {
         IInternalTreeModelViewer viewer = fContentProvider.getViewer();
-        viewer.saveElementState(TreeModelContentProvider.EMPTY_TREE_PATH, delta, IModelDelta.SELECT | IModelDelta.EXPAND);
+        viewer.saveElementState(TreeModelContentProvider.EMPTY_TREE_PATH, delta, flags);
         
         // Add memento for top item if it is mapped to an element.  The reveal memento
         // is in its own path to avoid requesting unnecessary data when restoring it.
-        TreePath topElementPath = viewer.getTopElementPath();
-        if (topElementPath != null) {
-            ModelDelta parentDelta = delta;
-            TreePath parentPath = TreeModelContentProvider.EMPTY_TREE_PATH;
-            for (int i = 0; i < topElementPath.getSegmentCount(); i++) {
-                Object element = topElementPath.getSegment(i);
-                int index = viewer.findElementIndex(parentPath, element);
-                ModelDelta childDelta = parentDelta.getChildDelta(element);
-                if (childDelta == null) {
-                    parentDelta = parentDelta.addNode(element, index, IModelDelta.NO_CHANGE);
-                } else {
-                    parentDelta = childDelta;
-                }
-                parentPath = parentPath.createChildPath(element);
-            }
-            parentDelta.setFlags(parentDelta.getFlags() | IModelDelta.REVEAL);
+        if ((flags & IModelDelta.REVEAL) != 0) {
+	        TreePath topElementPath = viewer.getTopElementPath();
+	        if (topElementPath != null) {
+	            ModelDelta parentDelta = delta;
+	            TreePath parentPath = TreeModelContentProvider.EMPTY_TREE_PATH;
+	            for (int i = 0; i < topElementPath.getSegmentCount(); i++) {
+	                Object element = topElementPath.getSegment(i);
+	                int index = viewer.findElementIndex(parentPath, element);
+	                ModelDelta childDelta = parentDelta.getChildDelta(element);
+	                if (childDelta == null) {
+	                    parentDelta = parentDelta.addNode(element, index, IModelDelta.NO_CHANGE);
+	                } else {
+	                    parentDelta = childDelta;
+	                }
+	                parentPath = parentPath.createChildPath(element);
+	            }
+	            parentDelta.setFlags(parentDelta.getFlags() | IModelDelta.REVEAL);
+	        }
         }
     }
     
@@ -1488,14 +1563,39 @@ class ViewerStateTracker {
     void compareFinished(ElementCompareRequest request, ModelDelta delta) {
         notifyStateUpdate(request.getViewerInput(), TreeModelContentProvider.UPDATE_COMPLETE, request);
         if (DebugUIPlugin.DEBUG_STATE_SAVE_RESTORE && DebugUIPlugin.DEBUG_TEST_PRESENTATION_ID(fContentProvider.getPresentationContext())) {
-        	DebugUIPlugin.trace("\tSTATE END: " + request + " = " + false); //$NON-NLS-1$ //$NON-NLS-2$
+        	DebugUIPlugin.trace("\tSTATE END: " + request + " = " + request.isEqual()); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         fCompareRequestsInProgress.remove(new CompareRequestKey(request.getElementPath(), delta));
         if (!request.isCanceled()) {
             if (request.isEqual()) {
-                delta.setElement(request.getElement());
-                restorePendingStateNode(delta, request.knowsHasChildren(), request.knowChildCount(), request.checkChildrenRealized());
+            	if ((delta.getFlags() & IModelDelta.FORCE) != 0) {
+            		ModelDelta parent = (ModelDelta)delta.getParentDelta();
+            		IModelDelta[] siblings = parent.getChildDeltas();
+            		ModelDelta copy = null;
+            		for (int i = 0; i < siblings.length; i++) {
+            			if (siblings[i] == delta) continue; 
+            			if (siblings[i].getElement().equals(request.getElement()) &&  
+            				 hasDelta((ModelDelta)siblings[i], delta) )
+            			{
+            				copy = (ModelDelta)siblings[i];
+            				break;
+            			}
+            		}
+            		if (copy != null) {
+        				copy.setFlags(copy.getFlags() | (delta.getFlags() & ~IModelDelta.FORCE));
+    	                restorePendingStateNode(copy, request.knowsHasChildren(), request.knowChildCount(), request.checkChildrenRealized());		            		
+            		}
+            		else {
+            			copyIntoDelta(delta, parent);
+    	                delta.setElement(request.getElement());
+    	                delta.setFlags(delta.getFlags() & ~IModelDelta.FORCE);
+    	                restorePendingStateNode(delta, request.knowsHasChildren(), request.knowChildCount(), request.checkChildrenRealized());		            		
+            		}
+            	} else {
+	                delta.setElement(request.getElement());
+	                restorePendingStateNode(delta, request.knowsHasChildren(), request.knowChildCount(), request.checkChildrenRealized());
+            	}
             } else if (request.getModelIndex() != -1) {
                 // Comparison failed.
                 // Check if the delta has a reveal flag, and if its index 
@@ -1510,7 +1610,17 @@ class ViewerStateTracker {
         checkIfRestoreComplete();
     }
 
-
+    boolean hasDelta(ModelDelta delta, ModelDelta subDelta) {
+    	IModelDelta[] subChildren = subDelta.getChildDeltas();
+    	for (int i = 0; i < subChildren.length; i++) {
+    		ModelDelta child = delta.getChildDelta(subChildren[i].getElement());
+    		if (child == null || !hasDelta(child, (ModelDelta)subChildren[i])) {
+    			return false;
+    		}
+    	}
+    	return true;
+    }
+    
     void addStateUpdateListener(IStateUpdateListener listener) {
         fStateUpdateListeners.add(listener);
     }

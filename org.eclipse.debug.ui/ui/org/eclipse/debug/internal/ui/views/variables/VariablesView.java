@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2000, 2012 IBM Corporation and others.
+ *  Copyright (c) 2000, 2013 IBM Corporation and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -65,10 +65,10 @@ import org.eclipse.debug.internal.ui.views.IDebugExceptionHandler;
 import org.eclipse.debug.internal.ui.views.variables.details.AvailableDetailPanesAction;
 import org.eclipse.debug.internal.ui.views.variables.details.DetailPaneProxy;
 import org.eclipse.debug.internal.ui.views.variables.details.IDetailPaneContainer2;
-import org.eclipse.debug.ui.AbstractDebugView;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.contexts.AbstractPinnableDebugView;
 import org.eclipse.debug.ui.contexts.DebugContextEvent;
 import org.eclipse.debug.ui.contexts.IDebugContextListener;
 import org.eclipse.debug.ui.contexts.IDebugContextService;
@@ -137,7 +137,7 @@ import org.eclipse.ui.texteditor.IUpdate;
 /**
  * This view shows variables and their values for a particular stack frame
  */
-public class VariablesView extends AbstractDebugView implements IDebugContextListener,
+public class VariablesView extends AbstractPinnableDebugView implements IDebugContextListener,
 	IPropertyChangeListener, IDebugExceptionHandler,
 	IPerspectiveListener, IModelChangedListener,
 		IViewerUpdateListener, IDetailPaneContainer2, ISaveablePart2 {
@@ -316,8 +316,10 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	private ToggleDetailPaneAction[] fToggleDetailPaneActions;
 	private ConfigureColumnsAction fConfigureColumnsAction;
     
-    protected String PREF_STATE_MEMENTO = "pref_state_memento."; //$NON-NLS-1$
-
+	protected String PREF_STATE_MEMENTO_TEMPLATE = "pref_state_memento."; //$NON-NLS-1$
+	
+    protected String PREF_STATE_MEMENTO;
+    
 	public static final String LOGICAL_STRUCTURE_TYPE_PREFIX = "VAR_LS_"; //$NON-NLS-1$
 	
 	/**
@@ -528,6 +530,8 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 		
         initDragAndDrop(variablesViewer);
 
+        initPinnedContextViewerState(getMemento());
+        
 		return variablesViewer;
 	}
 
@@ -547,7 +551,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	 */
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
-		PREF_STATE_MEMENTO = PREF_STATE_MEMENTO + site.getId();
+		PREF_STATE_MEMENTO = PREF_STATE_MEMENTO_TEMPLATE + getCombinedViewId(site.getId(), site.getSecondaryId());
         IPreferenceStore store = DebugUIPlugin.getDefault().getPreferenceStore();
         String string = store.getString(PREF_STATE_MEMENTO);
         if(string.length() > 0) {
@@ -564,8 +568,8 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
         		} catch (IOException e){}
         	}
         }
+        
         IMemento mem = getMemento();
-        // check the weights to makes sure they are valid -- bug 154025
         setLastSashWeights(DEFAULT_SASH_WEIGHTS);
 		if (mem != null) {
 			int[] weights = getWeights(mem);
@@ -573,9 +577,22 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 				setLastSashWeights(weights);
 			}
 		}
+
 		site.getWorkbenchWindow().addPerspectiveListener(this);
     }
 	
+	public void copyViewSettings(String secondaryId) {
+		saveViewStateToPreference();
+		IPreferenceStore store = DebugUIPlugin.getDefault().getPreferenceStore();
+		String copyViewPreference = PREF_STATE_MEMENTO_TEMPLATE + getCombinedViewId(getSite().getId(), secondaryId);
+		String preferenceMemento = store.getString(PREF_STATE_MEMENTO);
+		store.putValue(copyViewPreference, preferenceMemento);
+	}
+	
+	protected String getCombinedViewId(String id, String secondaryId) {
+		return id + (secondaryId != null ? ":" + secondaryId : "");   //$NON-NLS-1$//$NON-NLS-2$
+	}
+
 	/**
 	 * Returns sash weights stored in the given memento or <code>null</code> if none.
 	 * 
@@ -602,30 +619,40 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
      */
     public void partDeactivated(IWorkbenchPart part) {
 		String id = part.getSite().getId();
-		if (id.equals(getSite().getId())) {
-			ByteArrayOutputStream bout = new ByteArrayOutputStream();
-			OutputStreamWriter writer = new OutputStreamWriter(bout);
-
-			try {
-				XMLMemento memento = XMLMemento.createWriteRoot("VariablesViewMemento"); //$NON-NLS-1$
-				saveViewerState(memento);
-				memento.save(writer);
-
-				IPreferenceStore store = DebugUIPlugin.getDefault().getPreferenceStore();
-				String xmlString = bout.toString();
-				store.putValue(PREF_STATE_MEMENTO, xmlString);
-			} catch (IOException e) {
-			} finally {
-				try {
-					writer.close();
-					bout.close();
-				} catch (IOException e) {
-				}
-			}
+		String secondaryId = part.getSite() instanceof IViewSite ? ((IViewSite)part.getSite()).getSecondaryId() : null;
+		String myId = getSite().getId();
+		String mySecondaryId = ((IViewSite)getSite()).getSecondaryId();
+		if ( id.equals(myId) && 
+		     ((secondaryId == null && mySecondaryId == null) || 
+		      (secondaryId != null && secondaryId.equals(mySecondaryId))) ) 
+		{
+			saveViewStateToPreference();
 		}
 		super.partDeactivated(part);
 	}
+    
+    private void saveViewStateToPreference() {
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		OutputStreamWriter writer = new OutputStreamWriter(bout);
 
+		try {
+			XMLMemento memento = XMLMemento.createWriteRoot("VariablesViewMemento"); //$NON-NLS-1$
+			saveViewerState(memento);
+			memento.save(writer);
+
+			IPreferenceStore store = DebugUIPlugin.getDefault().getPreferenceStore();
+			String xmlString = bout.toString();
+			store.putValue(PREF_STATE_MEMENTO, xmlString);
+		} catch (IOException e) {
+		} finally {
+			try {
+				writer.close();
+				bout.close();
+			} catch (IOException e) {
+			}
+		}    	
+    }
+    
 	/**
 	 * Saves the current state of the viewer
 	 * @param memento the memento to write the viewer state into
@@ -637,6 +664,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 			memento.putInteger(SASH_DETAILS_PART, weights[1]);
 		}
 		getVariablesViewer().saveState(memento);
+		savePinnedContextViewerState(memento);
 	}
 
 	/**
@@ -923,6 +951,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	 * @see org.eclipse.debug.ui.AbstractDebugView#createActions()
 	 */
 	protected void createActions() {
+	    super.createActions();
 		IAction action = new ShowTypesAction(this);
 		setAction("ShowTypeNames",action); //$NON-NLS-1$
 				
@@ -1056,6 +1085,7 @@ public class VariablesView extends AbstractDebugView implements IDebugContextLis
 	 * @param tbm The toolbar that will be configured
 	 */
 	protected void configureToolBar(IToolBarManager tbm) {
+	    super.configureToolBar(tbm);
 		tbm.add(new Separator(this.getClass().getName()));
 		tbm.add(new Separator(IDebugUIConstants.RENDER_GROUP));
 		tbm.add(getAction("ShowTypeNames")); //$NON-NLS-1$

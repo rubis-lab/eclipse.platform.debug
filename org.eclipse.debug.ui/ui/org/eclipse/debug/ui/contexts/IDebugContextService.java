@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,6 +68,14 @@ public interface IDebugContextService {
 	public ISelection getActiveContext();
 	
 	/**
+     * Returns the active provider or <code>null</code>
+     * 
+     * @return active provider or <code>null</code>
+     * @since 3.9
+	 */
+	public IDebugContextProvider getActiveProvider();
+	
+	/**
 	 * Returns the active context in the specified part of this service's window
 	 * or <code>null</code> if none.
 	 * 
@@ -76,6 +84,15 @@ public interface IDebugContextService {
 	 */
 	public ISelection getActiveContext(String partId);
 	
+	/**
+     * Returns the active provider for the given part, or <code>null</code>
+     * 
+     * @since 3.9
+	 * @param partId part identifier
+     * @return active provider or <code>null</code>
+     */
+    public IDebugContextProvider getActiveProvider(String partId) ;
+
 	/**
 	 * Registers the given debug context listener for post context change notification
 	 * in this service's window. Post listeners are notified of context changes after all
@@ -137,6 +154,16 @@ public interface IDebugContextService {
 	 */
 	ISelection getActiveContext(String partId, String partSecondaryId);
 	
+   /**
+     * Returns the active provider for the given part, or <code>null</code>
+     * 
+     * @since 3.9
+	 * @param partId part identifier
+	 * @param partSecondaryId part secondary identifier
+     * @return active provider or <code>null</code>
+     */
+    public IDebugContextProvider getActiveProvider(String partId, String partSecondaryId) ;
+
 	/**
 	 * Registers for the given debug context listener for context notification
 	 * from the specified part in this service's window.

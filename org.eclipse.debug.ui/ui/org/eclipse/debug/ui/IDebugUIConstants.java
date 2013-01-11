@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2000, 2012 IBM Corporation and others.
+ *  Copyright (c) 2000, 2013 IBM Corporation and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -1115,6 +1115,14 @@ public interface IDebugUIConstants {
      * @since 3.2
      */
     public static final String EXTENSION_POINT_UPDATE_POLICIES = "updatePolicies"; //$NON-NLS-1$    
+
+    /**
+     * Pinned context viewer factories point identifier (value
+     * <code>"pinnedContextViewerFactories"</code>
+     * 
+     * @since 3.9
+     */
+    public static final String EXTENSION_POINT_PINNED_CONTEXT_VIEWER_FACTORIES = "pinnedContextViewerFactories"; //$NON-NLS-1$    
 
 	/**
 	 * Padded string preference for renderings.  Padded string is the string to be used in place of 

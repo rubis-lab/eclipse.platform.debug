@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2005, 2012 IBM Corporation and others.
+ *  Copyright (c) 2005, 2013 IBM Corporation and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -305,13 +305,20 @@ public class DebugWindowContextService implements IDebugContextService, IPartLis
 	 * @see org.eclipse.debug.ui.contexts.IDebugContextService#getActiveContext(java.lang.String)
 	 */
 	public ISelection getActiveContext(String partId) {
-		IDebugContextProvider provider = (IDebugContextProvider) fProvidersByPartId.get(partId);
+		IDebugContextProvider provider = getActiveProvider(partId);
 		if (provider != null) {
 			return provider.getActiveContext();
 		}
 		return getActiveContext();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.contexts.IDebugContextService#getActiveProvider(java.lang.String)
+	 */
+	public IDebugContextProvider getActiveProvider(String partId) {
+        return (IDebugContextProvider) fProvidersByPartId.get(partId);	    
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.ui.contexts.IDebugContextService#getActiveContext()
 	 */
@@ -323,12 +330,10 @@ public class DebugWindowContextService implements IDebugContextService, IPartLis
 		return null;
 	}
 	
-	/**
-	 * Returns the active provider or <code>null</code>
-	 * 
-	 * @return active provider or <code>null</code>
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.contexts.IDebugContextService#getActiveProvider()
 	 */
-	private IDebugContextProvider getActiveProvider() {
+	public IDebugContextProvider getActiveProvider() {
 		if (!fProviders.isEmpty()) {
 			return (IDebugContextProvider)fProviders.get(0);
 		}
@@ -424,35 +429,39 @@ public class DebugWindowContextService implements IDebugContextService, IPartLis
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.contexts.IDebugContextService2#addDebugContextListener(org.eclipse.debug.ui.contexts.IDebugContextListener, java.lang.String, java.lang.String)
+	 * @see org.eclipse.debug.ui.contexts.IDebugContextService#addDebugContextListener(org.eclipse.debug.ui.contexts.IDebugContextListener, java.lang.String, java.lang.String)
 	 */
 	public void addDebugContextListener(IDebugContextListener listener, String partId, String partSecondaryId) {
 		addDebugContextListener(listener, getCombinedPartId(partId, partSecondaryId));
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.contexts.IDebugContextService2#removeDebugContextListener(org.eclipse.debug.ui.contexts.IDebugContextListener, java.lang.String, java.lang.String)
+	 * @see org.eclipse.debug.ui.contexts.IDebugContextService#removeDebugContextListener(org.eclipse.debug.ui.contexts.IDebugContextListener, java.lang.String, java.lang.String)
 	 */
 	public void removeDebugContextListener(IDebugContextListener listener, String partId, String partSecondaryId) {
 		removeDebugContextListener(listener, getCombinedPartId(partId, partSecondaryId));
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.contexts.IDebugContextService2#addPostDebugContextListener(org.eclipse.debug.ui.contexts.IDebugContextListener, java.lang.String, java.lang.String)
+	 * @see org.eclipse.debug.ui.contexts.IDebugContextService#addPostDebugContextListener(org.eclipse.debug.ui.contexts.IDebugContextListener, java.lang.String, java.lang.String)
 	 */
 	public void addPostDebugContextListener(IDebugContextListener listener, String partId, String partSecondaryId) {
 		addPostDebugContextListener(listener, getCombinedPartId(partId, partSecondaryId));
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.contexts.IDebugContextService2#removePostDebugContextListener(org.eclipse.debug.ui.contexts.IDebugContextListener, java.lang.String, java.lang.String)
+	 * @see org.eclipse.debug.ui.contexts.IDebugContextService#removePostDebugContextListener(org.eclipse.debug.ui.contexts.IDebugContextListener, java.lang.String, java.lang.String)
 	 */
 	public void removePostDebugContextListener(IDebugContextListener listener, String partId, String partSecondaryId) {
 		removePostDebugContextListener(listener, getCombinedPartId(partId, partSecondaryId));
 	}
 
+	public IDebugContextProvider getActiveProvider(String partId, String partSecondaryId) {
+	    return getActiveProvider(getCombinedPartId(partId, partSecondaryId));
+	}
+	
 	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.contexts.IDebugContextService2#getActiveContext(java.lang.String, java.lang.String)
+	 * @see org.eclipse.debug.ui.contexts.IDebugContextService#getActiveContext(java.lang.String, java.lang.String)
 	 */
 	public ISelection getActiveContext(String partId, String partSecondaryId) {		
 		return getActiveContext(getCombinedPartId(partId, partSecondaryId));

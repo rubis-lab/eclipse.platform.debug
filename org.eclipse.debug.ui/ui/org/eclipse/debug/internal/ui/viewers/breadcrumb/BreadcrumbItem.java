@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,8 @@ package org.eclipse.debug.internal.ui.viewers.breadcrumb;
 
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -223,4 +225,57 @@ class BreadcrumbItem extends Item {
 		super.setImage(image);
 		fDetailsBlock.setImage(image);
 	}
+	
+	/**
+	 * Set the font of the  item to the given font.
+	 *
+	 * @param font for the item
+	 * @since 3.9
+	 */
+	public void setFont(Font font) {
+		fDetailsBlock.setFont(font);
+	}
+
+	public Font getFont() {
+		return fDetailsBlock.getFont();
+	}
+	
+	/**
+	 * Get the foreground of the given item.
+	 * @return Foreground color
+	 * @since 3.9
+	 */
+	public Color getForeground() {
+		return fDetailsBlock.getForeground();
+	}
+
+	/**
+	 * Set the background for the given item to the given color.
+	 *
+	 * @param background color for the item
+	 * @since 3.9
+	 */
+	public void setBackground(Color color) {
+		fDetailsBlock.setBackground(color);
+	}
+
+	/**
+	 * Set the foreground for the given item to the given color.
+	 *
+	 * @param foreground color for the item
+	 * @since 3.9
+	 */
+	public void setForeground(Color color) {
+		fDetailsBlock.setForeground(color);
+	}
+	
+	/**
+	 * Get the background of the given item.
+	 * @return Background color
+	 * @since 3.9
+	 */
+	public Color getBackground() {
+		return fDetailsBlock.getBackground();
+	}
+
 }

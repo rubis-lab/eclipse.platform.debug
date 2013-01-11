@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <!--
-     Copyright (c) 2005, 2012 IBM Corporation and others.
+     Copyright (c) 2005, 2013 IBM Corporation and others.
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
      which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@
    <extension-point id="launchConfigurationTabs" name="%LaunchConfigurationTabsExtension.name" schema="schema/launchConfigurationTabs.exsd"/>
    <extension-point id="detailPaneFactories" name="%DetailPaneFactoriesExtension.name" schema="schema/detailPaneFactories.exsd"/>
    <extension-point id="toggleBreakpointsTargetFactories" name="%ToggleBreakpointsTargetFactoriesExtension.name" schema="schema/toggleBreakpointsTargetFactories.exsd"/>
+   <extension-point id="pinnedContextViewerFactories" name="%PinnedContextViewerFactoresExtensionName" schema="schema/pinnedContextViewerFactories.exsd"/>
 
 <!-- Extensions -->
    <extension
@@ -874,12 +875,11 @@
          <action
                class="org.eclipse.debug.internal.ui.views.memory.PinMemoryBlockAction"
                helpContextId="PinMemoryBlockAction_context"
-               icon="$nl$/icons/full/elcl16/pin.gif"
                id="org.eclipse.debug.ui.PinMemoryBlockAction"
                label="%PinMemoryBlockAction.label"
                state="false"
                style="toggle"
-               toolbarPath="additions"
+               menubarPath="additions"
                tooltip="%PinMemoryBlockAction.tooltip"/>
          <action
                class="org.eclipse.debug.internal.ui.views.memory.NewMemoryViewAction"
@@ -2507,6 +2507,9 @@ M4 = Platform-specific fourth key
             <adapter
                   type="org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxyFactory">
             </adapter>
+            <adapter
+                  type="org.eclipse.debug.internal.ui.viewers.model.provisional.IElementMementoProvider">
+            </adapter>
          </factory>
          <factory
                adaptableType="org.eclipse.debug.core.ILaunch"
@@ -2523,6 +2526,9 @@ M4 = Platform-specific fourth key
             <adapter
                   type="org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerInputProvider">
             </adapter>
+            <adapter
+                  type="org.eclipse.debug.internal.ui.viewers.model.provisional.IElementMementoProvider">
+            </adapter>
          </factory>
          <factory
                adaptableType="org.eclipse.debug.core.model.IDebugTarget"
@@ -2532,6 +2538,9 @@ M4 = Platform-specific fourth key
             </adapter>
             <adapter
                   type="org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxyFactory">
+            </adapter>
+            <adapter
+                  type="org.eclipse.debug.internal.ui.viewers.model.provisional.IElementMementoProvider">
             </adapter>
          </factory>
          <factory
@@ -2549,12 +2558,18 @@ M4 = Platform-specific fourth key
             <adapter
                   type="org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerInputProvider">
             </adapter>
+            <adapter
+                  type="org.eclipse.debug.internal.ui.viewers.model.provisional.IElementMementoProvider">
+            </adapter>
          </factory>
          <factory
                adaptableType="org.eclipse.debug.core.model.IThread"
                class="org.eclipse.debug.internal.ui.views.launch.DebugElementAdapterFactory">
             <adapter
                   type="org.eclipse.debug.internal.ui.viewers.model.provisional.IElementContentProvider">
+            </adapter>
+            <adapter
+                  type="org.eclipse.debug.internal.ui.viewers.model.provisional.IElementMementoProvider">
             </adapter>
          </factory>
          <factory
@@ -3145,6 +3160,13 @@ M4 = Platform-specific fourth key
                name="org.eclipse.debug.core">
          </bundle>
       </component>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.pinnedContextViewerFactories">
+         <pinnedContextViewerFactory 
+         	id="org.eclipse.debug.ui.DebugView"
+         	class="org.eclipse.debug.internal.ui.views.launch.LaunchViewPinControlFactory"/>
+         	
    </extension>
 
 </plugin>

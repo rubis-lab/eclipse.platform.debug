@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -178,6 +179,41 @@ class BreadcrumbItemDetails {
 		if (!text.equals(fElementText.getText())) {
 			fElementText.setText(text);
 		}
+	}
+
+	public void setFont(Font font) {
+		if (font == null) {
+			font = fTextComposite.getFont();
+		}
+		if ( !font.equals(fElementText.getFont()) ) {
+			fElementText.setFont(font);
+		}		
+	}
+	
+	public Font getFont() {
+		return fElementText.getFont();
+	}
+	
+	public Color getBackground() {
+		return fElementText.getBackground();
+	}
+	
+	public void setBackground(Color color) {
+		if (color == null) {
+			color = fTextComposite.getBackground();
+		}
+		fElementText.setBackground(color);
+	}
+
+	public Color getForeground() {
+		return fElementText.getForeground();
+	}
+	
+	public void setForeground(Color color) {
+		if (color == null) {
+			color = fTextComposite.getForeground();
+		}
+		fElementText.setForeground(color);
 	}
 
 	/**

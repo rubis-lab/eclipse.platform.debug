@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -99,6 +99,10 @@ public abstract class AbstractBreadcrumb {
 		return fBreadcrumbViewer;
 	}
 
+	protected BreadcrumbViewer getViewer() {
+		return fBreadcrumbViewer;
+	}
+	
     /**
      * Set the input of the breadcrumb to the given element
      *
@@ -209,6 +213,10 @@ public abstract class AbstractBreadcrumb {
 		return fComposite;
 	}
 
+	public boolean isDisposed() {
+		return fComposite != null && fComposite.isDisposed();
+	}
+	
     /**
      * Dispose all resources hold by this breadcrumb.
      */
@@ -217,6 +225,7 @@ public abstract class AbstractBreadcrumb {
 			Display.getDefault().removeFilter(SWT.FocusIn, fDisplayFocusListener);
 		}
 		deinstallDisplayListeners();
+		fComposite.dispose();
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2007, 2011 IBM Corporation and others.
+ *  Copyright (c) 2007, 2013 IBM Corporation and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -16,6 +16,8 @@ import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.viewers.model.ChildrenUpdate;
 import org.eclipse.debug.internal.ui.viewers.model.ILabelUpdateListener;
 import org.eclipse.debug.internal.ui.viewers.model.IInternalTreeModelViewer;
+import org.eclipse.debug.internal.ui.viewers.model.ITreeModelContentProvider;
+import org.eclipse.debug.internal.ui.viewers.model.ITreeModelLabelProvider;
 import org.eclipse.debug.internal.ui.viewers.model.TreeModelContentProvider;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedListener;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
@@ -169,7 +171,24 @@ public class ChildrenUpdateTests extends TestCase {
                 }
                 public String[] getVisibleColumns() {
                     return null;
-                }                
+                }
+				public void collapseToLevel(Object elementOrTreePath, int level) {
+				}
+				public void dispose() {
+				}
+				public boolean isDisposed() {
+					return false;
+				}
+				public ITreeModelContentProvider getTreeModelContentProvider() {
+					return null;
+				}
+				public ITreeModelLabelProvider getTreeModelLabelProvider() {
+					return null;
+				}
+				public void preserveViewerState(int flags, boolean append) {
+				}
+				public void restoreViewerState() {
+				}                
 			};
 		}
 	}

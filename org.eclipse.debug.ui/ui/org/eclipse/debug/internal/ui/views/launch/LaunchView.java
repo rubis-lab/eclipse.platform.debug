@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -29,10 +28,6 @@ import org.eclipse.core.commands.IHandler2;
 import org.eclipse.core.commands.contexts.ContextManagerEvent;
 import org.eclipse.core.commands.contexts.IContextManagerListener;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.commands.IRestartHandler;
@@ -64,7 +59,6 @@ import org.eclipse.debug.internal.ui.viewers.model.InternalTreeModelViewer;
 import org.eclipse.debug.internal.ui.viewers.model.VirtualFindAction;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedListener;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta;
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDeltaVisitor;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IModelProxy;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdate;
@@ -81,6 +75,7 @@ import org.eclipse.debug.ui.contexts.AbstractDebugContextProvider;
 import org.eclipse.debug.ui.contexts.DebugContextEvent;
 import org.eclipse.debug.ui.contexts.IDebugContextListener;
 import org.eclipse.debug.ui.contexts.IDebugContextProvider;
+import org.eclipse.debug.ui.contexts.IPinnableDebugContextProvider;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
@@ -95,7 +90,6 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreePath;
@@ -132,7 +126,6 @@ import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
-import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.texteditor.IUpdate;
 
 public class LaunchView extends AbstractDebugView 
@@ -289,7 +282,7 @@ public class LaunchView extends AbstractDebugView
 	    }
 	    
 	    IDebugContextProvider getContextProvider() {
-	        return fCrumb.getContextProvider();
+	        return fCrumb.getBreadcrumbContextProvider();
 	    }
 
 	    int getHeight() {
@@ -302,130 +295,6 @@ public class LaunchView extends AbstractDebugView
 	}
 
 	private BreadcrumbPage fBreadcrumbPage;
-	
-	class TreeViewerContextProvider extends AbstractDebugContextProvider implements IModelChangedListener {
-		
-		private ISelection fContext = null;
-		private TreeModelViewer fViewer = null;
-		private Visitor fVisitor = new Visitor();
-		
-		class Visitor implements IModelDeltaVisitor {
-			public boolean visit(IModelDelta delta, int depth) {
-				if ((delta.getFlags() & (IModelDelta.STATE | IModelDelta.CONTENT)) > 0) {
-					// state and/or content change
-					if ((delta.getFlags() & IModelDelta.SELECT) == 0) {
-						// no select flag
-						if ((delta.getFlags() & IModelDelta.CONTENT) > 0) {
-							// content has changed without select >> possible re-activation
-							possibleChange(getViewerTreePath(delta), DebugContextEvent.ACTIVATED);
-						} else if ((delta.getFlags() & IModelDelta.STATE) > 0) {
-							// state has changed without select >> possible state change of active context
-							possibleChange(getViewerTreePath(delta), DebugContextEvent.STATE);
-						}
-					}
-				}
-				return true;
-			}	
-		}
-		
-		/**
-		 * Returns a tree path for the node, *not* including the root element.
-		 * 
-		 * @param node
-		 *            model delta
-		 * @return corresponding tree path
-		 */
-		private TreePath getViewerTreePath(IModelDelta node) {
-			ArrayList list = new ArrayList();
-			IModelDelta parentDelta = node.getParentDelta();
-			while (parentDelta != null) {
-				list.add(0, node.getElement());
-				node = parentDelta;
-				parentDelta = node.getParentDelta();
-			}
-			return new TreePath(list.toArray());
-		}
-		
-		public TreeViewerContextProvider(TreeModelViewer viewer) {
-			super(LaunchView.this);
-			fViewer = viewer;
-			fViewer.addModelChangedListener(this);
-		}
-		
-		protected void dispose() { 
-			fContext = null;
-			fViewer.removeModelChangedListener(this);
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.debug.ui.contexts.IDebugContextProvider#getActiveContext()
-		 */
-		public synchronized ISelection getActiveContext() {
-			return fContext;
-		}	
-		
-		protected void activate(ISelection selection) {
-			synchronized (this) {
-				fContext = selection;
-			}
-			fire(new DebugContextEvent(this, selection, DebugContextEvent.ACTIVATED));
-		}
-		
-        protected void possibleChange(TreePath element, int type) {
-            DebugContextEvent event = null;
-            synchronized (this) {
-                if (fContext instanceof ITreeSelection) {
-                    ITreeSelection ss = (ITreeSelection) fContext;
-                    TreePath[] ssPaths = ss.getPaths(); 
-                    for (int i = 0; i < ssPaths.length; i++) {
-                        if (ssPaths[i].startsWith(element, null)) {
-                            if (ssPaths[i].getSegmentCount() == element.getSegmentCount()) {
-                                event = new DebugContextEvent(this, fContext, type);
-                            } else {
-                                // if parent of the currently selected element 
-                                // changes, issue event to update STATE only
-                                event = new DebugContextEvent(this, fContext, DebugContextEvent.STATE);
-							}
-						}
-					}
-				} 
-			}
-			if (event == null) {
-				return;
-			}
-			if (getControl().getDisplay().getThread() == Thread.currentThread()) {
-				fire(event);
-			} else {
-				final DebugContextEvent finalEvent = event;
-				Job job = new UIJob("context change") { //$NON-NLS-1$
-					public IStatus runInUIThread(IProgressMonitor monitor) {
-						// verify selection is still the same context since job was scheduled
-						synchronized (TreeViewerContextProvider.this) {
-							if (fContext instanceof IStructuredSelection) {
-								IStructuredSelection ss = (IStructuredSelection) fContext;
-								Object changed = ((IStructuredSelection)finalEvent.getContext()).getFirstElement();
-								if (!(ss.size() == 1 && ss.getFirstElement().equals(changed))) {
-									return Status.OK_STATUS;
-								}
-							}
-						}
-						fire(finalEvent);
-						return Status.OK_STATUS;
-					}
-				};
-				job.setSystem(true);
-				job.schedule();
-			}
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.debug.internal.ui.viewers.model.provisional.IModelChangedListener#modelChanged(org.eclipse.debug.internal.ui.viewers.model.provisional.IModelDelta)
-		 */
-		public void modelChanged(IModelDelta delta, IModelProxy proxy) {
-			delta.accept(fVisitor);
-		}
-		
-	}
 	
 	/**
 	 * Context provider
@@ -469,7 +338,7 @@ public class LaunchView extends AbstractDebugView
 	    }
 	};
 
-	private class ContextProviderProxy extends AbstractDebugContextProvider implements IDebugContextListener {
+	private class ContextProviderProxy extends AbstractDebugContextProvider implements IDebugContextListener, IPinnableDebugContextProvider {
 	    private IDebugContextProvider fActiveProvider;
 	    private IDebugContextProvider[] fProviders;
 	    
@@ -513,6 +382,10 @@ public class LaunchView extends AbstractDebugView
             }
             fProviders = null;
             fActiveProvider = null;
+        }
+        
+        public String getFactoryId() {
+        	return IDebugUIConstants.ID_DEBUG_VIEW;
         }
 	}
 	
@@ -688,6 +561,15 @@ public class LaunchView extends AbstractDebugView
 	    return null;
 	}
 	
+	protected void doDestroyPage(IWorkbenchPart part, PageRec pageRecord) {
+	    if (part instanceof BreadcrumbWorkbenchPart) {
+	        fBreadcrumbPage.dispose();
+	        fBreadcrumbPage = null;
+	    } else {
+	    	super.doDestroyPage(part, pageRecord);
+	    }
+	    
+	}
     /**
      * Override the default implementation to create the breadcrumb page.
      * 
@@ -868,7 +750,7 @@ public class LaunchView extends AbstractDebugView
         
 		viewer.setInput(DebugPlugin.getDefault().getLaunchManager());
 		//setEventHandler(new LaunchViewEventHandler(this));
-		fTreeViewerDebugContextProvider = new TreeViewerContextProvider(viewer);
+		fTreeViewerDebugContextProvider = new TreeViewerContextProvider(this, viewer);
 		
 		return viewer;
 	}

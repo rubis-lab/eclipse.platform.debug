@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,7 @@ import org.eclipse.debug.internal.ui.model.elements.BreakpointManagerInputMement
 import org.eclipse.debug.internal.ui.model.elements.BreakpointMementoProvider;
 import org.eclipse.debug.internal.ui.model.elements.DebugElementLabelProvider;
 import org.eclipse.debug.internal.ui.model.elements.DebugTargetContentProvider;
+import org.eclipse.debug.internal.ui.model.elements.DebugTargetMementoProvider;
 import org.eclipse.debug.internal.ui.model.elements.ExpressionContentProvider;
 import org.eclipse.debug.internal.ui.model.elements.ExpressionLabelProvider;
 import org.eclipse.debug.internal.ui.model.elements.ExpressionManagerContentProvider;
@@ -56,17 +57,21 @@ import org.eclipse.debug.internal.ui.model.elements.ExpressionManagerMementoProv
 import org.eclipse.debug.internal.ui.model.elements.ExpressionMementoProvider;
 import org.eclipse.debug.internal.ui.model.elements.LaunchContentProvider;
 import org.eclipse.debug.internal.ui.model.elements.LaunchManagerContentProvider;
+import org.eclipse.debug.internal.ui.model.elements.LaunchManagerMementoProvider;
+import org.eclipse.debug.internal.ui.model.elements.LaunchMementoProvider;
 import org.eclipse.debug.internal.ui.model.elements.MemoryBlockContentProvider;
 import org.eclipse.debug.internal.ui.model.elements.MemoryBlockLabelProvider;
 import org.eclipse.debug.internal.ui.model.elements.MemoryRetrievalContentProvider;
 import org.eclipse.debug.internal.ui.model.elements.MemoryViewElementMementoProvider;
 import org.eclipse.debug.internal.ui.model.elements.ProcessContentProvider;
+import org.eclipse.debug.internal.ui.model.elements.ProcessMementoProvider;
 import org.eclipse.debug.internal.ui.model.elements.RegisterGroupContentProvider;
 import org.eclipse.debug.internal.ui.model.elements.RegisterGroupLabelProvider;
 import org.eclipse.debug.internal.ui.model.elements.RegisterGroupMementoProvider;
 import org.eclipse.debug.internal.ui.model.elements.StackFrameContentProvider;
 import org.eclipse.debug.internal.ui.model.elements.StackFrameMementoProvider;
 import org.eclipse.debug.internal.ui.model.elements.ThreadContentProvider;
+import org.eclipse.debug.internal.ui.model.elements.ThreadMementoProvider;
 import org.eclipse.debug.internal.ui.model.elements.VariableContentProvider;
 import org.eclipse.debug.internal.ui.model.elements.VariableEditor;
 import org.eclipse.debug.internal.ui.model.elements.VariableLabelProvider;
@@ -128,6 +133,11 @@ public class DebugElementAdapterFactory implements IAdapterFactory {
     private static IElementContentProvider fgCPBreakpointManager = new BreakpointManagerContentProvider();
     private static IElementContentProvider fgCPBreakpoint = new BreakpointContentProvider();
     
+    private static IElementMementoProvider fgMPLaunchManger = new LaunchManagerMementoProvider();
+    private static IElementMementoProvider fgMPLaunch = new LaunchMementoProvider();
+    private static IElementMementoProvider fgMPProcess = new ProcessMementoProvider();
+    private static IElementMementoProvider fgMPDebugTarget = new DebugTargetMementoProvider();
+    private static IElementMementoProvider fgMPThread = new ThreadMementoProvider();    
     private static IElementMementoProvider fgMPFrame = new StackFrameMementoProvider();
     private static IElementMementoProvider fgMPVariable = new VariableMementoProvider();
     private static IElementMementoProvider fgMPExpression = new ExpressionMementoProvider();
@@ -285,6 +295,12 @@ public class DebugElementAdapterFactory implements IAdapterFactory {
         	if (adaptableObject instanceof IExpressionManager) {
         		return fgMPExpressionManager;
         	}
+        	if (adaptableObject instanceof IDebugTarget) {
+        		return fgMPDebugTarget;
+        	}
+        	if (adaptableObject instanceof IThread) {
+        		return fgMPThread;
+        	}
         	if (adaptableObject instanceof IMemoryBlockRetrieval) {
         		return fgMPMemory;
         	}
@@ -296,6 +312,15 @@ public class DebugElementAdapterFactory implements IAdapterFactory {
         	}
         	if (adaptableObject instanceof DefaultBreakpointsViewInput) {
         		return fgMPBreakpointManagerInput;
+        	}
+        	if (adaptableObject instanceof ILaunchManager) {
+        		return fgMPLaunchManger;
+        	}
+        	if (adaptableObject instanceof ILaunch) {
+        		return fgMPLaunch;
+        	}
+        	if (adaptableObject instanceof IProcess) {
+        		return fgMPProcess;
         	}
         }
         

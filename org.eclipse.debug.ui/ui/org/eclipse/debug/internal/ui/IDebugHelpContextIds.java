@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,6 +78,8 @@ public interface IDebugHelpContextIds {
     public static final String DEBUG_TOOLBAR_VIEW_ACTION = PREFIX + "debug_toolbar_view_action_context"; //$NON-NLS-1$
     public static final String DEBUG_TOOLBAR_WINDOW_ACTION = PREFIX + "debug_toolbar_window_action_context"; //$NON-NLS-1$
     public static final String DEBUG_TOOLBAR_BOTH_ACTION = PREFIX + "debug_toolbar_both_action_context"; //$NON-NLS-1$
+    public static final String PIN_VIEW_TO_CONTEXT_ACTION = PREFIX + "pin_view_to_context_action_context"; //$NON-NLS-1$
+    public static final String NEW_VIEW_ACTION = PREFIX + "new_view_action_context"; //$NON-NLS-1$
 
 	// Views
 	public static final String DEBUG_VIEW = PREFIX + "debug_view_context"; //$NON-NLS-1$

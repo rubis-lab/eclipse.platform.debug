@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2005, 2010 IBM Corporation and others.
+ *  Copyright (c) 2005, 2013 IBM Corporation and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -16,12 +16,18 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.views.ViewContextManager;
+import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.contexts.IDebugContextListener;
 import org.eclipse.debug.ui.contexts.IDebugContextManager;
 import org.eclipse.debug.ui.contexts.IDebugContextProvider;
 import org.eclipse.debug.ui.contexts.IDebugContextService;
+import org.eclipse.debug.ui.contexts.IPinnedContextViewerFactory;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -36,7 +42,8 @@ public class DebugContextManager implements IDebugContextManager {
 	private static DebugContextManager fgDefault;
 	private Map fServices = new HashMap();
 	private ListenerList fGlobalListeners = new ListenerList();
-	
+    private Map fPinnedContextViewerFactories = new HashMap();
+
 	/**
 	 * A debug context service that does nothing (used for windows that have been closed)
 	 */
@@ -56,6 +63,15 @@ public class DebugContextManager implements IDebugContextManager {
 		}
 		public ISelection getActiveContext() {
 			return null;
+		}
+		public IDebugContextProvider getActiveProvider() {
+		    return null;
+		}
+		public IDebugContextProvider getActiveProvider(String partId) {
+		    return null;
+		}
+		public IDebugContextProvider getActiveProvider(String partId, String partSecondaryId) {
+		    return null;
 		}
 		public void addPostDebugContextListener(IDebugContextListener listener, String partId) {
 		}
@@ -117,6 +133,7 @@ public class DebugContextManager implements IDebugContextManager {
 	}
 	
 	private DebugContextManager() {
+		loadPinnedContextViewerFactories();
 		PlatformUI.getWorkbench().addWindowListener(new WindowListener());
 	}
 	
@@ -196,5 +213,18 @@ public class DebugContextManager implements IDebugContextManager {
 	public IDebugContextService getContextService(IWorkbenchWindow window) {
 		return createService(window);
 	}
-	
+
+    private void loadPinnedContextViewerFactories() {
+        IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(DebugUIPlugin.getUniqueIdentifier(), IDebugUIConstants.EXTENSION_POINT_PINNED_CONTEXT_VIEWER_FACTORIES);
+        IConfigurationElement[] configurationElements = extensionPoint.getConfigurationElements();
+        for (int i = 0; i < configurationElements.length; i++) {
+            IConfigurationElement element= configurationElements[i];
+            PinnedContextViewerFactory factory = new PinnedContextViewerFactory(element);
+            fPinnedContextViewerFactories.put(factory.getId(), factory);
+        }
+    }
+
+	public IPinnedContextViewerFactory getPinnedContextViewerFactory(String presentationId) {
+		return (IPinnedContextViewerFactory)fPinnedContextViewerFactories.get(presentationId); 
+	}
 }

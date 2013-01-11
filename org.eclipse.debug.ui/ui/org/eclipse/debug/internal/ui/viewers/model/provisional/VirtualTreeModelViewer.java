@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 Wind River Systems and others.
+ * Copyright (c) 2008, 2013 Wind River Systems and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,6 +61,23 @@ public class VirtualTreeModelViewer extends InternalVirtualTreeModelViewer {
      */
     public VirtualTreeModelViewer(Display display, int style, IPresentationContext context, IVirtualItemValidator validator) {
         super(display, style, context, validator);
+    }
+
+    /**
+     * Creates a virtual tree model viewer.
+     * @param display Display used by the viewer to call the data providers
+     * on the UI thread.
+     * @param style style flags.
+     * @param context Viewer's presentation context.
+     * @param validator Optional validator that is used to determine which items should be 
+     * @param modelDeltaMask Bit mask for IModelDelta flags to be ignored by the view.
+     * considered visible when SWT.VIRTUAL style is used.  If <code>null</code> then the 
+     * standard validator is used that updates only the selected items.
+     * 
+     * @since 3.9
+     */
+    public VirtualTreeModelViewer(Display display, int style, IPresentationContext context, IVirtualItemValidator validator, int modelDeltaMask) {
+        super(display, style, context, validator, modelDeltaMask);
     }
 
     /**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Wind River Systems and others.
+ * Copyright (c) 2011, 2013 Wind River Systems and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -140,6 +140,18 @@ public interface IInternalTreeModelViewer extends ITreeModelViewer {
      */
     public void expandToLevel(Object elementOrTreePath, int level);
 
+	/**
+	 * Collapses the subtree rooted at the given element or tree path to the
+	 * given level.
+	 *
+	 * @param elementOrTreePath
+	 *            the element or tree path
+	 * @param level
+	 *            non-negative level, or <code>ALL_LEVELS</code> to collapse
+	 *            all levels of the tree
+	 */
+    public void collapseToLevel(Object elementOrTreePath, int level);
+    
     /**
      * Removes the given element from the viewer. The selection is updated if
      * necessary.
@@ -316,4 +328,53 @@ public interface IInternalTreeModelViewer extends ITreeModelViewer {
      * @return the element grayed state
      */
     public boolean getElementGrayed(TreePath path);        
+
+    /**
+     * Disposes the viewer and its control.
+     * @since 3.9
+     */
+    public void dispose();
+    
+    /**
+     * @return Returns whether this viewer is disposed.
+     * @since 3.9
+     */
+    public boolean isDisposed();
+    
+    /**
+     * @return Returns the content provider for this viewer.
+     * @since 3.9
+     */
+    public ITreeModelContentProvider getTreeModelContentProvider();
+    
+    /**
+     * @return Returns the label provider for this viewer.
+     * @since 3.9
+     */
+    public ITreeModelLabelProvider getTreeModelLabelProvider();
+    
+    /**
+     * Causes the viewer to save the current state with the given flags into 
+     * its internal map of saved states.  The elements are saved using 
+     * mementos to make the state persistable.
+     * @param flags Flags to preserve in state.    The 
+     * supported flags are <code>IModelDelta.SELECT</code>, 
+     * <code>IModelDelta.EXPAND</code>, <code>IModelDelta.COLLAPSE</code>, 
+     * <code>IModelDelta.FORCE</code>, and <code>IModelDelta.REVEAL</code>.
+     * @return Returns whether the state was saved for the given path.  Will 
+     * return <code>false</code> if an element at the given path cannot 
+     * be found.
+     * @param append Flag whether the oustanding state being currently
+     * restored in viewer should be added to the saved state.
+     * @since 3.9
+     */
+    public void preserveViewerState(int flags, boolean append);
+    
+    /**
+     * Restores the saved viewer state for the current input.  Causes the view
+     * to lookup the saved viewer state for the current input and if found to 
+     * restore it to the viewer.  
+     * @since 3.9
+     */
+    public void restoreViewerState();
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2011 Wind River Systems and others.
+ * Copyright (c) 2009, 2013 Wind River Systems and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -387,6 +387,40 @@ public class SubTreeModelViewer extends TreeModelViewer {
         public void setElementChecked(TreePath path, boolean checked, boolean grayed) {
             SubTreeModelViewer.this.setElementChecked(createSubPath(path), checked, grayed);
         }
+
+		public void collapseToLevel(Object elementOrTreePath, int level) {
+            if (elementOrTreePath instanceof TreePath) {
+                TreePath path = (TreePath)elementOrTreePath;
+                if (path.startsWith(fRootPath, null)) {
+                    SubTreeModelViewer.this.collapseToLevel(createSubPath(path), level);
+                }
+            } else {
+                SubTreeModelViewer.this.collapseToLevel(elementOrTreePath, level);
+            }
+		}
+
+		public void dispose() {
+			SubTreeModelViewer.this.dispose();
+		}
+
+		public boolean isDisposed() {
+			return SubTreeModelViewer.this.isDisposed();
+		}
+
+		public ITreeModelContentProvider getTreeModelContentProvider() {
+			return SubTreeModelViewer.this.getTreeModelContentProvider();
+		}
+
+		public ITreeModelLabelProvider getTreeModelLabelProvider() {
+			return SubTreeModelViewer.this.getTreeModelLabelProvider();
+		}
+	    public void preserveViewerState(int flags, boolean append) {
+	    	SubTreeModelViewer.this.preserveViewerState(flags, append);
+	    }
+	    
+	    public void restoreViewerState() {
+	    	SubTreeModelViewer.this.restoreViewerState();
+	    }		
     }
 
     
@@ -573,6 +607,9 @@ public class SubTreeModelViewer extends TreeModelViewer {
     }
         
     private TreePath createFullPath(TreePath subPath) {
+        if (subPath == null) {
+            return null;
+        }
         if (fRootPath == null) {
             return TreePath.EMPTY;
         }

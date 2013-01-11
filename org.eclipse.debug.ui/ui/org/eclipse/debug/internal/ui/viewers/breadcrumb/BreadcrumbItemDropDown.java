@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 IBM Corporation and others.
+ * Copyright (c) 2008, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -307,12 +307,14 @@ class BreadcrumbItemDropDown implements IBreadcrumbDropDownSite {
         TreePath path= fParent.getPath();
 
 		Control control = fParent.getViewer().createDropDown(composite, this, path);
-		
-		control.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		setShellBounds(fShell);
-		fShell.setVisible(true);
-		installCloser(fShell);
+		 
+		if (control != null) {
+			control.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	
+			setShellBounds(fShell);
+			fShell.setVisible(true);
+			installCloser(fShell);
+		}
 	}
 
 	/**
@@ -353,6 +355,17 @@ class BreadcrumbItemDropDown implements IBreadcrumbDropDownSite {
 						}
 						break;
 
+					case SWT.KeyDown:
+                        if (isFocusBreadcrumbTreeFocusWidget || isFocusWidgetParentShell) {
+                            if (DebugUIPlugin.DEBUG_BREADCRUMB) {
+                                DebugUIPlugin.trace("==> closing shell since ESC was pressed"); //$NON-NLS-1$
+                            }
+    					    if (event.keyCode == SWT.ESC) {
+    					        shell.close();
+    					    }
+                        }
+						break;
+						
 					default:
 						Assert.isTrue(false);
 				}
@@ -362,6 +375,7 @@ class BreadcrumbItemDropDown implements IBreadcrumbDropDownSite {
 		final Display display= shell.getDisplay();
 		display.addFilter(SWT.FocusIn, focusListener);
 		display.addFilter(SWT.FocusOut, focusListener);
+        display.addFilter(SWT.KeyDown, focusListener);
 
 		final ControlListener controlListener= new ControlListener() {
 			public void controlMoved(ControlEvent e) {
@@ -386,6 +400,7 @@ class BreadcrumbItemDropDown implements IBreadcrumbDropDownSite {
 
 				display.removeFilter(SWT.FocusIn, focusListener);
 				display.removeFilter(SWT.FocusOut, focusListener);
+                display.removeFilter(SWT.KeyDown, focusListener);
 
 				if (!fToolBar.isDisposed()) {
 					fToolBar.getShell().removeControlListener(controlListener);

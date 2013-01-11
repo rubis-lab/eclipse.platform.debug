@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -409,6 +409,14 @@ public class InternalTreeModelViewer extends TreeViewer
 		super.handleDispose(event);
 	}
 	
+	public void dispose() {
+		getTree().dispose();
+	}
+	
+	public boolean isDisposed() {
+		return getTree().isDisposed();
+	}
+	
 	/**
 	 * Returns this viewer's presentation context.
 	 * 
@@ -416,6 +424,14 @@ public class InternalTreeModelViewer extends TreeViewer
 	 */
 	public IPresentationContext getPresentationContext() {
 		return fContext;
+	}
+	
+	public ITreeModelContentProvider getTreeModelContentProvider() {
+		return (TreeModelContentProvider)getContentProvider();
+	}
+	
+	public ITreeModelLabelProvider getTreeModelLabelProvider() {
+		return (TreeModelLabelProvider)getLabelProvider();
 	}
 	
 	protected void unmapElement(Object element, Widget widget) {
@@ -1815,4 +1831,16 @@ public class InternalTreeModelViewer extends TreeViewer
 	public void clearSelectionQuiet() {
 		getTree().setSelection(new TreeItem[0]);
 	}
+	
+    public void preserveViewerState(int flags, boolean append) {
+    	ViewerStateTracker stateTracker = ((TreeModelContentProvider)getContentProvider()).getStateTracker();
+    	stateTracker.saveViewerState(getInput(), flags, append);
+    	stateTracker.restoreViewerState(getInput());
+    }
+    
+    public void restoreViewerState() {
+    	ViewerStateTracker stateTracker = ((TreeModelContentProvider)getContentProvider()).getStateTracker();
+    	stateTracker.restoreViewerState(getInput());
+    	refresh();
+    }
 }
