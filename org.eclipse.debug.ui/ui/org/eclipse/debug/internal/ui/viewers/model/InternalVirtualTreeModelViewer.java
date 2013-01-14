@@ -621,9 +621,11 @@ public class InternalVirtualTreeModelViewer extends Viewer
                     for (int j = 0; j < children.length; j++) {
                         if (children[j].getData() != null && children[j].getIndex().intValue() >= count) {
                             disassociate(children[j]);
+                        } else {
+                            children[j].setNeedsDataUpdate();
                         }
                     }
-                    
+
                     items[i].setItemCount(count);
                 }
             }

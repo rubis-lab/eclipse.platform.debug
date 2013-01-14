@@ -45,6 +45,19 @@ import org.eclipse.ui.IWorkbenchPart;
 /**
  * Breadcrumb for embedding in debug data views, which shows the active debug 
  * context based on the debug view content.
+ * <p>
+ * This breadcrumb uses a <code>VirtualTreeModelViewer</code> to track the 
+ * debug model elements using the same presentation context as the Debug view.
+ * While the Debug view shows only the elements that are visible on the screen, 
+ * the virtual viewer needs to have a strategy for determining which elements are
+ * "visible".  The the pin control, the viewer makes visible only the selected element 
+ * and its children.
+ * </p>
+ * <p>
+ * The pin context breadcrumb will attempt to remember the pinned context in case 
+ * the selected element is removed from viewer (by using <code>IElementMementoProvider</code>.  
+ * In this case it will keep attempting to re-select the element that was originally 
+ * pinned.
  * 
  * @since 3.9
  */
@@ -52,26 +65,15 @@ public class DebugViewContextPinBreadcrumb extends AbstractLaunchViewBreadcrumb 
 
 	private static class DebugViewItemValidator implements IVirtualItemValidator {
 
-		private IInternalTreeModelViewer fDebugViewViewer;
-
-		public DebugViewItemValidator(IWorkbenchPart part) {
-		}
-		
 		public boolean isItemVisible(VirtualItem item) {
-			if (fDebugViewViewer != null) {
-//				Object parentElement = item.getParent().getData();
-//				TreePath[] parentPaths = fDebugViewViewer.getElementPaths(parentElement);
-//				if (parentPaths.length != 0) {
-//					for (int i = 0; i < parentPaths.length; i++) {
-//						Object element = ((IInternalTreeModelViewer)fDebugViewViewer).getChildElement(parentPaths[i], item.getIndex().intValue());
-//						if (element != null) return true;
-//					}
-//				}
-			}
-			
-			// Always mark selected item, its parents and children of selected item visible.
+            // First level of items is always visible, since the input 
+            // element cannot be part of selection
+            if (item.getParent() instanceof VirtualTree) {
+                return true;
+            }
+            // Selected item, its parents and children of selected item are visible.
 			VirtualItem[] selection = getTree(item).getSelection();
-            for (int i = 0; i < selection.length; i++) {
+			for (int i = 0; i < selection.length; i++) {
                 VirtualItem selectionItem = selection[i]; 
                 VirtualItem[] selectedItemChildren = selectionItem.getItems(); 
                 for (int j = 0; j< selectedItemChildren.length; j++) {
@@ -96,22 +98,15 @@ public class DebugViewContextPinBreadcrumb extends AbstractLaunchViewBreadcrumb 
 			return (VirtualTree)item;
 		}
 		
-		void setDebugViewViewer(IInternalTreeModelViewer viewer) {
-			fDebugViewViewer = viewer;
-		}
-		
 		public void showItem(VirtualItem item) {
 			// No op
 		}
 	}
 	
-	private DebugViewItemValidator fDebugViewItemValidator;
-	
 	private IPartListener fPartListener = new IPartListener() {
 		public void partOpened(IWorkbenchPart part) {
 			if (part instanceof LaunchView) {
 				IInternalTreeModelViewer debugViewViewer = (IInternalTreeModelViewer)((LaunchView)part).getViewer();
-				fDebugViewItemValidator.setDebugViewViewer(debugViewViewer);
 				debugViewViewer.addViewerUpdateListener(fUpdateListener);
 			}
 		}
@@ -122,7 +117,6 @@ public class DebugViewContextPinBreadcrumb extends AbstractLaunchViewBreadcrumb 
 				if (!debugViewViewer.isDisposed()) {
 					debugViewViewer.removeViewerUpdateListener(fUpdateListener);
 				}
-				fDebugViewItemValidator.setDebugViewViewer(null);
 			}
 		}
 		
@@ -149,7 +143,7 @@ public class DebugViewContextPinBreadcrumb extends AbstractLaunchViewBreadcrumb 
     }
     
     public DebugViewContextPinBreadcrumb(IPinnablePart part) {
-    	this(part, new DebugViewItemValidator(part));
+    	this(part, new DebugViewItemValidator());
     }
 
     private DebugViewContextPinBreadcrumb(IPinnablePart part, DebugViewItemValidator validator) {
@@ -161,12 +155,10 @@ public class DebugViewContextPinBreadcrumb extends AbstractLaunchViewBreadcrumb 
     
     private DebugViewContextPinBreadcrumb(IPinnablePart part, DebugViewItemValidator validator, VirtualTreeModelViewer viewer, TreeViewerContextProvider contextProvider) {
     	super(part, viewer, contextProvider);
-    	fDebugViewItemValidator = validator;
 		IWorkbenchPage page = part.getSite().getPage();
 		LaunchView debugView = (LaunchView)page.findView(IDebugUIConstants.ID_DEBUG_VIEW);
 		if (debugView != null) {
 			IInternalTreeModelViewer debugViewViewer = (IInternalTreeModelViewer)debugView.getViewer();
-			fDebugViewItemValidator.setDebugViewViewer(debugViewViewer);
 			debugViewViewer.addViewerUpdateListener(fUpdateListener);
 			//getTreeModelViewer().setFilters( debugViewViewer.getFilters() );
 		}
@@ -312,6 +304,16 @@ public class DebugViewContextPinBreadcrumb extends AbstractLaunchViewBreadcrumb 
     }
 
     protected boolean open(ISelection selection) {
+        // User selected new input into the view.  The drop down already set the new 
+        // selection to the virtual viewer, which triggered the breadcrumb input to be
+        // recreated.  Now remove any placeholder elements in the input.
+        Input currentInput = (Input)getCurrentInput();
+        if (currentInput.fPlaceholders.length != 0) {
+            Input newInput = new Input(currentInput.fPath);
+            setInput(newInput);
+        }
+        // Save the state of the viewer and make the viewer restore it.  Thereafter, 
+        // if the viewer selection is lost the viewer will attempt to re-select it. 
     	getVirtualTreeModelViewer().preserveViewerState( IModelDelta.SELECT | IModelDelta.REVEAL | IModelDelta.FORCE, false);
     	getVirtualTreeModelViewer().restoreViewerState();
     	return super.open(selection);

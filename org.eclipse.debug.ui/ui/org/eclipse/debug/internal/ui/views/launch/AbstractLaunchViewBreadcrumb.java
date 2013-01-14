@@ -124,13 +124,27 @@ abstract public class AbstractLaunchViewBreadcrumb extends AbstractBreadcrumb im
         }
 
         public boolean equals(Object obj) {
-            return obj instanceof Input && 
-                ((fPath == null && ((Input)obj).fPath == null) ||
-                 (fPath != null && fPath.equals( ((Input)obj).fPath )));
+            if (!(obj instanceof Input)) return false;
+            Input input = (Input)obj;
+            if ( (fPath == null && input.fPath == null) || (fPath != null && fPath.equals(input.fPath)) ) {
+                if (fPlaceholders.length == input.fPlaceholders.length) {
+                    for (int i = 0; i < fPlaceholders.length; i++) {
+                        if (!fPlaceholders.equals(input.fPlaceholders[i])) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            }
+            return false;
         }
         
         public int hashCode() {
-            return fPath == null ? 0 : fPath.hashCode();
+            int placeholdersHash = 0;
+            for (int i = 0; i < fPlaceholders.length; i++) {
+                placeholdersHash += fPlaceholders[i].hashCode();
+            }
+            return fPath == null ? 0 : fPath.hashCode() + placeholdersHash;
         }
     }
     
