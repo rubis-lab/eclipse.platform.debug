@@ -1263,11 +1263,14 @@ class ViewerStateTracker {
                     // selection.  Otherwise the setSelection() call will 
                     // update selection listeners needlessly. 
                     if (!pathInSelection && treePath.getSegmentCount() != 0) {
-                        TreePath[] newPaths = new TreePath[currentPaths.length + 1];
-                        System.arraycopy(currentPaths, 0, newPaths, 0, currentPaths.length);
-                        newPaths[newPaths.length - 1] = treePath;
-                        boolean force = (delta.getFlags() & IModelDelta.FORCE) != 0; 
-                    	viewer.setSelection(new TreeSelection(treePath), false, force);
+                        if ((delta.getFlags() & IModelDelta.FORCE) != 0) {
+                        	viewer.setSelection(new TreeSelection(treePath), false, true);                        
+                        } else {
+	                        TreePath[] newPaths = new TreePath[currentPaths.length + 1];
+	                        System.arraycopy(currentPaths, 0, newPaths, 0, currentPaths.length);
+	                        newPaths[newPaths.length - 1] = treePath;
+                        	viewer.setSelection(new TreeSelection(newPaths), false, false);
+                        }
                     }
                 }
             }
@@ -1589,7 +1592,6 @@ class ViewerStateTracker {
             		else {
             			copyIntoDelta(delta, parent);
     	                delta.setElement(request.getElement());
-    	                delta.setFlags(delta.getFlags() & ~IModelDelta.FORCE);
     	                restorePendingStateNode(delta, request.knowsHasChildren(), request.knowChildCount(), request.checkChildrenRealized());		            		
             		}
             	} else {
