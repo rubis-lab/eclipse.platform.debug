@@ -600,7 +600,7 @@ abstract public class AbstractLaunchViewBreadcrumb extends AbstractBreadcrumb im
             refresh = fRefreshBreadcrumb;
             fRefreshBreadcrumb = false;
         }
-        if (isBreadcrumbVisible() && refresh) {
+        if (isBreadcrumbVisible() && !fViewer.getControl().isDisposed() && refresh) {
             new UIJob(fViewer.getControl().getDisplay(), "refresh breadcrumb") { //$NON-NLS-1$
                 { setSystem(true); }
                 public IStatus runInUIThread(IProgressMonitor monitor) {
