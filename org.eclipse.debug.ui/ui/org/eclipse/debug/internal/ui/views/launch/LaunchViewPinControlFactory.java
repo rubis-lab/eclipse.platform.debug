@@ -13,16 +13,16 @@ package org.eclipse.debug.internal.ui.views.launch;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.contexts.IPinnablePart;
 import org.eclipse.debug.ui.contexts.IPinnedContextViewer;
-import org.eclipse.debug.ui.contexts.IPinnedContextViewerFactory;
+import org.eclipse.debug.ui.contexts.IPinnedContextFactory;
 
 /**
  * Factory for creating gebug View's pinned context (breadcrumb) viewer. 
  * 
  * @since 3.9
  */
-public class LaunchViewPinControlFactory implements IPinnedContextViewerFactory {
+public class LaunchViewPinControlFactory implements IPinnedContextFactory {
 
-	public String getPresentationId() {
+	public String getId() {
 		return IDebugUIConstants.ID_DEBUG_VIEW;
 	}
 

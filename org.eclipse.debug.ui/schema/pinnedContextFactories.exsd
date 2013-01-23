@@ -3,7 +3,7 @@
 <schema targetNamespace="org.eclipse.debug.ui" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.eclipse.debug.ui" id="pinnedContextViewerFactories" name="Create a control to pin a view to debug context."/>
+         <meta.schema plugin="org.eclipse.debug.ui" id="pinnedContextFactories" name="Create a control to pin a view to debug context."/>
       </appInfo>
       <documentation>
          Pin control allow a view to be &quot;pinned&quot; to a particular debug context.  Once pinned, the view says focused on the context active in the pin control instead of the context that&apos;s active in the window.
@@ -18,7 +18,7 @@
       </annotation>
       <complexType>
          <sequence>
-            <element ref="pinnedContextViewerFactory" minOccurs="1" maxOccurs="unbounded"/>
+            <element ref="pinnedContextFactory" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -44,7 +44,7 @@
       </complexType>
    </element>
 
-   <element name="pinnedContextViewerFactory">
+   <element name="pinnedContextFactory">
       <complexType>
          <attribute name="id" type="string" use="required">
             <annotation>
@@ -61,6 +61,27 @@
                <appInfo>
                   <meta.attribute kind="java" basedOn=":org.eclipse.debug.ui.contexts.IPinnedContextViewerFactory"/>
                </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="label" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Name of the pinned context provider factory.  If the factory is associated with the view, the name should match the name of the view.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="description" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Description of the pinned context provider factory.  If the factory is associated with the view, the description should reference the view.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="icon" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The icon that represents the pinned debug context viewer factory.
+               </documentation>
             </annotation>
          </attribute>
       </complexType>
@@ -98,7 +119,7 @@ In the above example, the supplied factory will be used when a a view is pinned 
          <meta.section type="apiInfo"/>
       </appInfo>
       <documentation>
-         Value of the attribute &lt;b&gt;class&lt;/b&gt; must be a fully qualified name of a Java class that implements the interface &lt;b&gt;org.eclipse.debug.ui.contexts.IPinnedContextViewerFactory&lt;/b&gt;. 
+         Value of the attribute &lt;b&gt;class&lt;/b&gt; must be a fully qualified name of a Java class that implements the interface &lt;b&gt;org.eclipse.debug.ui.contexts.IPinnedContextViewerFactory&lt;/b&gt;.
       </documentation>
    </annotation>
 

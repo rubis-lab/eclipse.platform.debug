@@ -39,25 +39,16 @@ abstract public class AbstractPinnableDebugView extends AbstractDebugView implem
     private Composite fComposite;
     private IPinnedContextViewer fPinnedContextViewer;
 
-    public void pinToProvider(IPinnableDebugContextProvider provider) {
-    	pinToFactory(provider.getFactoryId());
+    public void pin(IPinnedContextFactory factory) {
+    	if (isPinned()) clearPin();
+        fPinnedContextViewer = factory.createPinnedContextViewer(this);
+        Control control = fPinnedContextViewer.createControl(fComposite);
+        control.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        control.moveAbove(null);
+        fComposite.layout(true,  true);
     }
 
-    private void pinToFactory(String factoryId) {
-        if (fPinnedContextViewer != null) {
-            fPinnedContextViewer.dispose();
-        }
-        IPinnedContextViewerFactory factory = DebugUITools.getDebugContextManager().getPinnedContextViewerFactory( factoryId );
-        if (factory != null) {
-	        fPinnedContextViewer = factory.createPinnedContextViewer(this);
-	        Control control = fPinnedContextViewer.createControl(fComposite);
-	        control.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	        control.moveAbove(null);
-	        fComposite.layout(true,  true);
-        }    	
-    }
-    
-    public void clearPinnedProvider() {
+    public void clearPin() {
         if (fPinnedContextViewer != null) {
             fPinnedContextViewer.dispose();
             fPinnedContextViewer = null;
@@ -71,6 +62,13 @@ abstract public class AbstractPinnableDebugView extends AbstractDebugView implem
         return fPinnedContextViewer != null;
     }
 
+    public String getPinnedFactoryId() {
+    	if (fPinnedContextViewer != null) {
+    		return fPinnedContextViewer.getFactoryId();
+    	}
+    	return null;
+    }
+    
     public final void createPartControl(Composite parent) {
         setPartTitle();
         fComposite = new Composite(parent, SWT.NONE);
@@ -85,7 +83,7 @@ abstract public class AbstractPinnableDebugView extends AbstractDebugView implem
 	
     public void dispose() {
         NewViewInstanceAction.recycleCounterId(this);
-        clearPinnedProvider();
+        clearPin();
         super.dispose();
     }
 
@@ -97,9 +95,11 @@ abstract public class AbstractPinnableDebugView extends AbstractDebugView implem
     	if (memento != null) {
 	    	String factoryId = memento.getString(PINNED_CONTEXT_VIEWER_ID); 
 	    	if (factoryId != null) {
-	    		pinToFactory(factoryId);
-	        	if (fPinnedContextViewer != null) {
-	        		fPinnedContextViewer.restorePinnedContext(memento);
+	    		IPinnedContextFactory factory = 
+	    				DebugUITools.getDebugContextManager().getPinnedContextViewerFactory(factoryId);
+	    		if (factory != null ) {
+	    			pin(factory);
+	    			if (fPinnedContextViewer != null) fPinnedContextViewer.restorePinnedContext(memento);
 	        	}
 	    	}
     	}
@@ -117,7 +117,7 @@ abstract public class AbstractPinnableDebugView extends AbstractDebugView implem
 	}
 	
     protected void createActions() {
-        setAction("PinViewToContext", new PinViewToContextAction(this)); //$NON-NLS-1$
+        setAction("PinViewToContext", new PinViewToContextDropDownAction(this)); //$NON-NLS-1$
         setAction("NewViewInstance", new NewViewInstanceAction(this)); //$NON-NLS-1$
     }
     

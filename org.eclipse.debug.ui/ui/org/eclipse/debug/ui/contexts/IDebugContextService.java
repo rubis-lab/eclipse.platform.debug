@@ -208,4 +208,13 @@ public interface IDebugContextService {
 	 * @since 3.7
 	 */
 	void removePostDebugContextListener(IDebugContextListener listener, String partId, String partSecondaryId);
+	
+	/**
+	 * 
+	 * @return
+	 * @since 3.9
+	 */
+	public IPinnedContextFactory[] getEnabledPinnedContextViewerFactories();
+	
+	
 }

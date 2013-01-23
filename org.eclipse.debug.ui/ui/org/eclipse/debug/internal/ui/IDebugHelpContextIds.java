@@ -78,7 +78,7 @@ public interface IDebugHelpContextIds {
     public static final String DEBUG_TOOLBAR_VIEW_ACTION = PREFIX + "debug_toolbar_view_action_context"; //$NON-NLS-1$
     public static final String DEBUG_TOOLBAR_WINDOW_ACTION = PREFIX + "debug_toolbar_window_action_context"; //$NON-NLS-1$
     public static final String DEBUG_TOOLBAR_BOTH_ACTION = PREFIX + "debug_toolbar_both_action_context"; //$NON-NLS-1$
-    public static final String PIN_VIEW_TO_CONTEXT_ACTION = PREFIX + "pin_view_to_context_action_context"; //$NON-NLS-1$
+    public static final String PIN_TO_CONTEXT_ACTION = PREFIX + "pin_view_to_context_action_context"; //$NON-NLS-1$
     public static final String NEW_VIEW_ACTION = PREFIX + "new_view_action_context"; //$NON-NLS-1$
 
 	// Views

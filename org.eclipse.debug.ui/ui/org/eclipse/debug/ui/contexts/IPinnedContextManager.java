@@ -10,21 +10,11 @@
  *******************************************************************************/
 package org.eclipse.debug.ui.contexts;
 
-
 /**
- * Debug context provider that allows a view to create a "pin" control for a 
- * data view.  
  * 
  * @since 3.9
- * @see IPinnedContextFactory
- * @see IDebugContextManager#getPinnedContextViewerFactory(String)
  */
-public interface IPinnableDebugContextProvider extends IDebugContextProvider {
+public interface IPinnedContextManager {
 	
-	/**
-	 * Returns the ID for the factory for a pinned context viewer.
-	 * The factory creates a viewer that pins the view to the active context
-	 * in the given debug context provider.
-	 */
-    public String getFactoryId();
+	
 }

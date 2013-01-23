@@ -18,7 +18,7 @@ import org.eclipse.ui.IMemento;
  * Wrapper class for the viewer of the pinned context in a view.  The viewer is 
  * created using the pinned context factory.  
  * 
- * @see IPinnedContextViewerFactory
+ * @see IPinnedContextFactory
  * 
  * @since 3.9
  */

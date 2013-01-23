@@ -47,25 +47,15 @@ abstract public class AbstractPinnableView extends ViewPart implements IPinnable
      */
     private IPinnedContextViewer fPinnedContextViewer;
 
-    public void pinToProvider(IPinnableDebugContextProvider provider) {
-    	pinToFactory(provider.getFactoryId());
+    public void pin(IPinnedContextFactory factory) {
+        fPinnedContextViewer = factory.createPinnedContextViewer(this);
+        Control control = fPinnedContextViewer.createControl(fComposite);
+        control.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        control.moveAbove(null);
+        fComposite.layout(true,  true);
     }
 
-    private void pinToFactory(String factoryId) {
-        if (fPinnedContextViewer != null) {
-            fPinnedContextViewer.dispose();
-        }
-        IPinnedContextViewerFactory factory = DebugUITools.getDebugContextManager().getPinnedContextViewerFactory( factoryId );
-        if (factory != null) {
-	        fPinnedContextViewer = factory.createPinnedContextViewer(this);
-	        Control control = fPinnedContextViewer.createControl(fComposite);
-	        control.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	        control.moveAbove(null);
-	        fComposite.layout(true,  true);
-        }
-    }
-    
-    public void clearPinnedProvider() {
+    public void clearPin() {
         if (fPinnedContextViewer != null) {
             fPinnedContextViewer.dispose();
             fPinnedContextViewer = null;
@@ -76,6 +66,13 @@ abstract public class AbstractPinnableView extends ViewPart implements IPinnable
 	public boolean isPinned() {
 	    return fPinnedContextViewer != null;
 	}
+	
+    public String getPinnedFactoryId() {
+    	if (fPinnedContextViewer != null) {
+    		return fPinnedContextViewer.getFactoryId();
+    	}
+    	return null;
+    }
 	
 	public final void createPartControl(Composite parent) {
 	    setPartTitle();
@@ -111,10 +108,14 @@ abstract public class AbstractPinnableView extends ViewPart implements IPinnable
     	String secondaryId = NewViewInstanceAction.decodeClonedPartSecondaryId(((IViewSite)getSite()).getSecondaryId());
     	String factoryId = memento.getString(secondaryId + "." + PINNED_CONTEXT_VIEWER_ID); //$NON-NLS-1$
     	if (factoryId != null) {
-    		pinToFactory(factoryId);
-        	if (fPinnedContextViewer != null) {
-        		fPinnedContextViewer.restorePinnedContext(memento);
-        	}
+    		IPinnedContextFactory factory = 
+    				DebugUITools.getDebugContextManager().getPinnedContextViewerFactory(factoryId);
+    		if (factory != null ) {
+	    		pin(factory);
+	        	if (fPinnedContextViewer != null) {
+	        		fPinnedContextViewer.restorePinnedContext(memento);
+	        	}
+    		}
     	}
     }
     
@@ -137,7 +138,7 @@ abstract public class AbstractPinnableView extends ViewPart implements IPinnable
 	protected void configureToolBar(IToolBarManager tbm) {
 		tbm.add(new Separator(this.getClass().getName()));
 		tbm.add(new Separator(IDebugUIConstants.NAVIGATION_GROUP));
-		tbm.add(new PinViewToContextAction(this));
+		tbm.add(new PinViewToContextDropDownAction(this));
 		tbm.add(new NewViewInstanceAction(this)); 
 	}
 	    

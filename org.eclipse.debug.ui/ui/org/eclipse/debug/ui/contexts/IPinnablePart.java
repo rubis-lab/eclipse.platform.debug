@@ -19,17 +19,25 @@ import org.eclipse.ui.IWorkbenchPart;
  * @see IPinnableDebugContextProvider
  */
 public interface IPinnablePart extends IWorkbenchPart {
+	
 	/**
 	 * Pins this part to the given debug context provider.  
 	 * @param provider Debug context provider to pin to.
 	 */
-    public void pinToProvider(IPinnableDebugContextProvider provider);
+    public void pin(IPinnedContextFactory provider);    
     
     /**
      * Clears the pinned context from the part.  This should cause the part
      * to start tracking the active window debug context. 
      */
-    public void clearPinnedProvider();
+    public void clearPin();
+    
+    /**
+     * Returns the factory ID of the pinned context provider.  Returns 
+     * <code>null</code> if view is not pinned.
+     * @return Factory ID of pinned provider.
+     */
+    public String getPinnedFactoryId();
     
     /**
      * Returns whether the view is currently pinned.

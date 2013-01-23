@@ -34,7 +34,7 @@
    <extension-point id="launchConfigurationTabs" name="%LaunchConfigurationTabsExtension.name" schema="schema/launchConfigurationTabs.exsd"/>
    <extension-point id="detailPaneFactories" name="%DetailPaneFactoriesExtension.name" schema="schema/detailPaneFactories.exsd"/>
    <extension-point id="toggleBreakpointsTargetFactories" name="%ToggleBreakpointsTargetFactoriesExtension.name" schema="schema/toggleBreakpointsTargetFactories.exsd"/>
-   <extension-point id="pinnedContextViewerFactories" name="%PinnedContextViewerFactoresExtensionName" schema="schema/pinnedContextViewerFactories.exsd"/>
+   <extension-point id="pinnedContextFactories" name="%PinnedContextFactoresExtensionName" schema="schema/pinnedContextFactories.exsd"/>
 
 <!-- Extensions -->
    <extension
@@ -700,7 +700,7 @@
              </separator>
           </toolbar>
        </menuContribution>
-   </extension>  
+  </extension>
    
    <extension
          point="org.eclipse.ui.viewActions">
@@ -3161,12 +3161,15 @@ M4 = Platform-specific fourth key
          </bundle>
       </component>
    </extension>
+
    <extension
-         point="org.eclipse.debug.ui.pinnedContextViewerFactories">
-         <pinnedContextViewerFactory 
+         point="org.eclipse.debug.ui.pinnedContextFactories">
+         <pinnedContextFactory 
          	id="org.eclipse.debug.ui.DebugView"
-         	class="org.eclipse.debug.internal.ui.views.launch.LaunchViewPinControlFactory"/>
-         	
+         	class="org.eclipse.debug.internal.ui.views.launch.LaunchViewPinControlFactory"
+         	label="%debugViewPinnedContextFactory.label"
+         	description="%debugViewPinnedContextFactory.description"
+         	icon="$nl$/icons/full/eview16/debug_view.gif"/>
    </extension>
 
 </plugin>

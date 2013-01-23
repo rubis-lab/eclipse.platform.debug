@@ -32,7 +32,7 @@ import org.eclipse.debug.internal.ui.views.variables.VariablesViewMessages;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.contexts.AbstractPinnableView;
-import org.eclipse.debug.ui.contexts.IPinnableDebugContextProvider;
+import org.eclipse.debug.ui.contexts.IPinnedContextFactory;
 import org.eclipse.debug.ui.memory.IMemoryRendering;
 import org.eclipse.debug.ui.memory.IMemoryRenderingContainer;
 import org.eclipse.debug.ui.memory.IMemoryRenderingSite;
@@ -353,13 +353,13 @@ public class MemoryView extends AbstractPinnableView implements IMemoryRendering
 		loadPinnedContextViewer();
 	}
 
-	public void pinToProvider(IPinnableDebugContextProvider provider) {
-		super.pinToProvider(provider);
+	public void pin(IPinnedContextFactory factory) {
+		super.pin(factory);
 		savePinnedContextViewer();
 	}
 	
-	public void clearPinnedProvider() {
-		super.clearPinnedProvider();
+	public void clearPin() {
+		super.clearPin();
 		savePinnedContextViewer();
 	}
 	

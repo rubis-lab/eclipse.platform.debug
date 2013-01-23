@@ -10,31 +10,48 @@
  *******************************************************************************/
 package org.eclipse.debug.internal.ui.contexts;
 
+import java.net.URL;
+
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.ui.contexts.IPinnablePart;
 import org.eclipse.debug.ui.contexts.IPinnedContextViewer;
-import org.eclipse.debug.ui.contexts.IPinnedContextViewerFactory;
+import org.eclipse.debug.ui.contexts.IPinnedContextFactory;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.osgi.framework.Bundle;
 
 /**
  * A contributed pinned context viewer factory.
  * 
  * @since 3.9
  */
-public class PinnedContextViewerFactory implements IPinnedContextViewerFactory {
+public class PinnedContextViewerFactory implements IPinnedContextFactory {
 	
 	private IConfigurationElement fElement;
-	private IPinnedContextViewerFactory fDelegate;
+	private IPinnedContextFactory fDelegate;
+	private ImageDescriptor fImage;
 	
 	// attributes
 	public static final String ATTR_ID = "id"; //$NON-NLS-1$
+	public static final String ATTR_LABEL = "label"; //$NON-NLS-1$
+	public static final String ATTR_DESCRIPTION = "description"; //$NON-NLS-1$
+	public static final String ATTR_IMAGE = "image"; //$NON-NLS-1$
 	public static final String ATTR_CLASS = "class"; //$NON-NLS-1$
 	
 	public PinnedContextViewerFactory(IConfigurationElement element) {
 		fElement = element;
 	}
 
+	private Bundle getBundle() {
+		String namespace= fElement.getDeclaringExtension().getContributor().getName();
+		Bundle bundle= Platform.getBundle(namespace);
+		return bundle;
+	}
+	
 	public String getId() {
 		return fElement.getAttribute(ATTR_ID);
 	}
@@ -43,15 +60,39 @@ public class PinnedContextViewerFactory implements IPinnedContextViewerFactory {
 		return getDelegate().createPinnedContextViewer(part);
 	}
 	
+	public String getName() {
+		return fElement.getAttribute(ATTR_LABEL);
+	}
+	
+	public String getDescription() {
+		return fElement.getAttribute(ATTR_DESCRIPTION);
+	}
+
+	public ImageDescriptor getImage() {
+		if (fImage == null) { 
+			String attr = fElement.getAttribute(ATTR_IMAGE);
+			if (attr != null) {
+				Bundle bundle= getBundle();
+				if (bundle != null) {
+					Path path= new Path(attr);
+					URL url= FileLocator.find(bundle, path, null);
+					fImage = ImageDescriptor.createFromURL(url);
+				}
+			}
+		}
+		return fImage;
+	}
+	
+	
 	/**
 	 * Returns this factories's delegate, instantiating it if required.
 	 * 
 	 * @return this organizer's delegate
 	 */
-	protected IPinnedContextViewerFactory getDelegate() {
+	protected IPinnedContextFactory getDelegate() {
 		if (fDelegate == null) {
 			try {
-				fDelegate = (IPinnedContextViewerFactory) fElement.createExecutableExtension(ATTR_CLASS);
+				fDelegate = (IPinnedContextFactory) fElement.createExecutableExtension(ATTR_CLASS);
 			} catch (CoreException e) {
 				DebugUIPlugin.log(e);
 			}

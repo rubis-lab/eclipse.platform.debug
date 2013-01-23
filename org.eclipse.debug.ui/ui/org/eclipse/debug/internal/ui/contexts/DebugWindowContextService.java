@@ -29,6 +29,7 @@ import org.eclipse.debug.ui.contexts.IDebugContextListener;
 import org.eclipse.debug.ui.contexts.IDebugContextProvider;
 import org.eclipse.debug.ui.contexts.IDebugContextProvider2;
 import org.eclipse.debug.ui.contexts.IDebugContextService;
+import org.eclipse.debug.ui.contexts.IPinnedContextFactory;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IPartListener2;
@@ -466,4 +467,10 @@ public class DebugWindowContextService implements IDebugContextService, IPartLis
 	public ISelection getActiveContext(String partId, String partSecondaryId) {		
 		return getActiveContext(getCombinedPartId(partId, partSecondaryId));
 	} 
+	
+	public IPinnedContextFactory[] getEnabledPinnedContextViewerFactories() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 }

@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.debug.ui.contexts;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
 /**
@@ -58,9 +61,42 @@ public interface IDebugContextManager {
 	 *
 	 * @since 3.9
 	 * 
-	 * @param id ID of the context viewer factory.
+	 * @param factoryId ID of the context viewer factory.
 	 * @return pinned context viewer factory, <code>null</code> if no 
 	 * factory for given ID was found
 	 */
-	public IPinnedContextViewerFactory getPinnedContextViewerFactory(String id);
+	public IPinnedContextFactory getPinnedContextViewerFactory(String factoryId);
+	
+	/**
+	 * Returns the pinned context viewer factories that are enabled for the 
+	 * given part and selection.   
+	 * 
+	 * @since 3.9
+	 * @return Array of enabled factories.
+	 */
+	public IPinnedContextFactory[] getEnabledContextViewerFactories(IWorkbenchPart part, ISelection selection);
+	
+	/**
+	 * Returns the name of the given context factory.
+	 * 
+	 * @since 3.9
+	 * @return Returns the name of the given context factory.
+	 */
+	public String getPinnedContextViewerFactoryName(String factoryId);
+
+	/**
+	 * Returns the description of the given context factory.
+	 * 
+	 * @since 3.9
+	 * @return Returns the description of the given context factory.
+	 */
+	public String getPinnedContextViewerFactoryDescription(String factoryId);
+
+	/**
+	 * Returns the image descriptor of the given context factory.
+	 * 
+	 * @since 3.9
+	 * @return Returns the image descriptor of the given context factory.
+	 */
+	public ImageDescriptor getPinnedContextViewerFactoryImage(String factoryId);
 }
