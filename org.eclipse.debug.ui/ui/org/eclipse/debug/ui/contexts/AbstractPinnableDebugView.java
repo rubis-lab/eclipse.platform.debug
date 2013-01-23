@@ -82,7 +82,6 @@ abstract public class AbstractPinnableDebugView extends AbstractDebugView implem
     }
 	
     public void dispose() {
-        NewViewInstanceAction.recycleCounterId(this);
         clearPin();
         super.dispose();
     }

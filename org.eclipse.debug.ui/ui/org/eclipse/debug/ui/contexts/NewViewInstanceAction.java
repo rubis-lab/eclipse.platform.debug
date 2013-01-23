@@ -11,11 +11,8 @@
 
 package org.eclipse.debug.ui.contexts;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.debug.internal.ui.DebugPluginImages;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
@@ -25,8 +22,8 @@ import org.eclipse.debug.internal.ui.actions.ActionMessages;
 import org.eclipse.jface.action.Action;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewReference;
-import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
@@ -39,8 +36,7 @@ import org.eclipse.ui.PlatformUI;
 public class NewViewInstanceAction extends Action {
 
     public static String PIN_CLONE_VIEW_TAG = "PLATFORM_PIN_CLONE_VIEW_"; //$NON-NLS-1$
-    private static final Map viewIdToNextCounterMap = Collections.synchronizedMap(new HashMap());
-
+    
 	private IViewPart fView;
 
 	/**
@@ -58,36 +54,14 @@ public class NewViewInstanceAction extends Action {
 	public void run() {
 		try {
 			String viewId = fView.getSite().getId();
-			String secondaryId = encodeClonedPartSecondaryId(getNextCounter(viewId).toString());
+			String secondaryId = encodeClonedPartSecondaryId(getNextSecondaryId().toString());
 			if (fView instanceof IPinnablePart) {
 				((IPinnablePart)fView).copyViewSettings(secondaryId);
 			}
-			fView.getSite().getPage().showView(viewId, secondaryId, IWorkbenchPage.VIEW_CREATE);
+			fView.getSite().getPage().showView(viewId, secondaryId, IWorkbenchPage.VIEW_VISIBLE);
 		} catch (PartInitException e) {
 			DebugUIPlugin.log(e);
 		}
-	}
-
-	/**
-	 * Returns the given part's secondary ID to the pool of available IDs.  
-	 * This method should be called when a cloneable view instance is 
-	 * being disposed.  
-	 * 
-	 * @param part Part to recycle.
-	 */
-	public static void recycleCounterId(IViewPart part) {
-	    if ( !isClonedPart(part))
-	        return;
-	    
-	    String viewId = part.getSite().getId();
-	    String secondaryId = ((IViewSite)part.getSite()).getSecondaryId();
-	        
-	    if (secondaryId != null) {
-	        Set secondaryIdSet = (Set)viewIdToNextCounterMap.get(viewId);
-	        if (secondaryIdSet != null) {   
-	            secondaryIdSet.remove(new Integer(decodeClonedPartSecondaryId(secondaryId)));
-	        }
-	    }
 	}
 	    
 	
@@ -97,18 +71,17 @@ public class NewViewInstanceAction extends Action {
 	 * @param viewId Primary view ID to look up.
 	 * @return Next available secondary ID.
 	 */
-    protected static Integer getNextCounter(String viewId) {
-        Set secondaryIdSet = (Set)viewIdToNextCounterMap.get(viewId);
-        if (secondaryIdSet == null) {
-            secondaryIdSet = new HashSet();
-            viewIdToNextCounterMap.put(viewId, secondaryIdSet);
-        }
+    protected Integer getNextSecondaryId() {
+    	IWorkbenchWindow window = fView.getSite().getWorkbenchWindow();
+    	IViewReference[] viewRefs = window.getActivePage().getViewReferences();
+		Set usedIds= new TreeSet();
+		for (int i = 0; i < viewRefs.length; i++) {
+			usedIds.add( decodeClonedPartSecondaryId( viewRefs[i].getSecondaryId()) );
+		}
         
         for (int i = 1; i < Integer.MAX_VALUE; ++i) {
-            Integer next = new Integer(i);
-            if (!secondaryIdSet.contains(next)) {
-                secondaryIdSet.add(next);
-                return next;
+            if (!usedIds.contains(Integer.toString(i))) {
+                return new Integer(i);
             }
         }
         

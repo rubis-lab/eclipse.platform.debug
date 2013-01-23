@@ -96,7 +96,7 @@ abstract public class AbstractPinnableView extends ViewPart implements IPinnable
 	abstract protected void doCreatePartControl(Composite parent);
 	
 	public void dispose() {
-	    NewViewInstanceAction.recycleCounterId(this);
+	    clearPin();
 		super.dispose();
 	}
 	

@@ -208,6 +208,7 @@ public class DebugViewContextPinBreadcrumb extends AbstractLaunchViewBreadcrumb 
     }
     
     protected Input makeInputForTreePath(TreePath path) {
+    	if (path == null) path = TreePath.EMPTY;
     	Input currentInput = (Input)getCurrentInput();
     	TreePath currentPath = currentInput.fPath;
     	if (currentPath != null && path != null && currentPath.startsWith(path, null) && !currentPath.equals(path)) {
