@@ -29,7 +29,7 @@ import org.osgi.framework.Bundle;
  * 
  * @since 3.9
  */
-public class PinnedContextViewerFactory implements IPinnedContextFactory {
+public class PinnedContextFactory implements IPinnedContextFactory {
 	
 	private IConfigurationElement fElement;
 	private IPinnedContextFactory fDelegate;
@@ -42,7 +42,7 @@ public class PinnedContextViewerFactory implements IPinnedContextFactory {
 	public static final String ATTR_IMAGE = "image"; //$NON-NLS-1$
 	public static final String ATTR_CLASS = "class"; //$NON-NLS-1$
 	
-	public PinnedContextViewerFactory(IConfigurationElement element) {
+	public PinnedContextFactory(IConfigurationElement element) {
 		fElement = element;
 	}
 

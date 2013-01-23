@@ -13,6 +13,7 @@ package org.eclipse.debug.internal.ui.contexts;
 
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.IDebugHelpContextIds;
+import org.eclipse.debug.internal.ui.actions.ActionMessages;
 import org.eclipse.debug.ui.contexts.IPinnablePart;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -33,7 +34,7 @@ public class ClearPinnedContextAction extends Action implements IUpdate {
 	 * @param view
 	 */
 	public ClearPinnedContextAction(IPinnablePart view) {
-		super(null, IAction.AS_RADIO_BUTTON);
+		super(ActionMessages.ClearPinAction_label, IAction.AS_RADIO_BUTTON);
 		fView = view;
 		setId(DebugUIPlugin.getUniqueIdentifier() + ".ClearPinnedContextAction"); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IDebugHelpContextIds.PIN_TO_CONTEXT_ACTION);

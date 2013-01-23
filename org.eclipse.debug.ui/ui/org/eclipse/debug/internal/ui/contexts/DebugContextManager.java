@@ -45,7 +45,7 @@ public class DebugContextManager implements IDebugContextManager {
 	private static DebugContextManager fgDefault;
 	private Map fServices = new HashMap();
 	private ListenerList fGlobalListeners = new ListenerList();
-    private Map fPinnedContextViewerFactories = new HashMap();
+    private Map fPinnedContextFactories = new HashMap();
 
 	/**
 	 * A debug context service that does nothing (used for windows that have been closed)
@@ -222,31 +222,31 @@ public class DebugContextManager implements IDebugContextManager {
 	}
 
     private void loadPinnedContextViewerFactories() {
-        IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(DebugUIPlugin.getUniqueIdentifier(), IDebugUIConstants.EXTENSION_POINT_PINNED_CONTEXT_VIEWER_FACTORIES);
+        IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(DebugUIPlugin.getUniqueIdentifier(), IDebugUIConstants.EXTENSION_POINT_PINNED_CONTEXT_FACTORIES);
         IConfigurationElement[] configurationElements = extensionPoint.getConfigurationElements();
         for (int i = 0; i < configurationElements.length; i++) {
             IConfigurationElement element= configurationElements[i];
-            PinnedContextViewerFactory factory = new PinnedContextViewerFactory(element);
-            fPinnedContextViewerFactories.put(factory.getId(), factory);
+            PinnedContextFactory factory = new PinnedContextFactory(element);
+            fPinnedContextFactories.put(factory.getId(), factory);
         }
     }
 
 	public IPinnedContextFactory getPinnedContextViewerFactory(String factoryId) {
-		return (IPinnedContextFactory)fPinnedContextViewerFactories.get(factoryId); 
+		return (IPinnedContextFactory)fPinnedContextFactories.get(factoryId); 
 	}
 
 	public IPinnedContextFactory[] getEnabledContextViewerFactories(IWorkbenchPart part, ISelection selection) {
 		// TODO: use enablement expression to evaluate enabled context factories.
-		IPinnedContextFactory[] factories = new IPinnedContextFactory[fPinnedContextViewerFactories.size()];
+		IPinnedContextFactory[] factories = new IPinnedContextFactory[fPinnedContextFactories.size()];
 		int i = 0;
-		for(Iterator itr = fPinnedContextViewerFactories.values().iterator(); itr.hasNext();) {
+		for(Iterator itr = fPinnedContextFactories.values().iterator(); itr.hasNext();) {
 			factories[i] = (IPinnedContextFactory)itr.next();
 		}
 		return factories;
 	}
 	
 	public String getPinnedContextViewerFactoryName(String factoryId) {
-		PinnedContextViewerFactory factory = (PinnedContextViewerFactory)fPinnedContextViewerFactories.get(factoryId);
+		PinnedContextFactory factory = (PinnedContextFactory)fPinnedContextFactories.get(factoryId);
 		if (factory != null) {
 			return factory.getName();
 		}
@@ -254,7 +254,7 @@ public class DebugContextManager implements IDebugContextManager {
 	}
 
 	public String getPinnedContextViewerFactoryDescription(String factoryId) {
-		PinnedContextViewerFactory factory = (PinnedContextViewerFactory)fPinnedContextViewerFactories.get(factoryId);
+		PinnedContextFactory factory = (PinnedContextFactory)fPinnedContextFactories.get(factoryId);
 		if (factory != null) {
 			return factory.getDescription();
 		}
@@ -262,7 +262,7 @@ public class DebugContextManager implements IDebugContextManager {
 	}
 	
 	public ImageDescriptor getPinnedContextViewerFactoryImage(String factoryId) {
-		PinnedContextViewerFactory factory = (PinnedContextViewerFactory)fPinnedContextViewerFactories.get(factoryId);
+		PinnedContextFactory factory = (PinnedContextFactory)fPinnedContextFactories.get(factoryId);
 		if (factory != null) {
 			return factory.getImage();
 		}

@@ -1122,7 +1122,7 @@ public interface IDebugUIConstants {
      * 
      * @since 3.9
      */
-    public static final String EXTENSION_POINT_PINNED_CONTEXT_VIEWER_FACTORIES = "pinnedContextViewerFactories"; //$NON-NLS-1$    
+    public static final String EXTENSION_POINT_PINNED_CONTEXT_FACTORIES = "pinnedContextFactories"; //$NON-NLS-1$    
 
 	/**
 	 * Padded string preference for renderings.  Padded string is the string to be used in place of 
