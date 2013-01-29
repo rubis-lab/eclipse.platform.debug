@@ -240,7 +240,7 @@ public class DebugContextManager implements IDebugContextManager {
 		IPinnedContextFactory[] factories = new IPinnedContextFactory[fPinnedContextFactories.size()];
 		int i = 0;
 		for(Iterator itr = fPinnedContextFactories.values().iterator(); itr.hasNext();) {
-			factories[i] = (IPinnedContextFactory)itr.next();
+			factories[i++] = (IPinnedContextFactory)itr.next();
 		}
 		return factories;
 	}
