@@ -91,7 +91,9 @@ public class DebugPluginImages {
 		declareRegistryImage(IInternalDebugUIConstants.IMG_LCL_RESET_MEMORY, ELCL + "memoryreset_tsk.gif"); //$NON-NLS-1$
 		declareRegistryImage(IInternalDebugUIConstants.IMG_LCL_COPY_VIEW_TO_CLIPBOARD, ELCL + "copyviewtoclipboard_tsk.gif"); //$NON-NLS-1$
 		declareRegistryImage(IInternalDebugUIConstants.IMG_LCL_PRINT_TOP_VIEW_TAB, ELCL + "printview_tsk.gif"); //$NON-NLS-1$
-        declareRegistryImage(IInternalDebugUIConstants.IMG_LCL_PIN, ELCL+"pin.gif"); //$NON-NLS-1$
+        declareRegistryImage(IInternalDebugUIConstants.IMG_LCL_PIN, ELCL + "pin.gif"); //$NON-NLS-1$
+        declareRegistryImage(IDebugUIConstants.IMG_OVR_NEW, OVR + "new.gif");//$NON-NLS-1$
+        declareRegistryImage(IDebugUIConstants.IMG_OVR_PIN, OVR + "pin.gif");//$NON-NLS-1$
 			
 		// disabled local toolbars
 		declareRegistryImage(IInternalDebugUIConstants.IMG_DLCL_DETAIL_PANE, DLCL + "toggledetailpane_co.gif"); //$NON-NLS-1$

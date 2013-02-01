@@ -84,6 +84,9 @@ public class ActionMessages extends NLS {
 	public static String PinViewToContextAction_label;
 	public static String PinViewToContextAction_tooltip;
 
+	public static String NewPinnedViewAction_label;
+	public static String NewPinnedViewAction_tooltip;
+
 	public static String ClearPinAction_label;
 
 	public static String ProfileLastAction_0;

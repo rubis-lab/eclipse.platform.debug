@@ -138,8 +138,7 @@ abstract public class AbstractPinnableView extends ViewPart implements IPinnable
 	protected void configureToolBar(IToolBarManager tbm) {
 		tbm.add(new Separator(this.getClass().getName()));
 		tbm.add(new Separator(IDebugUIConstants.NAVIGATION_GROUP));
-		tbm.add(new PinViewToContextDropDownAction(this));
-		tbm.add(new NewViewInstanceAction(this)); 
+		tbm.add(new NewPinnedViewDropDownAction(this));
 	}
 	    
 	/**

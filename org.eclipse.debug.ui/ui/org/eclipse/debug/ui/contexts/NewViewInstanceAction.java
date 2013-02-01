@@ -54,9 +54,9 @@ public class NewViewInstanceAction extends Action {
 	public void run() {
 		try {
 			String viewId = fView.getSite().getId();
-			String secondaryId = encodeClonedPartSecondaryId(getNextSecondaryId().toString());
+			String secondaryId = encodeClonedPartSecondaryId(getNextSecondaryId(fView).toString());
 			if (fView instanceof IPinnablePart) {
-				((IPinnablePart)fView).copyViewSettings(secondaryId);
+				createNewPart(fView);
 			}
 			fView.getSite().getPage().showView(viewId, secondaryId, IWorkbenchPage.VIEW_VISIBLE);
 		} catch (PartInitException e) {
@@ -64,6 +64,19 @@ public class NewViewInstanceAction extends Action {
 		}
 	}
 	    
+	public static IViewPart createNewPart(IViewPart part) {
+		try {
+			String viewId = part.getSite().getId();
+			String secondaryId = NewViewInstanceAction.encodeClonedPartSecondaryId(getNextSecondaryId(part).toString());
+			if (part instanceof IPinnablePart) {
+				((IPinnablePart)part).copyViewSettings(secondaryId);
+			}
+			return part.getSite().getPage().showView(viewId, secondaryId, IWorkbenchPage.VIEW_VISIBLE);
+		} catch (PartInitException e) {
+			DebugUIPlugin.log(e);
+		}
+		return null;
+	}
 	
 	/**
 	 * Returns the next available secondary ID for the given primary view ID.
@@ -71,8 +84,8 @@ public class NewViewInstanceAction extends Action {
 	 * @param viewId Primary view ID to look up.
 	 * @return Next available secondary ID.
 	 */
-    protected Integer getNextSecondaryId() {
-    	IWorkbenchWindow window = fView.getSite().getWorkbenchWindow();
+    public static  Integer getNextSecondaryId(IViewPart part) {
+    	IWorkbenchWindow window = part.getSite().getWorkbenchWindow();
     	IViewReference[] viewRefs = window.getActivePage().getViewReferences();
 		Set usedIds= new TreeSet();
 		for (int i = 0; i < viewRefs.length; i++) {

@@ -413,6 +413,18 @@ public interface IDebugUIConstants {
 	 */
 	public static final String IMG_LCL_DETAIL_PANE_HIDE= "IMG_LCL_DETAIL_PANE_HIDE"; //$NON-NLS-1$
 	
+	/**
+	 * New view instance icon overlay.
+	 * @since 3.9
+	 */
+	public static final String IMG_OVR_NEW= "IMG_OVR_NEW"; //$NON-NLS-1$
+
+	/**
+	 * Pinned view icon overlay.
+	 * @since 3.9
+	 */
+    public static final String IMG_OVR_PIN = "IMG_OVR_PIN"; //$NON-NLS-1$
+
 	// Debug element images
 	
 	/** Debug mode launch image identifier. */
