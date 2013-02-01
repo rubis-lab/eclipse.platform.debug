@@ -205,7 +205,8 @@ abstract public class AbstractLaunchViewBreadcrumb extends AbstractBreadcrumb im
 
         public Object[] getElements(Object inputElement) {
             if (fInput != null && 
-                fInput.fPath != null) 
+                fInput.fPath != null &&
+                fInput.fPath.getSegmentCount() != 0) 
             {
                 return getChildren(TreePath.EMPTY);
             } else {
