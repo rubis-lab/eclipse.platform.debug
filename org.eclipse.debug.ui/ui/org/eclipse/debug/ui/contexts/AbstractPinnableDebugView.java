@@ -10,18 +10,14 @@
  *******************************************************************************/
 package org.eclipse.debug.ui.contexts;
 
-import org.eclipse.debug.internal.ui.DebugPluginImages;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.SWTFactory;
-import org.eclipse.debug.internal.ui.contexts.OverlayIcon;
 import org.eclipse.debug.ui.AbstractDebugView;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -42,8 +38,6 @@ abstract public class AbstractPinnableDebugView extends AbstractDebugView implem
 	
     private Composite fComposite;
     private IPinnedContextViewer fPinnedContextViewer;
-    private Image fOriginalIcon;
-    private Image fPinnedIcon;
 
     public void pin(IPinnedContextFactory factory) {
     	if (isPinned()) clearPin();
@@ -52,20 +46,8 @@ abstract public class AbstractPinnableDebugView extends AbstractDebugView implem
         control.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         control.moveAbove(null);
         fComposite.layout(true,  true);
-        setTitleImage(getPinnedIcon());
     }
 
-    private Image getPinnedIcon() {
-    	if (fPinnedIcon == null) {
-	        fOriginalIcon = getTitleImage();
-	    	ImageDescriptor pinnedIconDesc = new OverlayIcon(
-	    			ImageDescriptor.createFromImage(fOriginalIcon), 
-	    			DebugPluginImages.getImageDescriptor(IDebugUIConstants.IMG_OVR_PIN));
-	    	fPinnedIcon = pinnedIconDesc.createImage();
-    	}
-    	return fPinnedIcon;
-    }
-    
     public void clearPin() {
         if (fPinnedContextViewer != null) {
             fPinnedContextViewer.dispose();
@@ -73,9 +55,6 @@ abstract public class AbstractPinnableDebugView extends AbstractDebugView implem
         }
         if (fComposite != null && !fComposite.isDisposed()) {
         	fComposite.layout(true,  true);
-        }
-        if (fOriginalIcon != null) {
-        	setTitleImage(fOriginalIcon);
         }
     }
 
@@ -104,7 +83,6 @@ abstract public class AbstractPinnableDebugView extends AbstractDebugView implem
 	
     public void dispose() {
         clearPin();
-        if (fPinnedIcon != null) fPinnedIcon.dispose();
         super.dispose();
     }
 
@@ -138,7 +116,7 @@ abstract public class AbstractPinnableDebugView extends AbstractDebugView implem
 	}
 	
     protected void createActions() {
-        setAction("NewPinnedView", new NewPinnedViewDropDownAction(this)); //$NON-NLS-1$
+        setAction("NewPinnedView", new NewPinnedViewAction(this)); //$NON-NLS-1$
     }
     
     protected void configureToolBar(IToolBarManager tbm) {

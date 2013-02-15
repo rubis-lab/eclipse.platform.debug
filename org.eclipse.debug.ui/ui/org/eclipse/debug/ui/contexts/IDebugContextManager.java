@@ -11,8 +11,6 @@
 package org.eclipse.debug.ui.contexts;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
 /**
@@ -66,15 +64,6 @@ public interface IDebugContextManager {
 	 * factory for given ID was found
 	 */
 	public IPinnedContextFactory getPinnedContextViewerFactory(String factoryId);
-	
-	/**
-	 * Returns the pinned context viewer factories that are enabled for the 
-	 * given part and selection.   
-	 * 
-	 * @since 3.9
-	 * @return Array of enabled factories.
-	 */
-	public IPinnedContextFactory[] getEnabledContextViewerFactories(IWorkbenchPart part, ISelection selection);
 	
 	/**
 	 * Returns the name of the given context factory.

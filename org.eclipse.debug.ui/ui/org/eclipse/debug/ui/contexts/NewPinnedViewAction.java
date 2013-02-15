@@ -19,7 +19,6 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
@@ -30,7 +29,6 @@ import org.eclipse.ui.IWorkbenchWindow;
  */
 class NewPinnedViewAction extends Action {
 	private IPinnablePart fView;
-	private Menu fMenu;
 
 	public NewPinnedViewAction(IPinnablePart view) {
 		this(view, AS_PUSH_BUTTON);
@@ -39,8 +37,8 @@ class NewPinnedViewAction extends Action {
 	public NewPinnedViewAction(IPinnablePart view, int style) {
 		super(null, style);
 		fView= view;
-		setText(ActionMessages.PinViewToContextAction_label);
-		setToolTipText(ActionMessages.PinViewToContextAction_tooltip); 
+		setText(ActionMessages.NewPinnedViewAction_label);
+		setToolTipText(ActionMessages.NewPinnedViewAction_tooltip); 
 		Image viewImage = fView.getSite().getPart().getTitleImage();
 		ImageDescriptor plusOverlayImage = new OverlayIcon(
 				ImageDescriptor.createFromImage(viewImage), 
@@ -52,10 +50,6 @@ class NewPinnedViewAction extends Action {
 	 * @see org.eclipse.jface.action.IMenuCreator#dispose()
 	 */
 	public void dispose() {
-		if (fMenu != null) {
-			fMenu.dispose();
-		}
-		
 		fView = null;
 	}
 

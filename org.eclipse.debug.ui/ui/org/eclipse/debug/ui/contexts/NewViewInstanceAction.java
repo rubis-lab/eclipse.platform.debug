@@ -71,7 +71,7 @@ public class NewViewInstanceAction extends Action {
 			if (part instanceof IPinnablePart) {
 				((IPinnablePart)part).copyViewSettings(secondaryId);
 			}
-			return part.getSite().getPage().showView(viewId, secondaryId, IWorkbenchPage.VIEW_VISIBLE);
+			return part.getSite().getPage().showView(viewId, secondaryId, IWorkbenchPage.VIEW_ACTIVATE);
 		} catch (PartInitException e) {
 			DebugUIPlugin.log(e);
 		}

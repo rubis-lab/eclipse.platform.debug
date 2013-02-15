@@ -875,11 +875,12 @@
          <action
                class="org.eclipse.debug.internal.ui.views.memory.PinMemoryBlockAction"
                helpContextId="PinMemoryBlockAction_context"
+               icon="$nl$/icons/full/elcl16/pin.gif"
                id="org.eclipse.debug.ui.PinMemoryBlockAction"
                label="%PinMemoryBlockAction.label"
                state="false"
                style="toggle"
-               menubarPath="additions"
+               toolbarPath="additions"
                tooltip="%PinMemoryBlockAction.tooltip"/>
          <action
                class="org.eclipse.debug.internal.ui.views.memory.NewMemoryViewAction"

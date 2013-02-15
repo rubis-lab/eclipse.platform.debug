@@ -14,7 +14,6 @@ package org.eclipse.debug.internal.ui.contexts;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -32,7 +31,6 @@ import org.eclipse.debug.ui.contexts.IPinnedContextFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWindowListener;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.services.IEvaluationService;
@@ -235,16 +233,6 @@ public class DebugContextManager implements IDebugContextManager {
 		return (IPinnedContextFactory)fPinnedContextFactories.get(factoryId); 
 	}
 
-	public IPinnedContextFactory[] getEnabledContextViewerFactories(IWorkbenchPart part, ISelection selection) {
-		// TODO: use enablement expression to evaluate enabled context factories.
-		IPinnedContextFactory[] factories = new IPinnedContextFactory[fPinnedContextFactories.size()];
-		int i = 0;
-		for(Iterator itr = fPinnedContextFactories.values().iterator(); itr.hasNext();) {
-			factories[i++] = (IPinnedContextFactory)itr.next();
-		}
-		return factories;
-	}
-	
 	public String getPinnedContextViewerFactoryName(String factoryId) {
 		PinnedContextFactory factory = (PinnedContextFactory)fPinnedContextFactories.get(factoryId);
 		if (factory != null) {
