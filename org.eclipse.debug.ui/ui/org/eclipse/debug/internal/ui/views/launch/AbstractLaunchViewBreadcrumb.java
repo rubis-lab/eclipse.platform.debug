@@ -516,8 +516,12 @@ abstract public class AbstractLaunchViewBreadcrumb extends AbstractBreadcrumb im
         }
     }
 
+    protected int getStyle() {
+        return SWT.NONE;
+    }
+    
     protected BreadcrumbViewer createViewer(Composite parent) {
-        fViewer = new BreadcrumbViewer(parent, SWT.NONE) {
+        fViewer = new BreadcrumbViewer(parent, getStyle()) {
             protected Control createDropDown(Composite dropDownParent, IBreadcrumbDropDownSite site, TreePath path) {
                 return createDropDownControl(dropDownParent, site, path);
             }

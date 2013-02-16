@@ -58,7 +58,7 @@ public class NewViewInstanceAction extends Action {
 			if (fView instanceof IPinnablePart) {
 				createNewPart(fView);
 			}
-			fView.getSite().getPage().showView(viewId, secondaryId, IWorkbenchPage.VIEW_VISIBLE);
+			fView.getSite().getPage().showView(viewId, secondaryId, IWorkbenchPage.VIEW_ACTIVATE);
 		} catch (PartInitException e) {
 			DebugUIPlugin.log(e);
 		}

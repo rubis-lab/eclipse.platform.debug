@@ -199,10 +199,10 @@ class BreadcrumbItemDetails {
 	}
 	
 	public void setBackground(Color color) {
-		if (color == null) {
+		if (color != null) {
 			color = fTextComposite.getBackground();
+	        fElementText.setBackground(color);
 		}
-		fElementText.setBackground(color);
 	}
 
 	public Color getForeground() {

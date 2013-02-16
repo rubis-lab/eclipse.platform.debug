@@ -15,6 +15,7 @@ import org.eclipse.debug.ui.contexts.IDebugContextProvider;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuDetectEvent;
 import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.widgets.Menu;
@@ -44,6 +45,10 @@ public class LaunchViewBreadcrumb extends AbstractLaunchViewBreadcrumb {
 
     protected boolean isBreadcrumbVisible() {
     	return getLaunchView().isBreadcrumbVisible();
+    }
+    
+    protected int getStyle() {
+        return SWT.FLAT;
     }
     
     protected void createMenuManager() {

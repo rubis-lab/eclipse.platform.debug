@@ -825,10 +825,15 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 
         GC gc= new GC(result);
 
-        Color colorC= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 35, display);
-        Color colorD= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 45, display);
-        Color colorE= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 80, display);
-        Color colorF= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 70, display);
+        boolean flat = (getStyle() & SWT.FLAT) != 0;
+        
+        int blendForeground = flat ? SWT.COLOR_LIST_BACKGROUND : SWT.COLOR_WIDGET_BACKGROUND;
+        int blendBackground = flat ? SWT.COLOR_WIDGET_BACKGROUND : SWT.COLOR_WIDGET_NORMAL_SHADOW;
+        
+        Color colorC= createColor(blendBackground, blendForeground, 35, display);
+        Color colorD= createColor(blendBackground, blendForeground, 45, display);
+        Color colorE= createColor(blendBackground, blendForeground, 80, display);
+        Color colorF= createColor(blendBackground, blendForeground, 70, display);
         Color colorG= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_WHITE, 45, display);
         Color colorH= createColor(SWT.COLOR_WIDGET_NORMAL_SHADOW, SWT.COLOR_LIST_BACKGROUND, 35, display);
 
@@ -857,7 +862,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
             colorG.dispose();
             colorH.dispose();
         }
-
+        
         return result;
     }
 
