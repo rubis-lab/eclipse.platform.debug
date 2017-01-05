@@ -23,7 +23,7 @@
          point="org.eclipse.ui.actionSets">
       <actionSet
             label="%ActionSet.externalTools"
-            visible="true"
+            visible="false"
             id="org.eclipse.ui.externaltools.ExternalToolsSet">
          <menu
                label="%Menu.run"
